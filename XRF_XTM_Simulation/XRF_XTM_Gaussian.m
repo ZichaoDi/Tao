@@ -16,7 +16,7 @@ more off;
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
 UnitSpectrumSherman_Gaussian; %% Produce BindingEnergy M
 DefineObject_Gaussian; %% Produce W, MU
-thetan=linspace(1,180,25);%[1:60:180];% Projection Angles
+thetan=[1:40:180];%linspace(1,180,25);%[1:60:180];% Projection Angles
 %%%%%%%==============================================================
 if plotTravel
     fig2=[];  fig5=[];
@@ -28,6 +28,8 @@ XRF=cell(length(thetan),nTau+1);
 DisR=zeros(nTau+1,length(thetan));
 Ltol=cell(length(thetan),nTau+1);
 GlobalInd=cell(length(thetan),nTau+1);
+LocalInd=cell(length(thetan),nTau+1,m(1),m(2),NumSSDlet);
+L_after=cell(length(thetan),nTau+1,m(1),m(2),NumSSDlet);
 RMlocal=zeros(m(1),m(2),numChannel); %% assign all the contributions from seperate beam to each pixel
 fprintf(1,'====== Transmission Detector Resolution is %d\n',nTau);
 fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel);
@@ -121,6 +123,8 @@ for n=1:length(thetan)
                     [index_after,Lvec_after]=IntersectionSet(CurrentCellCenter,SSDknot(SSDi,:),xbox,ybox,beta);
                     [index_after,otherInd]=setdiff(index_after,index(j,:),'rows');
                     Lvec_after=Lvec_after(otherInd);
+                    LocalInd{n,i,index(j,2),index(j,1),SSDi}=index_after;
+                    L_after{n,i,index(j,2),index(j,1),SSDi}=Lvec_after;
                     for tsub=1:NumElement
                         for t_after=1:size(index_after,1)
                             temp_after=temp_after+Lvec_after(t_after)*MU_after{tsub}(index_after(t_after,2),index_after(t_after,1));

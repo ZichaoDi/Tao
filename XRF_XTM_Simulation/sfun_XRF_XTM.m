@@ -94,9 +94,7 @@ for n=1:length(thetan)
                          Ind_after=unique([Ind_after;index_after],'rows');
                         Lvec_after=Lvec_after(otherInd);
                         for tsub=1:NumElement
-                            for t_after=1:size(index_after,1)
-                                temp_after=temp_after+Lvec_after(t_after)*MU_after{tsub}(index_after(t_after,2),index_after(t_after,1));
-                            end %% Attenuation of Flourescent energy emitted from current pixel
+                          temp_after=temp_after+sum(Lvec_after.*MU_after{tsub}(sub2ind(size(MU_after{tsub}),index_after(:,2),index_after(:,1)))); %% Attenuation of Flourescent energy emitted from current pixel
                             for si=1:size(index_after,1)
                                 temp_d(:,index_after(si,2),index_after(si,1),tsub)=temp_d(:,index_after(si,2),index_after(si,1),tsub)+exp(-temp_after)*reshape(MU_e(:,1,tsub+1),NumElement,1).*Lvec_after(si);
                                 if(~ismember(index(j,end:-1:1),SelfInd{index_after(si,2),index_after(si,1)}{i}{1},'rows'))
@@ -150,19 +148,12 @@ for n=1:length(thetan)
                 end
                 %% ====================================================================
                 temp(1,1,:)=2*reshape(TempSub(:,j,:),NumElement,numChannel)*(xrfSub-xrfData{n,i})';
-%                                 if(index(j,2)==1 & index(j,1)==1)
-%                                     disp('this is it')
-%                                     temp(1,1,1)
-%                                 end
                 g(index(j,2),index(j,1),:)=g(index(j,2),index(j,1),:)+temp;
                 clear temp
             end
-%             figure(190);
-%             plot(xrfData{n,i}-xrfSub,'r.-')
-%             pause;
             Rdis=e1'*(MU.*L)*e1; %% Discrete case
             sum_Tau=sum_Tau+(xrfData{n,i}-xrfSub)*(xrfData{n,i}-xrfSub)'+beta*(Rdis-Mt(i))^2;
-            g=g+2*beta*(Rdis-Mt(i)).*repmat(full(L),[1,1,NumElement]).*repmat(MUe,[3,3,1]);
+            g=g+2*beta*(Rdis-Mt(i)).*repmat(full(L),[1,1,NumElement]).*repmat(MUe,[m(1),m(2),1]);
         end
     end
     

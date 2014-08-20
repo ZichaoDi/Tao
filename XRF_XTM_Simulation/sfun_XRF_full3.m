@@ -1,4 +1,4 @@
-function [f,g]=sfun_XRF_full3(W,xrfData,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,thetan,m,nTau)
+function [f,g]=sfun_XRF_full3(W,xrfData,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau)
 global BeforeEmit  SSDlet dz omega NumSSDlet NoSelfAbsorption testind
 f=0;
 W=reshape(W,m(1),m(2),NumElement);
@@ -68,34 +68,36 @@ for n=1:length(thetan)
                     
                     for SSDi=1:NumSSDlet
                         temp_after=0;
-                        beta=angle(SSDknot(SSDi,1)-CurrentCellCenter(1)+(SSDknot(SSDi,2)-CurrentCellCenter(2))*sqrt(-1));
-                        if(beta>=0 & beta<=pi/2)
-                            xbox=[CurrentCellCenter(1) CurrentCellCenter(1) omega(2) omega(2) CurrentCellCenter(1)];
-                            ybox=[CurrentCellCenter(2) omega(4) omega(4) CurrentCellCenter(2) CurrentCellCenter(2)];
-                        elseif(beta >pi/2 & beta<=pi)
-                            xbox=[omega(1) omega(1) CurrentCellCenter(1) CurrentCellCenter(1) omega(1)];
-                            ybox=[ CurrentCellCenter(2) omega(4) omega(4) CurrentCellCenter(2) CurrentCellCenter(2)];
-                        elseif(beta >=-pi/2 & beta<0)
-                            xbox=[CurrentCellCenter(1) CurrentCellCenter(1) omega(2) omega(2) CurrentCellCenter(1)];
-                            ybox=[omega(3) CurrentCellCenter(2) CurrentCellCenter(2) omega(3) omega(3)];
-                        elseif(beta>=-pi & beta<-pi/2)
-                            xbox=[omega(1) omega(1) CurrentCellCenter(1) CurrentCellCenter(1) omega(1)];
-                            ybox=[omega(3) CurrentCellCenter(2) CurrentCellCenter(2) omega(3) omega(3)];
-                        end
-                        if(beta<0)
-                            beta=beta+2*pi;
-                        end
-                        [index_after,Lvec_after]=IntersectionSet(CurrentCellCenter,SSDknot(SSDi,:),xbox,ybox,beta);
-                        [index_after,otherInd]=setdiff(index_after,index(j,:),'rows');
-                         Ind_after=unique([Ind_after;index_after],'rows');
-                        Lvec_after=Lvec_after(otherInd);
+                        %                         beta=angle(SSDknot(SSDi,1)-CurrentCellCenter(1)+(SSDknot(SSDi,2)-CurrentCellCenter(2))*sqrt(-1));
+                        %                         if(beta>=0 & beta<=pi/2)
+                        %                             xbox=[CurrentCellCenter(1) CurrentCellCenter(1) omega(2) omega(2) CurrentCellCenter(1)];
+                        %                             ybox=[CurrentCellCenter(2) omega(4) omega(4) CurrentCellCenter(2) CurrentCellCenter(2)];
+                        %                         elseif(beta >pi/2 & beta<=pi)
+                        %                             xbox=[omega(1) omega(1) CurrentCellCenter(1) CurrentCellCenter(1) omega(1)];
+                        %                             ybox=[ CurrentCellCenter(2) omega(4) omega(4) CurrentCellCenter(2) CurrentCellCenter(2)];
+                        %                         elseif(beta >=-pi/2 & beta<0)
+                        %                             xbox=[CurrentCellCenter(1) CurrentCellCenter(1) omega(2) omega(2) CurrentCellCenter(1)];
+                        %                             ybox=[omega(3) CurrentCellCenter(2) CurrentCellCenter(2) omega(3) omega(3)];
+                        %                         elseif(beta>=-pi & beta<-pi/2)
+                        %                             xbox=[omega(1) omega(1) CurrentCellCenter(1) CurrentCellCenter(1) omega(1)];
+                        %                             ybox=[omega(3) CurrentCellCenter(2) CurrentCellCenter(2) omega(3) omega(3)];
+                        %                         end
+                        %                         if(beta<0)
+                        %                             beta=beta+2*pi;
+                        %                         end
+                        %                         [index_after,Lvec_after]=IntersectionSet(CurrentCellCenter,SSDknot(SSDi,:),xbox,ybox,beta);
+                        %                         [index_after,otherInd]=setdiff(index_after,index(j,:),'rows');
+                        index_after=LocalInd{n,i,index(j,2),index(j,1),SSDi};
+                        Lvec_after=L_after{n,i,index(j,2),index(j,1),SSDi};
+                        Ind_after=unique([Ind_after;index_after],'rows');
+                        %                         Lvec_after=Lvec_after(otherInd);
+                        
                         for tsub=1:NumElement
-                            for t_after=1:size(index_after,1)
-                                temp_after=temp_after+Lvec_after(t_after)*MU_after{tsub}(index_after(t_after,2),index_after(t_after,1));
-                            end %% Attenuation of Flourescent energy emitted from current pixel
+                            temp_after=temp_after+sum(Lvec_after.*MU_after{tsub}(sub2ind(size(MU_after{tsub}),index_after(:,2),index_after(:,1)))); %% Attenuation of Flourescent energy emitted from current pixel
+                            
                             for si=1:size(index_after,1)
                                 temp_d(:,index_after(si,2),index_after(si,1),tsub)=temp_d(:,index_after(si,2),index_after(si,1),tsub)+exp(-temp_after)*reshape(MU_e(:,1,tsub+1),NumElement,1).*Lvec_after(si);
-                                if(~ismember(index(j,end:-1:1),SelfInd{index_after(si,2),index_after(si,1)}{i}{1},'rows'))
+                                if(~ismember(index(j,end:-1:1),SelfInd{index_after(si,2),index_after(si,1)}{i}{1},'rows','legacy'))
                                     SelfInd{index_after(si,2),index_after(si,1)}{i}{1}=[SelfInd{index_after(si,2),index_after(si,1)}{i}{1};index(j,end:-1:1)];%% assign downstream index to pixel(oppsite)
                                     SelfInd{index_after(si,2),index_after(si,1)}{i}{2}=[SelfInd{index_after(si,2),index_after(si,1)}{i}{2};L(index(j,2),index(j,1))];
                                     SelfInd{index_after(si,2),index_after(si,1)}{i}{3}=[SelfInd{index_after(si,2),index_after(si,1)}{i}{3};reshape(W(index(j,2),index(j,1),:),1,NumElement)];
@@ -130,7 +132,7 @@ for n=1:length(thetan)
                 end
                 %% ==================================================================== eqn(5) part 2
                 if(~NoSelfAbsorption)
-                    if(~ismember(index(j,:),GlobalInd{n,i+1},'rows'))
+                    if(~ismember(index(j,:),GlobalInd{n,i+1},'rows','legacy'))
                         for i_sub=1:i
                             for diffj_i=1:size(SelfInd{index(j,2),index(j,1)}{i_sub}{1},1)
                                 TempLong=zeros(NumElement,numChannel);
@@ -146,16 +148,9 @@ for n=1:length(thetan)
                 end
                 %% ====================================================================
                 temp(1,1,:)=2*reshape(TempSub(:,j,:),NumElement,numChannel)*(xrfSub-xrfData{n,i})';
-%                                 if(index(j,2)==1 & index(j,1)==1)
-%                                     disp('this is it')
-%                                     temp(1,1,1)
-%                                 end
                 g(index(j,2),index(j,1),:)=g(index(j,2),index(j,1),:)+temp;
                 clear temp
             end
-%             figure(190);
-%             plot(xrfData{n,i}-xrfSub,'r.-')
-%             pause;
             sum_Tau=sum_Tau+(xrfData{n,i}-xrfSub)*(xrfData{n,i}-xrfSub)';
         end
     end

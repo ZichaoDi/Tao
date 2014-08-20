@@ -8,7 +8,7 @@
 %%%         O: Object specified by W.*Z
 %%%         MU: Attenuation matrix of O
 %%=======================================================================
-global x y m omega dz AbsorbScale
+global x y m omega dz AbsorbScale min_MU max_MU
 
 
 AbsorbScale=1e-4;
@@ -74,7 +74,8 @@ for i=1: NumElement
 end
 %%%%%================== Attenuation Matrix at beam energy
 MU_e=MU_e.*AbsorbScale; %% Discrete Scale
-% MU_e(:,1,1)=-1./log(MU_e(:,1,1));
+min_MU=min(MU_e(:,1,1))-1;%=-1./log(MU_e(:,1,1));
+max_MU=max(MU_e(:,1,1));
 %%%========================================================
 MU=zeros(m);
 for i=1:m(1)

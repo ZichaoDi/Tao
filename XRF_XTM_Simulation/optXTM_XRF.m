@@ -1,10 +1,12 @@
 
 global NF N ptest gv
 global low up 
+global min_MU max_MU DiscreteScale
 close all;
 more off;
 % SimulateXTM;
 XRF_XTM_Gaussian;
+DiscreteScale=0;
 %%%----------------------------------------------------------------------
 W0=W;
 Joint=1; % 1: XRF; -1: XTM; 0: Joint inversion
@@ -13,11 +15,14 @@ if(Joint==-1)
 elseif(Joint==0)
     fctn=@(W)sfun_XRF_XTM(W,XRF,DisR,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,thetan,m,nTau,I0);
 else
-    fctn=@(W)sfun_XRF_full3(W,XRF,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,thetan,m,nTau);
+    fctn=@(W)sfun_XRF_full3(W,XRF,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau);
 end
 rng('default');
-
-   x0=W(:)+5*10^(0)*rand(prod(m)*size(M,1),1);
+Wtest=W;
+for i=1:NumElement
+    Wtest(:,:,i)=Wtest(:,:,i)/(-log(MU_e(i,1,1)))*MU_e(i,1,1);%*(MU_e(i,1,1)-min_MU)/(max_MU-min_MU);
+end
+   x0=Wtest(:)*1e-2+1*10^(1)*rand(prod(m)*size(M,1),1);
 %    x0=ones(size(x0));
   xinitial=x0;
   
@@ -35,6 +40,14 @@ figureObject(reshape(x0,m(1),m(2),NumElement),Z,m,NumElement,MU_e,1);
 low=0*ones(size(x0));
 up=1e6*ones(size(x0));
 [xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
+figure(99);plot(xstar)
+if(Joint==-1 & DiscreteScale)
+xtemp=reshape(xstar,m(1),m(2),NumElement);
+for i=1:NumElement
+    xtemp(:,:,i)=xtemp(:,:,i)*(-log(MU_e(i,1,1)))/MU_e(i,1,1);%*(MU_e(i,1,1)-min_MU)/(max_MU-min_MU);
+end
+xstar=xtemp(:);
+end
 %%%====================================================== Report Result
 Wstar=W0(:);
 for i=1:NumElement
