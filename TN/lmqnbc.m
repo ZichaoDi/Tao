@@ -227,7 +227,7 @@ while (~conv);
             disp('Cauchy point not found')
         end
     end
-    figure(90);qpPlotAset(ipivot,nit,length(x));
+%     figure(90);qpPlotAset(ipivot,nit,length(x));
     %%%===========================================================
     
     g = ztime (g, ipivot);
