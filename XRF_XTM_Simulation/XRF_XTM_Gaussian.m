@@ -16,7 +16,7 @@ more off;
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
 UnitSpectrumSherman_Gaussian; %% Produce BindingEnergy M
 DefineObject_Gaussian; %% Produce W, MU
-thetan=linspace(1,180,prod(m)*NumElement/nTau);%[1:60:180];% Projection Angles
+thetan=[1];%[1:60:180];%linspace(1,180,prod(m)*NumElement/nTau);% Projection Angles
 %%%%%%%==============================================================
 if plotTravel
     fig2=[];  fig5=[];
@@ -125,10 +125,9 @@ for n=1:length(thetan)
                     Lvec_after=Lvec_after(otherInd);
                     LocalInd{n,i,index(j,2),index(j,1),SSDi}=index_after;
                     L_after{n,i,index(j,2),index(j,1),SSDi}=Lvec_after;
+                    LinearInd=sub2ind([m(1),m(2)],index_after(:,2),index_after(:,1));
                     for tsub=1:NumElement
-                        for t_after=1:size(index_after,1)
-                            temp_after=temp_after+Lvec_after(t_after)*MU_after{tsub}(index_after(t_after,2),index_after(t_after,1));
-                        end %% Attenuation of Flourescent energy emitted from current pixel
+                        temp_after=sum(Lvec_after.*MU_after{tsub}(LinearInd)); %% Attenuation of Flourescent energy emitted from current pixel
                         I_after(tsub)=I_after(tsub)+exp(-temp_after)/NumSSDlet;
                     end %% End loop for each SSD detector let
                 end %% End loop for existing fluorescence energy from current pixel

@@ -1,46 +1,41 @@
-function [f,g]=sfun_XRF_XTM(W,xrfData,xtmData,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,thetan,m,nTau,I0)
+function [f,g]=sfun_XRF_XTM(W,xrfData,xtmData,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau,I0)
 global BeforeEmit  SSDlet dz omega NumSSDlet NoSelfAbsorption testind
 f=0;
 W=reshape(W,m(1),m(2),NumElement);
-beta=1e-3;
+beta=1e3;
 %%%%% =================== Attenuation Matrix at beam energy
-MU=zeros(m);
-for i=1:m(1)
-    for j=1:m(2)
-        MU(i,j)=sum(reshape(W(i,j,:),NumElement,1).*reshape(MU_e(:,1,1),NumElement,1));
-    end
-end
-MUe=reshape(reshape(MU_e(:,1,1),NumElement,1),1,1,NumElement);
+MUe=reshape(MU_e(:,1,1),1,1,NumElement);
+MU=sum(W.*repmat(MUe,[m(1),m(2),1]),3);
 %%%%% =================== Attenuation Matrix at flourescence energy (Corrected Attenuation)
 MU_after=cell(NumElement,1);
 for i=1:NumElement
-    
-    for t=1:m(1)
-        for j=1:m(2)
-            MU_after{i}(t,j)=sum(reshape(W(t,j,:),NumElement,1).*reshape(MU_e(:,1,i+1),NumElement,1));
-        end
-    end
+    MU_after{i}=sum(W.*repmat(reshape(MU_e(:,1,i+1),1,1,NumElement),[m(1),m(2),1]),3);
 end
 %%%%% ====================================================================
 e1=ones(m(1),1);
 g=zeros(m(1),m(2),NumElement);
-SelfInd=cell(m(1),m(2));
+Jacob1=[];
+Jacob2=[];
+SelfInd1=cell(m(1),m(2));
 for im=1:m(1)
     for jm=1:m(2)
-        SelfInd{im,jm}=cell(nTau+1,1);
+        SelfInd1{im,jm}=cell(nTau+1,1);
         for i=1:nTau+1
-            SelfInd{im,jm}{i}=cell(5,1);
+            SelfInd1{im,jm}{i}=cell(5,1);
         end
     end
 end
 clear i j t
 for n=1:length(thetan)
+    SelfInd=SelfInd1;
     Mt=-log(xtmData(:,n)./I0);
     theta=thetan(n)/180*pi;
     TransMatrix=[cos(theta) sin(theta);-sin(theta) cos(theta)];
     SSDknot=SSDlet*TransMatrix;
     sum_Tau=0;
     for i=1:nTau+1
+        JacobSub1=zeros(m(1),m(2),NumElement);
+        JacobSub2=zeros(m(1),m(2),NumElement);
         index=GlobalInd{n,i};
         if(~isempty(index))
             L=Ltol{n,i};
@@ -71,30 +66,12 @@ for n=1:length(thetan)
                     I_after=0*I_after;
                     
                     for SSDi=1:NumSSDlet
-                        temp_after=0;
-                        beta=angle(SSDknot(SSDi,1)-CurrentCellCenter(1)+(SSDknot(SSDi,2)-CurrentCellCenter(2))*sqrt(-1));
-                        if(beta>=0 & beta<=pi/2)
-                            xbox=[CurrentCellCenter(1) CurrentCellCenter(1) omega(2) omega(2) CurrentCellCenter(1)];
-                            ybox=[CurrentCellCenter(2) omega(4) omega(4) CurrentCellCenter(2) CurrentCellCenter(2)];
-                        elseif(beta >pi/2 & beta<=pi)
-                            xbox=[omega(1) omega(1) CurrentCellCenter(1) CurrentCellCenter(1) omega(1)];
-                            ybox=[ CurrentCellCenter(2) omega(4) omega(4) CurrentCellCenter(2) CurrentCellCenter(2)];
-                        elseif(beta >=-pi/2 & beta<0)
-                            xbox=[CurrentCellCenter(1) CurrentCellCenter(1) omega(2) omega(2) CurrentCellCenter(1)];
-                            ybox=[omega(3) CurrentCellCenter(2) CurrentCellCenter(2) omega(3) omega(3)];
-                        elseif(beta>=-pi & beta<-pi/2)
-                            xbox=[omega(1) omega(1) CurrentCellCenter(1) CurrentCellCenter(1) omega(1)];
-                            ybox=[omega(3) CurrentCellCenter(2) CurrentCellCenter(2) omega(3) omega(3)];
-                        end
-                        if(beta<0)
-                            beta=beta+2*pi;
-                        end
-                        [index_after,Lvec_after]=IntersectionSet(CurrentCellCenter,SSDknot(SSDi,:),xbox,ybox,beta);
-                        [index_after,otherInd]=setdiff(index_after,index(j,:),'rows');
-                         Ind_after=unique([Ind_after;index_after],'rows');
-                        Lvec_after=Lvec_after(otherInd);
+                        index_after=LocalInd{n,i,index(j,2),index(j,1),SSDi};
+                        Lvec_after=L_after{n,i,index(j,2),index(j,1),SSDi};
+                        Ind_after=unique([Ind_after;index_after],'rows');
+                        LinearInd=sub2ind([m(1),m(2)],index_after(:,2),index_after(:,1));
                         for tsub=1:NumElement
-                          temp_after=temp_after+sum(Lvec_after.*MU_after{tsub}(sub2ind(size(MU_after{tsub}),index_after(:,2),index_after(:,1)))); %% Attenuation of Flourescent energy emitted from current pixel
+                            temp_after=sum(Lvec_after.*MU_after{tsub}(LinearInd)); %% Attenuation of Flourescent energy emitted from current pixel
                             for si=1:size(index_after,1)
                                 temp_d(:,index_after(si,2),index_after(si,1),tsub)=temp_d(:,index_after(si,2),index_after(si,1),tsub)+exp(-temp_after)*reshape(MU_e(:,1,tsub+1),NumElement,1).*Lvec_after(si);
                                 if(~ismember(index(j,end:-1:1),SelfInd{index_after(si,2),index_after(si,1)}{i}{1},'rows'))
@@ -134,30 +111,44 @@ for n=1:length(thetan)
                 if(~NoSelfAbsorption)
                     if(~ismember(index(j,:),GlobalInd{n,i+1},'rows'))
                         for i_sub=1:i
-                            for diffj_i=1:size(SelfInd{index(j,2),index(j,1)}{i_sub}{1},1)
+                            if(size(SelfInd{index(j,2),index(j,1)}{i_sub}{1},1)~=0)
                                 TempLong=zeros(NumElement,numChannel);
                                 for tsub=1:NumElement
-                                    TempLong=TempLong+SelfInd{index(j,2),index(j,1)}{i_sub}{2}(diffj_i).*SelfInd{index(j,2),index(j,1)}{i_sub}{4}(diffj_i).*...
-                                        SelfInd{index(j,2),index(j,1)}{i_sub}{3}(diffj_i,tsub).*bsxfun(@times,SelfInd{index(j,2),index(j,1)}{i_sub}{5}{tsub}(diffj_i,:)',M(tsub,:));
+                                    TempLong=TempLong+bsxfun(@times,(sum(bsxfun(@times,SelfInd{index(j,2),index(j,1)}{i_sub}{2}.*SelfInd{index(j,2),index(j,1)}{i_sub}{4}.*...
+                                        SelfInd{index(j,2),index(j,1)}{i_sub}{3}(:,tsub),SelfInd{index(j,2),index(j,1)}{i_sub}{5}{tsub}),1))' ,M(tsub,:));
                                 end
+                                
                                 TempSub(:,j,:)=TempSub(:,j,:)-reshape(TempLong,size(TempSub,1),1,size(TempSub,3));
                             end %% End loop for accumulating contribution from self absorption
                             clear TempLong
                         end
                     end
                 end
+                
                 %% ====================================================================
                 temp(1,1,:)=2*reshape(TempSub(:,j,:),NumElement,numChannel)*(xrfSub-xrfData{n,i})';
+                JacobSub1(index(j,2),index(j,1),:)=JacobSub1(index(j,2),index(j,1),:)+reshape(sum(TempSub(:,j,:),3),1,1,NumElement);
                 g(index(j,2),index(j,1),:)=g(index(j,2),index(j,1),:)+temp;
                 clear temp
             end
             Rdis=e1'*(MU.*L)*e1; %% Discrete case
             sum_Tau=sum_Tau+(xrfData{n,i}-xrfSub)*(xrfData{n,i}-xrfSub)'+beta*(Rdis-Mt(i))^2;
             g=g+2*beta*(Rdis-Mt(i)).*repmat(full(L),[1,1,NumElement]).*repmat(MUe,[m(1),m(2),1]);
+            JacobSub2=JacobSub2+repmat(full(L),[1,1,NumElement]).*repmat(MUe,[m(1),m(2),1]);
         end
+        Jacob1=[Jacob1;JacobSub1(:)'];
+        Jacob2=[Jacob2;JacobSub2(:)'];
     end
     
     f=f+sum_Tau;
 end
-
+figure,subplot(1,2,1),spy(Jacob1), subplot(1,2,2),spy(Jacob2);
+J1=rank(Jacob1);
+k1=cond(Jacob1);
+[U1,S1,V1]=svd(Jacob1);
+J2=rank(Jacob2);
+k2=cond(Jacob2);
+[U2,S2,V2]=svd(Jacob2);
+J3=rank([Jacob1;Jacob2]);
+fprintf('Cond1=%d, Rank1=%d, minS1=%d, Cond2=%d, Rank2=%d, minS2=%d, rank=%d \n',k1,J1,min(S1),k2,J2,min(S2),J3);
 g=g(:);

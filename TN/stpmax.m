@@ -22,3 +22,4 @@ end;
 spe  = min([spe al au]);
 
 
+

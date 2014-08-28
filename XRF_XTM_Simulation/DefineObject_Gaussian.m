@@ -76,23 +76,15 @@ end
 MU_e=MU_e.*AbsorbScale; %% Discrete Scale
 min_MU=min(MU_e(:,1,1))-1;%=-1./log(MU_e(:,1,1));
 max_MU=max(MU_e(:,1,1));
-%%%========================================================
-MU=zeros(m);
-for i=1:m(1)
-    for j=1:m(2)
-MU(i,j)=sum(reshape(W(i,j,:),NumElement,1).*reshape(MU_e(:,1,1),NumElement,1));
-    end
-end
+%%%%% =================== Attenuation Matrix at beam energy
+MUe=reshape(MU_e(:,1,1),1,1,NumElement);
+MU=sum(W.*repmat(MUe,[m(1),m(2),1]),3);
 %%%%% =================== Attenuation Matrix at flourescence energy (Corrected Attenuation)
 MU_after=cell(NumElement,1);
 for i=1:NumElement
-
-for t=1:m(1)
-    for j=1:m(2)
-MU_after{i}(t,j)=sum(reshape(W(t,j,:),NumElement,1).*reshape(MU_e(:,1,i+1),NumElement,1));
-    end
+MU_after{i}=sum(W.*repmat(reshape(MU_e(:,1,i+1),1,1,NumElement),[m(1),m(2),1]),3);
 end
-end
+%%%%% ====================================================================
 
 %%=================== Picture the object based on atomic number and attenuation
 if(PlotObject)
