@@ -9,6 +9,7 @@
 %%%         MU: Attenuation matrix of O
 %%=======================================================================
 global x y m omega dz AbsorbScale min_MU max_MU
+global XTMscale
 
 
 AbsorbScale=1e-4;
@@ -79,6 +80,8 @@ max_MU=max(MU_e(:,1,1));
 %%%%% =================== Attenuation Matrix at beam energy
 MUe=reshape(MU_e(:,1,1),1,1,NumElement);
 MU=sum(W.*repmat(MUe,[m(1),m(2),1]),3);
+XTMscale=1e0;
+MU_XTM=MU.*XTMscale;
 %%%%% =================== Attenuation Matrix at flourescence energy (Corrected Attenuation)
 MU_after=cell(NumElement,1);
 for i=1:NumElement

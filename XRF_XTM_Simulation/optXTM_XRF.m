@@ -1,21 +1,23 @@
 
 global NF N ptest gv
-global low up Tik penalty
+global low up Tik penalty gama 
+global W0 VarInd
 
 close all;
 more off;
 XRF_XTM_Gaussian;
 %%%----------------------------------------------------------------------
-W0=W;
-Joint=0; % 1: XRF; -1: XTM; 0: Joint inversion
+W0=W(:);
+Joint=1; % 1: XRF; -1: XTM; 0: Joint inversion
 %%%============== Rescale MU_e to make unity contribution
 DiscreteScale=0;
 penalty=0;
 
-if(DiscreteScale & Joint==-1)
+if(DiscreteScale )
     Mag=-order(MU_e(:,1,1));
-    gama=5e2*ones(size(MU_e(:,1,1)));%10.^(Mag);%-log(MU_e(:,1,1))./MU_e(:,1,1);%(max_MU-min_MU)./(MU_e(:,1,1)-min_MU);%1./MU_e(:,1,1);%
-    MU_e(:,1,1)=MU_e(:,1,1).*gama;
+    gama=-log(MU_e(:,1,1))./MU_e(:,1,1);%5e2*ones(size(MU_e(:,1,1)));%10.^(Mag);%(max_MU-min_MU)./(MU_e(:,1,1)-min_MU);%1./MU_e(:,1,1);%
+else
+    gama=ones(size(MU_e(:,1,1)));
 end
 
 if(penalty)
@@ -49,8 +51,10 @@ if(DiscreteScale)
     end
 end
 ws=Wtest(:);
-x0=Wtest(:)+1*10^(0)*rand(prod(m)*size(M,1),1);
+x0=Wtest(:)+1*10^(-1)*rand(prod(m)*size(M,1),1);%10*ones(sizEDe(ws));%
 xinitial=x0;
+VarInd=1:length(W0);%[10:18];
+xinital(~VarInd)=ws(~VarInd);
 
 %    options = optimset('Algorithm','interior-point','DerivativeCheck','off','Diagnostics','off','GradObj','on','Display','iter');%,'AlwaysHonorConstraints','none','TolCon',1e-10,'TolX',1e-16,'TolFun',1e-15
 %  [xstar,fval] = fmincon(fctn,x0,[],[],[],[],zeros(size(x0)),1e6*ones(size(x0)),[],options);
@@ -69,9 +73,14 @@ e=cputime;
 figureObject(reshape(x0,m(1),m(2),NumElement),Z,m,NumElement,MU_e,1);
 low=0*ones(size(x0));
 up=1e6*ones(size(x0));
-[xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
+%%%========================================================================
+x0=x0(VarInd);
+up=up(VarInd);
+low=low(VarInd);
+%%%========================================================================
+[xstar_sub,f,g,ierror] = tnbc (x0,fctn,low,up);
+xstar=ws;xstar(VarInd)=xstar_sub;
 err0=xinitial-ws;
-figure(99);plot(xstar)
 if(Joint==-1 & DiscreteScale)
     xtemp=reshape(xstar,m(1),m(2),NumElement);
     err0_1=reshape(err0,m(1),m(2),NumElement);

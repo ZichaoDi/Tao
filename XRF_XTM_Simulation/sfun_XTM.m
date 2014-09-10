@@ -1,6 +1,6 @@
 function [f,g]=sfun_XTM(W,M,MU_e,I0,Ltol,thetan,m,nTau,NumElement)
-
-global Tik penalty
+global SigMa_XTM
+global Tik penalty XTMscale
 %%===== Reconstruction discrete objective
 %%===== L: intersection length matrix
 %%===== M: Radon transform with t beam lines and theta angles
@@ -10,8 +10,8 @@ beta=1;
 lambda=1e-3;
 %%%%% =================== Attenuation Matrix at beam energy
 
-MUe=reshape(MU_e(:,1,1),1,1,NumElement);
-MU=sum(W1.*repmat(MUe,[m(1),m(2),1]),3);
+MUe=reshape(MU_e(:,1,1),1,1,NumElement).*XTMscale;
+MU=sum(W1.*repmat(MUe,[m(1),m(2),1]),3).*XTMscale;
 %%%====================================
 
 e=ones(m(1),1);
@@ -28,12 +28,12 @@ for n=1:length(thetan)
     sum_Tau=0;
     for i=1:nTau+1
         L=Ltol{n,i};
-        if(~isempty(L))
+        if(~isempty(find(L,1)))
             Rdis=e'*(MU.*L)*e;%
 %             Rdis=I0*exp(-e'*(MU.*L)*e);%% Discrete case
-            sum_Tau=sum_Tau+beta*(Rdis-Mt(i))^2;
-            g=g+2*beta*(Rdis-Mt(i)).*repmat(full(L),[1,1,NumElement]).*repmat(MUe,[m(1),m(2),1]);%
-            Jacob=Jacob+repmat(full(L),[1,1,NumElement]).*repmat(MUe,[m(1),m(2),1]);
+            sum_Tau=sum_Tau+beta*SigMa_XTM(i)*(Rdis-Mt(i))^2;
+            g=g+2*beta*SigMa_XTM(i)*(Rdis-Mt(i)).*repmat(full(L),[1,1,NumElement]).*repmat(MUe,[m(1),m(2),1]);%
+            Jacob=Jacob+2*beta*SigMa_XTM(i)*repmat(full(L),[1,1,NumElement]).*repmat(MUe,[m(1),m(2),1]);
             if(penalty)
 %           g=g-2*beta*Rdis*(Rdis-Mt(i)).*repmat(full(L),[1,1,NumElement]).*repmat(MUe,[m(1),m(2),1]);
 

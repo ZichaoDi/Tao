@@ -8,9 +8,10 @@ function [xstar, f, g, ierror] = ...
 % For further details, see routine tnbc.
 %---------------------------------------------------------
 global sk yk sr yr yksk yrsr
-global NF N current_n  fiter itertest 
+global NF N current_n  fiter itertest
 global ptest gv ipivot nit
-global Cauchy 
+global  i_cauchy
+global W0 VarInd m
 %---------------------------------------------------------
 % check that initial x is feasible and that the bounds
 % are consistent
@@ -108,11 +109,11 @@ while (~conv);
     oldf = f;
     fiter(nit+2)=oldf;
     itertest(nit+2)=nf+ncg;
-   
+    
     %---------------------------------------------------------
     % line search
     %---------------------------------------------------------
-    if(i_cauchy)
+    if(i_cauchy~=0)
         p = ztime (p, ipivot);
     end
     pe = pnorm + eps;
@@ -121,10 +122,14 @@ while (~conv);
     alpha0 = alpha;
     PieceLinear=1;
     if(PieceLinear)
-    [x_new, f_new, g_new, nf1, ierror, alpha] = lin_proj (p, x, f, g, alpha0, sfun, low, up);
+        [x_new, f_new, g_new, nf1, ierror, alpha] = lin_proj (p, x, f, g, alpha0, sfun, low, up);
     else
-    [x_new, f_new, g_new, nf1, ierror, alpha] = lin1 (p, x, f, alpha0, g, sfun);
+        [x_new, f_new, g_new, nf1, ierror, alpha] = lin1 (p, x, f, alpha0, g, sfun);
     end
+    Cauchy=0;
+    %     if(gtp>0)
+    %         Cauchy=1;
+    %     end
     %---------------------------------------------------------
     save x_new x_new;
     if (alpha == 0 & alpha0 ~= 0 | ierror == 3);
@@ -136,9 +141,11 @@ while (~conv);
         %############################
         fprintf('    |g|     = %12.4e\n', norm(g));
         fprintf('    |p|     = %12.4e\n', norm(p));
-        disp('Hit any key to continue')
-        pause;
-        
+        %         disp('Hit any key to continue')
+        %         pause;
+        if(gtp<0 & norm(pold-p)>0)
+            [ipivot, ierror, x_new] = crash2(x_new, g_new, low, up);
+        end  
     end;
     %#######################
     x   = x_new;
@@ -152,13 +159,12 @@ while (~conv);
     % update active set, if appropriate
     %---------------------------------------------------------
     newcon = 0;
-    Cauchy=0;
-    if (abs(alpha-spe) <= 10*eps & Cauchy==0);
+    if (abs(alpha-spe) <= 10*eps & i_cauchy==0);%
         newcon = 1;
         ierror = 0;
         [ipivot, flast] = modz (x, p, ipivot, low, up, flast, f, alpha);
     end;
-
+    
     if (ierror == 3);
         disp('LMQNBC: termination 3')
         xstar = x;
@@ -194,6 +200,20 @@ while (~conv);
     xnorm = norm(x,'inf');
     fprintf(1,'%4i   %4i   %4i   % .8e   %.1e\n', ...
         nit, nf, ncg, f, gnorm)
+    %--------------------------------- Error Plot
+%     if(mod(nit,50)==0)
+%         figure(100);
+%         CurrentErr=abs(x-W0(VarInd));
+%         subplot(1,2,1)
+%         vs=sum(reshape(CurrentErr,m(1),m(2),length(VarInd)/prod(m)),3);
+%         surf(vs);
+%         %     [xx,yy] = meshgrid(1:.02:m(1),1:.02:m(2));
+%         % [X,Y] = meshgrid(1:m(1),1:m(2));
+%         % vv = interp2(X,Y,vs,xx,yy,'cubic');
+%         % surfl(xx,yy,vv);
+%         subplot(1,2,2)
+%         plot(abs(x-W0(VarInd)),'ro-');
+%     end
     %---------------------------------------------------------
     % test for convergence
     %---------------------------------------------------------
@@ -208,25 +228,26 @@ while (~conv);
         NF(3,nind) = NF(3,nind) + ncg;
         return;
     end;
-     %%%######################## Update active set using Cauchy point
+    %%%######################## Update active set using Cauchy point
     if(Cauchy)
         [~,i_cauchy,alpha_cp,p_cp]=Cauchy_Point(x,g0, accrcy, xnorm, sfun,low,up);
         if(i_cauchy~=0)
             if(length(alpha_cp)==1)
-            alpha_cp
+                alpha_cp
             end
             [x, f, g, nf1, ierror] = lin_Cauchy (p_cp, x, f, g0, sfun, alpha_cp);
             if(ierror==3)
                 disp('descent not found from Cauchy point')
             else
-            nf = nf+nf1;
-            [ipivot] = crash (x, low, up);
+                nf = nf+nf1;
+                [ipivot] = crash2 (x,g0, low, up);
             end
         else
             disp('Cauchy point not found')
         end
     end
-%     figure(90);qpPlotAset(ipivot,nit,length(x));
+    %------------------------------- Active set plot
+%         figure(90);qpPlotAset(ipivot,nit,length(x));
     %%%===========================================================
     
     g = ztime (g, ipivot);
@@ -251,6 +272,7 @@ while (~conv);
     %%%%%%%%%%%%%%%%%%%%%##############################
     % x_tran = x'
     %%%%%%%%%%%%%%%%%%%%%##############################
+    pold=p;
     [p, gtp, ncg1, d, eig_val] = ...
         modlnp (d, x, g, maxit, upd1, ireset, bounds, ipivot, argvec, sfun);
     ptest=p;

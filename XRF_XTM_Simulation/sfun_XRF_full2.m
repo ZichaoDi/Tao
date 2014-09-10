@@ -1,5 +1,6 @@
 function [f,g]=sfun_XRF_full2(W,xrfData,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau)
 global BeforeEmit  SSDlet dz omega NumSSDlet NoSelfAbsorption testind
+global SigMa_XRF
 f=0;
 W=reshape(W,m(1),m(2),NumElement);
 %%%%% =================== Attenuation Matrix at beam energy
@@ -124,11 +125,11 @@ for n=1:length(thetan)
                     end
                 end
                 %% ====================================================================
-                temp(1,1,:)=2*reshape(TempSub(:,j,:),NumElement,numChannel)*(xrfSub-xrfData{n,i})';
+                temp(1,1,:)=2*reshape(TempSub(:,j,:),NumElement,numChannel)*SigMa_XRF((nTau+1)*(n-1)+i)*(xrfSub-xrfData{n,i})';%
                 g(index(j,2),index(j,1),:)=g(index(j,2),index(j,1),:)+temp;
                 clear temp
             end
-            sum_Tau=sum_Tau+(xrfData{n,i}-xrfSub)*(xrfData{n,i}-xrfSub)';
+            sum_Tau=sum_Tau+SigMa_XRF((nTau+1)*(n-1)+i)*(xrfData{n,i}-xrfSub)*(xrfData{n,i}-xrfSub)';%
         end
     end
     

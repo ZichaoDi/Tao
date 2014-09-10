@@ -1,11 +1,17 @@
 function [f,g]=sfun_XRF_XTM(W,xrfData,xtmData,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau,I0)
-global BeforeEmit  SSDlet dz omega NumSSDlet NoSelfAbsorption testind
+global BeforeEmit  SSDlet dz omega NumSSDlet NoSelfAbsorption testind XTMscale gama
+global SigMa_XTM SigMa_XRF
+global W0 VarInd
 f=0;
-W=reshape(W,m(1),m(2),NumElement);
-beta=1e3;
+Wtol=W0;Wtol(VarInd)=W;
+W=reshape(Wtol,m(1),m(2),NumElement);
+beta=1e0;
+alpha=beta;
 %%%%% =================== Attenuation Matrix at beam energy
 MUe=reshape(MU_e(:,1,1),1,1,NumElement);
 MU=sum(W.*repmat(MUe,[m(1),m(2),1]),3);
+MUe_XTM=reshape(MU_e(:,1,1).*gama,1,1,NumElement).*XTMscale;
+MU_XTM=sum(W.*repmat(MUe,[m(1),m(2),1]),3).*XTMscale;
 %%%%% =================== Attenuation Matrix at flourescence energy (Corrected Attenuation)
 MU_after=cell(NumElement,1);
 for i=1:NumElement
@@ -26,6 +32,7 @@ for im=1:m(1)
     end
 end
 clear i j t
+ttt=0;
 for n=1:length(thetan)
     SelfInd=SelfInd1;
     Mt=-log(xtmData(:,n)./I0);
@@ -34,10 +41,10 @@ for n=1:length(thetan)
     SSDknot=SSDlet*TransMatrix;
     sum_Tau=0;
     for i=1:nTau+1
-        JacobSub1=zeros(m(1),m(2),NumElement);
-        JacobSub2=zeros(m(1),m(2),NumElement);
+        JacobSub1=zeros(m(1),m(2),NumElement,numChannel);
         index=GlobalInd{n,i};
         if(~isempty(index))
+            ttt=ttt+1;
             L=Ltol{n,i};
             RM=cell(m(1),m(2));
             xrfSub=zeros(1,numChannel);
@@ -126,29 +133,36 @@ for n=1:length(thetan)
                 end
                 
                 %% ====================================================================
-                temp(1,1,:)=2*reshape(TempSub(:,j,:),NumElement,numChannel)*(xrfSub-xrfData{n,i})';
-                JacobSub1(index(j,2),index(j,1),:)=JacobSub1(index(j,2),index(j,1),:)+reshape(sum(TempSub(:,j,:),3),1,1,NumElement);
-                g(index(j,2),index(j,1),:)=g(index(j,2),index(j,1),:)+temp;
+                temp(1,1,:)=2*reshape(TempSub(:,j,:),NumElement,numChannel)*SigMa_XRF((nTau+1)*(n-1)+i)*(xrfSub-xrfData{n,i})';
+                JacobSub1(index(j,2),index(j,1),:,:)=JacobSub1(index(j,2),index(j,1),:,:)+reshape(TempSub(:,j,:),1,1,NumElement,numChannel);
+                g(index(j,2),index(j,1),:)=g(index(j,2),index(j,1),:)+alpha*temp;
                 clear temp
             end
-            Rdis=e1'*(MU.*L)*e1; %% Discrete case
-            sum_Tau=sum_Tau+(xrfData{n,i}-xrfSub)*(xrfData{n,i}-xrfSub)'+beta*(Rdis-Mt(i))^2;
-            g=g+2*beta*(Rdis-Mt(i)).*repmat(full(L),[1,1,NumElement]).*repmat(MUe,[m(1),m(2),1]);
-            JacobSub2=JacobSub2+repmat(full(L),[1,1,NumElement]).*repmat(MUe,[m(1),m(2),1]);
-        end
-        Jacob1=[Jacob1;JacobSub1(:)'];
+            Rdis=e1'*(MU_XTM.*L)*e1; %% Discrete case
+            sum_Tau=sum_Tau+alpha*SigMa_XRF((nTau+1)*(n-1)+i)*(xrfData{n,i}-xrfSub)*(xrfData{n,i}-xrfSub)'+beta*SigMa_XTM(i)*(Rdis-Mt(i))^2;
+            g=g+2*beta*SigMa_XTM(i)*(Rdis-Mt(i)).*repmat(full(L),[1,1,NumElement]).*repmat(MUe_XTM,[m(1),m(2),1]);
+            JacobSub2=2*beta*SigMa_XTM(i)*repmat(full(L),[1,1,NumElement]).*repmat(MUe_XTM,[m(1),m(2),1]);
+        Jacob1=[Jacob1;reshape(JacobSub1,m(1)*m(2)*NumElement,numChannel)'];
         Jacob2=[Jacob2;JacobSub2(:)'];
+        end
+
     end
     
     f=f+sum_Tau;
 end
-figure,subplot(1,2,1),spy(Jacob1), subplot(1,2,2),spy(Jacob2);
-J1=rank(Jacob1);
-k1=cond(Jacob1);
-[U1,S1,V1]=svd(Jacob1);
-J2=rank(Jacob2);
-k2=cond(Jacob2);
-[U2,S2,V2]=svd(Jacob2);
-J3=rank([Jacob1;Jacob2]);
-fprintf('Cond1=%d, Rank1=%d, minS1=%d, Cond2=%d, Rank2=%d, minS2=%d, rank=%d \n',k1,J1,min(S1),k2,J2,min(S2),J3);
+%%=============================================== Measure ill-conditioness
+% figure,subplot(2,1,1),spy(Jacob1), subplot(2,1,2),spy(Jacob2);
+% size(Jacob1)
+% size(Jacob2)
+% J1=rank(Jacob1);
+% k1=cond(Jacob1);
+% % [U1,S1,V1]=svd(Jacob1);
+% J2=rank(Jacob2);
+% k2=cond(Jacob2);
+% % [U2,S2,V2]=svd(Jacob2);
+% [U,S,V]=svd([Jacob1;Jacob2]);
+% J3=rank([Jacob1;Jacob2]);
+% fprintf('Cond1=%d, Rank1=%d, Cond2=%d, Rank2=%d, cond=%d, minS=%d, rank=%d \n',k1,J1,k2,J2,cond([Jacob1;Jacob2]),min(diag(S)),J3);
+%%=====================================================================
 g=g(:);
+g=g(VarInd);

@@ -1,7 +1,8 @@
 %%%Simulate XRF of a given object with predifined detector and beam
 % function XRF=SimulateXRF(W,MU,BindingEenergy,M,thetan,DetChannel, numChannel, nTau, DetKnot0, SourceKnot0);
 global plotSpecSingle BeforeEmit plotTravel SSDlet NoSelfAbsorption
-global fig2  fig5 finalfig
+global fig2  fig5 finalfig 
+global SigMa_XTM SigMa_XRF
 % close all;
 plotTravel=0; % If plot the intersection of beam with object
 plotSpec = 0; % Do you want to see the spectra? If so plotSpec = 1
@@ -16,7 +17,7 @@ more off;
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
 UnitSpectrumSherman_Gaussian; %% Produce BindingEnergy M
 DefineObject_Gaussian; %% Produce W, MU
-thetan=[1];%[1:60:180];%linspace(1,180,prod(m)*NumElement/nTau);% Projection Angles
+thetan=[1 60 120];%[1:60:180];%linspace(1,180,prod(m)*NumElement/nTau);% Projection Angles
 %%%%%%%==============================================================
 if plotTravel
     fig2=[];  fig5=[];
@@ -25,6 +26,7 @@ end
 Energy=BindingEnergy;
 e1=ones(m(1),1);
 XRF=cell(length(thetan),nTau+1);
+SigMa_XRF=zeros(length(thetan)*(nTau+1),numChannel);
 DisR=zeros(nTau+1,length(thetan));
 Ltol=cell(length(thetan),nTau+1);
 GlobalInd=cell(length(thetan),nTau+1);
@@ -66,7 +68,7 @@ for n=1:length(thetan)
             subplot(1,2,1);
             plotGrid(xc,omega,m);
             hold on;
-            plot(DetKnot(:,1),DetKnot(:,2),'k+-',SourceKnot(:,1),SourceKnot(:,2),'m+-',SSDknot(:,1),SSDknot(:,2),'g+-','LineWidth',0.5)
+%             plot(DetKnot(:,1),DetKnot(:,2),'k+-',SourceKnot(:,1),SourceKnot(:,2),'m+-',SSDknot(:,1),SSDknot(:,2),'g+-','LineWidth',0.5)
             axis equal
             set(gcf,'Units','normalized')
             set(gca,'Units','normalized')
@@ -74,7 +76,7 @@ for n=1:length(thetan)
             ap = get(gca,'Position');
             xp = ([SourceKnot(i,1),DetKnot(i,1)]-ax(1))/(ax(2)-ax(1))*ap(3)+ap(1);
             yp = ([SourceKnot(i,2),DetKnot(i,2)]-ax(3))/(ax(4)-ax(3))*ap(4)+ap(2);
-            ah=annotation('arrow',xp,yp,'Color','r','LineStyle','--');
+%             ah=annotation('arrow',xp,yp,'Color','r','LineStyle','--');
         end
         %=================================================================
         %%%%%%%%================================================================
@@ -140,17 +142,21 @@ for n=1:length(thetan)
             xrfSub=xrfSub+RM{index(j,2),index(j,1)};
         end
         Ltol{n,i}=L;
-        Rdis(i)=I0*exp(-e1'*(MU.*L)*e1); %% Discrete case
+        Rdis(i)=I0*exp(-e1'*(MU_XTM.*L)*e1); %% Discrete case
         XRF{n,i}=xrfSub;
+        SigMa_XRF((nTau+1)*(n-1)+i,:)=xrfSub;
         if(plotSpec)
             figure(finalfig)
             subplot(1,2,2);
             plot(DetChannel,XRF{n,i},'r-')
             xlabel('Energy Channel','fontsize',12); ylabel('Intensity','fontsize',12)
-            pause;
+%             pause;
         end
         
     end
     DisR(:,n)=Rdis';
 end
-
+SigMa_XTM=1./diag(cov(-log(DisR'./I0)));
+SigMa_XRF=1./diag(cov(SigMa_XRF'));
+ SigMa_XRF=ones(size(SigMa_XRF));
+ SigMa_XTM=ones(size(SigMa_XTM));
