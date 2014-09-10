@@ -8,7 +8,7 @@ more off;
 XRF_XTM_Gaussian;
 %%%----------------------------------------------------------------------
 W0=W(:);
-Joint=1; % 1: XRF; -1: XTM; 0: Joint inversion
+Joint=-1; % 1: XRF; -1: XTM; 0: Joint inversion
 %%%============== Rescale MU_e to make unity contribution
 DiscreteScale=0;
 penalty=0;
