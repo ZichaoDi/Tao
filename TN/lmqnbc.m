@@ -247,7 +247,7 @@ while (~conv);
         end
     end
     %------------------------------- Active set plot
-%         figure(90);qpPlotAset(ipivot,nit,length(x));
+%     figure(90);qpPlotAset(ipivot,nit,length(x));
     %%%===========================================================
     
     g = ztime (g, ipivot);

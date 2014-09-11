@@ -65,6 +65,7 @@ for n=1:length(thetan)
                 
                 BeforeEmit=0;
                 I_after=ones(NumElement,1);
+                Ind_after=[];
                 if(NoSelfAbsorption)
                     NumSSDlet=1;%% Turn off self-absorption
                 else
@@ -73,6 +74,7 @@ for n=1:length(thetan)
                     for SSDi=1:NumSSDlet
                         index_after=LocalInd{n,i,index(j,2),index(j,1),SSDi};
                         Lvec_after=L_after{n,i,index(j,2),index(j,1),SSDi};
+                        Ind_after=unique([Ind_after;index_after],'rows');
                         LinearInd=sub2ind([m(1),m(2)],index_after(:,2),index_after(:,1));
                         for tsub=1:NumElement
                             temp_after=sum(Lvec_after.*MU_after{tsub}(LinearInd)); %% Attenuation of Flourescent energy emitted from current pixel
@@ -93,7 +95,6 @@ for n=1:length(thetan)
                             I_after(tsub)=I_after(tsub)+exp(-temp_after)/NumSSDlet;
                         end %% End loop for existing fluorescence energy from current pixel
                     end %% End loop for each SSD detector let
-                    Ind_after=unique(cat(1,LocalInd{n,i,index(j,2),index(j,1),:}),'rows');
                     for tt=1:size(Ind_after,1)
                         if(isempty(SelfInd{Ind_after(tt,2),Ind_after(tt,1)}{i}{5}))
                             SelfInd{Ind_after(tt,2),Ind_after(tt,1)}{i}{5}=cell(NumElement,1);

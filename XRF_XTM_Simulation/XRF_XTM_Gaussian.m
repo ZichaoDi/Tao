@@ -2,7 +2,7 @@
 % function XRF=SimulateXRF(W,MU,BindingEenergy,M,thetan,DetChannel, numChannel, nTau, DetKnot0, SourceKnot0);
 global plotSpecSingle BeforeEmit plotTravel SSDlet NoSelfAbsorption
 global fig2  fig5 finalfig 
-global SigMa_XTM SigMa_XRF
+global SigMa_XTM SigMa_XRF LogScale
 % close all;
 plotTravel=0; % If plot the intersection of beam with object
 plotSpec = 0; % Do you want to see the spectra? If so plotSpec = 1
@@ -17,7 +17,7 @@ more off;
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
 UnitSpectrumSherman_Gaussian; %% Produce BindingEnergy M
 DefineObject_Gaussian; %% Produce W, MU
-thetan=[1 60 120];%[1:60:180];%linspace(1,180,prod(m)*NumElement/nTau);% Projection Angles
+thetan=[1 60];%[1:60:180];%linspace(1,180,prod(m)*NumElement/nTau);% Projection Angles
 %%%%%%%==============================================================
 if plotTravel
     fig2=[];  fig5=[];
@@ -60,7 +60,7 @@ for n=1:length(thetan)
         ybox=[omega(3) omega(4) omega(4) omega(3) omega(3)];
         BeforeEmit=1;
         [index,Lvec]=IntersectionSet(SourceKnot(i,:),DetKnot(i,:),xbox,ybox,theta);
-        L=sparse(zeros(m(1),m(2)));
+        L=full(zeros(m(1),m(2)));
         %============================= Plot Grid and Current Light Beam
         
         if(plotSpec)
@@ -156,7 +156,11 @@ for n=1:length(thetan)
     end
     DisR(:,n)=Rdis';
 end
+if(LogScale)
 SigMa_XTM=1./diag(cov(-log(DisR'./I0)));
+else
+SigMa_XTM=1./diag(cov(DisR'));
+end
 SigMa_XRF=1./diag(cov(SigMa_XRF'));
  SigMa_XRF=ones(size(SigMa_XRF));
  SigMa_XTM=ones(size(SigMa_XTM));
