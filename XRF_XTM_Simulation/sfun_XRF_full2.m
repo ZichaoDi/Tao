@@ -67,7 +67,12 @@ for n=1:length(thetan)
 %                             temp_d(LinearInd1)=exp(-temp_after)*temp_d_sub(:);
                             for si=1:size(index_after,1)
                                 temp_d(:,index_after(si,2),index_after(si,1),tsub)=temp_d(:,index_after(si,2),index_after(si,1),tsub)+exp(-temp_after)*reshape(MU_e(:,1,tsub+1),NumElement,1).*Lvec_after(si);
-                                if(~ismember(index(j,end:-1:1),SelfInd{index_after(si,2),index_after(si,1)}{i}{1},'rows'))
+                               if(ismac)
+                                    TempIs=ismember(index(j,end:-1:1),SelfInd{index_after(si,2),index_after(si,1)}{i}{1},'rows');
+                                else
+                                    TempIs=ismember(index(j,end:-1:1),SelfInd{index_after(si,2),index_after(si,1)}{i}{1},'rows','legacy');
+                                end
+                                if(~TempIs)    
                                     SelfInd{index_after(si,2),index_after(si,1)}{i}{1}=[SelfInd{index_after(si,2),index_after(si,1)}{i}{1};index(j,end:-1:1)];%% assign downstream index to pixel(oppsite)
                                     SelfInd{index_after(si,2),index_after(si,1)}{i}{2}=[SelfInd{index_after(si,2),index_after(si,1)}{i}{2};L(index(j,2),index(j,1))];
                                     SelfInd{index_after(si,2),index_after(si,1)}{i}{3}=[SelfInd{index_after(si,2),index_after(si,1)}{i}{3};reshape(W(index(j,2),index(j,1),:),1,NumElement)];
@@ -105,7 +110,12 @@ for n=1:length(thetan)
                 end
                 %% ==================================================================== eqn(5) part 2
                 if(~NoSelfAbsorption)
-                    if(~ismember(index(j,:),GlobalInd{n,i+1},'rows'))
+                     if(ismac)
+                        TempIs=ismember(index(j,:),GlobalInd{n,i+1},'rows');
+                    else
+                        TempIs=ismember(index(j,:),GlobalInd{n,i+1},'rows','legacy');
+                    end
+                    if(~TempIs)
                         for i_sub=1:i
                             if(size(SelfInd{index(j,2),index(j,1)}{i_sub}{1},1)~=0)
                                 TempLong=zeros(NumElement,numChannel);
