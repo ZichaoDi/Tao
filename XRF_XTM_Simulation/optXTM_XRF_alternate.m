@@ -1,20 +1,15 @@
 
-global NF N current_n ptest gv 
-global low up Tik penalty gama  
-global W0 VarInd LogScale maxiter err0
-
+global maxiter NF N low up current_n
+global ptest gv
 close all;
-more off;
+maxiter=10;
 LogScale=1;
-maxiter=100;
 XRF_XTM_Gaussian;
 %%%----------------------------------------------------------------------
 W0=W(:);
-Joint=0; % 1: XRF; -1: XTM; 0: Joint inversion
-%%%============== Rescale MU_e to make unity contribution
 DiscreteScale=0;
 penalty=0;
-
+%%%============== Rescale MU_e to make unity contribution
 if(DiscreteScale )
     Mag=-order(MU_e(:,1,1));
     gama=-log(MU_e(:,1,1))./MU_e(:,1,1);%5e2*ones(size(MU_e(:,1,1)));%10.^(Mag);%(max_MU-min_MU)./(MU_e(:,1,1)-min_MU);%1./MU_e(:,1,1);%
@@ -33,14 +28,6 @@ if(penalty)
     %         Tik(i,i)=-1;Tik(i,i+1)=2; Tik(i,i+2)=-1;
     %     end
 end
-
-if(Joint==-1)
-    fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,Ltol,thetan,m,nTau,NumElement);
-elseif(Joint==0)
-    fctn=@(W)sfun_XRF_XTM(W,XRF,DisR,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau,I0);
-else
-    fctn=@(W)sfun_XRF_full2(W,XRF,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau);
-end
 rng('default');
 Wtest=W;
 
@@ -55,29 +42,53 @@ end
 ws=Wtest(:);
 x0=Wtest(:)+1*10^(0)*rand(prod(m)*size(M,1),1);%10*ones(sizEDe(ws));%
 xinitial=x0;
-VarInd=1:length(W0);%[10:18];
-xinital(~VarInd)=ws(~VarInd);
-
-
-%      foo(fctn,x0);
-%      return;
-% load x_new
-% x0=x_new;
+err0=xinitial-ws;
 N=m(1);
 current_n=N(1);
-NF = [0*N; 0*N; 0*N];
 e=cputime;
 figureObject(reshape(x0,m(1),m(2),NumElement),Z,m,NumElement,MU_e,1);
 low=0*ones(size(x0));
 up=1e6*ones(size(x0));
-%%%========================================================================
-x0=x0(VarInd);
-up=up(VarInd);
-low=low(VarInd);
-%%%========================================================================
-[xstar_sub,f,g,ierror] = tnbc (x0,fctn,low,up);
-xstar=ws;xstar(VarInd)=xstar_sub;
-err0=xinitial-ws;
+%%%===== Initialization
+OuterIter=0;
+errTol=1;
+x=x0;
+Ntot=zeros(1,2);
+%%%===================================================================
+while (errTol>1e-10 & OuterIter<=5);
+    NF = [0*N; 0*N; 0*N];
+    Joint=(-1)^OuterIter; % 1: XRF; -1: XTM; 0: Joint inversion
+    if(Joint==-1)
+        fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,Ltol,thetan,m,nTau,NumElement);
+    elseif(Joint==0)
+        fctn=@(W)sfun_XRF_XTM(W,XRF,DisR,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau,I0);
+    else
+        fctn=@(W)sfun_XRF_full2(W,XRF,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau);
+    end
+    
+    %%%========================================================================
+    [x,f,g,ierror] = tnbc (x,fctn,low,up);
+    OuterIter=OuterIter+1;
+    errTol=norm(x-ws)/norm(err0);
+    if(Joint==1)
+    Ntot(2)=Ntot(2)+NF(2)+NF(3);
+    elseif(Joint==-1)
+    Ntot(1)=Ntot(1)+NF(2)+NF(3);
+    end
+    figure(333)
+    hold on; drawnow;
+    if(Joint==1)
+        marker='s';
+        color='r';
+    elseif(Joint==-1)
+        marker='*';
+        color='b';
+    end
+    plot(OuterIter,errTol,'Marker',marker,'color',color,'LineStyle','-')
+end
+fprintf('Total number of function evaluations, XTM = %d, XRF = %d \n',Ntot(1),Ntot(2));
+%%%====================================================== Report Result
+xstar=x;
 if(Joint==-1 & DiscreteScale)
     xtemp=reshape(xstar,m(1),m(2),NumElement);
     err0_1=reshape(err0,m(1),m(2),NumElement);
@@ -87,18 +98,13 @@ if(Joint==-1 & DiscreteScale)
     end
     err0_1=err0_1(:);
 end
-%%%====================================================== Report Result
-
 for i=1:NumElement
     err(i)=norm(xstar(9*i-8:9*i)-ws(9*i-8:9*i))/norm(xinitial(9*i-8:9*i)-ws(9*i-8:9*i));
 end
 figure('name','Elemental Residule')
 semilogy(1:NumElement,err,'r.-');
 t=cputime-e;
-errTol=norm(xstar-ws)/norm(err0);
 if(DiscreteScale)
-    AbsErr=norm(xtemp(:)-W(:))
-    IniErr=norm(err0_1)
     errOri=norm(xtemp(:)-W(:))/norm(err0_1);
     fprintf('Time elapsed is %f, residule is %d, original residule is %d\n',t,errTol,errOri);
 else

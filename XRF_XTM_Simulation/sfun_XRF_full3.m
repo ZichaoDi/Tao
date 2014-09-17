@@ -1,16 +1,19 @@
-function [f,g]=sfun_XRF_full3(W,xrfData,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau)
-global BeforeEmit  SSDlet dz omega NumSSDlet NoSelfAbsorption testind
+function [f,g]=sfun_XRF_full3(W,xrfData,MU0,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau)
+%%%% XRF with attenuation coefficient at Beam energy obtained from XTM for
+%%%% each pixel
+global BeforeEmit  NumSSDlet NoSelfAbsorption
+global SigMa_XRF
 f=0;
 W=reshape(W,m(1),m(2),NumElement);
 %%%%% =================== Attenuation Matrix at beam energy
-MUe=reshape(MU_e(:,1,1),1,1,NumElement);
-MU=sum(W.*repmat(MUe,[m(1),m(2),1]),3);
+MU=reshape(MU0,m(1),m(2));
 %%%%% =================== Attenuation Matrix at flourescence energy (Corrected Attenuation)
 MU_after=cell(NumElement,1);
 for i=1:NumElement
-    MU_after{i}=sum(W.*repmat(reshape(MU_e(:,1,i+1),1,1,NumElement),[m(1),m(2),1]),3);
+MU_after{i}=sum(W.*repmat(reshape(MU_e(:,1,i+1),1,1,NumElement),[m(1),m(2),1]),3);
 end
 %%%%% ====================================================================
+
 g=zeros(m(1),m(2),NumElement);
 SelfInd1=cell(m(1),m(2));
 for im=1:m(1)
@@ -24,9 +27,6 @@ end
 clear i j t
 for n=1:length(thetan)
     SelfInd=SelfInd1;
-    theta=thetan(n)/180*pi;
-    TransMatrix=[cos(theta) sin(theta);-sin(theta) cos(theta)];
-    SSDknot=SSDlet*TransMatrix;
     sum_Tau=0;
     for i=1:nTau+1
         index=GlobalInd{n,i};
@@ -35,11 +35,9 @@ for n=1:length(thetan)
             RM=cell(m(1),m(2));
             xrfSub=zeros(1,numChannel);
             TempSub=zeros(NumElement,size(index,1),numChannel);
-            I_incident=[];
+            I_incident=zeros(size(index,1),1);
             temp_d=zeros(NumElement,m(1),m(2),NumElement);
-            for j=1:size(index,1)
-                CurrentCellCenter=[(index(j,1)-1/2)*dz-abs(omega(1)),(index(j,2)-1/2)*dz-abs(omega(3))];
-                
+            for j=1:size(index,1)                
                 if(j==1)
                     I_incident(j)=1;
                     temp_sum=0;
@@ -52,7 +50,6 @@ for n=1:length(thetan)
                 
                 BeforeEmit=0;
                 I_after=ones(NumElement,1);
-                Ind_after=[];
                 if(NoSelfAbsorption)
                     NumSSDlet=1;%% Turn off self-absorption
                 else
@@ -61,11 +58,9 @@ for n=1:length(thetan)
                     for SSDi=1:NumSSDlet
                         index_after=LocalInd{n,i,index(j,2),index(j,1),SSDi};
                         Lvec_after=L_after{n,i,index(j,2),index(j,1),SSDi};
-                        Ind_after=unique([Ind_after;index_after],'rows');
-                        %                         Lvec_after=Lvec_after(otherInd);
-                        
+                        LinearInd=sub2ind([m(1),m(2)],index_after(:,2),index_after(:,1));
                         for tsub=1:NumElement
-                            temp_after=sum(Lvec_after.*MU_after{tsub}(sub2ind(size(MU_after{tsub}),index_after(:,2),index_after(:,1)))); %% Attenuation of Flourescent energy emitted from current pixel    
+                            temp_after=sum(Lvec_after.*MU_after{tsub}(LinearInd)); %% Attenuation of Flourescent energy emitted from current pixel
                             for si=1:size(index_after,1)
                                 temp_d(:,index_after(si,2),index_after(si,1),tsub)=temp_d(:,index_after(si,2),index_after(si,1),tsub)+exp(-temp_after)*reshape(MU_e(:,1,tsub+1),NumElement,1).*Lvec_after(si);
                                 if(~ismember(index(j,end:-1:1),SelfInd{index_after(si,2),index_after(si,1)}{i}{1},'rows'))
@@ -78,12 +73,15 @@ for n=1:length(thetan)
                             I_after(tsub)=I_after(tsub)+exp(-temp_after)/NumSSDlet;
                         end %% End loop for existing fluorescence energy from current pixel
                     end %% End loop for each SSD detector let
+                    Ind_after=unique(cat(1,LocalInd{n,i,index(j,2),index(j,1),:}),'rows');
                     for tt=1:size(Ind_after,1)
                         if(isempty(SelfInd{Ind_after(tt,2),Ind_after(tt,1)}{i}{5}))
                             SelfInd{Ind_after(tt,2),Ind_after(tt,1)}{i}{5}=cell(NumElement,1);
                         end
                         for tsub=1:NumElement
+                            
                             SelfInd{Ind_after(tt,2),Ind_after(tt,1)}{i}{5}{tsub}=[SelfInd{Ind_after(tt,2),Ind_after(tt,1)}{i}{5}{tsub}; reshape(temp_d(:,Ind_after(tt,2),Ind_after(tt,1),tsub)./NumSSDlet,1,NumElement)];
+                            
                         end
                     end
                 end
@@ -94,23 +92,24 @@ for n=1:length(thetan)
             end
             for j=1:size(index,1)
                 temp=zeros(size(g(index(j,2),index(j,1),:)));
-                %% ==================================================================== eqn(5) part 1
-                if(j~=size(index,1))
-                    for subj=j+1:size(index,1)
-                        TempSub(:,j,:)=TempSub(:,j,:)- reshape(full(bsxfun(@times,reshape(MU_e(:,1,1).*L(index(j,2),index(j,1)),NumElement,1)...
-                            ,RM{index(subj,2),index(subj,1)})),size(TempSub,1),1,size(TempSub,3));
-                    end %%End loop for accumulating contribution from beam attenuation
-                end
+%                 %% ==================================================================== eqn(5) part 1
+%                 if(j~=size(index,1))
+%                     for subj=j+1:size(index,1)
+%                         TempSub(:,j,:)=TempSub(:,j,:)- reshape(full(bsxfun(@times,reshape(MU_e(:,1,1).*L(index(j,2),index(j,1)),NumElement,1)...
+%                             ,RM{index(subj,2),index(subj,1)})),size(TempSub,1),1,size(TempSub,3));
+%                     end %%End loop for accumulating contribution from beam attenuation
+%                 end
                 %% ==================================================================== eqn(5) part 2
                 if(~NoSelfAbsorption)
                     if(~ismember(index(j,:),GlobalInd{n,i+1},'rows'))
                         for i_sub=1:i
-                            for diffj_i=1:size(SelfInd{index(j,2),index(j,1)}{i_sub}{1},1)
+                            if(size(SelfInd{index(j,2),index(j,1)}{i_sub}{1},1)~=0)
                                 TempLong=zeros(NumElement,numChannel);
                                 for tsub=1:NumElement
-                                    TempLong=TempLong+SelfInd{index(j,2),index(j,1)}{i_sub}{2}(diffj_i).*SelfInd{index(j,2),index(j,1)}{i_sub}{4}(diffj_i).*...
-                                        SelfInd{index(j,2),index(j,1)}{i_sub}{3}(diffj_i,tsub).*bsxfun(@times,SelfInd{index(j,2),index(j,1)}{i_sub}{5}{tsub}(diffj_i,:)',M(tsub,:));
+                                    TempLong=TempLong+bsxfun(@times,(sum(bsxfun(@times,SelfInd{index(j,2),index(j,1)}{i_sub}{2}.*SelfInd{index(j,2),index(j,1)}{i_sub}{4}.*...
+                                        SelfInd{index(j,2),index(j,1)}{i_sub}{3}(:,tsub),SelfInd{index(j,2),index(j,1)}{i_sub}{5}{tsub}),1))' ,M(tsub,:));
                                 end
+                                
                                 TempSub(:,j,:)=TempSub(:,j,:)-reshape(TempLong,size(TempSub,1),1,size(TempSub,3));
                             end %% End loop for accumulating contribution from self absorption
                             clear TempLong
@@ -118,11 +117,11 @@ for n=1:length(thetan)
                     end
                 end
                 %% ====================================================================
-                temp(1,1,:)=2*reshape(TempSub(:,j,:),NumElement,numChannel)*(xrfSub-xrfData{n,i})';
+                temp(1,1,:)=2*reshape(TempSub(:,j,:),NumElement,numChannel)*SigMa_XRF((nTau+1)*(n-1)+i)*(xrfSub-xrfData{n,i})';%
                 g(index(j,2),index(j,1),:)=g(index(j,2),index(j,1),:)+temp;
                 clear temp
             end
-            sum_Tau=sum_Tau+(xrfData{n,i}-xrfSub)*(xrfData{n,i}-xrfSub)';
+            sum_Tau=sum_Tau+SigMa_XRF((nTau+1)*(n-1)+i)*(xrfData{n,i}-xrfSub)*(xrfData{n,i}-xrfSub)';%
         end
     end
     

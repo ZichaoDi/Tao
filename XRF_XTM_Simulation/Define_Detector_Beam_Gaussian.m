@@ -2,7 +2,7 @@
 global m ;
  global DetChannel numChannel nTau DetKnot0 SourceKnot0 NumSSDlet
 omega=[-2     2    -2     2];
-  m=[3 3];
+  m=[8 8];
  alpha=atan((omega(4)-omega(3))/(omega(2)-omega(1)));
 dTau=(omega(2)-omega(1))/m(2);%0.5;%%% width of the each discrete beam
 Tau=sqrt((omega(2)-omega(1))^2+(omega(4)-omega(3))^2);
@@ -20,7 +20,8 @@ SourceKnot0=[repmat(SourceS0(1),size(knot)),knot];%% source knot points
 %%%======================Define Energy Channel of the fluorescence detector
 SSD0=[detE0-[0,tol]; SourceE0-[0,tol]];
 numChannel=8;
-DetChannel=linspace(0,numChannel,numChannel)';
+DetScaleXRF=8;
+DetChannel=linspace(0,DetScaleXRF,numChannel)';
 NumSSDlet=2;
 SSDlet=[linspace(SSD0(2,1),SSD0(1,1),NumSSDlet)',...
             linspace(SSD0(2,2),SSD0(1,2),NumSSDlet)' ];

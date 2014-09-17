@@ -3,21 +3,19 @@
 global plotSpecSingle BeforeEmit plotTravel SSDlet NoSelfAbsorption
 global fig2  fig5 finalfig 
 global SigMa_XTM SigMa_XRF LogScale
-% close all;
 plotTravel=0; % If plot the intersection of beam with object
 plotSpec = 0; % Do you want to see the spectra? If so plotSpec = 1
 plotUnit=0;
 plotSpecSingle=0;
 NoSelfAbsorption=0;
 PlotObject=1;
-% global m x y omega NumElement plotTravel plotSpec plotWhole dz
 startup;
 more off;
 
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
 UnitSpectrumSherman_Gaussian; %% Produce BindingEnergy M
-DefineObject_Gaussian; %% Produce W, MU
-thetan=[1 60];%[1:60:180];%linspace(1,180,prod(m)*NumElement/nTau);% Projection Angles
+DefineObject_Gaussian; %% Produce W, MU_XTM
+thetan=[1:40:180];%linspace(1,180,prod(m)*NumElement/nTau);% Projection Angles
 %%%%%%%==============================================================
 if plotTravel
     fig2=[];  fig5=[];
@@ -90,7 +88,7 @@ for n=1:length(thetan)
                 I_incident=1;
                 temp_sum=0;
             else
-                temp_sum=temp_sum+Lvec(j-1)*MU(index(j-1,2),index(j-1,1));
+                temp_sum=temp_sum+Lvec(j-1)*MU_XTM(index(j-1,2),index(j-1,1));
                 I_incident=exp(-temp_sum);
             end
             %% ===========================================================
@@ -162,5 +160,5 @@ else
 SigMa_XTM=1./diag(cov(DisR'));
 end
 SigMa_XRF=1./diag(cov(SigMa_XRF'));
- SigMa_XRF=ones(size(SigMa_XRF));
- SigMa_XTM=ones(size(SigMa_XTM));
+%  SigMa_XRF=ones(size(SigMa_XRF));
+%  SigMa_XTM=ones(size(SigMa_XTM));

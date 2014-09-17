@@ -1,5 +1,5 @@
 function [f,g]=sfun_XRF_full2(W,xrfData,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau)
-global BeforeEmit  SSDlet dz omega NumSSDlet NoSelfAbsorption testind
+global BeforeEmit  NumSSDlet NoSelfAbsorption testind
 global SigMa_XRF
 f=0;
 W=reshape(W,m(1),m(2),NumElement);
@@ -27,9 +27,6 @@ end
 clear i j t
 for n=1:length(thetan)
     SelfInd=SelfInd1;
-    theta=thetan(n)/180*pi;
-    TransMatrix=[cos(theta) sin(theta);-sin(theta) cos(theta)];
-    SSDknot=SSDlet*TransMatrix;
     sum_Tau=0;
     for i=1:nTau+1
         index=GlobalInd{n,i};
@@ -38,7 +35,7 @@ for n=1:length(thetan)
             RM=cell(m(1),m(2));
             xrfSub=zeros(1,numChannel);
             TempSub=zeros(NumElement,size(index,1),numChannel);
-            I_incident=[];
+            I_incident=zeros(size(index,1),1);
             temp_d=zeros(NumElement,m(1),m(2),NumElement);
             for j=1:size(index,1)                
                 if(j==1)
@@ -53,7 +50,6 @@ for n=1:length(thetan)
                 
                 BeforeEmit=0;
                 I_after=ones(NumElement,1);
-                Ind_after=[];
                 if(NoSelfAbsorption)
                     NumSSDlet=1;%% Turn off self-absorption
                 else
@@ -62,7 +58,6 @@ for n=1:length(thetan)
                     for SSDi=1:NumSSDlet
                         index_after=LocalInd{n,i,index(j,2),index(j,1),SSDi};
                         Lvec_after=L_after{n,i,index(j,2),index(j,1),SSDi};
-                        Ind_after=unique([Ind_after;index_after],'rows');
                         LinearInd=sub2ind([m(1),m(2)],index_after(:,2),index_after(:,1));
                         for tsub=1:NumElement
                             temp_after=sum(Lvec_after.*MU_after{tsub}(LinearInd)); %% Attenuation of Flourescent energy emitted from current pixel
@@ -82,6 +77,7 @@ for n=1:length(thetan)
                             I_after(tsub)=I_after(tsub)+exp(-temp_after)/NumSSDlet;
                         end %% End loop for existing fluorescence energy from current pixel
                     end %% End loop for each SSD detector let
+                    Ind_after=unique(cat(1,LocalInd{n,i,index(j,2),index(j,1),:}),'rows');
                     for tt=1:size(Ind_after,1)
                         if(isempty(SelfInd{Ind_after(tt,2),Ind_after(tt,1)}{i}{5}))
                             SelfInd{Ind_after(tt,2),Ind_after(tt,1)}{i}{5}=cell(NumElement,1);

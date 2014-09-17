@@ -16,7 +16,7 @@ ltest  = (flast - f <= -0.5*gtp);
 %---------------------------------------------------------
 if (~ltest)
    ind   = find(ipivot ~= 0 & ipivot ~= 2);
-   if (length(ind)>0);
+   if (~isempty(ind));
       t = -ipivot(ind).*g(ind);
       [cmax, imax] = min(t);
       if (cmax >= 0); imax = 0; end;
@@ -30,7 +30,6 @@ else
            & abs(dif) < rtleps*ftest        ...
            & gnorm < accrcy^(1/3)*ftest)    ...
            | gnorm < .01*sqrt(accrcy)*ftest;
-   % conv = conv | gnorm < 1.e-4*ftest;
 end;
 flast1  = flast;
 ipivot1 = ipivot;

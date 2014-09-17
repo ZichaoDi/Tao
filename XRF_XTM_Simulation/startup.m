@@ -14,7 +14,7 @@ path(path,[pwd, slash, 'data']);
 path(path,[pwd, slash, 'result']);
 path(path,'../TN');
 % path(path,'../SimplerCode');
-addpath_recurse('../SimplerCode')
+% addpath_recurse('../SimplerCode')
 
 
 

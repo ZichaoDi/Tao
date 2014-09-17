@@ -7,20 +7,13 @@ function [xstar, f, g, ierror, eig_val] = ...
 % this routine) with a diagonal scaling (routine ndia3).
 % For further details, see routine tnbc.
 %---------------------------------------------------------
-global hyk ykhyk hyr yksr ykhyr yrhyr sk yk sr yr ...
-    hg gsk yksk yrsr
+global sk yk sr yr yksk yrsr
 global NF N current_n lambdaind L 
 %---------------------------------------------------------
 % check that initial x is feasible and that the bounds
 % are consistent
 %---------------------------------------------------------
-%             ind=find(x>=up)
-%             x(ind)
-%             [ff1,gg1]=feval (sfun, x);
-%             ff1
 [ipivot, ierror, x] = crash(x, low, up);
-% [ff2,gg2]=feval (sfun, x);
-% ff2
 if (ierror ~= 0);
     fprintf(1,'LMQNBC: terminating (no feasible point)');
     f = 0;
@@ -28,13 +21,7 @@ if (ierror ~= 0);
     xstar = x;
     exit;
 end;
-% %%%%%%%%%%%### Check active set ####################################
-% indexl=find(ipivot==-1);
-% indexu=find(ipivot==1);
-% feas=find(ipivot==0);
-% % fprintf('after crash before loop active set: \n');
-% % figure(333);plot(indexl, x(indexl),'ro',indexu,x(indexu),'b*',feas,x(feas),'g*');pause
-%%%%%%%%%%%%%#######################################################
+
 %---------------------------------------------------------
 % initialize variables, parameters, and constants
 %---------------------------------------------------------
@@ -67,10 +54,8 @@ flast  = f;
 % Then form the projected gradient.
 %---------------------------------------------------------
 ind = find((ipivot ~= 2) & (ipivot.*g>0));
-if (length(ind) > 0);
-    %if(maxiter>2)
+if (~isempty(ind));
     ipivot(ind) = zeros(length(ind),1);
-    %end
 end;
 
  %%%%%%%%%%%%%#######################################################
@@ -156,10 +141,8 @@ while (~conv);
     [x, f, g, nf1, ierror, alpha] = lin1 (p, x, f, alpha0, g, sfun);
     %---------------------------------------------------------
     %## MODIFIED: ADDED THIRD CONDITION TO 'IF' STATEMENT ##
-    if (alpha == 0 && alpha0 ~= 0 && alpha0 > 10*eps);
-        %    if (alpha == 0 && alpha0 ~= 0);
+     if (alpha == 0 && alpha0 ~= 0);
         format long e
-        alpha0
         fprintf('Error in Line Search (lmqnbcm.m)\n');
         fprintf('    ncg1   = %d\n',ncg1);
         fprintf('    alpha  = %12.8f\n', alpha);
@@ -185,13 +168,6 @@ while (~conv);
         ipivot0 = ipivot;
         newcon = 1;
         [ipivot, flast] = modz (x, p, ipivot, low, up, flast, f, alpha);
-        %%%%%%%%%%%### Check active set ####################################
-%         indexl=find(ipivot==-1);
-%         indexu=find(ipivot==1);
-%         feas=find(ipivot==0);
-%         fprintf('after modz: \n');
-%         figure(333);plot(indexl, x(indexl),'ro',indexu,x(indexu),'b*',feas,x(feas),'g*');pause
-        %%%%%%%%%%%%%#######################################################
         dipiv = norm(ipivot-ipivot0);
         if (dipiv > 0); ierror = 0; end;
     end;
@@ -231,21 +207,9 @@ while (~conv);
     %---------------------------------------------------------
     % test for convergence
     %---------------------------------------------------------
-    ind=find(ipivot~=0);
-    % figure(555);subplot(1,3,1);plot(1:257,ipivot,'ro-'); for i=1:length(ind) text(ind(i),ipivot(ind(i)),num2str(i));end
-    % subplot(1,3,2);plot(1:257,g,'g.-');for i=1:length(ind) text(ind(i),g(ind(i)),num2str(i));end
-    % subplot(1,3,3);plot(1:257,x,'r*-');for i=1:length(ind) text(ind(i),x(ind(i)),num2str(i));end; pause;
     [conv, flast, ipivot] = cnvtstm (alpha, pnorm, xnorm, ...
         difnew, ftest, gnorm, gtp, f, flast, g, ...
         ipivot, accrcy);
-%     %%%%%%%%%%%### Check active set ####################################
-%    indexl=find(ipivot==-1);
-%     indexu=find(ipivot==1);
-%  feas=find(ipivot==0);
-%     fprintf('after cvntstm: \n');
-%     figure(333);plot(indexl, x(indexl),'ro',indexu,x(indexu),'b*',feas,x(feas),'g*');pause
-    %%%%%%%%%%%%%#######################################################
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%find multiplier index
     lamind=find(ipivot ~= 0 & ipivot ~= 2);
     toll = 10 * eps * (abs(low) + ones(size(x)));
     subl=find(x-low<toll);
@@ -255,15 +219,6 @@ while (~conv);
     subu=find(up-x<tolu);
     lambdaindu=intersect(lamind,subu);
     lambdaind=struct('low',lambdaind1,'up',lambdaindu);
-%     if(length(x)==31^2)
-%         [ftes,gtes]=feval(sfun,x);
-%         lamb31=zeros(31^2,1);
-%         lamb31(lambdaindu)=-gtes(lambdaindu);
-%         load lambda63;
-%         figure(21);subplot(2,1,1);plot(1:31^2,lamb31,'r.');
-%         subplot(2,1,2);plot(1:63^2,lambda63,'b.')
-%     end
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     if (nit>=maxiter); conv = 1; end;
     if (conv);
@@ -295,10 +250,6 @@ while (~conv);
     argvec = [accrcy gnorm xnorm];
     [p, gtp, ncg1, d, eig_val{nit+1}] = ...
         modlnp (d, x, g, maxit, upd1, ireset, bounds, ipivot, argvec, sfun);
-    %%##################################################################
-%     indg=find(p~=0);
-%     p(indg)=-g(indg);
-    %%##################################################################
     ncg = ncg + ncg1;
     %---------------------------------------------------------
     % update LMQN preconditioner

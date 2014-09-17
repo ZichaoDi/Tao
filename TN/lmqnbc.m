@@ -10,8 +10,8 @@ function [xstar, f, g, ierror] = ...
 global sk yk sr yr yksk yrsr
 global NF N current_n  fiter itertest
 global ptest gv ipivot nit
-global  i_cauchy
-global W0 VarInd m
+global i_cauchy W0 VarInd m Ntot
+global maxiter err0 Joint
 %---------------------------------------------------------
 % check that initial x is feasible and that the bounds
 % are consistent
@@ -202,17 +202,18 @@ while (~conv);
         nit, nf, ncg, f, gnorm)
     %--------------------------------- Error Plot
 %     if(mod(nit,50)==0)
-%         figure(100);
-%         CurrentErr=abs(x-W0(VarInd));
-%         subplot(1,2,1)
-%         vs=sum(reshape(CurrentErr,m(1),m(2),length(VarInd)/prod(m)),3);
-%         surf(vs);
-%         %     [xx,yy] = meshgrid(1:.02:m(1),1:.02:m(2));
-%         % [X,Y] = meshgrid(1:m(1),1:m(2));
-%         % vv = interp2(X,Y,vs,xx,yy,'cubic');
-%         % surfl(xx,yy,vv);
-%         subplot(1,2,2)
-%         plot(abs(x-W0(VarInd)),'ro-');
+if(Joint==1 |Joint==0)
+        figure(100);
+        CurrentErr=abs(x-W0(VarInd));
+        FunEva(nit)=Ntot(2)+nf+ncg;
+        ErrIter(nit)=norm(x-W0(VarInd))/norm(err0);
+        ErrIter(end)
+        subplot(1,2,1)
+        vs=sum(reshape(CurrentErr,m(1),m(2),length(VarInd)/prod(m)),3);
+        surf(vs);
+         subplot(1,2,2)
+        plot(FunEva,ErrIter,'ro-');drawnow;hold on;
+end
 %     end
     %---------------------------------------------------------
     % test for convergence
@@ -220,6 +221,7 @@ while (~conv);
     [conv, flast, ipivot] = cnvtst (alpha, pnorm, xnorm, ...
         difnew, ftest, gnorm, gtp, f, flast, g, ...
         ipivot, accrcy);
+    if (nit>=maxiter); conv = 1; end;
     if (conv);
         disp('LMQNBC: termination 5')
         xstar = x;
@@ -228,6 +230,7 @@ while (~conv);
         NF(3,nind) = NF(3,nind) + ncg;
         return;
     end;
+    
     %%%######################## Update active set using Cauchy point
     if(Cauchy)
         [~,i_cauchy,alpha_cp,p_cp]=Cauchy_Point(x,g0, accrcy, xnorm, sfun,low,up);
