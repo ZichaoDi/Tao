@@ -24,10 +24,14 @@ center=[0 0];
 %%%========================== the grids of object
 xc = getNodalGrid(omega,m);
 %%%========================== assign weight matrix for each element in each pixel
-W=zeros(m(1),m(2),NumElement);
-for tsub=1:NumElement
-W(:,:,tsub)=tsub*2e-1;
-end
+CreateElement;
+%%=======================================================================
+% W=zeros(m(1),m(2),NumElement);
+% for tsub=1:NumElement
+% W(:,:,tsub)=tsub*2e-1;
+% end
+% W(:,:,1)=abs(phantom(m(1)));
+%%=======================================================================
 % W(1,1,:)=[7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];
 % W(1,2,:)=[7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];
 %  W(1,3,:)=[7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];
@@ -64,7 +68,8 @@ end
 % W(4,2,:)= [1 0 0 0] ;
 % W(4,3,:)=[0 1 0 0];
 % W(4,4,:)=[0 1 0 0];
-
+%%%%%%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+UnitSpectrumSherman_Gaussian; %% Produce BindingEnergy M
 %%%========================== locate element attenuation coefficient
 MU_e=zeros(NumElement,1,1+NumElement);
 for i=1: NumElement

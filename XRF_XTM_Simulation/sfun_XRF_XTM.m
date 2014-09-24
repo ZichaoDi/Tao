@@ -20,6 +20,7 @@ end
 %%%%% ====================================================================
 e1=ones(m(1),1);
 g=zeros(m(1),m(2),NumElement);
+Jacob0=[];
 Jacob1=[];
 Jacob2=[];
 SelfInd1=cell(m(1),m(2));
@@ -158,6 +159,7 @@ for n=1:length(thetan)
                 JacobSub2=-2*beta*SigMa_XTM(i)*Rdis*repmat(full(L),[1,1,NumElement]).*repmat(MUe_XTM,[m(1),m(2),1]);
             end
             Jacob1=[Jacob1;reshape(JacobSub1,m(1)*m(2)*NumElement,numChannel)'];
+            Jacob0=[Jacob0;sum(reshape(JacobSub1,m(1)*m(2)*NumElement,numChannel),2)'];
             Jacob2=[Jacob2;JacobSub2(:)'];
         end
         
@@ -167,17 +169,18 @@ for n=1:length(thetan)
 end
 %%=============================================== Measure ill-conditioness
 % figure,subplot(2,1,1),spy(Jacob1), subplot(2,1,2),spy(Jacob2);
-% size(Jacob1)
-% size(Jacob2)
-% tol=eps;
-% J1=rank(Jacob1);
+size(Jacob1)
+size(Jacob2)
+tol=eps;
+J1=rank(Jacob1)
 % k1=cond(Jacob1);
-% % [U1,S1,V1]=svd(Jacob1);
-% J2=rank(Jacob2);
+% [U1,S1,V1]=svd(Jacob1);
+J2=rank(Jacob2)
 % k2=cond(Jacob2);
-% % [U2,S2,V2]=svd(Jacob2);
+% [U2,S2,V2]=svd(Jacob2);
 % [U,S,V]=svd([Jacob1;Jacob2]);
-% J3=rank([Jacob1;Jacob2]);
+J0=rank(Jacob0+Jacob2)
+J3=rank([Jacob1;Jacob2])
 % fprintf('Cond1=%d, Rank1=%d, Cond2=%d, Rank2=%d, cond=%d, minS=%d, rank=%d \n',k1,J1,k2,J2,cond([Jacob1;Jacob2]),min(diag(S)),J3);
 %%=====================================================================
 g=g(:);

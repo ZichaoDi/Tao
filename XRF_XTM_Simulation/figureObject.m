@@ -12,7 +12,7 @@ MU(i,j)=sum(reshape(W(i,j,:),NumElement,1).*reshape(MU_e(:,1,1),NumElement,1));
     end
 end
 if(status==0)
-Map=figure('name','Elemental Map');
+Map=figure('name','Attenuation Map');
 % elseif(status==1)
 %     figure('name','Initial Guess');
 % elseif(status==2)
