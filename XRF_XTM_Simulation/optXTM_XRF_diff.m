@@ -1,8 +1,10 @@
 
 global maxiter NF N current_n Ntot
-global ptest gv Joint VarInd W0 err0
+global ptest gv Joint W0 err0
 close all;
-maxiter=10;
+maxiter=1000;
+PlotObject=1;
+plotElement=1;
 LogScale=1;
 XRF_XTM_Gaussian;
 %%%----------------------------------------------------------------------
@@ -11,7 +13,7 @@ rng('default');
 Wtest=W;
 ws=Wtest(:);
 x0_XRF=Wtest(:)+1*10^(0)*rand(prod(m)*size(M,1),1);%10*ones(sizEDe(ws));%
-x0_XTM=MU_XTM(:)+1*10^(0)*rand(prod(m),1);
+x0_XTM=ones(size(MU_XTM(:)+1*10^(0)*rand(prod(m),1)));
 xinitial=x0_XRF;
 err0=xinitial-ws;
 err0_XTM=x0_XTM-MU_XTM(:);
@@ -29,14 +31,16 @@ errTol=1;
 x_XRF=x0_XRF;
 x_XTM=x0_XTM;
 Ntot=zeros(1,2);
-VarInd=1:length(W0);%[10:18];
 %%%===================================================================
-MaxiOuter=2^2+1; %% choose odd number to make sure the outer iteration stops at XRF
+MaxiOuter=2^6+1; %% choose odd number to make sure the outer iteration stops at XRF
 while ( OuterIter<=MaxiOuter);
     NF = [0*N; 0*N; 0*N];
-    Joint=(-1)^(OuterIter+1); % 1: XRF; -1: XTM; 0: Joint inversion
+%     Joint=(-1)^(OuterIter+1); % 1: XRF; -1: XTM; 0: Joint inversion
+Joint=-1;
     if(Joint==-1)
         fctn=@(MU)sfun_XTM_com(DisR,MU,I0,Ltol,thetan,m,nTau);
+               foo(fctn,x_XTM);
+     return;
         [x_XTM,f,g,ierror] = tnbc (x_XTM,fctn,low_XTM,up_XTM);
     elseif(Joint==1)
         fctn=@(W)sfun_XRF_full3(W,XRF,x_XTM,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau);
@@ -73,7 +77,8 @@ end
 fprintf('Total number of function evaluations, XTM = %d, XRF = %d \n',Ntot(1),Ntot(2));
 %%%====================================================== Report Result
 xstar=x_XRF;
-
+xstar_diff1=xstar;
+save xstar_diff1 xstar_diff1;
 for i=1:NumElement
     err(i)=norm(xstar(9*i-8:9*i)-ws(9*i-8:9*i))/norm(xinitial(9*i-8:9*i)-ws(9*i-8:9*i));
 end

@@ -1,5 +1,8 @@
 
-A=phantom(m(1));
+% A=phantom(m(1));
+% load Logan50;
+% A=Logan;
+A=ones(m);
 A(A(:)<0)=0;
 tol=eps^(1/2);
 val=unique(A(:));
@@ -9,8 +12,8 @@ W=zeros(m(1),m(2),NumElement);
 
 for i=1:NumElement
 Ws=zeros(m(1),m(2));
-Ws(abs(A(:)-val(i))<tol)=val(i);
-W(:,:,i)=Ws;
+Ws(abs(A(:)-val(i))<tol)=val(i)+1;
+W(:,:,i)=Ws+0.1;
 end
 if(plotElement)
  figure('name','Element Map')

@@ -10,7 +10,7 @@ function [xstar, f, g, ierror] = ...
 global sk yk sr yr yksk yrsr
 global NF N current_n  fiter itertest
 global ptest gv ipivot nit
-global i_cauchy W0 VarInd m Ntot
+global i_cauchy W0  m Ntot
 global maxiter err0 Joint
 %---------------------------------------------------------
 % check that initial x is feasible and that the bounds
@@ -206,7 +206,7 @@ if(Joint==1 |Joint==0)
 %         figure(100);
 %         CurrentErr=abs(x-W0(VarInd));
 %         FunEva(nit)=Ntot(2)+nf+ncg;
-        ErrIter(nit)=norm(x-W0(VarInd))/norm(err0);
+        ErrIter(nit)=norm(x-W0)/norm(err0);
         ErrIter(end)
 %         subplot(1,2,1)
 %         vs=sum(reshape(CurrentErr,m(1),m(2),length(VarInd)/prod(m)),3);

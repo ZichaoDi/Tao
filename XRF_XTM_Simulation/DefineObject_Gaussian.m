@@ -14,23 +14,26 @@ global XTMscale
 
 AbsorbScale=1e-4;
 %%%%%======================================
-Dis=m(1)+1;
+DisY=m(1)+1;
+DisX=m(2)+1;
 % omega=[-Dis/2 Dis/2 -Dis/2 Dis/2];
-x=linspace(omega(1),omega(2),Dis);
-y=linspace(omega(3),omega(4),Dis);
-dz=(omega(2)-omega(1))/m(1);%Dis/m(1);
+x=linspace(omega(1),omega(2),DisX);
+y=linspace(omega(3),omega(4),DisY);
+dz=[(omega(2)-omega(1))/m(2) (omega(4)-omega(3))/m(1)];
 [X,Y] = meshgrid((x(1:end-1)+x(2:end))./2,(y(1:end-1)+y(2:end))./2);
 center=[0 0];
 %%%========================== the grids of object
 xc = getNodalGrid(omega,m);
 %%%========================== assign weight matrix for each element in each pixel
-CreateElement;
+%  CreateElement;
+NumElement=4;
+%%%%%%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+UnitSpectrumSherman_Gaussian; %% Produce BindingEnergy M
 %%=======================================================================
-% W=zeros(m(1),m(2),NumElement);
-% for tsub=1:NumElement
-% W(:,:,tsub)=tsub*2e-1;
-% end
-% W(:,:,1)=abs(phantom(m(1)));
+W=zeros(m(1),m(2),NumElement);
+for tsub=1:NumElement
+W(:,:,tsub)=tsub*2e-1;
+end
 %%=======================================================================
 % W(1,1,:)=[7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];
 % W(1,2,:)=[7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];
@@ -68,8 +71,6 @@ CreateElement;
 % W(4,2,:)= [1 0 0 0] ;
 % W(4,3,:)=[0 1 0 0];
 % W(4,4,:)=[0 1 0 0];
-%%%%%%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-UnitSpectrumSherman_Gaussian; %% Produce BindingEnergy M
 %%%========================== locate element attenuation coefficient
 MU_e=zeros(NumElement,1,1+NumElement);
 for i=1: NumElement

@@ -1,6 +1,6 @@
 
 global NF N current_n ptest gv 
-global low up Tik penalty gama  
+global low up penalty gama  
 global W0 LogScale maxiter err0 Joint
 
 close all;
@@ -9,10 +9,10 @@ PlotObject=1;
 plotElement=1;
 LogScale=1;
 maxiter=10000;
-XRF_XTM_Gaussian;
+XRF_XTM_Tensor;
 %%%----------------------------------------------------------------------
 W0=W(:);
-Joint=0; % 1: XRF; -1: XTM; 0: Joint inversion
+Joint=1; % 1: XRF; -1: XTM; 0: Joint inversion
 %%%============== Rescale MU_e to make unity contribution
 DiscreteScale=0;
 penalty=0;
@@ -24,25 +24,12 @@ else
     gama=ones(size(MU_e(:,1,1)));
 end
 
-if(penalty)
-    Tik=spalloc(length(W(:))-1,length(W(:)),2*(length(W(:))-1)); %% First-order derivative regularization
-    for i=1:length(W(:))-1
-        Tik(i,i)=-1; Tik(i,i+1)=1;
-    end
-    
-    % Tik=spalloc(length(W(:))-2,length(W(:)),3*(length(W(:))-2)); %% First-order derivative regularization
-    %     for i=1:size(Tik,1)
-    %         Tik(i,i)=-1;Tik(i,i+1)=2; Tik(i,i+2)=-1;
-    %     end
-end
-
 if(Joint==-1)
     fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,Ltol,thetan,m,nTau,NumElement);
 elseif(Joint==0)
     fctn=@(W)sfun_XRF_XTM(W,XRF,DisR,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau,I0);
-%      fctn=@(W)sfun_XRF_XTM_Jacobian(W,XRF,DisR,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau,I0);
 else
-     fctn=@(W)sfun_XRF_full2(W,XRF,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau);
+     fctn=@(W)sfun_Tensor2(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
 end
 rng('default');
 Wtest=W;
@@ -55,8 +42,14 @@ if(DiscreteScale)
 end
 ws=Wtest(:);
 x0=Wtest(:)+1*10^(-1)*rand(prod(m)*size(M,1),1);%10*ones(size(ws));%
+tic;
+[f,g]=feval(fctn,W(:));
+toc;
+return;
 xinitial=x0;
 err0=xinitial-ws;
+foo(fctn,W(:));
+return;
 N=m(1);
 current_n=N(1);
 NF = [0*N; 0*N; 0*N];
@@ -65,12 +58,10 @@ figureObject(reshape(x0,m(1),m(2),NumElement),Z,m,NumElement,MU_e,1);
 low=0*ones(size(x0));
 up=1e6*ones(size(x0));
 %%%========================================================================
-[xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
-% xstar_Joint1=xstar;
-% save xstar_Joint1 xstar_Joint1;
-%%%========================================================================
-% load xstar_Joint1
-% xstar=xstar_Joint1;
+%  options = optimset('Algorithm','interior-point','DerivativeCheck','off','Diagnostics','off','GradObj','on','Display','iter');%,'AlwaysHonorConstraints','none','TolCon',1e-10,'TolX',1e-16,'TolFun',1e-15
+%  [xstar,fval] = fmincon(fctn,x0,[],[],[],[],zeros(size(x0)),[],[],options);
+%  return;
+ [xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
 if(Joint==-1 & DiscreteScale)
     xtemp=reshape(xstar,m(1),m(2),NumElement);
     err0_1=reshape(err0,m(1),m(2),NumElement);
@@ -89,27 +80,15 @@ end
 % semilogy(1:NumElement,err,'r.-');
 t=cputime-e;
 errTol=norm(xstar-ws)/norm(err0);
-% errTol=(norm(xstar-ws)^2/length(xstar))^(1/2)/(max(ws)-min(ws)); %% NRMSE 
 if(DiscreteScale)
-    AbsErr=norm(xtemp(:)-W(:));
-    IniErr=norm(err0_1);
+    AbsErr=norm(xtemp(:)-W(:))
+    IniErr=norm(err0_1)
     errOri=norm(xtemp(:)-W(:))/norm(err0_1);
     fprintf('Time elapsed is %f, residule is %d, original residule is %d\n',t,errTol,errOri);
 else
     fprintf('Time elapsed is %f, residule is %d\n',t,errTol);
 end
-%%%%%%%%%%%%%%%%%%%%=======================================================
-% load xstar_Joint1
-% load xstar_diff1
-% for iplot=2:3
-%     if(iplot==2)
-% xstar=xstar_Joint1;
-%     elseif(iplot==3)
-%         xstar=xstar_diff1;
-%     end
-% figureObject(reshape(xstar,m(1),m(2),NumElement),Z,m,NumElement,MU_e,iplot);
-% end
-%%%%%%%%%%%%%%%%%%%%=======================================================
+
 figure(24);
 for i=1:NumElement
     subplot(3,NumElement,i);
@@ -125,11 +104,6 @@ for i=1:NumElement; subplot(3,NumElement,i+NumElement);
         legend('initial','final','optimal','font',16)
         ylabel('solution','fontsize',12)
     end
-%     plot(1:prod(m),ptest(prod(m)*i-prod(m)+1:prod(m)*i),'r.','MarkerSize',12);
-%     xlim([0 prod(m)]);
-%     if(i==1)
-%         ylabel('Projected Direction','fontsize',12)
-%     end
 end
 for i=1:NumElement; subplot(3,NumElement,i+2*NumElement);plot(1:prod(m),sort(gv(prod(m)*i-prod(m)+1:prod(m)*i)),'r.','MarkerSize',12);
     xlim([0 prod(m)]);

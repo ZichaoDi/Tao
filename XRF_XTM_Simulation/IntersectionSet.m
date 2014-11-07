@@ -1,4 +1,4 @@
-function [index,Lvec]=IntersectionSet(Source,Detector,xbox,ybox,theta)
+function [index,Lvec,linearInd]=IntersectionSet(Source,Detector,xbox,ybox,theta)
 global x y omega m plotTravel BeforeEmit dz  
 global  fig2 fig5 finalfig
 [Ax, Ay] = polyxpoly([Source(1),Detector(1)],[Source(2),Detector(2)], xbox, ybox);
@@ -6,7 +6,7 @@ if(isempty(Ax) | (length(Ax)==1 & length(Ay)==1 ))
     %fprintf('no intersection \n')
     index=[];
     Lvec=[];
-    
+    linearInd=[];
 else
      A=unique([Ax,Ay],'rows');Ax=A(:,1);Ay=A(:,2);
     if(theta==pi/2)
@@ -37,12 +37,13 @@ else
     Lvec=sqrt(bsxfun(@minus,Q(2:end,1),Q(1:end-1,1)).^2+bsxfun(@minus,Q(2:end,2),Q(1:end-1,2)).^2);
     %%%%%%%%%================================================================
     QC=(Q(1:end-1,:)+Q(2:end,:))/2;
-    index=floor([(QC(:,1)-omega(1))/dz+1, (QC(:,2)-omega(3))/dz+1]);
+    index=floor([(QC(:,1)-omega(1))/dz(1)+1, (QC(:,2)-omega(3))/dz(2)+1]);
     if(~BeforeEmit)
-    index=index(index(:,1)>0 & index(:,1)<=m(1)& index(:,2)<=m(1) & index(:,2)>0,:);
+    index=index(index(:,1)>0 & index(:,1)<=m(2)& index(:,2)<=m(1) & index(:,2)>0,:);
     [~,subInd]=unique(index,'rows');
     index=index(sort(subInd),:);
     end
+    linearInd=sub2ind(m,index(:,2),index(:,1));
     %%%%%%%%%================================================================
     if plotTravel
         if(BeforeEmit)

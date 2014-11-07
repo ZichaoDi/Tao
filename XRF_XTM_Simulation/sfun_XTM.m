@@ -1,5 +1,5 @@
 function [f,g]=sfun_XTM(W,M,MU_e,I0,Ltol,thetan,m,nTau,NumElement)
-global SigMa_XTM LogScale
+global SigMa_XTM LogScale eX eY
 global Tik penalty XTMscale
 %%===== Reconstruction discrete objective
 %%===== L: intersection length matrix
@@ -13,7 +13,6 @@ lambda=1e-3;
 MUe=reshape(MU_e(:,1,1),1,1,NumElement).*XTMscale;
 MU=sum(W1.*repmat(MUe,[m(1),m(2),1]),3).*XTMscale;
 %%%====================================
-e1=ones(m(1),1);
 if(penalty)
     f=lambda*(norm(Tik*W))^2;
 else
@@ -25,21 +24,23 @@ for n=1:length(thetan)
     if(LogScale)
         Mt=-log(M(:,n)./I0);
         for i=1:nTau+1
+            count=(nTau+1)*(n-1)+i;
             L=Ltol{n,i};
             if(~isempty(find(L,1)))
-                Rdis=e1'*(MU.*L)*e1;
-                sum_Tau=sum_Tau+beta*SigMa_XTM(i)*(Rdis-Mt(i))^2;
-                g=g+2*beta*SigMa_XTM(i)*(Rdis-Mt(i)).*repmat(L,[1,1,NumElement]).*repmat(MUe,[m(1),m(2),1]);
+                Rdis=eX'*(MU.*L)*eY;
+                sum_Tau=sum_Tau+beta*SigMa_XTM(count)*(Rdis-Mt(i))^2;
+                g=g+2*beta*SigMa_XTM(count)*(Rdis-Mt(i)).*repmat(L,[1,1,NumElement]).*repmat(MUe,[m(1),m(2),1]);
             end
         end
     else
         Mt=M(:,n);
         for i=1:nTau+1
+            count=(nTau+1)*(n-1)+i;
             L=Ltol{n,i};
             if(~isempty(find(L,1)))
-                Rdis=I0*exp(-e1'*(MU.*L)*e1);%% Discrete case
-                sum_Tau=sum_Tau+beta*SigMa_XTM(i)*(Rdis-Mt(i))^2;
-                g=g-2*beta*SigMa_XTM(i)*Rdis*(Rdis-Mt(i)).*repmat(L,[1,1,NumElement]).*repmat(MUe,[m(1),m(2),1]);
+                Rdis=I0*exp(-eX'*(MU.*L)*eY);%% Discrete case
+                sum_Tau=sum_Tau+beta*SigMa_XTM(count)*(Rdis-Mt(i))^2;
+                g=g-2*beta*SigMa_XTM(count)*Rdis*(Rdis-Mt(i)).*repmat(L,[1,1,NumElement]).*repmat(MUe,[m(1),m(2),1]);
             end
         end
     end

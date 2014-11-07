@@ -27,13 +27,18 @@ end
 % subplot(1,NumElement+1,NumElement+1);
 figure(Map);
 clims = [40 80];
-subplot(1,3,status+1);imagesc(Otest,clims);colormap(gray);axis xy
+subplot(1,5,status+1);
+% imagesc(Otest,clims);colormap(gray);axis xy
 if(status==0)
     title('Original');
 elseif(status==1)
     title('Initial');
 elseif(status==2);
-    title('Optimized');
+    title('Joint');
+    elseif(status==3);
+    title('Diff');
+    elseif(status==4);
+    title('Alternate');
 end
 % subplot(1,2,2);
 % drawnow;
