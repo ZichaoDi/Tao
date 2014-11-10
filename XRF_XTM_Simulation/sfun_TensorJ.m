@@ -1,12 +1,25 @@
-function [f,g]=sfun_Tensor2(W,xrfData,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau)
-global NumSSDlet numChannel NoSelfAbsorption
-global mtol SigMa_XRF
+function [f,g]=sfun_TensorJ(W,xrfData,xtmData,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0)
+global NumSSDlet numChannel NoSelfAbsorption XTMscale gama
+global mtol SigMa_XTM SigMa_XRF eX eY 
+global LogScale Beta
+
+Beta=1e0;
+%%%%% =================== Attenuation Matrix at beam energy
+MUe=reshape(MU_e(:,1,1),1,1,NumElement);
+MUe_XTM=reshape(MU_e(:,1,1).*gama,1,1,NumElement).*XTMscale;
+MU_XTM=sum(reshape(W,m(1),m(2),NumElement).*repmat(MUe,[m(1),m(2),1]),3).*XTMscale;
+%%%%% ====================================================================
 f=0;
 W=reshape(W,mtol,NumElement);
 L=reshape(L,length(thetan),nTau+1,mtol);
 %%%%% ====================================================================
 g=zeros(mtol,NumElement);
 for n=1:length(thetan)
+    if(LogScale)
+        Mt=-log(xtmData(:,n)./I0);
+    else
+        Mt=xtmData(:,n);
+    end
     sum_Tau=0;
     InTens=ones(nTau+1,mtol);
     OutTens=ones(nTau+1,mtol,NumElement);
@@ -79,6 +92,18 @@ for n=1:length(thetan)
             end
             g=g+2*SigMa_XRF((nTau+1)*(n-1)+i)*sum(bsxfun(@times,TempSub,reshape(XRF_v-xrfData{n,i},1,1,numChannel)),3);
             sum_Tau=sum_Tau+SigMa_XRF((nTau+1)*(n-1)+i)*(xrfData{n,i}-XRF_v)*(xrfData{n,i}-XRF_v)';
+            Lsub=reshape(L(n,i,:),m(1),m(2));
+             if(LogScale)
+                count=(nTau+1)*(n-1)+i;
+                Rdis=eX'*(MU_XTM.*Lsub)*eY; %% Discrete case
+                sum_Tau=sum_Tau+Beta*SigMa_XTM(count)*(Rdis-Mt(i))^2;
+                g=g+reshape(2*Beta*SigMa_XTM(count)*(Rdis-Mt(i)).*repmat(full(Lsub),[1,1,NumElement]).*repmat(MUe_XTM,[m(1),m(2),1]),mtol,NumElement);
+            else
+                count=(nTau+1)*(n-1)+i;
+                Rdis=I0*exp(-eX'*(MU_XTM.*Lsub)*eY);
+                sum_Tau=sum_Tau+Beta*SigMa_XTM(count)*(Rdis-Mt(i))^2;
+                g=g-reshape(2*Beta*SigMa_XTM(count)*Rdis*(Rdis-Mt(i)).*repmat(full(Lsub),[1,1,NumElement]).*repmat(MUe_XTM,[m(1),m(2),1]),mtol,NumElement);
+            end
         end
     end
     f=f+sum_Tau;

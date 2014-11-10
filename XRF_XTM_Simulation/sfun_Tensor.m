@@ -23,15 +23,15 @@ for n=1:length(thetan)
                 v=index_sub(v_count);
                 v5=SelfInd{n,i,v}{5};
                 v7=cell2mat(SelfInd{n,i,v}{7});
-                                n
-                                i
-                                v
-                                v5
-                                v1=SelfInd{n,i,v}{1}
-                                v21=SelfInd{n,i,v}{2}{1}
-                                v22=SelfInd{n,i,v}{2}{2}
-                                v7
-                                pause;
+%                                 n
+%                                 i
+%                                 v
+%                                 v5
+%                                 v1=SelfInd{n,i,v}{1}
+%                                 v21=SelfInd{n,i,v}{2}{1}
+%                                 v22=SelfInd{n,i,v}{2}{2}
+%                                 v7
+%                                 pause;
                 related_v=[v;v5;v7'];
                 nonCounted=find(ismember(related_v,counted_v)==0);
                 counted_v=[counted_v;related_v(nonCounted)];
