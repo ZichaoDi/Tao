@@ -15,7 +15,7 @@ Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
 DefineObject_Gaussian; %% Produce W, MU_XTM
 % UnitSpectrumSherman_Gaussian; %% Produce BindingEnergy M
 % Acquire2Daps;
-thetan=linspace(1,180,4);%[1 60];%[1:40:180];% Projection Angles
+thetan=linspace(1,180,1);%[1 60];%[1:40:180];% Projection Angles
 %%%%%%%==============================================================
 if plotTravel
     fig2=[];  fig5=[];

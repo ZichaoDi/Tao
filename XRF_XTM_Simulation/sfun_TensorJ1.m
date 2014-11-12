@@ -1,4 +1,4 @@
-function [f,g]=sfun_TensorJ(W,xrfData,xtmData,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0)
+function [f,g]=sfun_TensorJ1(W,xrfData,xtmData,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0)
 global NumSSDlet numChannel NoSelfAbsorption XTMscale gama
 global mtol SigMa_XTM SigMa_XRF eX eY
 global LogScale Beta
@@ -23,10 +23,10 @@ for n=1:length(thetan)
     sum_Tau=0;
     InTens=ones(nTau+1,mtol);
     OutTens=ones(nTau+1,mtol,NumElement);
+    OutTens_d=ones(nTau+1,mtol,NumSSDlet,NumElement);
     for i=1:nTau+1
         XRF_v=zeros(1,numChannel);
         counted_v=[];
-        OutTens_d=ones(mtol,NumSSDlet,NumElement);
         index=GlobalInd{n,i};
         if(~isempty(index))
             index_sub=sub2ind(m,index(:,2),index(:,1));
@@ -49,9 +49,9 @@ for n=1:length(thetan)
                     
                     if(~isempty(SelfInd{n,i,sub_v}{2}) & ~NoSelfAbsorption)
                         for d=1:NumSSDlet
-                            OutTens_d(sub_v,d,:)=exp(-sum(sum(bsxfun(@times,W(SelfInd{n,i,sub_v}{2}{d},:),reshape(SelfInd{n,i,sub_v}{4}{d},length(SelfInd{n,i,sub_v}{2}{d}),NumElement,NumElement)),1),2));
+                            OutTens_d(i,sub_v,d,:)=exp(-sum(sum(bsxfun(@times,W(SelfInd{n,i,sub_v}{2}{d},:),reshape(SelfInd{n,i,sub_v}{4}{d},length(SelfInd{n,i,sub_v}{2}{d}),NumElement,NumElement)),1),2));
                         end
-                        OutTens(i,sub_v,:)=sum(OutTens_d(sub_v,:,:),2)/NumSSDlet;
+                        OutTens(i,sub_v,:)=sum(sum(OutTens_d(i,sub_v,:,:),1),3)/NumSSDlet;
                     end
                 end
                 temp_sub=zeros(NumElement,numChannel);
@@ -72,17 +72,30 @@ for n=1:length(thetan)
 %                         end
                         
                         if(~isempty(v7))
-                        OutTens_J=sum(bsxfun(@times,reshape(permute(OutTens_d(v7,:,:),[1 3 2]),length(v7),1,NumElement,NumSSDlet),permute(cat(3,SelfInd{n,i_sub,v}{8}{:}),[3 1 2])),4)/(NumSSDlet^2);
+                        OutTens_J=sum(bsxfun(@times,permute(OutTens_d(i_sub,v7,:,:),[2 1 4 3]),permute(cat(3,SelfInd{n,i_sub,v}{8}{:}),[3 1 2])),4)/(NumSSDlet^2);
                         temp_sub=temp_sub-squeeze(sum(bsxfun(@times,reshape(L(n,i_sub,v7),length(v7),1).*InTens(i_sub,v7)',bsxfun(@times,W(v7,:),OutTens_J)),1))*M;
                         end
                     end
-%                     TempInd=horzcat(SelfInd{n,1:i,v});
-%                     v7=cat(2,TempInd{7,:});
-%                     if(~isempty(v7))
-%                         TempInd=cat(3,horzcat(TempInd{8,:}));
-%                         OutTens_J=sum(bsxfun(@times,reshape(permute(OutTens_d(v7,:,:),[1 3 2]),length(v7),1,NumElement,NumSSDlet),permute(TempInd,[3 1 2])),4)/(NumSSDlet^2);
-%                         temp_sub=temp_sub-squeeze(sum(bsxfun(@times,reshape(L(n,i_sub,v7),length(v7),1).*InTens(i_sub,v7)',bsxfun(@times,W(v7,:),OutTens_J)),1))*M;
-%                     end
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                    Temp1=cell(i,1);
+                    Temp1=SelfInd{n,1:i,v}
+                    Temp=cellfun(@(x)x{7},SelfInd{n,1:i,v},'UniformOutput',false)
+                    pause;
+                    
+ gLinear=cell2mat(Temp1);
+ if(~isempty(gLinear))
+     maxLength=max(cellfun(@(x)numel(x),gLinear));
+     out=cell2mat(cellfun(@(x)cat(2,x,zeros(1,maxLength-length(x))),gLinear,'UniformOutput',false))
+pause;
+                    TempInd=horzcat(SelfInd{n,1:i,v});
+                    v7=cat(2,TempInd{7,:});
+                    if(~isempty(v7))
+                        TempInd=cat(3,horzcat(TempInd{8,:}));
+                        OutTens_J=sum(bsxfun(@times,reshape(permute(OutTens_d(1:i,v7,:,:),[1 3 2]),length(v7),1,NumElement,NumSSDlet),permute(TempInd,[3 1 2])),4)/(NumSSDlet^2);
+                        temp_sub=temp_sub-squeeze(sum(bsxfun(@times,reshape(L(n,i_sub,v7),length(v7),1).*InTens(i_sub,v7)',bsxfun(@times,W(v7,:),OutTens_J)),1))*M;
+                    end
+                    pause;
+ end
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 end
                 XRF_v=XRF_v+L(n,i,v)*(InTens(i,v)*reshape(OutTens(i,v,:),1,NumElement).*W(v,:))*M;

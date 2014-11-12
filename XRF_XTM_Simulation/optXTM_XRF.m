@@ -57,6 +57,10 @@ ws=Wtest(:);
 x0=Wtest(:)+1*10^(-1)*rand(prod(m)*size(M,1),1);%10*ones(size(ws));%
 xinitial=x0;
 err0=xinitial-ws;
+tic;
+[f,g]=feval(fctn,W(:));
+toc;
+return;
 % foo(fctn,x0);
 % return;
 N=m(1);
