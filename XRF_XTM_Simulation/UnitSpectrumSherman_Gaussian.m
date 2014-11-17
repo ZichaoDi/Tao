@@ -9,9 +9,9 @@ global TakeLog
 E0=40;
 E2I=1/3e8/6.62e-34*1e-15;
 I0=E0*E2I;
-Z=[42 29 26 20 49 57 46];% reference sample: Pb La Pd Mo Cu Fe Ca
-Z=Z(1:NumElement);
-% NumElement=length(Z);
+Z=[79];%[42 29 26 20 49 57 46];% reference sample: Pb La Pd Mo Cu Fe Ca
+% Z=Z(1:NumElement);
+NumElement=length(Z);
 NA=6.02e23;%Avogadro's number
 if(ismac)
     loadlibrary('/opt/local/lib/libxrl.dylib','/opt/local/include/xraylib/xraylib.h');
@@ -19,7 +19,7 @@ else
     loadlibrary('/homes/wendydi/Documents/lib/libxrl.so','/homes/wendydi/Documents/include/xraylib/xraylib.h');
 end
 load PeriodicTable
-Line=[-0];% -1 -2 -3]; %% Transition Line
+Line=[-2];%[-0 -1 -2 -3]; %% Transition Line
 shell=0;  %% Shell type
 BindingEnergy=zeros(NumElement*length(Line),1);
 M=zeros(NumElement*length(Line),numChannel);

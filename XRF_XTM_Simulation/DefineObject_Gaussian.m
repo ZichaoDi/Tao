@@ -26,7 +26,7 @@ center=[0 0];
 xc = getNodalGrid(omega,m);
 %%%========================== assign weight matrix for each element in each pixel
 %  CreateElement;
-NumElement=4;
+% NumElement=1;
 %%%%%%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 UnitSpectrumSherman_Gaussian; %% Produce BindingEnergy M
 %%=======================================================================

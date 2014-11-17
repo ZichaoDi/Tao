@@ -10,12 +10,12 @@ plotSpecSingle=0;
 NoSelfAbsorption=0;
 startup;
 more off;
-
+load slice1;
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
 DefineObject_Gaussian; %% Produce W, MU_XTM
 % UnitSpectrumSherman_Gaussian; %% Produce BindingEnergy M
 % Acquire2Daps;
-thetan=linspace(1,180,1);%[1 60];%[1:40:180];% Projection Angles
+thetan=mod(thetan+360,360);%linspace(1,180,1);%[1 60];%[1:40:180];% Projection Angles
 %%%%%%%==============================================================
 if plotTravel
     fig2=[];  fig5=[];
@@ -26,7 +26,7 @@ eX=ones(m(1),1);
 eY=ones(m(2),1);
 XRF=cell(length(thetan),nTau+1);
 SigMa_XRF=zeros(length(thetan)*(nTau+1),numChannel);
-DisR=zeros(nTau+1,length(thetan));
+% DisR=zeros(nTau+1,length(thetan));
 Ltol=cell(length(thetan),nTau+1);
 L=zeros(length(thetan),nTau+1,m(1),m(2));
 GlobalInd=cell(length(thetan),nTau+1);
@@ -177,7 +177,7 @@ for n=1:length(thetan)
             
         end
         Rdis(i)=I0*exp(-eX'*(MU_XTM.*squeeze(L(n,i,:,:)))*eY); %% Discrete case
-        XRF{n,i}=xrfSub;
+        XRF{n,i}=DisXRF(n,i,:);%xrfSub;
         SigMa_XRF((nTau+1)*(n-1)+i,:)=xrfSub;
         if(plotSpec)
             figure(finalfig)
@@ -187,9 +187,9 @@ for n=1:length(thetan)
              pause;
         end
     end
-    DisR(:,n)=Rdis';
+%     DisR(:,n)=Rdis';
 end
-% DisR=XTM';
+DisR=DisR';
 if(LogScale)
 % SigMa_XTM=1./diag(cov(-log(DisR'./I0)));
 % SigMa_XTM=inv(cov(-log(DisR'./I0)));
