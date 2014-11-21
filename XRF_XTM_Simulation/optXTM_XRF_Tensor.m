@@ -30,6 +30,7 @@ elseif(Joint==0)
     fctn=@(W)sfun_TensorJ1(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 else
      fctn=@(W)sfun_Tensor2(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
+%      fctn=@(W)sfun_AdiMat(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
 end
 rng('default');
 Wtest=W;
@@ -44,12 +45,12 @@ ws=Wtest(:);
 x0=Wtest(:)+1*10^(-1)*rand(prod(m)*size(M,1),1);%10*ones(size(ws));%
 xinitial=x0;
 err0=xinitial-ws;
-% tic;
-% [f,g]=feval(fctn,W(:));
-% toc;
+tic;
+[f,g]=feval(fctn,W(:));
+toc;
 % return;
-foo(fctn,x0);
-return;
+% foo(fctn,x0);
+% return;
 N=m(1);
 current_n=N(1);
 NF = [0*N; 0*N; 0*N];

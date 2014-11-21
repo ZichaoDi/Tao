@@ -12,7 +12,7 @@ maxiter=10000;
 XRF_XTM_Gaussian;
 %%%----------------------------------------------------------------------
 W0=W(:);
-Joint=0; % 1: XRF; -1: XTM; 0: Joint inversion
+Joint=1; % 1: XRF; -1: XTM; 0: Joint inversion
 %%%============== Rescale MU_e to make unity contribution
 DiscreteScale=0;
 penalty=0;
@@ -57,9 +57,9 @@ ws=Wtest(:);
 x0=Wtest(:)+1*10^(-1)*rand(prod(m)*size(M,1),1);%10*ones(size(ws));%
 xinitial=x0;
 err0=xinitial-ws;
-% tic;
-% [f,g]=feval(fctn,W(:));
-% toc;
+tic;
+[f,g]=feval(fctn,W(:));
+toc;
 % return;
 % foo(fctn,x0);
 % return;

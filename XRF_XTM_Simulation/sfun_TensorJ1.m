@@ -58,44 +58,31 @@ for n=1:length(thetan)
                 if(~NoSelfAbsorption)
                     for i_sub=1:i
                         v7=cell2mat(SelfInd{n,i_sub,v}{7});
-%                         OutTens_J=zeros(length(v7),NumElement,NumElement);
-%                         TempInd=[];
-%                         for d=1:NumSSDlet
-%                             TempInd=[length(TempInd)+1:length(SelfInd{n,i_sub,v}{7}{d})+length(TempInd)];
-%                             if(~isempty(SelfInd{n,i_sub,v}{7}{d}))
-%                                 OutTens_J(TempInd,:,:)=OutTens_J(TempInd,:,:)+bsxfun(@times,OutTens_d(SelfInd{n,i_sub,v}{7}{d},d,:),permute(SelfInd{n,i_sub,v}{8}{d},[3 1 2]));
-%                             end
-%                         end
-%                         if(~isempty(v7))
-%                             OutTens_J=OutTens_J/NumSSDlet;
-%                           temp_sub=temp_sub-squeeze(sum(bsxfun(@times,reshape(L(n,i_sub,v7),length(v7),1).*InTens(i_sub,v7)',bsxfun(@times,W(v7,:),OutTens_J)),1))*M;
-%                         end
-                        
                         if(~isempty(v7))
                         OutTens_J=sum(bsxfun(@times,permute(OutTens_d(i_sub,v7,:,:),[2 1 4 3]),permute(cat(3,SelfInd{n,i_sub,v}{8}{:}),[3 1 2])),4)/(NumSSDlet^2);
                         temp_sub=temp_sub-squeeze(sum(bsxfun(@times,reshape(L(n,i_sub,v7),length(v7),1).*InTens(i_sub,v7)',bsxfun(@times,W(v7,:),OutTens_J)),1))*M;
                         end
                     end
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                    Temp1=cell(i,1);
-                    Temp1=SelfInd{n,1:i,v}
-                    Temp=cellfun(@(x)x{7},SelfInd{n,1:i,v},'UniformOutput',false)
-                    pause;
-                    
- gLinear=cell2mat(Temp1);
- if(~isempty(gLinear))
-     maxLength=max(cellfun(@(x)numel(x),gLinear));
-     out=cell2mat(cellfun(@(x)cat(2,x,zeros(1,maxLength-length(x))),gLinear,'UniformOutput',false))
-pause;
-                    TempInd=horzcat(SelfInd{n,1:i,v});
-                    v7=cat(2,TempInd{7,:});
-                    if(~isempty(v7))
-                        TempInd=cat(3,horzcat(TempInd{8,:}));
-                        OutTens_J=sum(bsxfun(@times,reshape(permute(OutTens_d(1:i,v7,:,:),[1 3 2]),length(v7),1,NumElement,NumSSDlet),permute(TempInd,[3 1 2])),4)/(NumSSDlet^2);
-                        temp_sub=temp_sub-squeeze(sum(bsxfun(@times,reshape(L(n,i_sub,v7),length(v7),1).*InTens(i_sub,v7)',bsxfun(@times,W(v7,:),OutTens_J)),1))*M;
-                    end
-                    pause;
- end
+%                     Temp1=cell(i,1);
+%                     Temp1=SelfInd{n,1:i,v}
+%                     Temp=cellfun(@(x)x{7},SelfInd{n,1:i,v},'UniformOutput',false)
+%                     pause;
+%                     
+%  gLinear=cell2mat(Temp1);
+%  if(~isempty(gLinear))
+%      maxLength=max(cellfun(@(x)numel(x),gLinear));
+%      out=cell2mat(cellfun(@(x)cat(2,x,zeros(1,maxLength-length(x))),gLinear,'UniformOutput',false))
+% pause;
+%                     TempInd=horzcat(SelfInd{n,1:i,v});
+%                     v7=cat(2,TempInd{7,:});
+%                     if(~isempty(v7))
+%                         TempInd=cat(3,horzcat(TempInd{8,:}));
+%                         OutTens_J=sum(bsxfun(@times,reshape(permute(OutTens_d(1:i,v7,:,:),[1 3 2]),length(v7),1,NumElement,NumSSDlet),permute(TempInd,[3 1 2])),4)/(NumSSDlet^2);
+%                         temp_sub=temp_sub-squeeze(sum(bsxfun(@times,reshape(L(n,i_sub,v7),length(v7),1).*InTens(i_sub,v7)',bsxfun(@times,W(v7,:),OutTens_J)),1))*M;
+%                     end
+%                     pause;
+%  end
                     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 end
                 XRF_v=XRF_v+L(n,i,v)*(InTens(i,v)*reshape(OutTens(i,v,:),1,NumElement).*W(v,:))*M;

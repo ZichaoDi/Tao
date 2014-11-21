@@ -7,15 +7,18 @@ plotTravel=0; % If plot the intersection of beam with object
 plotSpec = 0; % Do you want to see the spectra? If so plotSpec = 1
 plotUnit=0;
 plotSpecSingle=0;
-NoSelfAbsorption=1;
+NoSelfAbsorption=0;
 startup;
 more off;
-
+load slice1_50;
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
 DefineObject_Gaussian; %% Produce W, MU_XTM
 % UnitSpectrumSherman_Gaussian; %% Produce BindingEnergy M
 % Acquire2Daps;
-thetan=linspace(1,90,3);%[1 60];%[1:40:180];% Projection Angles
+% thetan=linspace(1,180,4);%[1 60];%[1:40:180];% Projection Angles
+thetan=mod(thetan+360,360);%linspace(1,180,1);%[1 60];%[1:40:180];% Projection Angles
+subTheta=1;%1:10:length(thetan);
+thetan=thetan(subTheta);
 %%%%%%%==============================================================
 if plotTravel
     fig2=[];  fig5=[];
