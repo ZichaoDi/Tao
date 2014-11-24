@@ -16,7 +16,7 @@ DefineObject_Gaussian; %% Produce W, MU_XTM
 % UnitSpectrumSherman_Gaussian; %% Produce BindingEnergy M
 % Acquire2Daps;
 thetan=mod(thetan+360,360);%linspace(1,180,1);%[1 60];%[1:40:180];% Projection Angles
-subTheta=1;
+subTheta=1:length(thetan);
 thetan=thetan(subTheta);
 %%%%%%%==============================================================
 if plotTravel

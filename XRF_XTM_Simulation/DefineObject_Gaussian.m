@@ -72,13 +72,15 @@ end
 % W(4,3,:)=[0 1 0 0];
 % W(4,4,:)=[0 1 0 0];
 %%%========================== locate element attenuation coefficient
-MU_e=zeros(NumElement,1,1+NumElement);
-for i=1: NumElement
-    MU_e(i,1,1)=na(i)*calllib('libxrl','CS_Total',Z(i),E0);
-    for j=1:NumElement
-    MU_e(i,1,j+1)=na(i)*calllib('libxrl','CS_Total',Z(i),BindingEnergy(j));    
-    end
-end
+% MU_e=zeros(NumElement,1,1+NumElement);
+% for i=1: NumElement
+%     MU_e(i,1,1)=na(i)*calllib('libxrl','CS_Total',Z(i),E0);
+%     for j=1:NumElement
+%     MU_e(i,1,j+1)=na(i)*calllib('libxrl','CS_Total',Z(i),BindingEnergy(j));    
+%     end
+% end
+% save MU_e MU_e;
+load MU_e
 %%%%%================== Attenuation Matrix at beam energy
 MU_e=MU_e.*AbsorbScale; %% Discrete Scale
 min_MU=min(MU_e(:,1,1))-1;%=-1./log(MU_e(:,1,1));

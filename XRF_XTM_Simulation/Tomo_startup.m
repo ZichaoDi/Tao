@@ -17,7 +17,7 @@ path(path,'../TN');
 addpath_recurse('./data');
 addpath_recurse('../SimplerCode');
 addpath_recurse('../APSdata');
-addpath_recurse('/Users/Wendydi/Documents/MATLAB/ADIMAT');
+addpath_recurse('/Users/Wendydi/Documents/MATLAB/Di_MATLABtool');
 ADiMat_startup;
 
 

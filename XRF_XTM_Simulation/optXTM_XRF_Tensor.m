@@ -5,8 +5,8 @@ global W0 LogScale maxiter err0 Joint
 
 close all;
 more off;
-PlotObject=1;
-plotElement=1;
+PlotObject=0;
+plotElement=0;
 LogScale=1;
 maxiter=10000;
 XRF_XTM_Tensor;
@@ -55,7 +55,7 @@ N=m(1);
 current_n=N(1);
 NF = [0*N; 0*N; 0*N];
 e=cputime;
-figureObject(reshape(x0,m(1),m(2),NumElement),Z,m,NumElement,MU_e,1);
+% figureObject(reshape(x0,m(1),m(2),NumElement),Z,m,NumElement,MU_e,1);
 low=0*ones(size(x0));
 up=1e6*ones(size(x0));
 %%%========================================================================
@@ -90,26 +90,26 @@ else
     fprintf('Time elapsed is %f, residule is %d\n',t,errTol);
 end
 
-figure(24);
-for i=1:NumElement
-    subplot(3,NumElement,i);
-
-errCom=reshape(xstar(prod(m)*i-prod(m)+1:prod(m)*i)-ws(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));
-imagesc(errCom);colormap gray
-    title(['Element ',num2str(i)],'fontsize',12);
-end
-for i=1:NumElement; subplot(3,NumElement,i+NumElement);
-        plot(1:prod(m),sort(xinitial(prod(m)*i-prod(m)+1:prod(m)*i)),'ro',1:prod(m),sort(xstar(prod(m)*i-prod(m)+1:prod(m)*i)),'bs',1:prod(m),sort(ws(prod(m)*i-prod(m)+1:prod(m)*i)),'g*')
-    xlim([0 prod(m)]);
-    if(i==1)
-        legend('initial','final','optimal','font',16)
-        ylabel('solution','fontsize',12)
-    end
-end
-for i=1:NumElement; subplot(3,NumElement,i+2*NumElement);plot(1:prod(m),sort(gv(prod(m)*i-prod(m)+1:prod(m)*i)),'r.','MarkerSize',12);
-    xlim([0 prod(m)]);
-    if(i==1)
-        ylabel('Projected Gradient','fontsize',12)
-    end
-end
+% figure(24);
+% for i=1:NumElement
+%     subplot(3,NumElement,i);
+% 
+% errCom=reshape(xstar(prod(m)*i-prod(m)+1:prod(m)*i)-ws(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));
+% imagesc(errCom);colormap gray
+%     title(['Element ',num2str(i)],'fontsize',12);
+% end
+% for i=1:NumElement; subplot(3,NumElement,i+NumElement);
+%         plot(1:prod(m),sort(xinitial(prod(m)*i-prod(m)+1:prod(m)*i)),'ro',1:prod(m),sort(xstar(prod(m)*i-prod(m)+1:prod(m)*i)),'bs',1:prod(m),sort(ws(prod(m)*i-prod(m)+1:prod(m)*i)),'g*')
+%     xlim([0 prod(m)]);
+%     if(i==1)
+%         legend('initial','final','optimal','font',16)
+%         ylabel('solution','fontsize',12)
+%     end
+% end
+% for i=1:NumElement; subplot(3,NumElement,i+2*NumElement);plot(1:prod(m),sort(gv(prod(m)*i-prod(m)+1:prod(m)*i)),'r.','MarkerSize',12);
+%     xlim([0 prod(m)]);
+%     if(i==1)
+%         ylabel('Projected Gradient','fontsize',12)
+%     end
+% end
 % %%%%%%%%%%%%%%%%%%%%=======================================================
