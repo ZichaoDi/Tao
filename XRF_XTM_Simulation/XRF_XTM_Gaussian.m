@@ -8,16 +8,16 @@ plotSpec = 0; % Do you want to see the spectra? If so plotSpec = 1
 plotUnit=0;
 plotSpecSingle=0;
 NoSelfAbsorption=0;
-startup;
+Tomo_startup;
 more off;
-load slice1_50;
+% load slice1_50;
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
 DefineObject_Gaussian; %% Produce W, MU_XTM
 % UnitSpectrumSherman_Gaussian; %% Produce BindingEnergy M
 % Acquire2Daps;
 % thetan=linspace(1,180,4);%[1 60];%[1:40:180];% Projection Angles
-thetan=mod(thetan+360,360);%linspace(1,180,1);%[1 60];%[1:40:180];% Projection Angles
-subTheta=1;%1:10:length(thetan);
+thetan=linspace(1,180,3);%mod(thetan+360,360);%[1 60];%[1:40:180];% Projection Angles
+subTheta=1:length(thetan);
 thetan=thetan(subTheta);
 %%%%%%%==============================================================
 if plotTravel
@@ -45,12 +45,12 @@ for n=1:length(thetan)
     SourceKnot=SourceKnot0*TransMatrix;
     SSDknot=SSDlet*TransMatrix;
     %%%%%============================================================
-%         fig=figure('name','grids & beam line');
-%         plotGrid(xc,omega,m); hold on;
-%         for i=1:nTau+1
-%             fig3=plot([SourceKnot(i,1),DetKnot(i,1)],[SourceKnot(i,2),DetKnot(i,2)],'r.-');hold on;
-%         end
-%         pause;
+    %         fig=figure('name','grids & beam line');
+    %         plotGrid(xc,omega,m); hold on;
+    %         for i=1:nTau+1
+    %             fig3=plot([SourceKnot(i,1),DetKnot(i,1)],[SourceKnot(i,2),DetKnot(i,2)],'r.-');hold on;
+    %         end
+    %         pause;
     %%%%%%%===============================================
     Rdis=zeros(nTau+1,1);
     for i=1:nTau+1 %%%%%%%%%================================================================
@@ -151,7 +151,7 @@ for n=1:length(thetan)
             subplot(1,2,2);
             plot(DetChannel,XRF{n,i},'r-')
             xlabel('Energy Channel','fontsize',12); ylabel('Intensity','fontsize',12)
-             pause;
+            pause;
         end
         
     end
@@ -159,12 +159,12 @@ for n=1:length(thetan)
 end
 % DisR=XTM';
 if(LogScale)
-% SigMa_XTM=1./diag(cov(-log(DisR'./I0)));
-% SigMa_XTM=inv(cov(-log(DisR'./I0)));
-SigMa_XTM=1./(-log(DisR(:)./I0));
+    % SigMa_XTM=1./diag(cov(-log(DisR'./I0)));
+    % SigMa_XTM=inv(cov(-log(DisR'./I0)));
+    SigMa_XTM=1./(-log(DisR(:)./I0));
 else
-SigMa_XTM=1./DisR(:);%1./diag(cov(DisR'));
+    SigMa_XTM=1./DisR(:);%1./diag(cov(DisR'));
 end
 SigMa_XRF=1./diag(cov(SigMa_XRF'));
-%  SigMa_XRF=ones(size(SigMa_XRF));
-%  SigMa_XTM=ones(size(SigMa_XTM));
+SigMa_XRF=ones(size(SigMa_XRF));
+SigMa_XTM=ones(size(SigMa_XTM));
