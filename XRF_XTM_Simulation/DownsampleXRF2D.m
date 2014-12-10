@@ -1,7 +1,7 @@
 %% Downsample the XRF spectrum
-slice=1;
+slice=20;
 numChannel=2000;
-nTau=19-1;
+nTau=50-1;
 thetan=zeros(36,1);
 DisXRF=zeros(length(thetan),nTau+1,numChannel);
 DisR=zeros(length(thetan),nTau+1);
@@ -16,15 +16,23 @@ for i=1:nTau+1
         else
             v=i*stepx;
         end
-        DisXRF(t,i,:)=sum(XRF( ((i-1)*stepx+1):v ,slice,: ),1);
+        DisXRF(t,i,:)=sum(sum(XRF(((i-1)*stepx+1):v ,slice,:),1),2);
         DisR(t,i)=sum(XTM( ((i-1)*stepx+1):v ,slice));
 end
 end
 DetChannel=DetChannel(1:numChannel);
-save(['data/2xfm0415/slice',num2str(1),'.mat'],'DetChannel','DisR','DisXRF','thetan','nTau');
+save(['data/2xfm0415/slice',num2str(slice),'_',num2str(50),'.mat'],'DetChannel','DisR','DisXRF','thetan','nTau');
 % A=reshape(XRF_d,numxbins*numybins,mStep(3));
 
-
+% for i=1:nTau+1
+%         if(i==nTau+1);
+%             v=1750;
+%         else
+%             v=i*10;
+%         end
+%         DisXRF(t,i,:)=sum(sum(XRF( ((i-1)*stepx+1):v ,slice,: ),1),2);
+%         
+% end
 %{
 numx=5; numy=2;
 count=0;

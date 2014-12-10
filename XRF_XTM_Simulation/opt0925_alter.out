@@ -1,0 +1,926 @@
+Unrecognized MATLAB option "nodisply".
+Warning: No display specified.  You will not be able to display graphics on the screen.
+Warning: No window system found.  Java option 'MWT' ignored.
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2013 The MathWorks, Inc.
+                    R2013a (8.1.0.604) 64-bit (glnxa64)
+                             February 15, 2013
+
+No window system found.  Java option 'MWT' ignored.
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+X-ray simulation startup file...
+>> >> >> >> >> >> >> X-ray simulation startup file...
+Element     AtomicNumber    Line     FluorescenceEnergy     Intensity
+    Mo           42          0          17.44               1322056574220.01
+=====================================================
+    Cu           29          0           8.04               307309887563.40
+=====================================================
+    Fe           26          0           6.40               180442917631.86
+=====================================================
+    Ca           20          0           3.69               36098687912.16
+=====================================================
+    In           49          0          24.14               2145592194690.98
+=====================================================
+====== Transmission Detector Resolution is 73
+====== Fluorescence Detector Resolution is 8
+====== Angle Number  1 of 18: 1
+====== Angle Number  2 of 18: 1.152941e+01
+====== Angle Number  3 of 18: 2.205882e+01
+====== Angle Number  4 of 18: 3.258824e+01
+====== Angle Number  5 of 18: 4.311765e+01
+====== Angle Number  6 of 18: 5.364706e+01
+====== Angle Number  7 of 18: 6.417647e+01
+====== Angle Number  8 of 18: 7.470588e+01
+====== Angle Number  9 of 18: 8.523529e+01
+====== Angle Number  10 of 18: 9.576471e+01
+====== Angle Number  11 of 18: 1.062941e+02
+====== Angle Number  12 of 18: 1.168235e+02
+====== Angle Number  13 of 18: 1.273529e+02
+====== Angle Number  14 of 18: 1.378824e+02
+====== Angle Number  15 of 18: 1.484118e+02
+====== Angle Number  16 of 18: 1.589412e+02
+====== Angle Number  17 of 18: 1.694706e+02
+====== Angle Number  18 of 18: 180
+>> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >>   it     nf     cg           f             |g|
+   0      1      0    1.21594310e+05   4.5e+03
+Armijo satisfied, trial= 1
+   1      2      5    8.21819523e+03   6.3e+02
+ans =
+    0.8179
+Armijo satisfied, trial= 1
+   2      3     10    6.75961675e+03   1.1e+03
+ans =
+    0.7874
+Armijo satisfied, trial= 1
+   3      4     20    1.78676167e+03   5.6e+02
+ans =
+    0.6796
+Armijo satisfied, trial= 1
+   4      5     25    1.20176294e+03   4.8e+02
+ans =
+    0.6559
+Armijo satisfied, trial= 1
+   5      6     30    3.57848228e+02   3.9e+02
+ans =
+    0.6235
+Armijo satisfied, trial= 1
+   6      7     33    2.49098619e+02   2.7e+02
+ans =
+    0.6163
+Armijo satisfied, trial= 1
+   7      8     35    7.81838250e+01   2.3e+02
+ans =
+    0.6135
+Armijo satisfied, trial= 1
+   8      9     44    5.23838088e+01   1.7e+02
+ans =
+    0.6009
+Armijo satisfied, trial= 1
+   9     10     49    2.89225290e+01   1.2e+02
+ans =
+    0.5901
+Armijo satisfied, trial= 1
+  10     11     56    1.68460239e+01   8.8e+01
+ans =
+    0.5797
+Armijo satisfied, trial= 1
+  11     12     60    1.28608671e+01   6.0e+01
+ans =
+    0.5743
+Armijo satisfied, trial= 1
+  12     13     63    9.37460529e+00   4.2e+01
+ans =
+    0.5721
+Armijo satisfied, trial= 1
+  13     14     83    6.78400324e+00   4.4e+01
+ans =
+    0.5338
+Armijo satisfied, trial= 1
+  14     15     86    6.08356123e+00   4.2e+01
+ans =
+    0.5212
+Armijo satisfied, trial= 1
+  15     16     90    4.02855519e+00   3.3e+01
+ans =
+    0.5174
+Armijo satisfied, trial= 1
+  16     17     96    3.47518781e+00   2.2e+01
+ans =
+    0.5132
+Armijo satisfied, trial= 1
+  17     18     99    2.95075977e+00   1.3e+01
+ans =
+    0.5110
+Armijo satisfied, trial= 1
+  18     19    123    2.36050866e+00   1.8e+01
+ans =
+    0.4709
+Armijo satisfied, trial= 1
+  19     20    126    2.20712051e+00   2.0e+01
+ans =
+    0.4580
+Armijo satisfied, trial= 1
+  20     21    128    1.39318707e+00   1.7e+01
+ans =
+    0.4585
+LMQNBC: termination 5
+  it     nf     cg           f             |g|
+   0      1      0    2.81699039e+03   4.8e+01
+Armijo satisfied, trial= 1
+   1      2      2    2.45112004e+02   3.3e+01
+Armijo satisfied, trial= 1
+   2      3     13    1.50400295e+02   1.1e+01
+Armijo satisfied, trial= 1
+   3      4     17    9.48691953e+01   7.5e+01
+Armijo satisfied, trial= 1
+   4      5     20    7.09445771e+01   1.2e+02
+Armijo satisfied, trial= 1
+   5      6     22    5.49211900e+01   1.2e+02
+Armijo satisfied, trial= 1
+   6      7     25    5.16747917e+01   1.1e+02
+Armijo satisfied, trial= 1
+   7      8     28    4.27616228e+01   1.1e+02
+   8     10     31    4.27616228e+01   1.1e+02
+Armijo satisfied, trial= 1
+   9     11     37    8.42786910e+00   3.4e+01
+Armijo satisfied, trial= 1
+  10     12     43    1.97332913e+00   1.5e+01
+Armijo satisfied, trial= 1
+  11     13     49    3.11558965e-01   1.5e+00
+Armijo satisfied, trial= 1
+  12     14     52    1.43001385e-01   1.6e+00
+Armijo satisfied, trial= 1
+  13     15     63    1.08634301e-01   4.7e-01
+Armijo satisfied, trial= 1
+  14     16     65    1.00925477e-01   5.1e-01
+Armijo satisfied, trial= 1
+  15     17     68    5.73992846e-02   3.7e-01
+Armijo satisfied, trial= 1
+  16     18     78    4.39033475e-02   2.2e-01
+Armijo satisfied, trial= 1
+  17     19     81    3.77660281e-02   2.0e-01
+Armijo satisfied, trial= 1
+  18     20     86    2.57213486e-02   7.8e-02
+  19     22    105    2.57213486e-02   7.3e-02
+Armijo satisfied, trial= 1
+  20     23    119    1.48342548e-02   8.2e-02
+LMQNBC: termination 5
+  it     nf     cg           f             |g|
+   0      1      0    3.75029637e+02   1.3e+02
+Armijo satisfied, trial= 1
+   1      2      5    4.30354151e+01   5.0e+01
+ans =
+    0.4304
+Armijo satisfied, trial= 1
+   2      3      9    1.06369913e+01   3.2e+01
+ans =
+    0.4301
+Armijo satisfied, trial= 1
+   3      4     12    4.05654421e+00   1.4e+01
+ans =
+    0.4300
+Armijo satisfied, trial= 1
+   4      5     18    1.74755906e+00   6.9e+00
+ans =
+    0.4297
+Armijo satisfied, trial= 1
+   5      6     24    1.10589794e+00   4.5e+00
+ans =
+    0.4294
+Armijo satisfied, trial= 1
+   6      7     35    7.83593410e-01   7.1e-01
+ans =
+    0.4283
+Armijo satisfied, trial= 1
+   7      8     55    6.01902270e-01   9.7e-01
+ans =
+    0.4234
+Armijo satisfied, trial= 1
+   8      9     89    3.15514686e-01   7.5e-01
+ans =
+    0.4021
+Armijo satisfied, trial= 1
+   9     10    110    1.86795959e-01   1.6e+00
+ans =
+    0.3902
+Armijo satisfied, trial= 1
+  10     11    130    1.03627518e-01   2.1e+00
+ans =
+    0.3828
+Armijo satisfied, trial= 1
+  11     12    132    9.78729065e-02   1.4e+00
+ans =
+    0.3823
+Armijo satisfied, trial= 1
+  12     13    135    9.66890703e-02   2.0e+00
+ans =
+    0.3818
+Armijo satisfied, trial= 1
+  13     14    137    9.60665021e-02   1.9e+00
+ans =
+    0.3815
+Armijo satisfied, trial= 1
+  14     15    140    9.02521546e-02   1.3e+00
+ans =
+    0.3811
+  15     17    164    9.02521546e-02   1.3e+00
+ans =
+    0.3811
+Armijo satisfied, trial= 1
+  16     18    189    5.29649302e-02   7.6e-01
+ans =
+    0.3753
+Armijo satisfied, trial= 1
+  17     19    211    3.68404566e-02   1.3e-01
+ans =
+    0.3725
+Armijo satisfied, trial= 1
+  18     20    232    2.34673764e-02   1.5e-01
+ans =
+    0.3711
+Armijo satisfied, trial= 1
+  19     21    264    1.56723676e-02   9.4e-02
+ans =
+    0.3702
+Armijo satisfied, trial= 1
+  20     22    291    1.14385085e-02   6.8e-02
+ans =
+    0.3692
+LMQNBC: termination 5
+  it     nf     cg           f             |g|
+   0      1      0    1.56833169e+03   3.5e+01
+Armijo satisfied, trial= 1
+   1      2      2    1.61276543e+01   2.2e+01
+Armijo satisfied, trial= 1
+   2      3      5    1.05700354e+01   4.1e+00
+Armijo satisfied, trial= 1
+   3      4     20    2.66316114e+00   5.8e+00
+Armijo satisfied, trial= 1
+   4      5     23    1.59980604e+00   4.8e+00
+Armijo satisfied, trial= 1
+   5      6     27    1.11795991e+00   7.4e+00
+Armijo satisfied, trial= 1
+   6      7     29    5.99323341e-01   7.4e+00
+Armijo satisfied, trial= 1
+   7      8     32    4.51995391e-01   4.4e+00
+Armijo satisfied, trial= 1
+   8      9     35    1.07909533e-01   1.4e+00
+Armijo satisfied, trial= 1
+   9     10     43    8.05788422e-02   1.7e+00
+Armijo satisfied, trial= 1
+  10     11     47    7.33881636e-02   1.9e+00
+Armijo satisfied, trial= 1
+  11     12     49    3.32235317e-02   1.7e+00
+Armijo satisfied, trial= 1
+  12     13     55    1.76372560e-02   4.2e-01
+Armijo satisfied, trial= 1
+  13     14     58    1.19362170e-02   2.8e-01
+Armijo satisfied, trial= 1
+  14     15     61    9.00406540e-03   2.0e-01
+  15     17     76    9.00406540e-03   2.0e-01
+Armijo satisfied, trial= 1
+  16     18     92    7.50963719e-03   1.8e-01
+  17     20     94    7.50963719e-03   1.8e-01
+Armijo satisfied, trial= 1
+  18     21     97    4.11646687e-03   1.3e-01
+Armijo satisfied, trial= 1
+  19     22    111    2.66374282e-03   3.3e-02
+Armijo satisfied, trial= 1
+  20     23    114    2.53896950e-03   3.8e-02
+LMQNBC: termination 5
+  it     nf     cg           f             |g|
+   0      1      0    3.33841046e+02   1.3e+02
+Armijo satisfied, trial= 1
+   1      2      5    2.13049276e+01   1.3e+01
+ans =
+    0.3640
+Armijo satisfied, trial= 1
+   2      3      9    6.22761265e+00   2.9e+01
+ans =
+    0.3638
+Armijo satisfied, trial= 1
+   3      4     13    1.61164246e+00   7.6e+00
+ans =
+    0.3637
+Armijo satisfied, trial= 1
+   4      5     19    3.73414663e-01   2.4e+00
+ans =
+    0.3636
+Armijo satisfied, trial= 1
+   5      6     24    1.03657438e-01   9.4e-01
+ans =
+    0.3635
+Armijo satisfied, trial= 1
+   6      7     29    4.75052696e-02   4.2e-01
+ans =
+    0.3635
+Armijo satisfied, trial= 1
+   7      8     34    2.88099180e-02   1.9e-01
+ans =
+    0.3635
+Armijo satisfied, trial= 1
+   8      9     45    1.64173967e-02   2.0e-01
+ans =
+    0.3634
+Armijo satisfied, trial= 1
+   9     10     67    1.07599939e-02   1.2e-01
+ans =
+    0.3633
+Armijo satisfied, trial= 1
+  10     11     92    8.65824601e-03   1.1e-01
+ans =
+    0.3631
+Armijo satisfied, trial= 1
+  11     12    117    6.97792746e-03   5.8e-02
+ans =
+    0.3628
+Armijo satisfied, trial= 1
+  12     13    148    5.44482541e-03   2.3e-02
+ans =
+    0.3623
+Armijo satisfied, trial= 1
+  13     14    177    4.74902546e-03   2.7e-02
+ans =
+    0.3619
+Armijo satisfied, trial= 1
+  14     15    207    4.23559988e-03   1.5e-02
+ans =
+    0.3614
+Armijo satisfied, trial= 1
+  15     16    234    3.71734393e-03   1.3e-01
+ans =
+    0.3608
+Armijo satisfied, trial= 1
+  16     17    237    3.63965065e-03   7.9e-02
+ans =
+    0.3607
+Armijo satisfied, trial= 1
+  17     18    278    2.84961933e-03   7.3e-02
+ans =
+    0.3599
+Armijo satisfied, trial= 1
+  18     19    319    2.37779720e-03   3.4e-02
+ans =
+    0.3593
+Armijo satisfied, trial= 1
+  19     20    354    2.12760183e-03   1.2e-02
+ans =
+    0.3591
+Armijo satisfied, trial= 1
+  20     21    384    1.94823319e-03   2.0e-02
+ans =
+    0.3589
+LMQNBC: termination 5
+  it     nf     cg           f             |g|
+   0      1      0    1.39738192e+03   3.2e+01
+Armijo satisfied, trial= 1
+   1      2      2    1.22669171e+01   2.2e+01
+Armijo satisfied, trial= 1
+   2      3      5    5.17060724e+00   4.2e+00
+Armijo satisfied, trial= 1
+   3      4     21    1.00189179e+00   1.1e+00
+Armijo satisfied, trial= 1
+   4      5     29    2.23684034e-01   1.3e+00
+Armijo satisfied, trial= 1
+   5      6     33    9.67408560e-02   4.7e-01
+Armijo satisfied, trial= 1
+   6      7     35    2.29560160e-02   1.5e-01
+Armijo satisfied, trial= 1
+   7      8     41    1.27450264e-02   1.3e-01
+Armijo satisfied, trial= 1
+   8      9     50    1.06916140e-02   3.1e-01
+Armijo satisfied, trial= 1
+   9     10     52    6.66505944e-03   1.9e-01
+Armijo satisfied, trial= 1
+  10     11     55    6.62250738e-03   1.9e-01
+Armijo satisfied, trial= 1
+  11     12     58    4.93078135e-03   8.8e-02
+Armijo satisfied, trial= 1
+  12     13     70    3.89630322e-03   1.4e-01
+Armijo satisfied, trial= 1
+  13     14     73    3.25508819e-03   9.4e-02
+Armijo satisfied, trial= 1
+  14     15     77    2.69490669e-03   3.8e-02
+  15     17     91    2.69490669e-03   3.1e-02
+Armijo satisfied, trial= 1
+  16     18    105    2.42805468e-03   4.1e-02
+  17     20    107    2.42805468e-03   3.8e-02
+Armijo satisfied, trial= 1
+  18     21    110    1.69851528e-03   3.9e-02
+Armijo satisfied, trial= 1
+  19     22    117    1.08629300e-03   1.7e-02
+Armijo satisfied, trial= 1
+  20     23    129    8.77324083e-04   1.2e-02
+LMQNBC: termination 5
+  it     nf     cg           f             |g|
+   0      1      0    3.04871714e+02   1.3e+02
+Armijo satisfied, trial= 1
+   1      2      5    1.91642638e+01   1.3e+01
+ans =
+    0.3547
+Armijo satisfied, trial= 1
+   2      3      8    6.67671351e+00   3.0e+01
+ans =
+    0.3546
+Armijo satisfied, trial= 1
+   3      4     12    1.44058136e+00   6.9e+00
+ans =
+    0.3544
+Armijo satisfied, trial= 1
+   4      5     20    1.96211692e-01   2.4e+00
+ans =
+    0.3543
+Armijo satisfied, trial= 1
+   5      6     26    5.12647572e-02   6.3e-01
+ans =
+    0.3543
+Armijo satisfied, trial= 1
+   6      7     35    1.52472758e-02   8.8e-01
+ans =
+    0.3543
+Armijo satisfied, trial= 1
+   7      8     44    7.82197582e-03   1.3e-01
+ans =
+    0.3542
+Armijo satisfied, trial= 1
+   8      9     53    5.01749915e-03   2.2e-01
+ans =
+    0.3542
+Armijo satisfied, trial= 1
+   9     10     67    3.19489439e-03   5.1e-02
+ans =
+    0.3542
+Armijo satisfied, trial= 1
+  10     11     88    2.29085363e-03   3.9e-02
+ans =
+    0.3542
+Armijo satisfied, trial= 1
+  11     12    116    1.89145793e-03   3.6e-02
+ans =
+    0.3542
+Armijo satisfied, trial= 1
+  12     13    141    1.72257735e-03   1.5e-02
+ans =
+    0.3542
+Armijo satisfied, trial= 1
+  13     14    165    1.59661826e-03   6.9e-03
+ans =
+    0.3542
+Armijo satisfied, trial= 1
+  14     15    190    1.47592602e-03   8.2e-03
+ans =
+    0.3542
+Armijo satisfied, trial= 1
+  15     16    214    1.38016672e-03   7.8e-03
+ans =
+    0.3541
+Armijo satisfied, trial= 1
+  16     17    264    1.18889291e-03   7.6e-02
+ans =
+    0.3540
+Armijo satisfied, trial= 1
+  17     18    267    1.16335751e-03   4.2e-02
+ans =
+    0.3540
+Armijo satisfied, trial= 1
+  18     19    277    1.12893311e-03   8.9e-03
+ans =
+    0.3540
+Armijo satisfied, trial= 1
+  19     20    319    9.65175584e-04   2.7e-02
+ans =
+    0.3537
+Armijo satisfied, trial= 1
+  20     21    356    8.42844788e-04   2.0e-02
+ans =
+    0.3535
+LMQNBC: termination 5
+  it     nf     cg           f             |g|
+   0      1      0    1.27233607e+03   3.1e+01
+Armijo satisfied, trial= 1
+   1      2      2    1.07770503e+01   2.1e+01
+Armijo satisfied, trial= 1
+   2      3      5    3.95708015e+00   3.8e+00
+Armijo satisfied, trial= 1
+   3      4     10    3.46985553e+00   2.1e+00
+Armijo satisfied, trial= 1
+   4      5     20    1.07902988e+00   1.1e+00
+Armijo satisfied, trial= 1
+   5      6     27    2.10729681e-01   5.8e-01
+Armijo satisfied, trial= 1
+   6      7     32    5.38300689e-02   5.1e-01
+Armijo satisfied, trial= 1
+   7      8     34    1.81913173e-02   9.1e-02
+Armijo satisfied, trial= 1
+   8      9     39    8.56087087e-03   5.2e-02
+Armijo satisfied, trial= 1
+   9     10     50    5.21681646e-03   1.6e-01
+Armijo satisfied, trial= 1
+  10     11     52    4.37058162e-03   1.2e-01
+Armijo satisfied, trial= 1
+  11     12     63    3.84622489e-03   1.6e-01
+Armijo satisfied, trial= 1
+  12     13     65    3.58829257e-03   1.4e-01
+  13     15     70    3.58829257e-03   1.4e-01
+Armijo satisfied, trial= 1
+  14     16     75    2.15260620e-03   3.6e-02
+Armijo satisfied, trial= 1
+  15     17     91    1.26275598e-03   4.1e-02
+Armijo satisfied, trial= 1
+  16     18     95    1.19459156e-03   4.4e-02
+Armijo satisfied, trial= 1
+  17     19     98    9.33319998e-04   1.6e-02
+  18     21    116    9.33319998e-04   1.2e-02
+Armijo satisfied, trial= 1
+  19     22    130    6.65695052e-04   1.5e-02
+Armijo satisfied, trial= 1
+  20     23    142    6.08671597e-04   2.3e-02
+LMQNBC: termination 5
+  it     nf     cg           f             |g|
+   0      1      0    2.78888271e+02   1.3e+02
+Armijo satisfied, trial= 1
+   1      2      5    1.75368772e+01   1.3e+01
+ans =
+    0.3496
+Armijo satisfied, trial= 1
+   2      3      8    6.13503248e+00   2.8e+01
+ans =
+    0.3495
+Armijo satisfied, trial= 1
+   3      4     12    1.27684761e+00   3.9e+00
+ans =
+    0.3493
+Armijo satisfied, trial= 1
+   4      5     20    1.70181762e-01   2.3e+00
+ans =
+    0.3492
+Armijo satisfied, trial= 1
+   5      6     26    4.41104414e-02   1.0e+00
+ans =
+    0.3492
+Armijo satisfied, trial= 1
+   6      7     32    1.95220194e-02   7.0e-01
+ans =
+    0.3492
+Armijo satisfied, trial= 1
+   7      8     38    1.10352813e-02   2.7e-01
+ans =
+    0.3492
+Armijo satisfied, trial= 1
+   8      9     48    5.14502430e-03   3.0e-01
+ans =
+    0.3492
+Armijo satisfied, trial= 1
+   9     10     58    3.04772791e-03   6.0e-02
+ans =
+    0.3492
+Armijo satisfied, trial= 1
+  10     11     68    2.08548361e-03   9.0e-02
+ans =
+    0.3492
+Armijo satisfied, trial= 1
+  11     12     82    1.39164282e-03   6.4e-02
+ans =
+    0.3491
+Armijo satisfied, trial= 1
+  12     13    105    9.92356548e-04   5.0e-02
+ans =
+    0.3491
+Armijo satisfied, trial= 1
+  13     14    136    7.87987079e-04   1.1e-02
+ans =
+    0.3491
+Armijo satisfied, trial= 1
+  14     15    186    6.71234009e-04   3.0e-03
+ans =
+    0.3490
+Armijo satisfied, trial= 1
+  15     16    236    6.12238085e-04   1.3e-02
+ans =
+    0.3489
+Armijo satisfied, trial= 1
+  16     17    286    5.48515523e-04   3.7e-02
+ans =
+    0.3486
+Armijo satisfied, trial= 1
+  17     18    289    5.40124245e-04   1.5e-02
+ans =
+    0.3486
+Armijo satisfied, trial= 1
+  18     19    316    5.08529700e-04   2.0e-02
+ans =
+    0.3485
+Armijo satisfied, trial= 1
+  19     20    360    4.35179624e-04   2.9e-02
+ans =
+    0.3482
+Armijo satisfied, trial= 1
+  20     21    365    4.27964203e-04   8.1e-03
+ans =
+    0.3482
+LMQNBC: termination 5
+  it     nf     cg           f             |g|
+   0      1      0    1.15732098e+03   3.0e+01
+Armijo satisfied, trial= 1
+   1      2      2    9.87425279e+00   2.0e+01
+Armijo satisfied, trial= 1
+   2      3      5    3.41748398e+00   3.6e+00
+Armijo satisfied, trial= 1
+   3      4     10    2.93105894e+00   2.0e+00
+Armijo satisfied, trial= 1
+   4      5     20    9.82340214e-01   1.2e+00
+Armijo satisfied, trial= 1
+   5      6     27    2.00918034e-01   1.0e+00
+Armijo satisfied, trial= 1
+   6      7     32    5.54614042e-02   5.4e-01
+Armijo satisfied, trial= 1
+   7      8     34    2.01547773e-02   1.1e-01
+Armijo satisfied, trial= 1
+   8      9     39    8.96699056e-03   7.2e-02
+Armijo satisfied, trial= 1
+   9     10     48    5.91991816e-03   2.0e-01
+Armijo satisfied, trial= 1
+  10     11     50    5.06828693e-03   1.5e-01
+Armijo satisfied, trial= 1
+  11     12     55    3.33870624e-03   7.1e-02
+  12     14     77    3.33870624e-03   7.1e-02
+Armijo satisfied, trial= 1
+  13     15     83    2.55144814e-03   1.7e-02
+  14     17     99    2.55144814e-03   1.7e-02
+Armijo satisfied, trial= 2
+  15     19    115    2.53743603e-03   1.7e-02
+Armijo satisfied, trial= 2
+  16     21    131    2.53655176e-03   1.7e-02
+Armijo satisfied, trial= 2
+  17     23    147    2.51576821e-03   1.7e-02
+Armijo satisfied, trial= 2
+  18     25    163    2.50459735e-03   1.6e-02
+Armijo satisfied, trial= 1
+  19     26    179    2.48230869e-03   7.0e-02
+  20     28    181    2.48230869e-03   7.0e-02
+LMQNBC: termination 5
+  it     nf     cg           f             |g|
+   0      1      0    2.54531941e+02   1.2e+02
+Armijo satisfied, trial= 1
+   1      2      5    1.59478023e+01   1.2e+01
+ans =
+    0.3446
+Armijo satisfied, trial= 1
+   2      3      8    5.58862667e+00   2.6e+01
+ans =
+    0.3445
+Armijo satisfied, trial= 1
+   3      4     12    1.17442086e+00   3.8e+00
+ans =
+    0.3444
+Armijo satisfied, trial= 1
+   4      5     20    1.52540826e-01   2.1e+00
+ans =
+    0.3443
+Armijo satisfied, trial= 1
+   5      6     26    3.93133836e-02   1.0e+00
+ans =
+    0.3443
+Armijo satisfied, trial= 1
+   6      7     32    1.67648267e-02   6.5e-01
+ans =
+    0.3442
+Armijo satisfied, trial= 1
+   7      8     38    9.07176685e-03   3.8e-01
+ans =
+    0.3442
+Armijo satisfied, trial= 1
+   8      9     48    3.91577389e-03   2.6e-01
+ans =
+    0.3442
+Armijo satisfied, trial= 1
+   9     10     58    2.17891503e-03   5.6e-02
+ans =
+    0.3442
+Armijo satisfied, trial= 1
+  10     11     68    1.40425749e-03   7.4e-02
+ans =
+    0.3442
+Armijo satisfied, trial= 1
+  11     12     83    8.52958974e-04   2.9e-02
+ans =
+    0.3442
+Armijo satisfied, trial= 1
+  12     13    106    5.66231823e-04   1.5e-02
+ans =
+    0.3442
+Armijo satisfied, trial= 1
+  13     14    128    4.66861513e-04   7.8e-03
+ans =
+    0.3442
+Armijo satisfied, trial= 1
+  14     15    149    4.14490978e-04   1.1e-02
+ans =
+    0.3443
+Armijo satisfied, trial= 1
+  15     16    178    3.72328248e-04   5.5e-03
+ans =
+    0.3443
+Armijo satisfied, trial= 1
+  16     17    203    3.50875954e-04   4.4e-03
+ans =
+    0.3443
+Armijo satisfied, trial= 1
+  17     18    228    3.36511700e-04   3.1e-03
+ans =
+    0.3443
+Armijo satisfied, trial= 1
+  18     19    253    3.23648126e-04   9.4e-03
+ans =
+    0.3443
+Armijo satisfied, trial= 1
+  19     20    277    3.11668378e-04   1.6e-02
+ans =
+    0.3443
+Armijo satisfied, trial= 1
+  20     21    298    2.98889731e-04   1.5e-02
+ans =
+    0.3443
+LMQNBC: termination 5
+  it     nf     cg           f             |g|
+   0      1      0    1.05561542e+03   2.8e+01
+Armijo satisfied, trial= 1
+   1      2      2    9.19435599e+00   2.0e+01
+Armijo satisfied, trial= 1
+   2      3      5    3.25021822e+00   3.4e+00
+Armijo satisfied, trial= 1
+   3      4     10    2.89737607e+00   2.0e+00
+Armijo satisfied, trial= 1
+   4      5     20    1.05400868e+00   1.3e+00
+Armijo satisfied, trial= 1
+   5      6     27    2.06504954e-01   9.4e-01
+Armijo satisfied, trial= 1
+   6      7     32    5.76852905e-02   5.7e-01
+Armijo satisfied, trial= 1
+   7      8     34    2.02094907e-02   1.2e-01
+Armijo satisfied, trial= 1
+   8      9     39    9.04508429e-03   8.9e-02
+Armijo satisfied, trial= 1
+   9     10     49    5.79351327e-03   2.2e-01
+Armijo satisfied, trial= 1
+  10     11     51    4.84249149e-03   1.7e-01
+Armijo satisfied, trial= 1
+  11     12     56    2.98988741e-03   7.1e-02
+  12     14     81    2.98988741e-03   7.1e-02
+Armijo satisfied, trial= 1
+  13     15     87    2.28125790e-03   1.1e-02
+  14     17    104    2.28125790e-03   1.1e-02
+  15     19    120    2.28125790e-03   1.1e-02
+  16     21    136    2.28125790e-03   1.1e-02
+Armijo satisfied, trial= 2
+  17     23    153    2.27834593e-03   1.1e-02
+Armijo satisfied, trial= 2
+  18     25    170    2.27664178e-03   1.1e-02
+Armijo satisfied, trial= 2
+  19     27    187    2.25939694e-03   1.1e-02
+Armijo satisfied, trial= 2
+  20     29    204    2.25886504e-03   1.1e-02
+LMQNBC: termination 5
+  it     nf     cg           f             |g|
+   0      1      0    2.33313796e+02   1.2e+02
+Armijo satisfied, trial= 1
+   1      2      5    1.45968845e+01   1.2e+01
+ans =
+    0.3410
+Armijo satisfied, trial= 1
+   2      3      8    5.11826804e+00   2.6e+01
+ans =
+    0.3408
+Armijo satisfied, trial= 1
+   3      4     12    1.08731977e+00   3.8e+00
+ans =
+    0.3407
+Armijo satisfied, trial= 1
+   4      5     20    1.36647677e-01   2.1e+00
+ans =
+    0.3406
+Armijo satisfied, trial= 1
+   5      6     26    3.34707737e-02   1.3e+00
+ans =
+    0.3406
+Armijo satisfied, trial= 1
+   6      7     32    1.34776618e-02   5.8e-01
+ans =
+    0.3406
+Armijo satisfied, trial= 1
+   7      8     38    6.98410657e-03   3.7e-01
+ans =
+    0.3406
+Armijo satisfied, trial= 1
+   8      9     44    4.05127887e-03   1.8e-01
+ans =
+    0.3406
+Armijo satisfied, trial= 1
+   9     10     58    1.41964286e-03   6.7e-02
+ans =
+    0.3406
+Armijo satisfied, trial= 1
+  10     11     71    7.80873851e-04   4.3e-02
+ans =
+    0.3406
+  11     13     89    4.79070665e-04   4.5e-02
+ans =
+    0.3406
+  12     15    112    3.51764471e-04   1.1e-02
+ans =
+    0.3406
+  13     17    135    3.07246150e-04   1.1e-02
+ans =
+    0.3406
+Armijo satisfied, trial= 1
+  14     18    156    2.88074010e-04   4.6e-03
+ans =
+    0.3406
+Armijo satisfied, trial= 1
+  15     19    184    2.74729348e-04   1.5e-03
+ans =
+    0.3406
+Armijo satisfied, trial= 1
+  16     20    211    2.66726613e-04   1.2e-03
+ans =
+    0.3405
+Armijo satisfied, trial= 1
+  17     21    261    2.49172103e-04   4.6e-03
+ans =
+    0.3405
+Armijo satisfied, trial= 1
+  18     22    311    2.17412609e-04   2.3e-02
+ans =
+    0.3403
+Armijo satisfied, trial= 1
+  19     23    315    2.13784779e-04   8.4e-03
+ans =
+    0.3403
+Armijo satisfied, trial= 1
+  20     24    339    2.00087027e-04   2.0e-02
+ans =
+    0.3403
+LMQNBC: termination 5
+  it     nf     cg           f             |g|
+   0      1      0    9.62223906e+02   2.7e+01
+Armijo satisfied, trial= 1
+   1      2      2    8.60712509e+00   1.9e+01
+Armijo satisfied, trial= 1
+   2      3      5    3.21796202e+00   3.3e+00
+Armijo satisfied, trial= 1
+   3      4     21    1.07813346e+00   1.7e+00
+Armijo satisfied, trial= 1
+   4      5     27    3.65549622e-01   1.3e+00
+Armijo satisfied, trial= 1
+   5      6     31    1.59641650e-01   7.4e-01
+Armijo satisfied, trial= 1
+   6      7     33    4.58319782e-02   1.9e-01
+Armijo satisfied, trial= 1
+   7      8     40    1.89463957e-02   2.2e-01
+Armijo satisfied, trial= 1
+   8      9     48    1.22425431e-02   2.4e-01
+Armijo satisfied, trial= 1
+   9     10     50    7.84838188e-03   1.3e-01
+Armijo satisfied, trial= 1
+  10     11     56    4.02020719e-03   1.0e-01
+Armijo satisfied, trial= 1
+  11     12     59    2.88800848e-03   1.8e-02
+  12     14     77    2.88800848e-03   1.8e-02
+  13     16     96    2.88800848e-03   1.8e-02
+Armijo satisfied, trial= 2
+  14     18    114    2.88691003e-03   1.8e-02
+Armijo satisfied, trial= 2
+  15     20    131    2.88621767e-03   1.8e-02
+Armijo satisfied, trial= 2
+  16     22    154    2.88472048e-03   1.8e-02
+Armijo satisfied, trial= 2
+  17     24    177    2.88430161e-03   1.8e-02
+Armijo satisfied, trial= 2
+  18     26    200    2.88420549e-03   1.8e-02
+Armijo satisfied, trial= 2
+  19     28    223    2.88327386e-03   1.8e-02
+Armijo satisfied, trial= 2
+  20     30    246    2.88234355e-03   1.8e-02
+LMQNBC: termination 5
+  it     nf     cg           f             |g|
+   0      1      0    2.13724206e+02   1.1e+02
+Armijo satisfied, trial= 1
+   1      2      5    1.33823534e+01   1.1e+01
+ans =
+    0.3371
+Armijo satisfied, trial= 1
+   2      3      8    4.67526250e+00   2.7e+01
+ans =
+    0.3370
+Armijo satisfied, trial= 1
+   3      4     12    1.08511487e+00   3.2e+00
+ans =
+    0.3369
+Armijo satisfied, trial= 1
+   4      5     20    1.42094900e-01   1.6e+00
+ans =
+    0.3368
