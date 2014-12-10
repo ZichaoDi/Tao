@@ -12,7 +12,7 @@ global x y m omega dz AbsorbScale min_MU max_MU
 global XTMscale
 
 
-AbsorbScale=1e-4;
+%AbsorbScale=1e-4;
 %%%%%======================================
 DisY=m(1)+1;
 DisX=m(2)+1;

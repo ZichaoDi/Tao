@@ -46,13 +46,17 @@ x0=W(:)+1*10^(-1)*rand(prod(m)*NumElement,1);
 xinitial=x0;
 err0=xinitial-ws;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% [f,g]=feval(fctn,x0);
-% [f1,g1]=feval(fctn1,x0);
-% % gh=foo(fctn,x0);
-% figure('name','Derivative Difference'),plot(1:prod(m)*NumElement,g,'r.-',1:prod(m)*NumElement,g1,'go-')
-% legend('Analytic','AdiMat')
-% errAD=norm(g-g1)/norm(g1)
-% return;
+[f,g]=feval(fctn,x0);
+[f1,g1]=feval(fctn1,x0);
+% gh=foo(fctn,x0);
+ee=abs(g-g1);
+figure('name','Derivative Difference'),
+subplot(2,1,1),plot(1:prod(m)*NumElement,ee,'r.-')
+legend('Analytic','AdiMat')
+hold on; for i=1:NumElement, line([prod(m)*i,prod(m)*i],[0,max(ee)],'LineStyle',':'); text(prod(m)*i,max(ee),num2str(i));end
+subplot(2,1,2),plot(sum(MU_e,3),'r.-');
+errAD=norm(g-g1)/norm(g1)
+return;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 N=m(1);
 current_n=N(1);
