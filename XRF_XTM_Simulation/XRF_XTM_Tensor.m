@@ -14,7 +14,7 @@ more off;
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
 DefineObject_Gaussian; % Produce W, MU_XTM
 % Acquire2Daps;
-thetan=linspace(0,180,2);%mod(thetan+360,360);%[1 60];%[1:40:180];% Projection Angles
+thetan=linspace(0,180,3);%mod(thetan+360,360);%[1 60];%[1:40:180];% Projection Angles
 subTheta=1:length(thetan);
 thetan=thetan(subTheta);
 %%%%%%%==============================================================
