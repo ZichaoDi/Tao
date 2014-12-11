@@ -5,7 +5,7 @@ global fig2  fig5 finalfig eX eY
 global SigMa_XTM SigMa_XRF LogScale mtol
 plotTravel=0; % If plot the intersection of beam with object
 plotSpec = 0; % Do you want to see the spectra? If so plotSpec = 1
-plotUnit=1;
+plotUnit=0;
 plotSpecSingle=0;
 NoSelfAbsorption=0;
 Tomo_startup;
@@ -14,7 +14,7 @@ more off;
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
 DefineObject_Gaussian; % Produce W, MU_XTM
 % Acquire2Daps;
-thetan=linspace(0,180,4);%mod(thetan+360,360);%[1 60];%[1:40:180];% Projection Angles
+thetan=linspace(0,180,2);%mod(thetan+360,360);%[1 60];%[1:40:180];% Projection Angles
 subTheta=1:length(thetan);
 thetan=thetan(subTheta);
 %%%%%%%==============================================================
@@ -157,8 +157,10 @@ for n=1:length(thetan)
                     LinearInd=sub2ind(m,index_after(:,2),index_after(:,1));
 
                     for tsub=1:NumElement
+                        if(~isempty(Lvec_after))
                         temp_after=sum(Lvec_after.*MU_after{tsub}(LinearInd)); %% Attenuation of Flourescent energy emitted from current pixel
                         I_after(tsub)=I_after(tsub)+exp(-temp_after)/NumSSDlet;
+                        end
                     end %% End loop for each SSD detector let
                     %%%part for gradient evaluation**************************************
                     SelfInd{n,i,currentInd}{2}{SSDi}=LinearInd;
@@ -178,7 +180,8 @@ for n=1:length(thetan)
             xrfSub=xrfSub+RM{index(j,2),index(j,1)};
             
         end
-        Rdis(i)=I0*exp(-eX'*(MU_XTM.*squeeze(L(n,i,:,:)))*eY); %% Discrete case
+        [~,~,subm,subn]=size(L(n,i,:,:));
+        Rdis(i)=I0*exp(-eX'*(MU_XTM.*reshape(L(n,i,:,:),subm,subn))*eY); %% Discrete case
         XRF{n,i}=xrfSub;%reshape(DisXRF(subTheta(n),i,:),1,numChannel);%
         SigMa_XRF((nTau+1)*(n-1)+i,:)=xrfSub;
         if(plotSpec)
