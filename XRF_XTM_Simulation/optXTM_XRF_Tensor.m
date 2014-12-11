@@ -30,7 +30,7 @@ elseif(Joint==0)
     fctn=@(W)sfun_TensorJ1(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 else
     fctn=@(W)sfun_Tensor2(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
-    fctn1=@(W)sfun_AdiMat(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
+    fctn=@(W)sfun_AdiMat(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
 end
 rng('default');
 Wtest=W;
