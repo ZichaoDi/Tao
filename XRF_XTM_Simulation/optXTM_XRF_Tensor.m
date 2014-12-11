@@ -46,17 +46,17 @@ x0=W(:)+1*10^(-1)*rand(prod(m)*NumElement,1);
 xinitial=x0;
 err0=xinitial-ws;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-[f,g]=feval(fctn,x0);
-[f1,g1]=feval(fctn1,x0);
-% gh=foo(fctn,x0);
-ee=abs(g-g1);
-figure('name','Derivative Difference'),
-subplot(2,1,1),plot(1:prod(m)*NumElement,ee,'r.-')
-legend('Analytic','AdiMat')
-hold on; for i=1:NumElement, line([prod(m)*i,prod(m)*i],[0,max(ee)],'LineStyle',':'); text(prod(m)*i,max(ee),num2str(i));end
-subplot(2,1,2),plot(sum(MU_e,3),'r.-');
-errAD=norm(g-g1)/norm(g1)
-return;
+% [f,g]=feval(fctn,x0);
+% [f1,g1]=feval(fctn1,x0);
+% % gh=foo(fctn,x0);
+% ee=abs(g-g1);
+% figure('name','Derivative Difference'),
+% subplot(2,1,1),plot(1:prod(m)*NumElement,ee,'r.-')
+% legend('Analytic','AdiMat')
+% hold on; for i=1:NumElement, line([prod(m)*i,prod(m)*i],[0,max(ee)],'LineStyle',':'); text(prod(m)*i,max(ee),num2str(i));end
+% subplot(2,1,2),plot(sum(MU_e,3),'r.-');
+% errAD=norm(g-g1)/norm(g1)
+% return;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 N=m(1);
 current_n=N(1);
@@ -69,8 +69,8 @@ up=1e6*ones(size(x0));
 %  options = optimset('Algorithm','interior-point','DerivativeCheck','off','Diagnostics','off','GradObj','on','Display','iter','AlwaysHonorConstraints','none','TolCon',1e-10,'TolX',1e-16,'TolFun',1e-15);%
 %  [xstar,fval] = fmincon(fctn,x0,[],[],[],[],zeros(size(x0)),[],[],options);
 %  return;
-[xstar,f,g,ierror] = tn(x0,fctn);
-% [xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
+% [xstar,f,g,ierror] = tn(x0,fctn);
+[xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
 if(Joint==-1 & DiscreteScale)
     xtemp=reshape(xstar,m(1),m(2),NumElement);
     err0_1=reshape(err0,m(1),m(2),NumElement);

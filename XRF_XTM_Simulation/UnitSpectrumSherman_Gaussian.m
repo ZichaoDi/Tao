@@ -11,7 +11,7 @@ global TakeLog
 E0=40;
 E2I=1/3e8/6.62e-34*1e-15;
 I0=E0*E2I;
-Z=20:70;%];%[29 30 74 79];%% 42 29 26 ];%20 49 57 46];% reference sample: Pb La Pd Mo Cu Fe Ca
+Z=20:10:70;%];%[29 30 74 79];%% 42 29 26 ];%20 49 57 46];% reference sample: Pb La Pd Mo Cu Fe Ca
 % Z=Z(1:NumElement);
 NumElement=length(Z);
 NA=6.02e23;%Avogadro's number
@@ -32,7 +32,7 @@ T=1;
 if(plotUnit)
     figure('name', 'Unit Spectrum');
 end
-fprintf(1,'Element     AtomicNumber    Line     FluorescenceEnergy     Intensity\n');
+%fprintf(1,'Element     AtomicNumber    Line     FluorescenceEnergy     Intensity\n')
 %%==set up Gaussian Distribution
 mu=0;
 sigma=(DetChannel(2)-DetChannel(1))/2.35;
