@@ -8,16 +8,23 @@ if (ispc)
 else
   slash = '/';
 end
+if(ismac)
 addpath('/Users/Wendydi/Documents/MATLAB/Di_MATLABtool');
+else
+addpath('/homes/wendydi/Documents/MATLAB/Di_MATLABtool');
+end
 
 PWD = pwd;
-% path(path,[pwd, slash, 'data']);
 path(path,[pwd, slash, 'result']);
 path(path,'../TN');
 addpath_recurse('./data');
 addpath_recurse('../SimplerCode');
+if(ismac)
 addpath_recurse('/Users/Wendydi/Documents/MATLAB/APSdata');
 addpath_recurse('/Users/Wendydi/Documents/MATLAB/Di_MATLABtool');
+else
+addpath_recurse('/homes/wendydi/Documents/MATLAB/Di_MATLABtool');
+end
 ADiMat_startup;
 
 
