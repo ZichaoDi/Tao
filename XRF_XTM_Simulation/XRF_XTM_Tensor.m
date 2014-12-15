@@ -129,7 +129,7 @@ for n=1:length(thetan)
             if(NoSelfAbsorption)
                 NumSSDlet=1;%% Turn off self-absorption
             else
-                I_after=0*I_after;
+                 I_after=0*I_after;
                 for SSDi=1:NumSSDlet
                     temp_after=0;
                     beta=angle(SSDknot(SSDi,1)-CurrentCellCenter(1)+(SSDknot(SSDi,2)-CurrentCellCenter(2))*sqrt(-1));
@@ -151,7 +151,7 @@ for n=1:length(thetan)
                     end
                     [index_after,Lvec_after,linearInd_after]=IntersectionSet(CurrentCellCenter,SSDknot(SSDi,:),xbox,ybox,beta);
                     [index_after,otherInd]=setdiff(index_after,index(j,:),'rows');
-                    Lvec_after=Lvec_after(otherInd);
+                    Lvec_after=Lvec_after(otherInd');
                     LocalInd{n,i,index(j,2),index(j,1),SSDi}=index_after;
                     L_after{n,i,index(j,2),index(j,1),SSDi}=Lvec_after;
                     LinearInd=sub2ind(m,index_after(:,2),index_after(:,1));
@@ -160,6 +160,8 @@ for n=1:length(thetan)
                         if(~isempty(Lvec_after))
                         temp_after=sum(Lvec_after.*MU_after{tsub}(LinearInd)); %% Attenuation of Flourescent energy emitted from current pixel
                         I_after(tsub)=I_after(tsub)+exp(-temp_after)/NumSSDlet;
+                        else
+                        I_after(tsub)=I_after(tsub)+1/NumSSDlet;
                         end
                     end %% End loop for each SSD detector let
                     %%%part for gradient evaluation**************************************

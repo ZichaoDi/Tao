@@ -28,7 +28,7 @@ for n=1:length(thetan)
                     for d=1:NumSSDlet  
                     Tmmp=repmat(W(SelfInd{n,i,v}{2}{d},:),[1,1,NumElement]).*reshape(SelfInd{n,i,v}{4}{d},length(SelfInd{n,i,v}{2}{d}),NumElement,NumElement); 
                     OutTens_d=OutTens_d+exp(-sum(sum(Tmmp,1),2));
-%                         OutTens_d=OutTens_d+exp(-sum(sum(bsxfun(@times,W(SelfInd{n,i,v}{2}{d},:),reshape(SelfInd{n,i,v}{4}{d},length(SelfInd{n,i,v}{2}{d}),NumElement,NumElement)),1),2));
+%                  OutTens_d=OutTens_d+exp(-sum(sum(bsxfun(@times,W(SelfInd{n,i,v}{2}{d},:),reshape(SelfInd{n,i,v}{4}{d},length(SelfInd{n,i,v}{2}{d}),NumElement,NumElement)),1),2));
 
                     end
                     OutTens_d=OutTens_d/NumSSDlet;

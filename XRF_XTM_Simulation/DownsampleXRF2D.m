@@ -31,15 +31,15 @@ ProJ=ProJ(in);
 I=zeros(1236,1236,51);
 load DisR
 % DisRl=zeros(51,1750,length(thetan));
-DisRs=zeros(1750,50,length(thetan));
-for slice=30
-for i=1:length(in)
-        load(['2xfm_',num2str(ProJ(i)),'.mat']);   
-        DisRs(:,slice,i)=XTM(:,slice);
-end
-I(:,:,slice)=iradon(squeeze(DisR(slice,1:end-2,in)),linspace(0,180,length(in)),'spline','Cosine');
-imagesc(I(:,:,slice));
-pause(1);
+% DisRs=zeros(1750,50,length(thetan));
+for slice=1:51
+% for i=1:length(in)
+%         load(['2xfm_',num2str(ProJ(i)),'.mat']);   
+%         DisRs(:,slice,i)=XTM(:,slice);
+% end
+I(:,:,slice)=iradon(squeeze(DisR(slice,1:end-2,in)),thetan(in),'spline','none');
+% imagesc(I(:,:,slice));
+% pause(1);
 end
 % A=reshape(XRF_d,numxbins*numybins,mStep(3));
 

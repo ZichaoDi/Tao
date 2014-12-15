@@ -143,9 +143,9 @@ while (~conv);
         fprintf('    |p|     = %12.4e\n', norm(p));
         %         disp('Hit any key to continue')
         %         pause;
-        if(gtp<0 & norm(pold-p)>0)
-            [ipivot, ierror, x_new] = crash2(x_new, g_new, low, up);
-        end  
+        %         if(gtp<0 & norm(pold-p)>0)
+        %             [ipivot, ierror, x_new] = crash2(x_new, g_new, low, up);
+        %         end
     end;
     %#######################
     x   = x_new;
@@ -201,20 +201,20 @@ while (~conv);
     fprintf(1,'%4i   %4i   %4i   % .8e   %.1e\n', ...
         nit, nf, ncg, f, gnorm)
     %--------------------------------- Error Plot
-%     if(mod(nit,50)==0)
-if(Joint==1 |Joint==0)
-%         figure(100);
-%         CurrentErr=abs(x-W0(VarInd));
-%         FunEva(nit)=Ntot(2)+nf+ncg;
+    %     if(mod(nit,50)==0)
+    if(Joint==1 |Joint==0)
+        %         figure(100);
+        %         CurrentErr=abs(x-W0(VarInd));
+        %         FunEva(nit)=Ntot(2)+nf+ncg;
         ErrIter(nit)=norm(x-W0)/norm(err0);
         ErrIter(end)
-%         subplot(1,2,1)
-%         vs=sum(reshape(CurrentErr,m(1),m(2),length(VarInd)/prod(m)),3);
-%         surf(vs);
-%          subplot(1,2,2)
-%         plot(FunEva,ErrIter,'ro-');drawnow;hold on;
-end
-%     end
+        %         subplot(1,2,1)
+        %         vs=sum(reshape(CurrentErr,m(1),m(2),length(VarInd)/prod(m)),3);
+        %         surf(vs);
+        %          subplot(1,2,2)
+        %         plot(FunEva,ErrIter,'ro-');drawnow;hold on;
+    end
+    %     end
     %---------------------------------------------------------
     % test for convergence
     %---------------------------------------------------------
@@ -250,7 +250,7 @@ end
         end
     end
     %------------------------------- Active set plot
-%     figure(90);qpPlotAset(ipivot,nit,length(x));
+    %     figure(90);qpPlotAset(ipivot,nit,length(x));
     %%%===========================================================
     
     g = ztime (g, ipivot);
