@@ -168,17 +168,17 @@ for n=1:length(thetan)
 end
 %%=============================================== Measure ill-conditioness
 % figure,subplot(2,1,1),spy(Jacob1), subplot(2,1,2),spy(Jacob2);
-size(Jacob1)
-size(Jacob2)
-tol=eps;
-J1=rank(Jacob1)
-% k1=cond(Jacob1);
-% [U1,S1,V1]=svd(Jacob1);
-J2=rank(Jacob2)
-% k2=cond(Jacob2);
-% [U2,S2,V2]=svd(Jacob2);
-% [U,S,V]=svd([Jacob1;Jacob2]);
-J3=rank([Jacob1;Jacob2])
+% size(Jacob1)
+% size(Jacob2)
+% tol=eps;
+% J1=rank(Jacob1,tol)
+% % k1=cond(Jacob1);
+% % [U1,S1,V1]=svd(Jacob1);
+% J2=rank(Jacob2,tol)
+% % k2=cond(Jacob2);
+% % [U2,S2,V2]=svd(Jacob2);
+% % [U,S,V]=svd([Jacob1;Jacob2]);
+% J3=rank([Jacob1;Jacob2],tol)
 % fprintf('Cond1=%d, Rank1=%d, Cond2=%d, Rank2=%d, cond=%d, minS=%d, rank=%d \n',k1,J1,k2,J2,cond([Jacob1;Jacob2]),min(diag(S)),J3);
 %%=====================================================================
 g=g(:);

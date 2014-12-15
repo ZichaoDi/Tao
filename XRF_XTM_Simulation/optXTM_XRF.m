@@ -12,7 +12,7 @@ maxiter=10000;
 XRF_XTM_Gaussian;
 %%%----------------------------------------------------------------------
 W0=W(:);
-Joint=1; % 1: XRF; -1: XTM; 0: Joint inversion
+Joint=0; % 1: XRF; -1: XTM; 0: Joint inversion
 %%%============== Rescale MU_e to make unity contribution
 DiscreteScale=0;
 penalty=0;
@@ -40,7 +40,7 @@ if(Joint==-1)
     fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,Ltol,thetan,m,nTau,NumElement);
 elseif(Joint==0)
     fctn=@(W)sfun_XRF_XTM(W,XRF,DisR,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau,I0);
-%      fctn=@(W)sfun_XRF_XTM_Jacobian(W,XRF,DisR,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau,I0);
+      fctn=@(W)sfun_XRF_XTM_Jacobian(W,XRF,DisR,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau,I0);
 else
      fctn=@(W)sfun_XRF_full2(W,XRF,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau);
 %      fctn1=@(W)func_for(W,XRF,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau);
@@ -58,8 +58,9 @@ ws=Wtest(:);
 x0=W(:)+1*10^(-1)*rand(prod(m)*NumElement,1);
 xinitial=x0;
 err0=xinitial-ws;
-% tic;
-% [f,g]=feval(fctn,x0);
+% % tic;
+% [f,g]=feval(fctn,W(:));
+% return;
 % g
 % toc;
 % return;
