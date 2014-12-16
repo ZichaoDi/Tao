@@ -3,7 +3,7 @@ global m ;
  global DetChannel numChannel nTau DetKnot0 SourceKnot0 NumSSDlet
 omega=[-2     2    -2     2];
 % m=[3 3];
-subm=1;
+subm=10;
 m=subm.*[3 3];
  alpha=atan((omega(4)-omega(3))/(omega(2)-omega(1)));
 dTau=(omega(2)-omega(1))/m(2);%0.5;%%% width of the each discrete beam

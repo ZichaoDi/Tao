@@ -7,14 +7,14 @@ plotTravel=0; % If plot the intersection of beam with object
 plotSpec = 0; % Do you want to see the spectra? If so plotSpec = 1
 plotUnit=0;
 plotSpecSingle=0;
-NoSelfAbsorption=0;
+NoSelfAbsorption=1;
 Tomo_startup;
 more off;
 % load slice1_50;
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
 DefineObject_Gaussian; % Produce W, MU_XTM
 % Acquire2Daps;
-thetan=linspace(0,180,3);%mod(thetan+360,360);%[1 60];%[1:40:180];% Projection Angles
+thetan=linspace(0,180,30);%mod(thetan+360,360);%[1 60];%[1:40:180];% Projection Angles
 subTheta=1:length(thetan);
 thetan=thetan(subTheta);
 %%%%%%%==============================================================
