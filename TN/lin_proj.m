@@ -14,7 +14,7 @@ maxit  = 5;
 if (alpha == 0); ierror = 0; maxit = 1; end;
 alpha1 = alpha;
 trialLength=2;
-if(alpha1<1)
+if(alpha1<=1)
     trialAlpha=linspace(1,alpha1,trialLength);
 end
 iproj=0;
@@ -22,16 +22,15 @@ q0=p'*g;
 %---------------------------------------------------------
 % line search
 %---------------------------------------------------------
-if(alpha1<1)%& alpha1>0
+if(alpha1<=1)%& alpha1>0
     for trial=1:length(trialAlpha)
         xt = x + trialAlpha(trial).*p;
         [~,~, xt] = crash (xt, low, up);
         [ft, gt] = feval (sfun, xt);
-%         Armijo =ft<f+1e-4*trialAlpha(trial)*q0;
-Armijo =ft<f+1e-4*g'*(xt-x);
-         Wolfe = abs(p'*gt)<0.25*abs(q0);
-        if (Armijo);%
-            fprintf('Armijo satisfied, trial= %d\n',trial);
+        Armijo =ft<f+1e-4*trialAlpha(trial)*q0;
+        Wolfe = abs(p'*gt)<0.25*abs(q0);
+        if (Armijo & Wolfe);%
+            fprintf('Armijo and Wolfe satisfied, trial= %d\n',trial);
             ierror = 0;
             iproj  = 1;
             xnew   = xt;

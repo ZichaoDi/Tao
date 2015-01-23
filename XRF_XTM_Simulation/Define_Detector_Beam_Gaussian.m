@@ -21,11 +21,14 @@ knot=linspace(SourceS0(2),SourceE0(2),nTau+1)';
 SourceKnot0=[repmat(SourceS0(1),size(knot)),knot];%% source knot points
 %%%======================Define Energy Channel of the fluorescence detector
 SSD0=[detE0-[0,tol]; SourceE0-[0,tol]];
-load DetChannel
-numChannel=length(DetChannel);
-% numChannel=3;
-% DetScaleXRF=numChannel;
-% DetChannel=linspace(0,DetScaleXRF,numChannel)';%
+%--------------------------------- APS real fluorescence detector energy channel
+% load DetChannel
+% numChannel=length(DetChannel);
+%----------------------------------------------------------------
+numChannel=3;
+DetScaleXRF=numChannel;
+DetChannel=linspace(0,DetScaleXRF,numChannel)';
+%----------------------------------------------------------------
 NumSSDlet=5;
 SSDlet=[linspace(SSD0(2,1),SSD0(1,1),NumSSDlet)',...
             linspace(SSD0(2,2),SSD0(1,2),NumSSDlet)' ];

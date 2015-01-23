@@ -88,7 +88,7 @@ end
 % end
 %  save(['./data/xRayLib',num2str(E0),'.mat'],'ElementDensity','LineEnergy','CS_FluoLine','CS_TotalBeam','CS_Total');
 %  save('./data/AtomicWeight.mat','A');
- M=M.*1e-9;
+%  M=M.*1e-9;
 if(TakeLog)
     M=abs(M);%1e-300;
 end

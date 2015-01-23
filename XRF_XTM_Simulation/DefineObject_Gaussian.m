@@ -42,7 +42,7 @@ for tsub=1:NumElement
 W(:,:,tsub)=tsub*2e-1;
 end
 rng('default');
-x0=W(:)+1*10^(0)*rand(prod(m)*NumElement,1); % Initial guess for W
+x0=W(:)+1*10^(-1)*rand(prod(m)*NumElement,1); % Initial guess for W
 %%=======================================================================
 % W(1,1,:)=[7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];
 % W(1,2,:)=[7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];

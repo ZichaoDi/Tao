@@ -120,7 +120,7 @@ while (~conv);
     [spe] = stpmax (stepmx, pe, x, p, ipivot, low, up);
     alpha = step1 (f, gtp, spe);
     alpha0 = alpha;
-    PieceLinear=1;
+    PieceLinear=0;
     if(PieceLinear)
         [x_new, f_new, g_new, nf1, ierror, alpha] = lin_proj (p, x, f, g, alpha0, sfun, low, up);
     else
@@ -141,11 +141,11 @@ while (~conv);
         %############################
         fprintf('    |g|     = %12.4e\n', norm(g));
         fprintf('    |p|     = %12.4e\n', norm(p));
-        %         disp('Hit any key to continue')
-        %         pause;
-        %                 if(gtp<0 & norm(pold-p)>0)
-        %                     [ipivot, ierror, x_new] = crash2(x_new, g_new, low, up);
-        %                 end
+%         disp('Hit any key to continue')
+%         pause;
+%         if(gtp<0 & norm(pold-p)>0)
+%             [ipivot, ierror, x_new] = crash2(x_new, g_new, low, up);
+%         end
     end;
     %#######################
     x   = x_new;
