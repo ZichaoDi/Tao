@@ -1,6 +1,6 @@
 function [f,g]=sfun_Tensor4(W,xrfData,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau)
 global NumSSDlet numChannel NoSelfAbsorption
-global mtol
+global mtol SigMa_XRF
 f=0;
 W=reshape(W,mtol,NumElement);
 L=reshape(L,length(thetan),nTau+1,mtol);
@@ -76,7 +76,8 @@ for n=1:length(thetan)
             end
         end
     end
-    f=f+sum(sum((cat(1,XRF_v{n,:})-cat(1,xrfData{n,:})).^2,1),2);
-    g=g+2*reshape(sum(sum(bsxfun(@times,TempSub,reshape((cat(1,XRF_v{n,:})-cat(1,xrfData{n,:})),nTau+1,1,1,numChannel)),1),4),mtol,NumElement);
+    count=(nTau+1)*(n-1)+1:(nTau+1)*n;
+    f=f+sum(SigMa_XRF(count).*sum((cat(1,XRF_v{n,:})-cat(1,xrfData{n,:})).^2,2),1);
+    g=g+2*reshape(sum(sum(bsxfun(@times,TempSub,repmat(SigMa_XRF(count),[1 1 1 numChannel]).*reshape((cat(1,XRF_v{n,:})-cat(1,xrfData{n,:})),nTau+1,1,1,numChannel)),1),4),mtol,NumElement);
 end
 g=g(:);

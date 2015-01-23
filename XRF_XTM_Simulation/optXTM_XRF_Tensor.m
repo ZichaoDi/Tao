@@ -15,7 +15,7 @@ maxiter=10000;
 XRF_XTM_Tensor;
 %%%----------------------------------------------------------------------
 W0=W(:);
-Joint=1; % 1: XRF; -1: XTM; 0: Joint inversion
+Joint=1; % 0: XRF; -1: XTM; 1: Joint inversion
 %%%============== Rescale MU_e to make unity contribution
 DiscreteScale=0;
 penalty=0;
@@ -29,12 +29,12 @@ end
 
 if(Joint==-1)
     fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,Ltol,thetan,m,nTau,NumElement);
-elseif(Joint==0)
+elseif(Joint==1)
     fctn1=@(W)sfun_TensorJ1_Jacobian(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
-    fctn=@(W)sfun_TensorJ1(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
+    fctn=@(W)sfun_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 else
      fctn=@(W)sfun_Tensor4(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
-    fctn=@(W)sfun_AdiMat(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);%@(W)sfun_Tensor2(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);%
+    fctn1=@(W)sfun_AdiMat(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
 end
 Wtest=W;
 if(DiscreteScale)

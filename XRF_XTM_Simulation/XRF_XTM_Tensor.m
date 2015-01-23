@@ -32,20 +32,20 @@ mtol=prod(m);
 for im=1:length(thetan)
     for jm=1:nTau+1
         for iv=1:prod(m)
-        SelfInd{im,jm,iv}=cell(8,1);
-        for d=1:NumSSDlet
-            SelfInd{im,jm,iv}{7}{d}=[];
-            SelfInd{im,jm,iv}{8}{d}=[];
-        end
+            SelfInd{im,jm,iv}=cell(8,1);
+            for d=1:NumSSDlet
+                SelfInd{im,jm,iv}{7}{d}=[];
+                SelfInd{im,jm,iv}{8}{d}=[];
+            end
         end
     end
 end
-
+EmptyBeam=[];
 RMlocal=zeros(m(1),m(2),numChannel); %% assign all the contributions from seperate beam to each pixel
 if(NoSelfAbsorption)
-fprintf(1,'====== No Self Absorption, Transmission Detector Resolution is %d\n',nTau);
+    fprintf(1,'====== No Self Absorption, Transmission Detector Resolution is %d\n',nTau);
 else
-fprintf(1,'====== With Self Absorption, Transmission Detector Resolution is %d\n',nTau);
+    fprintf(1,'====== With Self Absorption, Transmission Detector Resolution is %d\n',nTau);
 end
 fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel);
 for n=1:length(thetan)
@@ -56,12 +56,12 @@ for n=1:length(thetan)
     SourceKnot=SourceKnot0*TransMatrix;
     SSDknot=SSDlet*TransMatrix;
     %%%%%============================================================
-%         fig=figure('name','grids & beam line');
-%         plotGrid(xc,omega,[m(2) m(1)]); hold on;
-%         for i=1:nTau+1
-%             fig3=plot([SourceKnot(i,1),DetKnot(i,1)],[SourceKnot(i,2),DetKnot(i,2)],'r.-');hold on;
-%         end
-%         pause;
+    %         fig=figure('name','grids & beam line');
+    %         plotGrid(xc,omega,[m(2) m(1)]); hold on;
+    %         for i=1:nTau+1
+    %             fig3=plot([SourceKnot(i,1),DetKnot(i,1)],[SourceKnot(i,2),DetKnot(i,2)],'r.-');hold on;
+    %         end
+    %         pause;
     %%%%%%%===============================================
     Rdis=zeros(nTau+1,1);
     for i=1:nTau+1 %%%%%%%%%================================================================
@@ -89,6 +89,9 @@ for n=1:length(thetan)
         end
         %=================================================================
         [index,Lvec,linearInd]=IntersectionSet(SourceKnot(i,:),DetKnot(i,:),xbox,ybox,theta);
+        if(isempty(index))
+            EmptyBeam=[EmptyBeam,[n;i]];
+        end
         %%%%%%%%================================================================
         GlobalInd{n,i}=index;
         RM=cell(m(1),m(2));
@@ -100,14 +103,14 @@ for n=1:length(thetan)
             if(j==1)
                 I_incident=1;
                 temp_sum=0;
-                SelfInd{n,i,currentInd}{5}=sub2ind(m,index(end:-1:j+1,2),index(end:-1:j+1,1)); 
+                SelfInd{n,i,currentInd}{5}=sub2ind(m,index(end:-1:j+1,2),index(end:-1:j+1,1));
                 SelfInd{n,i,currentInd}{6}=kron(MU_e(:,1,1)',Lvec(j));%Lvec(end:-1:j+1));
             elseif(j>1 & j<size(index,1))
                 temp_sum=temp_sum+Lvec(j-1)*MU_XTM(index(j-1,2),index(j-1,1));
                 I_incident=exp(-temp_sum);
                 SelfInd{n,i,currentInd}{1}=sub2ind(m,index(j-1:-1:1,2),index(j-1:-1:1,1));
                 SelfInd{n,i,currentInd}{3}=kron(Lvec(j-1:-1:1),MU_e(:,1,1)');
-                SelfInd{n,i,currentInd}{5}=sub2ind(m,index(end:-1:j+1,2),index(end:-1:j+1,1));               
+                SelfInd{n,i,currentInd}{5}=sub2ind(m,index(end:-1:j+1,2),index(end:-1:j+1,1));
                 SelfInd{n,i,currentInd}{6}=kron(MU_e(:,1,1)',Lvec(j));%Lvec(end:-1:j+1));
             else
                 temp_sum=temp_sum+Lvec(j-1)*MU_XTM(index(j-1,2),index(j-1,1));
@@ -124,7 +127,7 @@ for n=1:length(thetan)
             if(NoSelfAbsorption)
                 NumSSDlet=1;%% Turn off self-absorption
             else
-                 I_after=0*I_after;
+                I_after=0*I_after;
                 for SSDi=1:NumSSDlet
                     temp_after=0;
                     beta=angle(SSDknot(SSDi,1)-CurrentCellCenter(1)+(SSDknot(SSDi,2)-CurrentCellCenter(2))*sqrt(-1));
@@ -152,7 +155,7 @@ for n=1:length(thetan)
                     LinearInd=sub2ind(m,index_after(:,2),index_after(:,1));
                     for tsub=1:NumElement
                         if(~isempty(Lvec_after))
-                        temp_after=sum(Lvec_after.*reshape(MU_after{tsub}(LinearInd),size(Lvec_after))); %% Attenuation of Flourescent energy emitted from current pixel
+                            temp_after=sum(Lvec_after.*reshape(MU_after{tsub}(LinearInd),size(Lvec_after))); %% Attenuation of Flourescent energy emitted from current pixel
                         else
                             temp_after=0;
                         end
@@ -160,10 +163,10 @@ for n=1:length(thetan)
                     end %% End loop for each SSD detector let
                     %%%part for gradient evaluation**************************************
                     SelfInd{n,i,currentInd}{2}{SSDi}=LinearInd;
-                    SelfInd{n,i,currentInd}{4}{SSDi}=kron(squeeze(MU_e(:,1,2:end)),Lvec_after);   
+                    SelfInd{n,i,currentInd}{4}{SSDi}=kron(squeeze(MU_e(:,1,2:end)),Lvec_after);
                     for tt=1:length(otherInd)
                         SelfInd{n,i,LinearInd(tt)}{7}{SSDi}=[SelfInd{n,i,LinearInd(tt)}{7}{SSDi},currentInd];
-                        SelfInd{n,i,LinearInd(tt)}{8}{SSDi}(:,:,length(SelfInd{n,i,LinearInd(tt)}{7}{SSDi}))=reshape(squeeze(MU_e(:,1,2:end)).*Lvec_after(tt),NumElement,NumElement,1);                   
+                        SelfInd{n,i,LinearInd(tt)}{8}{SSDi}(:,:,length(SelfInd{n,i,LinearInd(tt)}{7}{SSDi}))=reshape(squeeze(MU_e(:,1,2:end)).*Lvec_after(tt),NumElement,NumElement,1);
                     end
                     %%%**************************************
                 end %% End loop for existing fluorescence energy from current pixel
@@ -184,19 +187,20 @@ for n=1:length(thetan)
             subplot(1,2,2);
             plot(DetChannel,XRF{n,i},'r-')
             xlabel('Energy Channel','fontsize',12); ylabel('Intensity','fontsize',12)
-             pause;
+            pause;
         end
     end
     DisR(:,n)=Rdis';
 end
-% DisR=DisR';
 if(LogScale)
-% SigMa_XTM=1./diag(cov(-log(DisR'./I0)));
-% SigMa_XTM=inv(cov(-log(DisR'./I0)));
-SigMa_XTM=1./(-log(DisR(:)./I0));
+    % SigMa_XTM=1./diag(cov(-log(DisR'./I0)));
+    % SigMa_XTM=inv(cov(-log(DisR'./I0)));
+    SigMa_XTM=1./(-log(DisR(:)./I0));
 else
-SigMa_XTM=1./diag(cov(DisR'));
+    SigMa_XTM=1./diag(cov(DisR'));
 end
 SigMa_XRF=1./diag(cov(SigMa_XRF'));
- SigMa_XRF=ones(size(SigMa_XRF));
- SigMa_XTM=ones(size(SigMa_XTM));
+SigMa_XRF((sub2ind([nTau+1,length(thetan)],EmptyBeam(2,:),EmptyBeam(1,:))))=0;
+SigMa_XTM((sub2ind([nTau+1,length(thetan)],EmptyBeam(2,:),EmptyBeam(1,:))))=0;
+%  SigMa_XRF=ones(size(SigMa_XRF));
+%  SigMa_XTM=ones(size(SigMa_XTM));
