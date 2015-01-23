@@ -17,6 +17,7 @@ end
 PWD = pwd;
 path(path,[pwd, slash, 'result']);
 path(path,'../TN');
+% path(path,[pwd, slash, 'data']);
 addpath_recurse('./data');
 addpath_recurse('../SimplerCode');
 if(ismac)
@@ -25,7 +26,7 @@ addpath_recurse('/Users/Wendydi/Documents/MATLAB/Di_MATLABtool');
 else
 addpath_recurse('/homes/wendydi/Documents/MATLAB/Di_MATLABtool');
 end
-ADiMat_startup;
+ ADiMat_startup;
 
 
 

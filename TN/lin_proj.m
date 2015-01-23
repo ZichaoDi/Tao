@@ -29,7 +29,7 @@ if(alpha1<1)%& alpha1>0
         [ft, gt] = feval (sfun, xt);
 %         Armijo =ft<f+1e-4*trialAlpha(trial)*q0;
 Armijo =ft<f+1e-4*g'*(xt-x);
-%         Wolfe = abs(p'*gt)<0.25*abs(q0);
+         Wolfe = abs(p'*gt)<0.25*abs(q0);
         if (Armijo);%
             fprintf('Armijo satisfied, trial= %d\n',trial);
             ierror = 0;

@@ -115,6 +115,7 @@ for n=1:length(thetan)
              JacobSub2=-2*Beta*SigMa_XTM(count)*Rdis*repmat(full(Lsub),[1,1,NumElement]).*repmat(MUe_XTM,[m(1),m(2),1]);
             end
              Jacob1=[Jacob1;reshape(JacobSub1,m(1)*m(2)*NumElement,numChannel)'];
+             JacSub=rank(reshape(JacobSub1,m(1)*m(2)*NumElement,numChannel)',eps)
             Jacob2=[Jacob2;JacobSub2(:)'];
         end
     end
@@ -123,6 +124,8 @@ end
 %%=============================================== Measure ill-conditioness
 % figure,subplot(2,1,1),spy(Jacob1), subplot(2,1,2),spy(Jacob2);
 size(Jacob1)
+% JacYes=Jacob1;
+% save JacYes JacYes;
 size(Jacob2)
 tol=eps;
 J1=rank(Jacob1,tol)

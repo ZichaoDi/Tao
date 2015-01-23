@@ -9,10 +9,10 @@
 %%%         MU: Attenuation matrix of O
 %%=======================================================================
 global x y m omega dz AbsorbScale min_MU max_MU
-global XTMscale
+global XTMscale NumLines
 
 
-AbsorbScale=1e-4;
+AbsorbScale=1e-0;
 %%%%%======================================
 DisY=m(1)+1;
 DisX=m(2)+1;
@@ -23,20 +23,26 @@ dz=[(omega(2)-omega(1))/m(2) (omega(4)-omega(3))/m(1)];
 [X,Y] = meshgrid((x(1:end-1)+x(2:end))./2,(y(1:end-1)+y(2:end))./2);
 center=[0 0];
 %%%========================== the grids of object
-xc = getNodalGrid(omega,m);
+xc = getNodalGrid(omega,[m(2) m(1)]);
 %%%========================== assign weight matrix for each element in each pixel
 %  CreateElement;
 % NumElement=1;
 %%%%%%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Z=[29:30];%29 20 29 74 79];%];%[29 30 74 79];%% 42 29 26 ];%20 49 57 46];% reference sample: Pb La Pd Mo Cu Fe Ca
+% ComChoices=nchoosek(1:6,3);
+% Z=Z(ComChoices(1,:));
+% Z=Z(1:NumElement);
 UnitSpectrumSherman_Gaussian; %% Produce BindingEnergy M
 %%=======================================================================
-SvenSample;
+% SvenSample;
 % load W_sample10
 % W=W_sample10;
-% W=zeros(m(1),m(2),NumElement);
-% for tsub=1:NumElement
-% W(:,:,tsub)=tsub*2e-1;
-% end
+W=ones(m(1),m(2),NumElement);
+for tsub=1:NumElement
+W(:,:,tsub)=tsub*2e-1;
+end
+rng('default');
+x0=W(:)+1*10^(0)*rand(prod(m)*NumElement,1); % Initial guess for W
 %%=======================================================================
 % W(1,1,:)=[7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];
 % W(1,2,:)=[7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];
@@ -76,8 +82,9 @@ SvenSample;
 % W(4,3,:)=[0 1 0 0];
 % W(4,4,:)=[0 1 0 0];
 %%%========================== locate element attenuation coefficient
-MU_e=zeros(NumElement,1,1+NumElement);
-for i=1: NumElement
+NumLines=NumElement;
+MU_e=zeros(NumElement,1,1+NumLines);
+for i=1: NumLines
     MU_e(i,1,1)=na(i)*CS_TotalBeam(Z(i),1);%calllib('libxrl','CS_Total',Z(i),E0);
     for j=1:NumElement
     MU_e(i,1,j+1)=na(i)*CS_Total(Z(i),1,Z(j));%calllib('libxrl','CS_Total',Z(i),BindingEnergy(j));   only consider K_alpha line 

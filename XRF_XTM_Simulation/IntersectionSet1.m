@@ -1,4 +1,4 @@
-function [index,Lvec]=IntersectionSet1(Source,Detector,xbox,ybox,theta)
+function [index,Lvec,linearInd]=IntersectionSet(Source,Detector,xbox,ybox,theta)
 global x y omega m plotTravel BeforeEmit dz  
 global  fig2 fig5 finalfig
 [Ax, Ay] = polyxpoly([Source(1),Detector(1)],[Source(2),Detector(2)], xbox, ybox);
@@ -6,7 +6,7 @@ if(isempty(Ax) | (length(Ax)==1 & length(Ay)==1 ))
     %fprintf('no intersection \n')
     index=[];
     Lvec=[];
-    
+    linearInd=[];
 else
      A=unique([Ax,Ay],'rows');Ax=A(:,1);Ay=A(:,2);
     if(theta==pi/2)
@@ -32,18 +32,18 @@ else
         [~,InterOrder]=sort(dis);
         Q=Q(InterOrder,:);
     else
-        Q=[Q;A];
+        Q=unique(floor([Q;A].*1e4)./1e4,'rows');
     end
     Lvec=sqrt(bsxfun(@minus,Q(2:end,1),Q(1:end-1,1)).^2+bsxfun(@minus,Q(2:end,2),Q(1:end-1,2)).^2);
     %%%%%%%%%================================================================
-    if(theta>=0 & theta<=pi/2 | theta>=pi & theta<=3*pi/2 )
-        index=[floor(myvpa((Q(:,1)+abs(omega(1)))/dz))+1,floor(myvpa((Q(:,2)+abs(omega(3)))/dz))+1];
-    else
-        index=[floor(myvpa((Q(:,1)+abs(omega(1)))/dz))+1,ceil(myvpa((Q(:,2)+abs(omega(3)))/dz))];
-    end
-    index=index(index(:,1)>0 & index(:,1)<=m(1)& index(:,2)<=m(1) & index(:,2)>0,:);
+    QC=(Q(1:end-1,:)+Q(2:end,:))/2;
+    index=floor([(QC(:,1)-omega(1))/dz(1)+1, (QC(:,2)-omega(3))/dz(2)+1]);
+    if(~BeforeEmit)
+    index=index(index(:,1)>0 & index(:,1)<=m(2)& index(:,2)<=m(1) & index(:,2)>0,:);
     [~,subInd]=unique(index,'rows');
     index=index(sort(subInd),:);
+    end
+    linearInd=sub2ind(m,index(:,2),index(:,1));
     %%%%%%%%%================================================================
     if plotTravel
         if(BeforeEmit)
@@ -54,7 +54,7 @@ else
             drawnow;
             if(~isempty(index))
                 fig2=plot((index(:,1)-1/2)*dz-abs(omega(1)),(index(:,2)-1/2)*dz-abs(omega(3)),'bo',Q(:,1),Q(:,2),'g-');
-                
+%         pause;        
             end
         else
             figure(finalfig)
@@ -62,9 +62,7 @@ else
             set(fig5,'visible','off');
             drawnow;
             if(~isempty(index))
-                fig5=plot((index(:,1)-1/2)*dz-abs(omega(1)),(index(:,2)-1/2)*dz-abs(omega(3)),'bo',Q(:,1),Q(:,2),'g-');
-             index
-             Q
+                fig5=plot((index(:,1)-1/2)*dz-abs(omega(1)),(index(:,2)-1/2)*dz-abs(omega(3)),'bo',Q(:,1),Q(:,2),'g-'); 
             end
             pause;
         end

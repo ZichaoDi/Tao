@@ -19,9 +19,9 @@ if (diff_ind == 0);
         fh = feval(fctn,zh);
         gh(i,:) = (fh-f)./h;
         eee = norm(g(i,:)-gh(i,:))/(1+norm(g(i,:)));
-         fprintf('%3i     %8.1e        %8.1e     %8.1e\n',i,norm(g(i,:),inf),norm(gh(i,:),inf),eee);
+           fprintf('%3i     %8.8e        %8.8e     %8.8e\n',i,norm(g(i,:),inf),norm(gh(i,:),inf),eee);
     end;
-    err = norm(g-gh)/(1+norm(g))
+     err = norm(g-gh)/(1+norm(g))
 else
     disp('Central Differencing')
     fprintf(' i               fh1                  fh2                  g                       gh              error\n')

@@ -2,13 +2,13 @@
 global m ;
  global DetChannel numChannel nTau DetKnot0 SourceKnot0 NumSSDlet
 omega=[-2     2    -2     2];
-% m=[3 3];
-subm=10;
-m=subm.*[3 3];
+  m=[2 2];
+% subm=1;
+% m=subm.*[3 3];
  alpha=atan((omega(4)-omega(3))/(omega(2)-omega(1)));
 dTau=(omega(2)-omega(1))/m(2);%0.5;%%% width of the each discrete beam
 Tau=sqrt((omega(2)-omega(1))^2+(omega(4)-omega(3))^2);
-nTau=ceil(Tau/dTau)+2; % number of discrete beam%nTau;%
+nTau=ceil(Tau/dTau)+2;%m(1)+1;% % number of discrete beam%nTau;%
 tol=0.5; %%the threshod to gurantee the beam will cover the whole object
 detS0=[Tau/2*tan(alpha)+tol, ceil(Tau/2)]; %initiate transmission detector location
 detE0=[Tau/2*tan(alpha)+tol,-ceil(Tau/2)];
@@ -23,9 +23,13 @@ SourceKnot0=[repmat(SourceS0(1),size(knot)),knot];%% source knot points
 SSD0=[detE0-[0,tol]; SourceE0-[0,tol]];
 load DetChannel
 numChannel=length(DetChannel);
-% numChannel=2;
+% numChannel=3;
 % DetScaleXRF=numChannel;
 % DetChannel=linspace(0,DetScaleXRF,numChannel)';%
-NumSSDlet=10;
+NumSSDlet=5;
 SSDlet=[linspace(SSD0(2,1),SSD0(1,1),NumSSDlet)',...
             linspace(SSD0(2,2),SSD0(1,2),NumSSDlet)' ];
+% Acquire2Daps;
+thetan=linspace(0,180,5);%mod(thetan+360,360);%[1 60];%[1:40:180];% Projection Angles, has to be positive.
+subTheta=1:length(thetan);
+thetan=thetan(subTheta);

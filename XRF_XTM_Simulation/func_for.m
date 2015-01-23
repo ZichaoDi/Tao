@@ -44,7 +44,11 @@ for n=1:length(thetan)
                         Lvec_after=L_after{n,i,index(j,2),index(j,1),SSDi};
                         LinearInd=sub2ind([m(1),m(2)],index_after(:,2),index_after(:,1));
                         for tsub=1:NumElement
-                            temp_after=sum(Lvec_after.*MU_after{tsub}(LinearInd)); %% Attenuation of Flourescent energy emitted from current pixel
+                            if(~isempty(Lvec_after))
+                            temp_after=sum(Lvec_after.*reshape(MU_after{tsub}(LinearInd),size(Lvec_after))); %% Attenuation of Flourescent energy emitted from current pixel
+                            else
+                                temp_after=0;
+                            end
                             I_after(tsub)=I_after(tsub)+exp(-temp_after)/NumSSDlet;
                         end %% End loop for existing fluorescence energy from current pixel
                     end %% End loop for each SSD detector let

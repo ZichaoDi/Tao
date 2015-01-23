@@ -3,7 +3,7 @@ global NF N current_n ptest gv
 global low up Tik penalty gama  
 global W0 LogScale maxiter err0 Joint
 
-close all;
+% close all;
 more off;
 PlotObject=1;
 plotElement=1;
@@ -12,7 +12,7 @@ maxiter=10000;
 XRF_XTM_Gaussian;
 %%%----------------------------------------------------------------------
 W0=W(:);
-Joint=0; % 1: XRF; -1: XTM; 0: Joint inversion
+Joint=1; % 1: XRF; -1: XTM; 0: Joint inversion
 %%%============== Rescale MU_e to make unity contribution
 DiscreteScale=0;
 penalty=0;
@@ -42,8 +42,9 @@ elseif(Joint==0)
     fctn=@(W)sfun_XRF_XTM(W,XRF,DisR,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau,I0);
       fctn=@(W)sfun_XRF_XTM_Jacobian(W,XRF,DisR,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau,I0);
 else
-     fctn=@(W)sfun_XRF_full2(W,XRF,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau);
-%      fctn1=@(W)func_for(W,XRF,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau);
+     fctn=@(W)sfun_XRF_For_Forward(W,XRF,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau);
+%       fctn1=@(W)sfun_XRF_full2(W,XRF,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau);
+      fctn1=@(W)sfun_For_AdiMat(W,XRF,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau);
 end
 rng('default');
 Wtest=W;
@@ -55,18 +56,13 @@ if(DiscreteScale)
     end
 end
 ws=Wtest(:);
-x0=W(:)+1*10^(-1)*rand(prod(m)*NumElement,1);
 xinitial=x0;
 err0=xinitial-ws;
-% % tic;
-% [f,g]=feval(fctn,W(:));
-% return;
-% g
-% toc;
-% return;
-% return;
-% foo(fctn,x0);
-% return;
+   gForh3=foo(fctn,x0);
+ [fFor3,gFor3]=feval(fctn1,x0);
+% gForh=foo(fctn1,x0);
+% % % [fFor2,gFor2]=feval(fctn1,x0);
+return;
 N=m(1);
 current_n=N(1);
 NF = [0*N; 0*N; 0*N];
@@ -91,12 +87,6 @@ if(Joint==-1 & DiscreteScale)
     err0_1=err0_1(:);
 end
 %%%====================================================== Report Result
-
-for i=1:NumElement
-    err(i)=norm(xstar(9*i-8:9*i)-ws(9*i-8:9*i))/norm(xinitial(9*i-8:9*i)-ws(9*i-8:9*i));
-end
-% figure('name','Elemental Residule')
-% semilogy(1:NumElement,err,'r.-');
 t=cputime-e;
 errTol=norm(xstar-ws)/norm(err0);
 % errTol=(norm(xstar-ws)^2/length(xstar))^(1/2)/(max(ws)-min(ws)); %% NRMSE 

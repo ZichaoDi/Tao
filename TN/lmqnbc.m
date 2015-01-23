@@ -143,9 +143,9 @@ while (~conv);
         fprintf('    |p|     = %12.4e\n', norm(p));
         %         disp('Hit any key to continue')
         %         pause;
-        %         if(gtp<0 & norm(pold-p)>0)
-        %             [ipivot, ierror, x_new] = crash2(x_new, g_new, low, up);
-        %         end
+        %                 if(gtp<0 & norm(pold-p)>0)
+        %                     [ipivot, ierror, x_new] = crash2(x_new, g_new, low, up);
+        %                 end
     end;
     %#######################
     x   = x_new;

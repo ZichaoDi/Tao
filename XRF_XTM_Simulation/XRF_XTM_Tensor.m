@@ -3,20 +3,13 @@
 global plotSpecSingle BeforeEmit plotTravel SSDlet NoSelfAbsorption
 global fig2  fig5 finalfig eX eY
 global SigMa_XTM SigMa_XRF LogScale mtol
-plotTravel=0; % If plot the intersection of beam with object
-plotSpec = 0; % Do you want to see the spectra? If so plotSpec = 1
-plotUnit=0;
 plotSpecSingle=0;
-NoSelfAbsorption=1;
+NoSelfAbsorption=0;
 Tomo_startup;
 more off;
 % load slice1_50;
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
 DefineObject_Gaussian; % Produce W, MU_XTM
-% Acquire2Daps;
-thetan=linspace(0,180,30);%mod(thetan+360,360);%[1 60];%[1:40:180];% Projection Angles
-subTheta=1:length(thetan);
-thetan=thetan(subTheta);
 %%%%%%%==============================================================
 if plotTravel
     fig2=[];  fig5=[];
@@ -49,7 +42,11 @@ for im=1:length(thetan)
 end
 
 RMlocal=zeros(m(1),m(2),numChannel); %% assign all the contributions from seperate beam to each pixel
-fprintf(1,'====== Transmission Detector Resolution is %d\n',nTau);
+if(NoSelfAbsorption)
+fprintf(1,'====== No Self Absorption, Transmission Detector Resolution is %d\n',nTau);
+else
+fprintf(1,'====== With Self Absorption, Transmission Detector Resolution is %d\n',nTau);
+end
 fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel);
 for n=1:length(thetan)
     theta=thetan(n)/180*pi;
@@ -60,7 +57,7 @@ for n=1:length(thetan)
     SSDknot=SSDlet*TransMatrix;
     %%%%%============================================================
 %         fig=figure('name','grids & beam line');
-%         plotGrid(xc,omega,m); hold on;
+%         plotGrid(xc,omega,[m(2) m(1)]); hold on;
 %         for i=1:nTau+1
 %             fig3=plot([SourceKnot(i,1),DetKnot(i,1)],[SourceKnot(i,2),DetKnot(i,2)],'r.-');hold on;
 %         end
@@ -74,13 +71,11 @@ for n=1:length(thetan)
         xbox=[omega(1) omega(1) omega(2) omega(2) omega(1)];
         ybox=[omega(3) omega(4) omega(4) omega(3) omega(3)];
         BeforeEmit=1;
-        [index,Lvec,linearInd]=IntersectionSet(SourceKnot(i,:),DetKnot(i,:),xbox,ybox,theta);
         %============================= Plot Grid and Current Light Beam
-        
         if(plotSpec)
             finalfig=figure('name',sprintf('XRF at beam %d with angle %d',i,thetan(n)));
             subplot(1,2,1);
-            plotGrid(xc,omega,m);
+            plotGrid(xc,omega,[m(2) m(1)]);
             hold on;
             plot(DetKnot(:,1),DetKnot(:,2),'k+-',SourceKnot(:,1),SourceKnot(:,2),'m+-',SSDknot(:,1),SSDknot(:,2),'g+-','LineWidth',0.5)
             axis equal
@@ -93,6 +88,7 @@ for n=1:length(thetan)
             ah=annotation('arrow',xp,yp,'Color','r','LineStyle','--');
         end
         %=================================================================
+        [index,Lvec,linearInd]=IntersectionSet(SourceKnot(i,:),DetKnot(i,:),xbox,ybox,theta);
         %%%%%%%%================================================================
         GlobalInd{n,i}=index;
         RM=cell(m(1),m(2));
@@ -104,22 +100,21 @@ for n=1:length(thetan)
             if(j==1)
                 I_incident=1;
                 temp_sum=0;
-                SelfInd{n,i,currentInd}{5}=sub2ind(m,index(end:-1:j+1,2),index(end:-1:j+1,1));               
-                SelfInd{n,i,currentInd}{6}=kron(MU_e(:,1,1)',Lvec(end:-1:j+1));
+                SelfInd{n,i,currentInd}{5}=sub2ind(m,index(end:-1:j+1,2),index(end:-1:j+1,1)); 
+                SelfInd{n,i,currentInd}{6}=kron(MU_e(:,1,1)',Lvec(j));%Lvec(end:-1:j+1));
             elseif(j>1 & j<size(index,1))
                 temp_sum=temp_sum+Lvec(j-1)*MU_XTM(index(j-1,2),index(j-1,1));
                 I_incident=exp(-temp_sum);
                 SelfInd{n,i,currentInd}{1}=sub2ind(m,index(j-1:-1:1,2),index(j-1:-1:1,1));
                 SelfInd{n,i,currentInd}{3}=kron(Lvec(j-1:-1:1),MU_e(:,1,1)');
                 SelfInd{n,i,currentInd}{5}=sub2ind(m,index(end:-1:j+1,2),index(end:-1:j+1,1));               
-                SelfInd{n,i,currentInd}{6}=kron(MU_e(:,1,1)',Lvec(end:-1:j+1));
+                SelfInd{n,i,currentInd}{6}=kron(MU_e(:,1,1)',Lvec(j));%Lvec(end:-1:j+1));
             else
                 temp_sum=temp_sum+Lvec(j-1)*MU_XTM(index(j-1,2),index(j-1,1));
                 I_incident=exp(-temp_sum);
                 SelfInd{n,i,currentInd}{1}=sub2ind(m,index(j-1:-1:1,2),index(j-1:-1:1,1));
                 SelfInd{n,i,currentInd}{3}=kron(Lvec(j-1:-1:1),MU_e(:,1,1)');
             end
-            
             %% ===========================================================
             Wsub=reshape(W(index(j,2),index(j,1),:),[NumElement,1]);
             %% Self-absorption
@@ -155,18 +150,17 @@ for n=1:length(thetan)
                     LocalInd{n,i,index(j,2),index(j,1),SSDi}=index_after;
                     L_after{n,i,index(j,2),index(j,1),SSDi}=Lvec_after;
                     LinearInd=sub2ind(m,index_after(:,2),index_after(:,1));
-
                     for tsub=1:NumElement
                         if(~isempty(Lvec_after))
-                        temp_after=sum(Lvec_after.*MU_after{tsub}(LinearInd)); %% Attenuation of Flourescent energy emitted from current pixel
-                        I_after(tsub)=I_after(tsub)+exp(-temp_after)/NumSSDlet;
+                        temp_after=sum(Lvec_after.*reshape(MU_after{tsub}(LinearInd),size(Lvec_after))); %% Attenuation of Flourescent energy emitted from current pixel
                         else
-                        I_after(tsub)=I_after(tsub)+1/NumSSDlet;
+                            temp_after=0;
                         end
+                        I_after(tsub)=I_after(tsub)+exp(-temp_after)/NumSSDlet;
                     end %% End loop for each SSD detector let
                     %%%part for gradient evaluation**************************************
                     SelfInd{n,i,currentInd}{2}{SSDi}=LinearInd;
-                    SelfInd{n,i,currentInd}{4}{SSDi}=kron(squeeze(MU_e(:,1,2:end)),Lvec_after);
+                    SelfInd{n,i,currentInd}{4}{SSDi}=kron(squeeze(MU_e(:,1,2:end)),Lvec_after);   
                     for tt=1:length(otherInd)
                         SelfInd{n,i,LinearInd(tt)}{7}{SSDi}=[SelfInd{n,i,LinearInd(tt)}{7}{SSDi},currentInd];
                         SelfInd{n,i,LinearInd(tt)}{8}{SSDi}(:,:,length(SelfInd{n,i,LinearInd(tt)}{7}{SSDi}))=reshape(squeeze(MU_e(:,1,2:end)).*Lvec_after(tt),NumElement,NumElement,1);                   
@@ -180,7 +174,6 @@ for n=1:length(thetan)
             temp(1,1,:)=Lvec(j)*I_incident*(I_after.*Wsub)'*M;
             RMlocal(index(j,2),index(j,1),:)=RMlocal(index(j,2),index(j,1),:)+temp;
             xrfSub=xrfSub+RM{index(j,2),index(j,1)};
-            
         end
         [~,~,subm,subn]=size(L(n,i,:,:));
         Rdis(i)=I0*exp(-eX'*(MU_XTM.*reshape(L(n,i,:,:),subm,subn))*eY); %% Discrete case

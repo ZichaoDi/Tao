@@ -13,12 +13,6 @@ more off;
 % load slice1_50;
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
 DefineObject_Gaussian; %% Produce W, MU_XTM
-% UnitSpectrumSherman_Gaussian; %% Produce BindingEnergy M
-% Acquire2Daps;
-% thetan=linspace(1,180,4);%[1 60];%[1:40:180];% Projection Angles
-thetan=linspace(1,180,3);%mod(thetan+360,360);%[1 60];%[1:40:180];% Projection Angles
-subTheta=1:length(thetan);
-thetan=thetan(subTheta);
 %%%%%%%==============================================================
 if plotTravel
     fig2=[];  fig5=[];
@@ -85,7 +79,7 @@ for n=1:length(thetan)
         RM=cell(m(1),m(2));
         xrfSub=zeros(1,numChannel);
         for j=1:size(index,1)
-            CurrentCellCenter=[(index(j,1)-1/2)*dz-abs(omega(1)),(index(j,2)-1/2)*dz-abs(omega(3))];
+            CurrentCellCenter=[(index(j,1)-1/2)*dz(1)-abs(omega(1)),(index(j,2)-1/2)*dz(2)-abs(omega(3))];
             L(index(j,2),index(j,1))=Lvec(j);
             if(j==1)
                 I_incident=1;
@@ -125,12 +119,16 @@ for n=1:length(thetan)
                     end
                     [index_after,Lvec_after]=IntersectionSet(CurrentCellCenter,SSDknot(SSDi,:),xbox,ybox,beta);
                     [index_after,otherInd]=setdiff(index_after,index(j,:),'rows');
-                    Lvec_after=Lvec_after(otherInd);
+                    Lvec_after=Lvec_after(otherInd');
                     LocalInd{n,i,index(j,2),index(j,1),SSDi}=index_after;
                     L_after{n,i,index(j,2),index(j,1),SSDi}=Lvec_after;
                     LinearInd=sub2ind([m(1),m(2)],index_after(:,2),index_after(:,1));
                     for tsub=1:NumElement
-                        temp_after=sum(Lvec_after.*MU_after{tsub}(LinearInd)); %% Attenuation of Flourescent energy emitted from current pixel
+                        if(~isempty(Lvec_after))
+                        temp_after=sum(Lvec_after.*reshape(MU_after{tsub}(LinearInd),size(Lvec_after))); %% Attenuation of Flourescent energy emitted from current pixel
+                        else
+                            temp_after=0;
+                        end
                         I_after(tsub)=I_after(tsub)+exp(-temp_after)/NumSSDlet;
                     end %% End loop for each SSD detector let
                 end %% End loop for existing fluorescence energy from current pixel

@@ -118,6 +118,7 @@ while (~conv);
         NF(1,nind) = NF(1,nind) + nit;
         NF(2,nind) = NF(2,nind) + nf;
         NF(3,nind) = NF(3,nind) + ncg;
+        disp('ierror=3');
         return;
     end;
     %---------------------------------------------------------

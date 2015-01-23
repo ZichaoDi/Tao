@@ -1,5 +1,5 @@
 function [f,g]=sfun_XRF_full2(W,xrfData,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau)
-global BeforeEmit  NumSSDlet NoSelfAbsorption testind
+global BeforeEmit  NumSSDlet NoSelfAbsorption
 global SigMa_XRF
 f=0;
 W=reshape(W,m(1),m(2),NumElement);
@@ -60,7 +60,12 @@ for n=1:length(thetan)
                         Lvec_after=L_after{n,i,index(j,2),index(j,1),SSDi};
                         LinearInd=sub2ind([m(1),m(2)],index_after(:,2),index_after(:,1));
                         for tsub=1:NumElement
-                            temp_after=sum(Lvec_after.*MU_after{tsub}(LinearInd)); %% Attenuation of Flourescent energy emitted from current pixel
+                            if(~isempty(Lvec_after))
+                            temp_after=sum(Lvec_after.*reshape(MU_after{tsub}(LinearInd),size(Lvec_after))); %% Attenuation of Flourescent energy emitted from current pixel
+                            else
+                                temp_after=0;
+                            end
+                         
 %                             LinearInd1=sub2ind([NumElement,m(1),m(2),NumElement],repmat(1:NumElement,1,length(index_after(:,2))),repmat(index_after(:,2)',1,NumElement),...
 %                                 repmat(index_after(:,1)',1,NumElement),tsub*ones(1,NumElement*length(index_after(:,2))));
 %                             temp_d_sub=bsxfun(@times,reshape(MU_e(:,1,tsub+1),NumElement,1),Lvec_after');

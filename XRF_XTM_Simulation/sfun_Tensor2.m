@@ -37,7 +37,9 @@ for n=1:length(thetan)
                     
                     if(~isempty(SelfInd{n,i,sub_v}{2}) & ~NoSelfAbsorption)
                         for d=1:NumSSDlet
+                            if(~isempty(SelfInd{n,i,sub_v}{2}{d}))
                             OutTens_d(i,sub_v,d,:)=exp(-sum(sum(bsxfun(@times,W(SelfInd{n,i,sub_v}{2}{d},:),reshape(SelfInd{n,i,sub_v}{4}{d},length(SelfInd{n,i,sub_v}{2}{d}),NumElement,NumElement)),1),2));   
+                            end
                         end
                         OutTens(i,sub_v,:)=sum(OutTens_d(i,sub_v,:,:),3)/NumSSDlet;
                     end
@@ -55,8 +57,6 @@ for n=1:length(thetan)
                             if(~isempty(SelfInd{n,i_sub,v}{7}{d}))
                                 [~,mx,my,mz]=size(OutTens_d(i_sub,SelfInd{n,i_sub,v}{7}{d},d,:));
                                 OutTens_J(TempInd,:,:)=OutTens_J(TempInd,:,:)+bsxfun(@times,reshape(OutTens_d(i_sub,SelfInd{n,i_sub,v}{7}{d},d,:),mx,my,mz),permute(SelfInd{n,i_sub,v}{8}{d},[3 1 2]));
-%                  OutTens_J(TempInd,:,:)=OutTens_J(TempInd,:,:)+bsxfun(@times,OutTens_d(SelfInd{n,i_sub,v}{7}{d},d,:),permute(SelfInd{n,i_sub,v}{8}{d},[3 1 2]));
-
                             end
                         end
                         OutTens_J=OutTens_J/NumSSDlet;
