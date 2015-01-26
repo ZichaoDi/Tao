@@ -22,17 +22,17 @@ SourceKnot0=[repmat(SourceS0(1),size(knot)),knot];%% source knot points
 %%%======================Define Energy Channel of the fluorescence detector
 SSD0=[detE0-[0,tol]; SourceE0-[0,tol]];
 %--------------------------------- APS real fluorescence detector energy channel
-load DetChannel
-numChannel=length(DetChannel);
+% load DetChannel
+% numChannel=length(DetChannel);
 %----------------------------------------------------------------
-% numChannel=3;
-% DetScaleXRF=numChannel;
-% DetChannel=linspace(0,DetScaleXRF,numChannel)';
+numChannel=3;
+DetScaleXRF=numChannel;
+DetChannel=linspace(0,DetScaleXRF,numChannel)';
 %----------------------------------------------------------------
 NumSSDlet=5;
 SSDlet=[linspace(SSD0(2,1),SSD0(1,1),NumSSDlet)',...
             linspace(SSD0(2,2),SSD0(1,2),NumSSDlet)' ];
 % Acquire2Daps;
-thetan=linspace(0,180,5);%mod(thetan+360,360);%[1 60];%[1:40:180];% Projection Angles, has to be positive.
+thetan=linspace(0,180,4);%mod(thetan+360,360);%[1 60];%[1:40:180];% Projection Angles, has to be positive.
 subTheta=1:length(thetan);
 thetan=thetan(subTheta);

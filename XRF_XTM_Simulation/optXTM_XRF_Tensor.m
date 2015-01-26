@@ -28,9 +28,9 @@ else
 end
 
 if(Joint==-1)
-    fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,Ltol,thetan,m,nTau,NumElement);
+    fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,L,thetan,m,nTau,NumElement);
 elseif(Joint==1)
-    fctn1=@(W)sfun_TensorJ1_Jacobian(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
+%     fctn=@(W)sfun_Tensor_Joint_Jacobian(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
     fctn=@(W)sfun_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 else
      fctn=@(W)sfun_Tensor4(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
@@ -47,12 +47,13 @@ end
 ws=Wtest(:);
 xinitial=x0;
 err0=xinitial-ws;
+
+%%%===================================================== Derivative Test
 % gh=foo(fctn,x0);
 % % % foo(fctn1,x0);
+% % [f,g]=feval(fctn,x0);
 % return;
-%%%===================================================== Derivative Test
 % TolP=3;
-% [f,g]=feval(fctn,x0);
 % [f1,g1]=feval(fctn1,x0);
 % gh=foo(fctn,x0);
 % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% For loop version (previous)

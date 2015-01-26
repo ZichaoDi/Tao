@@ -1,7 +1,7 @@
 %%%Simulate XRF of a given object with predifined detector and beam
 % function XRF=SimulateXRF(W,MU,BindingEenergy,M,thetan,DetChannel, numChannel, nTau, DetKnot0, SourceKnot0);
 global plotSpecSingle BeforeEmit plotTravel SSDlet NoSelfAbsorption
-global fig2  fig5 finalfig eX eY
+global fig2  fig5 finalfig eX eY EmptyBeam
 global SigMa_XTM SigMa_XRF LogScale mtol
 plotSpecSingle=0;
 NoSelfAbsorption=0;
