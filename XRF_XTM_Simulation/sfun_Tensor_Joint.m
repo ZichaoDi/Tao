@@ -2,7 +2,7 @@ function [f,g]=sfun_Tensor_Joint(W,xrfData,xtmData,MU_e,M,NumElement,L,GlobalInd
 global NumSSDlet numChannel NoSelfAbsorption XTMscale gama
 global mtol SigMa_XTM SigMa_XRF eX eY
 global LogScale Beta EmptyBeam
-load WeightMatrix
+%load WeightMatrix
 f=0;
 W=reshape(W,mtol,NumElement);
 L=reshape(L,length(thetan),nTau+1,mtol);
@@ -79,7 +79,7 @@ for n=1:length(thetan)
                 f=f+Beta*SigMa_XTM(count)*(Rdis-Mt(i))^2;
                 g=g-reshape(2*Beta*SigMa_XTM(count)*Rdis*(Rdis-Mt(i)).*repmat(full(Lsub),[1,1,NumElement]).*repmat(MUe_XTM,[m(1),m(2),1]),mtol,NumElement);
             end
-          SigMa1(:,i)=eye(size(diag(diag(-inv(WeightMatrix{n,i}*WeightMatrix{n,i}')))))*(XRF_v{n,i}-xrfData{n,i})';
+         % SigMa1(:,i)=eye(size(diag(diag(-inv(WeightMatrix{n,i}*WeightMatrix{n,i}')))))*(XRF_v{n,i}-xrfData{n,i})';
         end
     end
     if(~NoSelfAbsorption)

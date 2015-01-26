@@ -5,11 +5,12 @@ global W0 LogScale maxiter err0 Joint
 
 close all;
 more on;
-PlotObject=1;
+PlotObject=0;
 plotSpec = 0; % Do you want to see the spectra? If so plotSpec = 1
 plotTravel=0; % If plot the intersection of beam with object
 plotUnit=0;
 plotElement=0;
+plotResult=0;
 LogScale=1;
 maxiter=10000;
 XRF_XTM_Tensor;
@@ -30,7 +31,7 @@ end
 if(Joint==-1)
     fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,L,thetan,m,nTau,NumElement);
 elseif(Joint==1)
-%     fctn=@(W)sfun_Tensor_Joint_Jacobian(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
+     fctn1=@(W)sfun_Tensor_Joint_Jacobian(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
     fctn=@(W)sfun_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 else
      fctn=@(W)sfun_Tensor4(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
@@ -54,7 +55,8 @@ err0=xinitial-ws;
 % % [f,g]=feval(fctn,x0);
 % return;
 % TolP=3;
-% [f1,g1]=feval(fctn1,x0);
+ [f1,g1]=feval(fctn1,x0);
+ return
 % gh=foo(fctn,x0);
 % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% For loop version (previous)
 % % disp('========= For Loop Version')
@@ -137,6 +139,7 @@ else
 end
 
 % figureObject(reshape(x0,m(1),m(2),NumElement),Z,m,NumElement,MU_e,1);
+if(plotResult)
 figure(24);
 for i=1:NumElement
     subplot(3,NumElement,i);
@@ -158,5 +161,6 @@ for i=1:NumElement; subplot(3,NumElement,i+2*NumElement);plot(1:prod(m),sort(gv(
     if(i==1)
         ylabel('Projected Gradient','fontsize',12)
     end
+end
 end
 % %%%%%%%%%%%%%%%%%%%%=======================================================
