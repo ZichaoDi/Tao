@@ -53,6 +53,12 @@ for n=1:length(thetan)
                         for d=1:NumSSDlet
                             if(~isempty(SelfInd{n,i,sub_v}{2}{d}))
                                 OutTens_d(i,sub_v,d,:)=exp(-sum(sum(bsxfun(@times,W(SelfInd{n,i,sub_v}{2}{d},:),reshape(SelfInd{n,i,sub_v}{4}{d},length(SelfInd{n,i,sub_v}{2}{d}),NumElement,NumElement)),1),2));
+                                for d_sub=1:length(SelfInd{n,i,sub_v}{2}{d})
+                                    v_self=SelfInd{n,i,sub_v}{2}{d}(d_sub);
+                                    TempSub(i,v_self,:,:)=TempSub(i,v_self,:,:)-...
+                                        reshape(L(n,i,sub_v)*InTens(i,sub_v)/NumSSDlet...
+                                        *bsxfun(@times,reshape(OutTens_d(i,sub_v,d,:),1,NumElement).*W(sub_v,:),reshape(SelfInd{n,i,v_self}{8}{d}(:,:,sub_v==SelfInd{n,i,v_self}{7}{d}),NumElement,NumElement))*M,[1 1 NumElement numChannel]);
+                                end
                             end
                         end
                         OutTens(i,sub_v,:)=sum(OutTens_d(i,sub_v,:,:),3)/NumSSDlet;
@@ -79,43 +85,43 @@ for n=1:length(thetan)
                 f=f+Beta*SigMa_XTM(count)*(Rdis-Mt(i))^2;
                 g=g-reshape(2*Beta*SigMa_XTM(count)*Rdis*(Rdis-Mt(i)).*repmat(full(Lsub),[1,1,NumElement]).*repmat(MUe_XTM,[m(1),m(2),1]),mtol,NumElement);
             end
-         % SigMa1(:,i)=eye(size(diag(diag(-inv(WeightMatrix{n,i}*WeightMatrix{n,i}')))))*(XRF_v{n,i}-xrfData{n,i})';
+            % SigMa1(:,i)=eye(size(diag(diag(-inv(WeightMatrix{n,i}*WeightMatrix{n,i}')))))*(XRF_v{n,i}-xrfData{n,i})';
         end
     end
-    if(~NoSelfAbsorption)
-        UsedBeam=setdiff([1:nTau+1],EmptyBeam(2,EmptyBeam(1,:)==n));
-        for i_sub_count=1:length(UsedBeam)
-            i_sub=UsedBeam(i_sub_count);
-            for v=1:mtol
-                v7=cell2mat(SelfInd{n,i_sub,v}{7});
-                if(~isempty(v7))
-                    OutTens_J=zeros(length(v7),NumElement,NumElement);
-                    TempInd=0;
-                    for d=1:NumSSDlet
-                        if(~isempty(SelfInd{n,i_sub,v}{7}{d}))
-                            TempInd=[TempInd(end)+1:length(SelfInd{n,i_sub,v}{7}{d})+TempInd(end)];
-                            [~,mx,my,mz]=size(OutTens_d(i_sub,SelfInd{n,i_sub,v}{7}{d},d,:));
-                            OutTens_J(TempInd,:,:)=OutTens_J(TempInd,:,:)+bsxfun(@times,reshape(OutTens_d(i_sub,SelfInd{n,i_sub,v}{7}{d},d,:)...
-                                ,mx,my,mz),permute(reshape(SelfInd{n,i_sub,v}{8}{d},NumElement,NumElement,length(SelfInd{n,i_sub,v}{7}{d})),[3 1 2]));
-                        end
-                    end
-                    OutTens_J=OutTens_J/NumSSDlet;
-                    TempSub(i_sub,v,:,:)=TempSub(i_sub,v,:,:)-reshape(squeeze(sum(bsxfun(@times,reshape(L(n,i_sub,v7),length(v7),1).*InTens(i_sub,v7)'...
-                        ,bsxfun(@times,W(v7,:),permute(OutTens_J,[1 3 2]))),1))'*M,1,1,NumElement,numChannel);
-                end
-            end
-        end
-    end
+    %     if(~NoSelfAbsorption)
+    %         UsedBeam=setdiff([1:nTau+1],EmptyBeam(2,EmptyBeam(1,:)==n));
+    %         for i_sub_count=1:length(UsedBeam)
+    %             i_sub=UsedBeam(i_sub_count);
+    %             for v=1:mtol
+    %                 v7=cell2mat(SelfInd{n,i_sub,v}{7});
+    %                 if(~isempty(v7))
+    %                     OutTens_J=zeros(length(v7),NumElement,NumElement);
+    %                     TempInd=0;
+    %                     for d=1:NumSSDlet
+    %                         if(~isempty(SelfInd{n,i_sub,v}{7}{d}))
+    %                             TempInd=[TempInd(end)+1:length(SelfInd{n,i_sub,v}{7}{d})+TempInd(end)];
+    %                             [~,mx,my,mz]=size(OutTens_d(i_sub,SelfInd{n,i_sub,v}{7}{d},d,:));
+    %                             OutTens_J(TempInd,:,:)=OutTens_J(TempInd,:,:)+bsxfun(@times,reshape(OutTens_d(i_sub,SelfInd{n,i_sub,v}{7}{d},d,:)...
+    %                                 ,mx,my,mz),permute(reshape(SelfInd{n,i_sub,v}{8}{d},NumElement,NumElement,length(SelfInd{n,i_sub,v}{7}{d})),[3 1 2]));
+    %                         end
+    %                     end
+    %                     OutTens_J=OutTens_J/NumSSDlet;
+    %                     TempSub(i_sub,v,:,:)=TempSub(i_sub,v,:,:)-reshape(squeeze(sum(bsxfun(@times,reshape(L(n,i_sub,v7),length(v7),1).*InTens(i_sub,v7)'...
+    %                         ,bsxfun(@times,W(v7,:),permute(OutTens_J,[1 3 2]))),1))'*M,1,1,NumElement,numChannel);
+    %                 end
+    %             end
+    %         end
+    %     end
     count=(nTau+1)*(n-1)+1:(nTau+1)*n;
     f=f+sum(SigMa_XRF(count).*sum((cat(1,XRF_v{n,:})-cat(1,xrfData{n,:})).^2,2),1);
-g=g+2*reshape(sum(sum(bsxfun(@times,TempSub,repmat(SigMa_XRF(count),[1 1 1 numChannel]).*reshape((cat(1,XRF_v{n,:})-cat(1,xrfData{n,:})),nTau+1,1,1,numChannel)),1),4),mtol,NumElement);
-
-% f=f+sum(sum((cat(1,XRF_v{n,:})-cat(1,xrfData{n,:})).*SigMa1',2),1);
-% g=g+2*reshape(sum(sum(permute(TempSub,[4 1 2 3]).*repmat(SigMa1,[1,1,mtol,NumElement]),1),2),mtol,NumElement);
-% for i=1:nTau+1
-% %     g=g+reshape(reshape(TempSub(i,:,:,:),mtol*NumElement,numChannel)*SigMa1(:,i)+(SigMa(i,:)*reshape(TempSub(i,:,:,:),mtol*NumElement,numChannel)')',mtol,NumElement);
-%     g=g+2*reshape(reshape(TempSub(i,:,:,:),mtol*NumElement,numChannel)*SigMa1(:,i),mtol,NumElement);
-% 
-% end
+    g=g+2*reshape(sum(sum(bsxfun(@times,TempSub,repmat(SigMa_XRF(count),[1 1 1 numChannel]).*reshape((cat(1,XRF_v{n,:})-cat(1,xrfData{n,:})),nTau+1,1,1,numChannel)),1),4),mtol,NumElement);
+    
+    % f=f+sum(sum((cat(1,XRF_v{n,:})-cat(1,xrfData{n,:})).*SigMa1',2),1);
+    % g=g+2*reshape(sum(sum(permute(TempSub,[4 1 2 3]).*repmat(SigMa1,[1,1,mtol,NumElement]),1),2),mtol,NumElement);
+    % for i=1:nTau+1
+    % %     g=g+reshape(reshape(TempSub(i,:,:,:),mtol*NumElement,numChannel)*SigMa1(:,i)+(SigMa(i,:)*reshape(TempSub(i,:,:,:),mtol*NumElement,numChannel)')',mtol,NumElement);
+    %     g=g+2*reshape(reshape(TempSub(i,:,:,:),mtol*NumElement,numChannel)*SigMa1(:,i),mtol,NumElement);
+    %
+    % end
 end
 g=g(:);

@@ -50,13 +50,18 @@ xinitial=x0;
 err0=xinitial-ws;
 
 %%%===================================================== Derivative Test
-% gh=foo(fctn,x0);
-% % % foo(fctn1,x0);
-% % [f,g]=feval(fctn,x0);
-% return;
-% TolP=3;
- [f1,g1]=feval(fctn1,x0);
- return
+%  gh=foo(fctn,x0);
+% % % % foo(fctn1,x0);
+% tic;
+%  [f,g]=feval(fctn,x0);
+%  toc;
+% % return;
+% % TolP=3;
+% tic;
+%  [f1,g1]=feval(fctn1,x0);
+%  toc;
+%  
+%  return
 % gh=foo(fctn,x0);
 % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% For loop version (previous)
 % % disp('========= For Loop Version')
