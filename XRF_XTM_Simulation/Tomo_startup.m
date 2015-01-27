@@ -17,6 +17,7 @@ end
 PWD = pwd;
 path(path,[pwd, slash, 'result']);
 path(path,'../TN');
+path(path,'../MGOPT');
 % path(path,[pwd, slash, 'data']);
 addpath_recurse('./data');
 addpath_recurse('../SimplerCode');

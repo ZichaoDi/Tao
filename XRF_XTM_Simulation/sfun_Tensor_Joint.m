@@ -88,30 +88,6 @@ for n=1:length(thetan)
             % SigMa1(:,i)=eye(size(diag(diag(-inv(WeightMatrix{n,i}*WeightMatrix{n,i}')))))*(XRF_v{n,i}-xrfData{n,i})';
         end
     end
-    %     if(~NoSelfAbsorption)
-    %         UsedBeam=setdiff([1:nTau+1],EmptyBeam(2,EmptyBeam(1,:)==n));
-    %         for i_sub_count=1:length(UsedBeam)
-    %             i_sub=UsedBeam(i_sub_count);
-    %             for v=1:mtol
-    %                 v7=cell2mat(SelfInd{n,i_sub,v}{7});
-    %                 if(~isempty(v7))
-    %                     OutTens_J=zeros(length(v7),NumElement,NumElement);
-    %                     TempInd=0;
-    %                     for d=1:NumSSDlet
-    %                         if(~isempty(SelfInd{n,i_sub,v}{7}{d}))
-    %                             TempInd=[TempInd(end)+1:length(SelfInd{n,i_sub,v}{7}{d})+TempInd(end)];
-    %                             [~,mx,my,mz]=size(OutTens_d(i_sub,SelfInd{n,i_sub,v}{7}{d},d,:));
-    %                             OutTens_J(TempInd,:,:)=OutTens_J(TempInd,:,:)+bsxfun(@times,reshape(OutTens_d(i_sub,SelfInd{n,i_sub,v}{7}{d},d,:)...
-    %                                 ,mx,my,mz),permute(reshape(SelfInd{n,i_sub,v}{8}{d},NumElement,NumElement,length(SelfInd{n,i_sub,v}{7}{d})),[3 1 2]));
-    %                         end
-    %                     end
-    %                     OutTens_J=OutTens_J/NumSSDlet;
-    %                     TempSub(i_sub,v,:,:)=TempSub(i_sub,v,:,:)-reshape(squeeze(sum(bsxfun(@times,reshape(L(n,i_sub,v7),length(v7),1).*InTens(i_sub,v7)'...
-    %                         ,bsxfun(@times,W(v7,:),permute(OutTens_J,[1 3 2]))),1))'*M,1,1,NumElement,numChannel);
-    %                 end
-    %             end
-    %         end
-    %     end
     count=(nTau+1)*(n-1)+1:(nTau+1)*n;
     f=f+sum(SigMa_XRF(count).*sum((cat(1,XRF_v{n,:})-cat(1,xrfData{n,:})).^2,2),1);
     g=g+2*reshape(sum(sum(bsxfun(@times,TempSub,repmat(SigMa_XRF(count),[1 1 1 numChannel]).*reshape((cat(1,XRF_v{n,:})-cat(1,xrfData{n,:})),nTau+1,1,1,numChannel)),1),4),mtol,NumElement);

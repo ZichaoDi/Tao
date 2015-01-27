@@ -1,7 +1,7 @@
 
-global NF N current_n ptest gv
+global gv
 global low up penalty gama
-global W0 LogScale maxiter err0 Joint
+global W0 LogScale err0 Joint
 
 close all;
 more on;
@@ -10,9 +10,9 @@ plotSpec = 0; % Do you want to see the spectra? If so plotSpec = 1
 plotTravel=0; % If plot the intersection of beam with object
 plotUnit=0;
 plotElement=0;
-plotResult=0;
+% plotResult=0;
 LogScale=1;
-maxiter=10000;
+% maxiter=10000;
 XRF_XTM_Tensor;
 %%%----------------------------------------------------------------------
 W0=W(:);
@@ -31,10 +31,10 @@ end
 if(Joint==-1)
     fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,L,thetan,m,nTau,NumElement);
 elseif(Joint==1)
-     fctn1=@(W)sfun_Tensor_Joint_Jacobian(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
+    fctn1=@(W)sfun_Tensor_Joint_Jacobian(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
     fctn=@(W)sfun_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 else
-     fctn=@(W)sfun_Tensor4(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
+    fctn=@(W)sfun_Tensor4(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
     fctn1=@(W)sfun_AdiMat(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
 end
 Wtest=W;
@@ -46,22 +46,20 @@ if(DiscreteScale)
     end
 end
 ws=Wtest(:);
-xinitial=x0;
-err0=xinitial-ws;
+err0=x0-ws;
 
 %%%===================================================== Derivative Test
-%  gh=foo(fctn,x0);
-% % % % foo(fctn1,x0);
-% tic;
-%  [f,g]=feval(fctn,x0);
-%  toc;
-% % return;
-% % TolP=3;
-% tic;
-%  [f1,g1]=feval(fctn1,x0);
-%  toc;
-%  
-%  return
+%   gh=foo(fctn,x0);
+% % % % % foo(fctn1,x0);
+% % tic;
+% %  [f,g]=feval(fctn,x0);
+% %  toc;
+% % % return;
+% % % TolP=3;
+% % tic;
+% %  [f1,g1]=feval(fctn1,x0);
+% %  toc;
+%   return
 % gh=foo(fctn,x0);
 % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% For loop version (previous)
 % % disp('========= For Loop Version')
@@ -91,9 +89,9 @@ err0=xinitial-ws;
 % % hl5= plot(1:prod(m)*NumElement,abs(gFor3-gForh)./max(abs([gForh gFor3]),[],2),'c.-');
 % %  hl6= plot(1:prod(m)*NumElement,abs(g1-gForh)./max(abs([gForh g1]),[],2),'m.--');
 % % hl7= plot(1:prod(m)*NumElement,abs(g1-gFor3)./max(abs([gForh3 g1]),[],2),'go--');
-% 
+%
 % set(gca,'yscale','log'); set(gca,'ytick',10.^[-10:10])
-% 
+%
 % axis tight
 % % legend([hl1, hl2,hl3,hl4,hl5,hl6,hl7],'relerror(Tensor,AdiMat)','relerror(For2,AdiMat)',...
 % %     'relerror(For,Tensor)','relerror(FD,AdiMat)','relerror(For,FDFor)','relerror(FDFor,AdiMat)','relerror(For3,AdiMat)')
@@ -105,9 +103,6 @@ err0=xinitial-ws;
 % subplot(TolP,1,TolP),plot(sum(MU_e,3),'r.-');
 % return;
 % %%=======================================================================
-N=m(1);
-current_n=N(1);
-NF = [0*N; 0*N; 0*N];
 e=cputime;
 low=0*ones(size(x0));
 up=1e6*ones(size(x0));
@@ -115,7 +110,7 @@ up=1e6*ones(size(x0));
 %  options = optimset('Algorithm','interior-point','Display','iter');%,'DerivativeCheck','off','Diagnostics','off','GradObj','off','Display','iter','AlwaysHonorConstraints','none','TolCon',1e-10,'TolX',1e-16,'TolFun',1e-15);%
 %  [xstar,fval] = fmincon(fctn,x0,[],[],[],[],zeros(size(x0)),[],[],options);
 %  return;
-[xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
+[xstar,f,g,ierror] = tnbcm (x0,fctn,low,up,maxiter);
 if(Joint==-1 & DiscreteScale)
     xtemp=reshape(xstar,m(1),m(2),NumElement);
     err0_1=reshape(err0,m(1),m(2),NumElement);
@@ -134,38 +129,51 @@ end
 % semilogy(1:NumElement,err,'r.-');
 t=cputime-e;
 errTol=norm(xstar-ws)/norm(err0);
-if(DiscreteScale)
-    AbsErr=norm(xtemp(:)-W(:))
-    IniErr=norm(err0_1)
-    errOri=norm(xtemp(:)-W(:))/norm(err0_1);
-    fprintf('Time elapsed is %f, residual is %d, original residual is %d\n',t,errTol,errOri);
-else
-    fprintf('Time elapsed is %f, residual is %d\n',t,errTol);
-end
+% if(DiscreteScale)
+%     AbsErr=norm(xtemp(:)-W(:))
+%     IniErr=norm(err0_1)
+%     errOri=norm(xtemp(:)-W(:))/norm(err0_1);
+%     fprintf('Time elapsed is %f, residual is %d, original residual is %d\n',t,errTol,errOri);
+% else
+%     fprintf('Time elapsed is %f, residual is %d\n',t,errTol);
+% end
 
 % figureObject(reshape(x0,m(1),m(2),NumElement),Z,m,NumElement,MU_e,1);
 if(plotResult)
-figure(24);
-for i=1:NumElement
-    subplot(3,NumElement,i);
-
-errCom=reshape(xstar(prod(m)*i-prod(m)+1:prod(m)*i)-ws(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));
-imagesc(errCom);colormap gray
-    title(['Element ',num2str(i)],'fontsize',12);
-end
-for i=1:NumElement; subplot(3,NumElement,i+NumElement);
+    figure(24);
+    for i=1:NumElement
+        subplot(3,NumElement,i);
+        
+        errCom=reshape(xstar(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-ws(prod(m)*i-prod(m)+1:prod(m)*i
+        imagesc(errCom);colormap gray
+        if(i==1)
+        ylabel('Final Soluction','fontsize',12)
+        end
+        title(['Element ',num2str(i)],'fontsize',12);
+    end
+    
+    for i=1:NumElement
+        subplot(3,NumElement,i+NumElement);
+        
+        errCom=reshape(ws(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));
+        imagesc(errCom);colormap gray
+                if(i==1)
+        ylabel('True Soluction','fontsize',12)
+        end
+    end
+    for i=1:NumElement; subplot(3,NumElement,i+2*NumElement);
         plot(1:prod(m),sort(xinitial(prod(m)*i-prod(m)+1:prod(m)*i)),'ro',1:prod(m),sort(xstar(prod(m)*i-prod(m)+1:prod(m)*i)),'bs',1:prod(m),sort(ws(prod(m)*i-prod(m)+1:prod(m)*i)),'g*')
-    xlim([0 prod(m)]);
-    if(i==1)
-        legend('initial','final','optimal','font',16)
-        ylabel('solution','fontsize',12)
+        xlim([0 prod(m)]);
+        if(i==1)
+            legend('initial','final','optimal','font',16)
+            ylabel('solution','fontsize',12)
+        end
     end
-end
-for i=1:NumElement; subplot(3,NumElement,i+2*NumElement);plot(1:prod(m),sort(gv(prod(m)*i-prod(m)+1:prod(m)*i)),'r.','MarkerSize',12);
-    xlim([0 prod(m)]);
-    if(i==1)
-        ylabel('Projected Gradient','fontsize',12)
-    end
-end
+    % for i=1:NumElement; subplot(3,NumElement,i+2*NumElement);plot(1:prod(m),sort(gv(prod(m)*i-prod(m)+1:prod(m)*i)),'r.','MarkerSize',12);
+    %     xlim([0 prod(m)]);
+    %     if(i==1)
+    %         ylabel('Projected Gradient','fontsize',12)
+    %     end
+    % end
 end
 % %%%%%%%%%%%%%%%%%%%%=======================================================

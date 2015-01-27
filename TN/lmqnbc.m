@@ -120,7 +120,7 @@ while (~conv);
     [spe] = stpmax (stepmx, pe, x, p, ipivot, low, up);
     alpha = step1 (f, gtp, spe);
     alpha0 = alpha;
-    PieceLinear=0;
+    PieceLinear=1;
     if(PieceLinear)
         [x_new, f_new, g_new, nf1, ierror, alpha] = lin_proj (p, x, f, g, alpha0, sfun, low, up);
     else
@@ -207,7 +207,7 @@ while (~conv);
         %         CurrentErr=abs(x-W0(VarInd));
         %         FunEva(nit)=Ntot(2)+nf+ncg;
         ErrIter(nit)=norm(x-W0)/norm(err0);
-        ErrIter(end)
+        ErrIter(end);
         %         subplot(1,2,1)
         %         vs=sum(reshape(CurrentErr,m(1),m(2),length(VarInd)/prod(m)),3);
         %         surf(vs);

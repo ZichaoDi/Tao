@@ -137,8 +137,13 @@ while (~conv);
     spe = stpmax (stepmx, pe, x, p, ipivot, low, up);
     alpha = step1 (f, gtp, spe);
     alpha0 = alpha;
-
-    [x, f, g, nf1, ierror, alpha] = lin1 (p, x, f, alpha0, g, sfun);
+        PieceLinear=1;
+    if(PieceLinear)
+        [x, f, g, nf1, ierror, alpha] = lin_proj (p, x, f, g, alpha0, sfun, low, up);
+    else
+        [x, f, g, nf1, ierror, alpha] = lin1 (p, x, f, alpha0, g, sfun);
+    end
+%     [x, f, g, nf1, ierror, alpha] = lin1 (p, x, f, alpha0, g, sfun);
     %---------------------------------------------------------
     %## MODIFIED: ADDED THIRD CONDITION TO 'IF' STATEMENT ##
      if (alpha == 0 && alpha0 ~= 0);
