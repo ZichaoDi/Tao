@@ -39,8 +39,7 @@
 %
 
 function [a_W nr_f] = a_func_Tensor_AdiMat(W, xrfData, M, NumElement, L, GlobalInd, SelfInd, thetan, m, nTau, a_f)
-   global NumSSDlet numChannel NoSelfAbsorption;
-   global mtol;
+   global NumSSDlet numChannel NoSelfAbsorption mtol;
    tmpca3 = 0;
    tmpca2 = 0;
    tmpca1 = 0;
@@ -107,20 +106,27 @@ function [a_W nr_f] = a_func_Tensor_AdiMat(W, xrfData, M, NumElement, L, GlobalI
                   OutTens_d = ones(1, NumElement);
                else
                   adimat_push1(OutTens_d);
-                  OutTens_d = 0;
+                  OutTens_d = zeros(1, 1, NumElement);
                   tmpfra4_2 = NumSSDlet;
                   for d=1 : tmpfra4_2
-                     adimat_push1(tmpda4);
-                     tmpda4 = length(SelfInd{n, i, v}{2}{d});
-                     adimat_push1(tmpda3);
-                     tmpda3 = reshape(SelfInd{n, i, v}{4}{d}, tmpda4, NumElement, NumElement);
-                     adimat_push1(tmpda2);
-                     tmpda2 = [1 1 NumElement];
-                     adimat_push1(tmpca1);
-                     tmpca1 = repmat(W(SelfInd{n, i, v}{2}{d}, :), tmpda2);
-                     adimat_push1(Tmmp);
-                     Tmmp = tmpca1 .* tmpda3;
-                     adimat_push1(tmpca3);
+                     tmpba3 = 0;
+                     if ~isempty(SelfInd{n, i, v}{2}{d})
+                        tmpba3 = 1;
+                        adimat_push1(tmpda4);
+                        tmpda4 = length(SelfInd{n, i, v}{2}{d});
+                        adimat_push1(tmpda3);
+                        tmpda3 = reshape(SelfInd{n, i, v}{4}{d}, tmpda4, NumElement, NumElement);
+                        adimat_push1(tmpda2);
+                        tmpda2 = [1 1 NumElement];
+                        adimat_push1(tmpca1);
+                        tmpca1 = repmat(W(SelfInd{n, i, v}{2}{d}, :), tmpda2);
+                        adimat_push1(Tmmp);
+                        Tmmp = tmpca1 .* tmpda3;
+                     else
+                        adimat_push1(Tmmp);
+                        Tmmp = 0;
+                     end
+                     adimat_push(tmpba3, tmpca3);
                      tmpca3 = sum(Tmmp, 1);
                      adimat_push1(tmpca2);
                      tmpca2 = sum(tmpca3, 2);
@@ -241,13 +247,19 @@ function [a_W nr_f] = a_func_Tensor_AdiMat(W, xrfData, M, NumElement, L, GlobalI
                      tmpca3 = adimat_pop1;
                      a_Tmmp = adimat_adjsum(a_Tmmp, a_sum(a_tmpca3, Tmmp, 1));
                      a_tmpca3 = a_zeros1(tmpca3);
-                     Tmmp = adimat_pop1;
-                     a_tmpca1 = adimat_adjsum(a_tmpca1, adimat_adjred(tmpca1, a_Tmmp .* tmpda3));
-                     a_Tmmp = a_zeros1(Tmmp);
-                     tmpca1 = adimat_pop1;
-                     a_W(SelfInd{n, i, v}{2}{d}, :) = adimat_adjsum(a_W(SelfInd{n, i, v}{2}{d}, :), a_repmat(a_tmpca1, W(SelfInd{n, i, v}{2}{d}, :), tmpda2));
-                     a_tmpca1 = a_zeros1(tmpca1);
-                     [tmpda2 tmpda3 tmpda4] = adimat_pop;
+                     tmpba3 = adimat_pop1;
+                     if tmpba3 == 1
+                        Tmmp = adimat_pop1;
+                        a_tmpca1 = adimat_adjsum(a_tmpca1, adimat_adjred(tmpca1, a_Tmmp .* tmpda3));
+                        a_Tmmp = a_zeros1(Tmmp);
+                        tmpca1 = adimat_pop1;
+                        a_W(SelfInd{n, i, v}{2}{d}, :) = adimat_adjsum(a_W(SelfInd{n, i, v}{2}{d}, :), a_repmat(a_tmpca1, W(SelfInd{n, i, v}{2}{d}, :), tmpda2));
+                        a_tmpca1 = a_zeros1(tmpca1);
+                        [tmpda2 tmpda3 tmpda4] = adimat_pop;
+                     else
+                        Tmmp = adimat_pop1;
+                        a_Tmmp = a_zeros1(Tmmp);
+                     end
                   end
                   OutTens_d = adimat_pop1;
                   a_OutTens_d = a_zeros1(OutTens_d);
@@ -287,8 +299,7 @@ function [a_W nr_f] = a_func_Tensor_AdiMat(W, xrfData, M, NumElement, L, GlobalI
 end
 
 function f = rec_func_Tensor_AdiMat(W, xrfData, M, NumElement, L, GlobalInd, SelfInd, thetan, m, nTau)
-   global NumSSDlet numChannel NoSelfAbsorption;
-   global mtol;
+   global NumSSDlet numChannel NoSelfAbsorption mtol;
    tmpca3 = 0;
    tmpca2 = 0;
    tmpca1 = 0;
@@ -355,20 +366,27 @@ function f = rec_func_Tensor_AdiMat(W, xrfData, M, NumElement, L, GlobalInd, Sel
                   OutTens_d = ones(1, NumElement);
                else
                   adimat_push1(OutTens_d);
-                  OutTens_d = 0;
+                  OutTens_d = zeros(1, 1, NumElement);
                   tmpfra4_2 = NumSSDlet;
                   for d=1 : tmpfra4_2
-                     adimat_push1(tmpda4);
-                     tmpda4 = length(SelfInd{n, i, v}{2}{d});
-                     adimat_push1(tmpda3);
-                     tmpda3 = reshape(SelfInd{n, i, v}{4}{d}, tmpda4, NumElement, NumElement);
-                     adimat_push1(tmpda2);
-                     tmpda2 = [1 1 NumElement];
-                     adimat_push1(tmpca1);
-                     tmpca1 = repmat(W(SelfInd{n, i, v}{2}{d}, :), tmpda2);
-                     adimat_push1(Tmmp);
-                     Tmmp = tmpca1 .* tmpda3;
-                     adimat_push1(tmpca3);
+                     tmpba3 = 0;
+                     if ~isempty(SelfInd{n, i, v}{2}{d})
+                        tmpba3 = 1;
+                        adimat_push1(tmpda4);
+                        tmpda4 = length(SelfInd{n, i, v}{2}{d});
+                        adimat_push1(tmpda3);
+                        tmpda3 = reshape(SelfInd{n, i, v}{4}{d}, tmpda4, NumElement, NumElement);
+                        adimat_push1(tmpda2);
+                        tmpda2 = [1 1 NumElement];
+                        adimat_push1(tmpca1);
+                        tmpca1 = repmat(W(SelfInd{n, i, v}{2}{d}, :), tmpda2);
+                        adimat_push1(Tmmp);
+                        Tmmp = tmpca1 .* tmpda3;
+                     else
+                        adimat_push1(Tmmp);
+                        Tmmp = 0;
+                     end
+                     adimat_push(tmpba3, tmpca3);
                      tmpca3 = sum(Tmmp, 1);
                      adimat_push1(tmpca2);
                      tmpca2 = sum(tmpca3, 2);
@@ -439,8 +457,7 @@ function f = rec_func_Tensor_AdiMat(W, xrfData, M, NumElement, L, GlobalInd, Sel
 end
 
 function a_W = ret_func_Tensor_AdiMat(a_f)
-   global NumSSDlet numChannel NoSelfAbsorption;
-   global mtol;
+   global NumSSDlet numChannel NoSelfAbsorption mtol;
    tmpnargin = adimat_pop1;
    if tmpnargin > 9
       nTau = adimat_pop1;
@@ -550,13 +567,19 @@ function a_W = ret_func_Tensor_AdiMat(a_f)
                      tmpca3 = adimat_pop1;
                      a_Tmmp = adimat_adjsum(a_Tmmp, a_sum(a_tmpca3, Tmmp, 1));
                      a_tmpca3 = a_zeros1(tmpca3);
-                     Tmmp = adimat_pop1;
-                     a_tmpca1 = adimat_adjsum(a_tmpca1, adimat_adjred(tmpca1, a_Tmmp .* tmpda3));
-                     a_Tmmp = a_zeros1(Tmmp);
-                     tmpca1 = adimat_pop1;
-                     a_W(SelfInd{n, i, v}{2}{d}, :) = adimat_adjsum(a_W(SelfInd{n, i, v}{2}{d}, :), a_repmat(a_tmpca1, W(SelfInd{n, i, v}{2}{d}, :), tmpda2));
-                     a_tmpca1 = a_zeros1(tmpca1);
-                     [tmpda2 tmpda3 tmpda4] = adimat_pop;
+                     tmpba3 = adimat_pop1;
+                     if tmpba3 == 1
+                        Tmmp = adimat_pop1;
+                        a_tmpca1 = adimat_adjsum(a_tmpca1, adimat_adjred(tmpca1, a_Tmmp .* tmpda3));
+                        a_Tmmp = a_zeros1(Tmmp);
+                        tmpca1 = adimat_pop1;
+                        a_W(SelfInd{n, i, v}{2}{d}, :) = adimat_adjsum(a_W(SelfInd{n, i, v}{2}{d}, :), a_repmat(a_tmpca1, W(SelfInd{n, i, v}{2}{d}, :), tmpda2));
+                        a_tmpca1 = a_zeros1(tmpca1);
+                        [tmpda2 tmpda3 tmpda4] = adimat_pop;
+                     else
+                        Tmmp = adimat_pop1;
+                        a_Tmmp = a_zeros1(Tmmp);
+                     end
                   end
                   OutTens_d = adimat_pop1;
                   a_OutTens_d = a_zeros1(OutTens_d);
