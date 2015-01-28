@@ -9,7 +9,7 @@
 %%%         MU: Attenuation matrix of O
 %%=======================================================================
 global x y m omega dz AbsorbScale min_MU max_MU
-global XTMscale NumLines
+global XTMscale NumLines NumElement
 
 
 AbsorbScale=1e-0;
@@ -28,21 +28,21 @@ xc = getNodalGrid(omega,[m(2) m(1)]);
 %  CreateElement;
 % NumElement=1;
 %%%%%%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Z=[29:30];%29 20 29 74 79];%];%[29 30 74 79];%% 42 29 26 ];%20 49 57 46];% reference sample: Pb La Pd Mo Cu Fe Ca
+Z=[20 29 30 46 49 57 74 79];%% 42 29 26 ];%20 49 57 46];% reference sample: Pb La Pd Mo Cu Fe Ca
 % ComChoices=nchoosek(1:6,3);
 % Z=Z(ComChoices(1,:));
-% Z=Z(1:NumElement);
+Z=Z(1:NumElement);
 UnitSpectrumSherman_Gaussian; %% Produce BindingEnergy M
 %%=======================================================================
 % SvenSample;
 % load W_sample10
 % W=W_sample10;
-% W=ones(m(1),m(2),NumElement);
-% for tsub=1:NumElement
-% W(:,:,tsub)=tsub*2e-1;
-% end
-% rng('default');
-% x0=W(:)+1*10^(-1)*rand(prod(m)*NumElement,1); % Initial guess for W
+W=ones(m(1),m(2),NumElement);
+for tsub=1:NumElement
+W(:,:,tsub)=tsub*2e-1;
+end
+rng('default');
+x0=W(:)+1*10^(-1)*rand(prod(m)*NumElement,1); % Initial guess for W
 %%=======================================================================
 % W(1,1,:)=[7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];
 % W(1,2,:)=[7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];

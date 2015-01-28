@@ -2,7 +2,7 @@ function [F, G] = sfun_mg (v)
 %--------------------------------------------------------------
 % compute objective function and gradient [residual form]
 %--------------------------------------------------------------
-global current_fnl it hx
+global current_fnl 
 %--------------------------------------------------------------
 [F,G] = sfun(v);
 

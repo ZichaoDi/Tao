@@ -9,7 +9,7 @@
 global current_n
 global NF N        % NF counts # of function evals on each grid
 global GRAPH_N_OLD GRAPH_INDEX_OLD
-global problem_name it lambdaind
+global problem_name it
 %----------------------------------------------------------------------
 % SETUP FOR MULTIGRID
 %----------------------------------------------------------------------

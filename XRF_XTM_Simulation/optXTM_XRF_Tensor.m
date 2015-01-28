@@ -1,5 +1,5 @@
 
-global gv
+% global gv
 global low up penalty gama
 global W0 LogScale err0 Joint
 
@@ -16,7 +16,7 @@ LogScale=1;
 XRF_XTM_Tensor;
 %%%----------------------------------------------------------------------
 W0=W(:);
-Joint=1; % 0: XRF; -1: XTM; 1: Joint inversion
+Joint=0; % 0: XRF; -1: XTM; 1: Joint inversion
 %%%============== Rescale MU_e to make unity contribution
 DiscreteScale=0;
 penalty=0;
@@ -51,18 +51,17 @@ err0=x0-ws;
 %%%===================================================== Derivative Test
 %   gh=foo(fctn,x0);
 % % % % % foo(fctn1,x0);
-% % tic;
-% %  [f,g]=feval(fctn,x0);
-% %  toc;
-% % % return;
-% % % TolP=3;
-% % tic;
-% %  [f1,g1]=feval(fctn1,x0);
-% %  toc;
-%   return
+tic;
+ [f,g]=feval(fctn,W(:));
+T_Tensor=toc;
+tic;
+ [f1,g1]=feval(fctn1,W(:));
+T_AD=toc;
+return;
 % gh=foo(fctn,x0);
 % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% For loop version (previous)
 % % disp('========= For Loop Version')
+% % TolP=3;
 % % gFor=g;
 % % XRF1=XRF;
 % % optXTM_XRF;
@@ -147,7 +146,7 @@ if(plotResult)
         errCom=reshape(xstar(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-ws(prod(m)*i-prod(m)+1:prod(m)*i
         imagesc(errCom);colormap gray
         if(i==1)
-        ylabel('Final Soluction','fontsize',12)
+            ylabel('Final Soluction','fontsize',12)
         end
         title(['Element ',num2str(i)],'fontsize',12);
     end
@@ -157,8 +156,8 @@ if(plotResult)
         
         errCom=reshape(ws(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));
         imagesc(errCom);colormap gray
-                if(i==1)
-        ylabel('True Soluction','fontsize',12)
+        if(i==1)
+            ylabel('True Soluction','fontsize',12)
         end
     end
     for i=1:NumElement; subplot(3,NumElement,i+2*NumElement);
