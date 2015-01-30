@@ -20,9 +20,9 @@ if(length(val)<4)
     subind=[1 2];
 end
 val=val(i2(subind));
-NumElement=length(val);
+NumElement=3;
 W=zeros(m(1),m(2),NumElement);
-for i=1:NumElement
+for i=1:length(subind)
     Ws=zeros(m(1),m(2));
     Ws(abs(A(:)-val(i))<tol)=val(i)+ExtraVal(i);
     W(:,:,i)=Ws+0.1;

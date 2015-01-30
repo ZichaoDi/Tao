@@ -32,10 +32,13 @@ for level=length(N):-1:1
         end
     else
         disp('====================== Start post-smoothing')
-        maxiter=100;
+        maxiter=1;
+        if(current_n==N(1))
+            maxiter=100;
+        end
     end
     if(current_n==N(1))
-        plotResult=1;
+        plotResult=0;
     else
         plotResult=0;
     end
