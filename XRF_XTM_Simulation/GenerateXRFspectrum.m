@@ -5,6 +5,7 @@ global fig2  fig5 finalfig slice onlyXRF
 
 Tomo_startup;
 close all;
+load Phantom3_Young
 onlyXRF=1;
 PlotObject=0;
 plotSpec = 0; % Do you want to see the spectra? If so plotSpec = 1
@@ -14,10 +15,10 @@ plotElement=0;
 plotSpecSingle=0;
 NoSelfAbsorption=0;
 more off;
-current_n=256;
+current_n=15;
 numThetan=1;
 XRF3=[];
-for slice=1:current_n
+for slice=1:2
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
 DefineObject_Gaussian; % Produce W, MU_XTM
 %%%%%%%==============================================================
@@ -150,16 +151,17 @@ end
 
 
 dataset={'XRF_roi', 'channel_names', 'channel_units','scaler_names', 'scaler_units', 'scalers','mca_arr'};
-formatD=cell(length(dataset),1);
-for i=1:length(dataset)-1
-formatD{i}=h5read('/Users/Wendydi/Documents/MATLAB/APSdata/2xfm1211_14/2xfm_0307.h5',['/MAPS/',num2str(dataset{i})]);
-end
-formatD{length(dataset)}=XRF3;
+% formatH5=cell(length(dataset),1);
+% for i=1:length(dataset)-1
+% formatH5{i}=h5read('/Users/Wendydi/Documents/MATLAB/APSdata/2xfm1211_14/2xfm_0307.h5',['/MAPS/',num2str(dataset{i})]);
+% end
+load formatH5
+formatH5{length(dataset)}=XRF3;
 for i=1:length(dataset)
 if(i==1)
-hdf5write('myXRF.h5',['/MAPS/',num2str(dataset{i})],formatD{i});
+hdf5write('myXRF.h5',['/MAPS/',num2str(dataset{i})],formatH5{i});
 else
-hdf5write('myXRF.h5',['/MAPS/',num2str(dataset{i})],formatD{i},'WriteMode', 'append');
+hdf5write('myXRF.h5',['/MAPS/',num2str(dataset{i})],formatH5{i},'WriteMode', 'append');
 end
 end
 

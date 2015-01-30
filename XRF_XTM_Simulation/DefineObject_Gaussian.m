@@ -28,9 +28,10 @@ xc = getNodalGrid(omega,[m(2) m(1)]);
  if(onlyXRF)
 W=zeros(current_n,current_n,4);
 for i=1:4
-data=h5read('3dPhantom_Young.h5',['/exchange/elem',num2str(i)]);
+data=Phantom3_Young(:,:,:,i+1);
 W(:,:,i)=data(1:current_n,1:current_n,slice);
 end
+ NumElement=4;
  else
 CreateElement;
 % SvenSample;
