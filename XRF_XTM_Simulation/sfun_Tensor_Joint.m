@@ -1,9 +1,10 @@
 function [f,g]=sfun_Tensor_Joint(W,xrfData,xtmData,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0)
 global NumSSDlet numChannel NoSelfAbsorption XTMscale gama
-global mtol SigMa_XTM SigMa_XRF eX eY
+global  SigMa_XTM SigMa_XRF
 global LogScale Beta EmptyBeam
-%load WeightMatrix
+% load WeightMatrix
 f=0;
+mtol=prod(m);
 W=reshape(W,mtol,NumElement);
 L=reshape(L,length(thetan),nTau+1,mtol);
 Beta=1e0;
@@ -12,6 +13,8 @@ MUe=reshape(MU_e(:,1,1),1,1,NumElement);
 MUe_XTM=reshape(MU_e(:,1,1).*gama,1,1,NumElement).*XTMscale;
 MU_XTM=sum(reshape(W,m(1),m(2),NumElement).*repmat(MUe,[m(1),m(2),1]),3).*XTMscale;
 %%%%% ====================================================================
+eX=ones(m(1),1);
+eY=ones(m(2),1);
 %%%%% ====================================================================
 g=zeros(mtol,NumElement);
 for n=1:length(thetan)
@@ -21,7 +24,6 @@ for n=1:length(thetan)
         Mt=xtmData(:,n);
     end
     SigMa1=zeros(numChannel,nTau+1);
-    SigMa=SigMa1';
     InTens=ones(nTau+1,mtol);
     OutTens=ones(nTau+1,mtol,NumElement);
     OutTens_d=ones(nTau+1,mtol,NumSSDlet,NumElement);
@@ -85,19 +87,19 @@ for n=1:length(thetan)
                 f=f+Beta*SigMa_XTM(count)*(Rdis-Mt(i))^2;
                 g=g-reshape(2*Beta*SigMa_XTM(count)*Rdis*(Rdis-Mt(i)).*repmat(full(Lsub),[1,1,NumElement]).*repmat(MUe_XTM,[m(1),m(2),1]),mtol,NumElement);
             end
-            % SigMa1(:,i)=eye(size(diag(diag(-inv(WeightMatrix{n,i}*WeightMatrix{n,i}')))))*(XRF_v{n,i}-xrfData{n,i})';
+%              SigMa1(:,i)=diag(diag(-inv(WeightMatrix{n,i}*WeightMatrix{n,i}')))*(XRF_v{n,i}-xrfData{n,i})';
         end
     end
     count=(nTau+1)*(n-1)+1:(nTau+1)*n;
     f=f+sum(SigMa_XRF(count).*sum((cat(1,XRF_v{n,:})-cat(1,xrfData{n,:})).^2,2),1);
     g=g+2*reshape(sum(sum(bsxfun(@times,TempSub,repmat(SigMa_XRF(count),[1 1 1 numChannel]).*reshape((cat(1,XRF_v{n,:})-cat(1,xrfData{n,:})),nTau+1,1,1,numChannel)),1),4),mtol,NumElement);
     
-    % f=f+sum(sum((cat(1,XRF_v{n,:})-cat(1,xrfData{n,:})).*SigMa1',2),1);
-    % g=g+2*reshape(sum(sum(permute(TempSub,[4 1 2 3]).*repmat(SigMa1,[1,1,mtol,NumElement]),1),2),mtol,NumElement);
-    % for i=1:nTau+1
-    % %     g=g+reshape(reshape(TempSub(i,:,:,:),mtol*NumElement,numChannel)*SigMa1(:,i)+(SigMa(i,:)*reshape(TempSub(i,:,:,:),mtol*NumElement,numChannel)')',mtol,NumElement);
-    %     g=g+2*reshape(reshape(TempSub(i,:,:,:),mtol*NumElement,numChannel)*SigMa1(:,i),mtol,NumElement);
-    %
-    % end
+%     f=f+sum(sum((cat(1,XRF_v{n,:})-cat(1,xrfData{n,:})).*SigMa1',2),1);
+%     g=g+2*reshape(sum(sum(permute(TempSub,[4 1 2 3]).*repmat(SigMa1,[1,1,mtol,NumElement]),1),2),mtol,NumElement);
+% %     for i=1:nTau+1
+% %     %     g=g+reshape(reshape(TempSub(i,:,:,:),mtol*NumElement,numChannel)*SigMa1(:,i)+(SigMa(i,:)*reshape(TempSub(i,:,:,:),mtol*NumElement,numChannel)')',mtol,NumElement);
+% %         g=g+2*reshape(reshape(TempSub(i,:,:,:),mtol*NumElement,numChannel)*SigMa1(:,i),mtol,NumElement);
+% %     
+% %     end
 end
 g=g(:);

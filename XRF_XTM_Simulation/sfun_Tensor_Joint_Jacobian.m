@@ -1,8 +1,9 @@
 function [f,g]=sfun_Tensor_Joint_Jacobian(W,xrfData,xtmData,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0)
 global NumSSDlet numChannel NoSelfAbsorption XTMscale gama
-global mtol SigMa_XTM SigMa_XRF eX eY
+global SigMa_XTM SigMa_XRF
 global LogScale Beta EmptyBeam
 f=0;
+mtol=prod(m);
 W=reshape(W,mtol,NumElement);
 L=reshape(L,length(thetan),nTau+1,mtol);
 Beta=1e0;
@@ -10,6 +11,9 @@ Beta=1e0;
 MUe=reshape(MU_e(:,1,1),1,1,NumElement);
 MUe_XTM=reshape(MU_e(:,1,1).*gama,1,1,NumElement).*XTMscale;
 MU_XTM=sum(reshape(W,m(1),m(2),NumElement).*repmat(MUe,[m(1),m(2),1]),3).*XTMscale;
+%%%%% ====================================================================
+eX=ones(m(1),1);
+eY=ones(m(2),1);
 %%%%% ====================================================================
 %%%%% ====================================================================
 g=zeros(mtol,NumElement);

@@ -2,7 +2,7 @@ function [index,Lvec,linearInd]=IntersectionSet(Source,Detector,xbox,ybox,theta)
 global x y omega m plotTravel BeforeEmit dz
 global  fig2 fig5 finalfig
 [Ax, Ay] = polyxpoly([Source(1),Detector(1)],[Source(2),Detector(2)], xbox, ybox);
-if(isempty(Ax) | (length(Ax)==1 & length(Ay)==1 ))
+if(isempty(Ax) | length(unique(Ax))==1 & length(unique(Ay))==1)
     %fprintf('no intersection \n')
     index=[];
     Lvec=[];

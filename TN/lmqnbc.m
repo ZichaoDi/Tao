@@ -206,8 +206,8 @@ while (~conv);
         %         figure(100);
         %         CurrentErr=abs(x-W0(VarInd));
         %         FunEva(nit)=Ntot(2)+nf+ncg;
-        ErrIter(nit)=norm(x-W0)/norm(err0);
-        ErrIter(end);
+        ErrIter(nit)=norm(x-W0)/err0;
+        ErrIter(end)
         %         subplot(1,2,1)
         %         vs=sum(reshape(CurrentErr,m(1),m(2),length(VarInd)/prod(m)),3);
         %         surf(vs);

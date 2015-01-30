@@ -21,7 +21,7 @@ NA=6.02e23;%Avogadro's number
 load AtomicWeight
 load(['xRayLib',num2str(E0),'.mat'])
 load PeriodicTable
-Line=1:36;%[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
+Line=1:3;%[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
 shell=0;  %% Shell type
 BindingEnergy=zeros(NumElement*length(Line),1);
 M=zeros(NumElement,numChannel);
@@ -38,21 +38,21 @@ G=fft(1*exp(-(DetChannel-mu).^2./(2*sigma^2))/(sigma*sqrt(2*pi)));
 %%======================================================================
 while(i<=NumElement)
     PurePeak=0.*DetChannel;
-%     ElementDensity(i)=calllib('libxrl','ElementDensity',Z(i));%
+    %     ElementDensity(i)=calllib('libxrl','ElementDensity',Z(i));%
     density=ElementDensity(Z(i));%
-%      A(i)=calllib('libxrl','AtomicWeight',Z(i));
+    %      A(i)=calllib('libxrl','AtomicWeight',Z(i));
     na(i)=density*NA/A(Z(i))*Z(i)*1e-24;
     j=1;
     while (j<=length(Line))
-%         LineEnergy(i,j)=calllib('libxrl','LineEnergy',Z(i),-Line(j));
+        %         LineEnergy(i,j)=calllib('libxrl','LineEnergy',Z(i),-Line(j));
         new_energy=LineEnergy(Z(i),Line(j));%
         %         mu=na(i)*calllib('libxrl','CS_Total',Z(i),E0);
         %         Jump=calllib('libxrl','JumpFactor',Z(i),shell);
         %         w=calllib('libxrl','FluorYield',Z(i),shell);
         %         c=1; %%% weight fraction, 1: single element, ~1: compound
         %         intensity=I0*c*w*(1-1/Jump)*mu*T;
-%                 CS_TotalBeam(i,1)=calllib('libxrl','CS_Total',Z(i),E0);
-%         CS_FluoLine(i,j)=calllib('libxrl','CS_FluorLine',Z(i),-Line(j),E0);
+        %                 CS_TotalBeam(i,1)=calllib('libxrl','CS_Total',Z(i),E0);
+        %         CS_FluoLine(i,j)=calllib('libxrl','CS_FluorLine',Z(i),-Line(j),E0);
         intensity=I0*CS_FluoLine(Z(i),Line(j));%
         BindingEnergy(length(Line)*(i-1)+j)=new_energy;
         [~,adj]=min(abs(repmat(new_energy,size(DetChannel))-DetChannel));
@@ -67,7 +67,8 @@ while(i<=NumElement)
     if(plotUnit)
         cmap=colormap(lines);
         cmap = cmap(1:NumElement,:);
-        semilogy(DetChannel,abs(M(i,:)),'color',cmap(i,1:3),'LineStyle','-.','LineWidth',1.5);%
+        semilogy(DetChannel,abs(M(i,:)),'color',cmap(i,1:3),'LineStyle','-.','LineWidth',1.5);
+        % plot(DetChannel,abs(M(i,:)),'color',cmap(i,1:3),'LineStyle','-.','LineWidth',1.5);
         Legend{i}=sprintf('%s',Element{Z(i)});
         legend(Legend)
         title('Gaussian spectrum for each element')
@@ -80,7 +81,7 @@ while(i<=NumElement)
 end
 % for i=1:NumElement
 %     for j=1:length(Line)
-% 
+%
 %                 for t=1:NumElement
 %                 CS_Total(i,j,t)=calllib('libxrl','CS_Total',Z(i),LineEnergy(t,j));
 %                 end
@@ -88,7 +89,7 @@ end
 % end
 %  save(['./data/xRayLib',num2str(E0),'.mat'],'ElementDensity','LineEnergy','CS_FluoLine','CS_TotalBeam','CS_Total');
 %  save('./data/AtomicWeight.mat','A');
- M=M.*1e-9;
+M=M.*ScaleM;
 if(TakeLog)
     M=abs(M);%1e-300;
 end

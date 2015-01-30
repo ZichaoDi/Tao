@@ -1,22 +1,23 @@
 
 % global gv
 global low up penalty gama
-global W0 LogScale err0 Joint
+global W0 current_n N
+global SigMa_XTM SigMa_XRF 
 
-close all;
-more on;
-PlotObject=0;
-plotSpec = 0; % Do you want to see the spectra? If so plotSpec = 1
-plotTravel=0; % If plot the intersection of beam with object
-plotUnit=0;
-plotElement=0;
-% plotResult=0;
-LogScale=1;
-% maxiter=10000;
-XRF_XTM_Tensor;
+%%%----------------------------Initialize dependent variables
+level=find(N==current_n);
+W= W_level{level};
+XRF=xrf_level{level};
+DisR=xtm_level{level};
+L=L_level{level};
+GlobalInd=GI_level{level};
+SelfInd=SI_level{level};
+m=m_level(level,:);
+nTau=nTau_level(level);
+SigMa_XTM=SigmaT{level};
+SigMa_XRF=SigmaR{level};
 %%%----------------------------------------------------------------------
 W0=W(:);
-Joint=0; % 0: XRF; -1: XTM; 1: Joint inversion
 %%%============== Rescale MU_e to make unity contribution
 DiscreteScale=0;
 penalty=0;
@@ -31,8 +32,8 @@ end
 if(Joint==-1)
     fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,L,thetan,m,nTau,NumElement);
 elseif(Joint==1)
-    fctn1=@(W)sfun_Tensor_Joint_Jacobian(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
-    fctn=@(W)sfun_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
+    fctn=@(W)sfun_Tensor_Joint_Jacobian(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
+%     fctn=@(W)sfun_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 else
     fctn=@(W)sfun_Tensor4(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
     fctn1=@(W)sfun_AdiMat(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
@@ -46,62 +47,6 @@ if(DiscreteScale)
     end
 end
 ws=Wtest(:);
-err0=x0-ws;
-
-%%%===================================================== Derivative Test
-%   gh=foo(fctn,x0);
-% % % % % foo(fctn1,x0);
-tic;
- [f,g]=feval(fctn,W(:));
-T_Tensor=toc;
-tic;
- [f1,g1]=feval(fctn1,W(:));
-T_AD=toc;
-return;
-% gh=foo(fctn,x0);
-% % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% For loop version (previous)
-% % disp('========= For Loop Version')
-% % TolP=3;
-% % gFor=g;
-% % XRF1=XRF;
-% % optXTM_XRF;
-% % %%%%%%%%%%%%==============================================
-% f_AD_Tensor=abs(f-f1)/norm(f)
-% % f_AD_For=norm(f1-fFor3)/norm(f)
-% % f_Tensor_For=norm(f-fFor3)/norm(f)
-% % return;
-% errTensor_FD=norm(g-gh)/norm(g1)
-% %  errFor_FD=norm(gFor3-gForh)/norm(g1)
-% % errFD1_FD2=norm(g1-gFor3)/norm(g1)
-% % return;
-% errAD_Tensor=norm(g-g1)/norm(g1)
-% % errFor_AD=norm(g1-gFor3)/norm(g1)
-% % errFor_Tensor=norm(g-gFor3)/norm(g1)
-% ee=abs(g-g1);
-% % eeFor=abs(gFor-g1);
-% figure('name','Derivative Difference'),
-% subplot(TolP,1,1), hold on
-% hl1= plot(1:prod(m)*NumElement,abs(g1-g)   ./ max(abs([g g1]),[],2),'r.-');
-% hl2= plot(1:prod(m)*NumElement,abs(gh-g)./ max(abs([gh g]),[],2),'b.-');
-% % hl3= plot(1:prod(m)*NumElement,abs(g-gFor3) ./ max(abs([gFor3 g]),[],2),'k.-');
-% hl4= plot(1:prod(m)*NumElement,abs(g1-gh)  ./ max(abs([gh g1]),[],2),'g.-');
-% % hl5= plot(1:prod(m)*NumElement,abs(gFor3-gForh)./max(abs([gForh gFor3]),[],2),'c.-');
-% %  hl6= plot(1:prod(m)*NumElement,abs(g1-gForh)./max(abs([gForh g1]),[],2),'m.--');
-% % hl7= plot(1:prod(m)*NumElement,abs(g1-gFor3)./max(abs([gForh3 g1]),[],2),'go--');
-%
-% set(gca,'yscale','log'); set(gca,'ytick',10.^[-10:10])
-%
-% axis tight
-% % legend([hl1, hl2,hl3,hl4,hl5,hl6,hl7],'relerror(Tensor,AdiMat)','relerror(For2,AdiMat)',...
-% %     'relerror(For,Tensor)','relerror(FD,AdiMat)','relerror(For,FDFor)','relerror(FDFor,AdiMat)','relerror(For3,AdiMat)')
-% legend([hl1,hl2,hl4],'relerror(Tensor,AdiMat)',...
-%     'relerror(FD,Tensor)','relerror(FD,AdiMat)')
-% subplot(TolP,1,2),plot(1:prod(m)*NumElement,g,'r.-',1:prod(m)*NumElement,g1,'go-');%,1:prod(m)*NumElement,gFor,'b*-')
-% legend('Tensor','AdiMat','For')
-% hold on; for i=1:NumElement, line([prod(m)*i,prod(m)*i],[0,max(ee)],'LineStyle',':'); text(prod(m)*i,max(ee),num2str(i));end
-% subplot(TolP,1,TolP),plot(sum(MU_e,3),'r.-');
-% return;
-% %%=======================================================================
 e=cputime;
 low=0*ones(size(x0));
 up=1e6*ones(size(x0));
@@ -110,6 +55,7 @@ up=1e6*ones(size(x0));
 %  [xstar,fval] = fmincon(fctn,x0,[],[],[],[],zeros(size(x0)),[],[],options);
 %  return;
 [xstar,f,g,ierror] = tnbcm (x0,fctn,low,up,maxiter);
+%   [xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
 if(Joint==-1 & DiscreteScale)
     xtemp=reshape(xstar,m(1),m(2),NumElement);
     err0_1=reshape(err0,m(1),m(2),NumElement);
@@ -176,3 +122,57 @@ if(plotResult)
     % end
 end
 % %%%%%%%%%%%%%%%%%%%%=======================================================
+%%%===================================================== Derivative Test
+%   gh=foo(fctn,x0);
+% % % % % foo(fctn1,x0);
+% tic;
+%  [f,g]=feval(fctn,W(:));
+% T_Tensor=toc;
+% tic;
+%  [f1,g1]=feval(fctn1,W(:));
+% T_AD=toc;
+% return;
+% gh=foo(fctn,x0);
+% % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% For loop version (previous)
+% % disp('========= For Loop Version')
+% % TolP=3;
+% % gFor=g;
+% % XRF1=XRF;
+% % optXTM_XRF;
+% % %%%%%%%%%%%%==============================================
+% f_AD_Tensor=abs(f-f1)/norm(f)
+% % f_AD_For=norm(f1-fFor3)/norm(f)
+% % f_Tensor_For=norm(f-fFor3)/norm(f)
+% % return;
+% errTensor_FD=norm(g-gh)/norm(g1)
+% %  errFor_FD=norm(gFor3-gForh)/norm(g1)
+% % errFD1_FD2=norm(g1-gFor3)/norm(g1)
+% % return;
+% errAD_Tensor=norm(g-g1)/norm(g1)
+% % errFor_AD=norm(g1-gFor3)/norm(g1)
+% % errFor_Tensor=norm(g-gFor3)/norm(g1)
+% ee=abs(g-g1);
+% % eeFor=abs(gFor-g1);
+% figure('name','Derivative Difference'),
+% subplot(TolP,1,1), hold on
+% hl1= plot(1:prod(m)*NumElement,abs(g1-g)   ./ max(abs([g g1]),[],2),'r.-');
+% hl2= plot(1:prod(m)*NumElement,abs(gh-g)./ max(abs([gh g]),[],2),'b.-');
+% % hl3= plot(1:prod(m)*NumElement,abs(g-gFor3) ./ max(abs([gFor3 g]),[],2),'k.-');
+% hl4= plot(1:prod(m)*NumElement,abs(g1-gh)  ./ max(abs([gh g1]),[],2),'g.-');
+% % hl5= plot(1:prod(m)*NumElement,abs(gFor3-gForh)./max(abs([gForh gFor3]),[],2),'c.-');
+% %  hl6= plot(1:prod(m)*NumElement,abs(g1-gForh)./max(abs([gForh g1]),[],2),'m.--');
+% % hl7= plot(1:prod(m)*NumElement,abs(g1-gFor3)./max(abs([gForh3 g1]),[],2),'go--');
+%
+% set(gca,'yscale','log'); set(gca,'ytick',10.^[-10:10])
+%
+% axis tight
+% % legend([hl1, hl2,hl3,hl4,hl5,hl6,hl7],'relerror(Tensor,AdiMat)','relerror(For2,AdiMat)',...
+% %     'relerror(For,Tensor)','relerror(FD,AdiMat)','relerror(For,FDFor)','relerror(FDFor,AdiMat)','relerror(For3,AdiMat)')
+% legend([hl1,hl2,hl4],'relerror(Tensor,AdiMat)',...
+%     'relerror(FD,Tensor)','relerror(FD,AdiMat)')
+% subplot(TolP,1,2),plot(1:prod(m)*NumElement,g,'r.-',1:prod(m)*NumElement,g1,'go-');%,1:prod(m)*NumElement,gFor,'b*-')
+% legend('Tensor','AdiMat','For')
+% hold on; for i=1:NumElement, line([prod(m)*i,prod(m)*i],[0,max(ee)],'LineStyle',':'); text(prod(m)*i,max(ee),num2str(i));end
+% subplot(TolP,1,TolP),plot(sum(MU_e,3),'r.-');
+% return;
+% %%=======================================================================

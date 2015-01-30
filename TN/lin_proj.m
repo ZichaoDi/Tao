@@ -28,9 +28,9 @@ if(alpha1<=1)%& alpha1>0
         [~,~, xt] = crash (xt, low, up);
         [ft, gt] = feval (sfun, xt);
         Armijo =ft<f+1e-4*trialAlpha(trial)*q0;
-        Wolfe = abs(p'*gt)<0.25*abs(q0);
-        if (Armijo & Wolfe);%
-%             fprintf('Armijo and Wolfe satisfied, trial= %d\n',trial);
+        Wolfe = abs(p'*gt)<0.25*abs(q0);%
+        if (Armijo & Wolfe);
+            fprintf('Armijo and Wolfe satisfied, trial= %d\n',trial);
             ierror = 0;
             iproj  = 1;
             xnew   = xt;

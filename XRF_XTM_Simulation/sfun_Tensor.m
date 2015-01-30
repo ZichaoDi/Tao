@@ -1,7 +1,8 @@
 function [f,g]=sfun_Tensor(W,xrfData,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau)
 global NumSSDlet numChannel NoSelfAbsorption
-global mtol SigMa_XRF
+global SigMa_XRF
 f=0;
+mtol=prod(m);
 W=reshape(W,mtol,NumElement);
 L=reshape(L,length(thetan),nTau+1,mtol);
 %%%%% ====================================================================

@@ -8,7 +8,8 @@ function [xstar, f, g, ierror, eig_val] = ...
 % For further details, see routine tnbc.
 %---------------------------------------------------------
 global sk yk sr yr yksk yrsr
-global NF N current_n lambdaind L 
+global NF N current_n lambdaind 
+global err0 WS
 %---------------------------------------------------------
 % check that initial x is feasible and that the bounds
 % are consistent
@@ -58,18 +59,18 @@ if (~isempty(ind));
     ipivot(ind) = zeros(length(ind),1);
 end;
 
- %%%%%%%%%%%%%#######################################################
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%find multiplier index
-    lamind=find(ipivot ~= 0 & ipivot ~= 2);
-    toll = 10 * eps * (abs(low) + ones(size(x)));
-    subl=find(x-low<toll);
-    lambdaind1=intersect(lamind,subl);
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    tolu = 10 * eps * (abs(up) + ones(size(x)));
-    subu=find(up-x<tolu);
-    lambdaindu=intersect(lamind,subu);
-    lambdaind=struct('low',lambdaind1,'up',lambdaindu);
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%#######################################################
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%find multiplier index
+lamind=find(ipivot ~= 0 & ipivot ~= 2);
+toll = 10 * eps * (abs(low) + ones(size(x)));
+subl=find(x-low<toll);
+lambdaind1=intersect(lamind,subl);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+tolu = 10 * eps * (abs(up) + ones(size(x)));
+subu=find(up-x<tolu);
+lambdaindu=intersect(lamind,subu);
+lambdaind=struct('low',lambdaind1,'up',lambdaindu);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 g = ztime (g, ipivot);
 gnorm = norm(g,'inf');
 fprintf(1,'%4i   %4i   %4i   % .8e   %.1e\n', ...
@@ -104,27 +105,27 @@ d      = ones(n,1);
 argvec = [accrcy gnorm xnorm];
 [p, gtp, ncg1, d, eig_val{nit+1}] = ...
     modlnp (d, x, g, maxit, upd1, ireset, bounds, ipivot, argvec, sfun);
-    %%##################################################################
- tembl=find(abs(x-low)<eps*10);
-    if (~isempty(tembl))
-        for i=1:length(tembl)
-            if (p(tembl(i))<0)
-                ipivot(tembl(i))=-1;
-                p(tembl(i))=0;
-            end
+%%##################################################################
+tembl=find(abs(x-low)<eps*10);
+if (~isempty(tembl))
+    for i=1:length(tembl)
+        if (p(tembl(i))<0)
+            ipivot(tembl(i))=-1;
+            p(tembl(i))=0;
         end
     end
-  tembu=find(abs(x-up)<eps*10);
-    if (~isempty(tembu))
-        for i=1:length(tembu)
-            if (p(tembu(i))>0)
-                ipivot(tembu(i))=1;
-                p(tembu(i))=0;
-            end
+end
+tembu=find(abs(x-up)<eps*10);
+if (~isempty(tembu))
+    for i=1:length(tembu)
+        if (p(tembu(i))>0)
+            ipivot(tembu(i))=1;
+            p(tembu(i))=0;
         end
-    end   
-    %##################################################################
-    
+    end
+end
+%##################################################################
+
 ncg = ncg + ncg1;
 while (~conv);
     oldg = g;
@@ -137,16 +138,18 @@ while (~conv);
     spe = stpmax (stepmx, pe, x, p, ipivot, low, up);
     alpha = step1 (f, gtp, spe);
     alpha0 = alpha;
-        PieceLinear=1;
+    PieceLinear=1;
     if(PieceLinear)
         [x, f, g, nf1, ierror, alpha] = lin_proj (p, x, f, g, alpha0, sfun, low, up);
     else
         [x, f, g, nf1, ierror, alpha] = lin1 (p, x, f, alpha0, g, sfun);
     end
-%     [x, f, g, nf1, ierror, alpha] = lin1 (p, x, f, alpha0, g, sfun);
+    if(current_n==N(1))
+    ErrIter=norm(x-WS(:))/err0
+    end
     %---------------------------------------------------------
     %## MODIFIED: ADDED THIRD CONDITION TO 'IF' STATEMENT ##
-     if (alpha == 0 && alpha0 ~= 0);
+    if (alpha == 0 && alpha0 ~= 0);
         format long e
         fprintf('Error in Line Search (lmqnbcm.m)\n');
         fprintf('    ncg1   = %d\n',ncg1);
@@ -215,6 +218,7 @@ while (~conv);
     [conv, flast, ipivot] = cnvtstm (alpha, pnorm, xnorm, ...
         difnew, ftest, gnorm, gtp, f, flast, g, ...
         ipivot, accrcy);
+    conv_opt=conv;
     lamind=find(ipivot ~= 0 & ipivot ~= 2);
     toll = 10 * eps * (abs(low) + ones(size(x)));
     subl=find(x-low<toll);
@@ -227,7 +231,9 @@ while (~conv);
     
     if (nit>=maxiter); conv = 1; end;
     if (conv);
-        
+        if(conv_opt)
+            disp('LMQNBC: termination 5');
+        end
         xstar = x;
         NF(1,nind) = NF(1,nind) + nit;
         NF(2,nind) = NF(2,nind) + nf;

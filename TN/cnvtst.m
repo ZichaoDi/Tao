@@ -35,12 +35,6 @@ else
            & abs(dif) < rtleps*ftest        ...
            & gnorm < accrcy^(1/3)*ftest) ...
             | gnorm < .01*sqrt(accrcy)*ftest;
-%        if(conv)
-%            conv1=alpha*pnorm < toleps*(1 + xnorm)
-%            conv2=abs(dif) < rtleps*ftest 
-%            conv3=gnorm < accrcy^(1/3)*ftest 
-%            conv4=gnorm < .01*sqrt(accrcy)*ftest
-%        end
 end;
 flast1  = flast;
 ipivot1 = ipivot;

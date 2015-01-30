@@ -1,11 +1,10 @@
 %%%Simulate XRF of a given object with predifined detector and beam
 % function XRF=SimulateXRF(W,MU,BindingEenergy,M,thetan,DetChannel, numChannel, nTau, DetKnot0, SourceKnot0);
 global plotSpecSingle BeforeEmit plotTravel SSDlet NoSelfAbsorption
-global fig2  fig5 finalfig eX eY EmptyBeam
-global SigMa_XTM SigMa_XRF LogScale mtol
+global fig2  fig5 finalfig EmptyBeam
+global LogScale
 plotSpecSingle=0;
 NoSelfAbsorption=0;
-Tomo_startup;
 more off;
 % load slice1_50;
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
@@ -199,8 +198,8 @@ if(LogScale)
 else
     SigMa_XTM=1./diag(cov(DisR'));
 end
-SigMa_XRF=1./diag(cov(SigMa_XRF'));
+SigMa_XRF=1./sum(SigMa_XRF,2);%1./diag(cov(SigMa_XRF'));
 SigMa_XRF((sub2ind([nTau+1,length(thetan)],EmptyBeam(2,:),EmptyBeam(1,:))))=0;
-SigMa_XTM((sub2ind([nTau+1,length(thetan)],EmptyBeam(2,:),EmptyBeam(1,:))))=0;
+% SigMa_XTM((sub2ind([nTau+1,length(thetan)],EmptyBeam(2,:),EmptyBeam(1,:))))=0;
 %  SigMa_XRF=ones(size(SigMa_XRF));
 %  SigMa_XTM=ones(size(SigMa_XTM));
