@@ -38,16 +38,13 @@ else
     %%%%%%%%%================================================================
     QC=(Q(1:end-1,:)+Q(2:end,:))/2;
     index=floor([(QC(:,1)-omega(1))/dz(1)+1, (QC(:,2)-omega(3))/dz(2)+1]);
-    if(~BeforeEmit)
-        indInside=find(index(:,1)>0 & index(:,1)<=m(2)& index(:,2)<=m(1) & index(:,2)>0);
-        index=index(indInside,:);
-        [~,subInd]=unique(index,'rows');
-        index=index(sort(subInd),:);
-    else
-        indInside=find(index(:,1)>0 & index(:,1)<=m(2)& index(:,2)<=m(1) & index(:,2)>0);
-        index=index(indInside,:);
-    end
+    indInside=find(index(:,1)>0 & index(:,1)<=m(2)& index(:,2)<=m(1) & index(:,2)>0);
+    index=index(indInside,:);
+    [~,subInd]=unique(index,'rows');
+    index=index(sort(subInd),:);
     Lvec=Lvec(indInside);
+    Lvec=Lvec(sort(subInd));
+    
     linearInd=sub2ind(m,index(:,2),index(:,1));
     %%%%%%%%%================================================================
     if plotTravel
@@ -59,7 +56,6 @@ else
             drawnow;
             if(~isempty(index))
                 fig2=plot((index(:,1)-1/2)*dz(1)-abs(omega(1)),(index(:,2)-1/2)*dz(2)-abs(omega(3)),'r*');%,Q(:,1),Q(:,2),'g-');
-                %         pause;
             end
         else
             figure(finalfig)

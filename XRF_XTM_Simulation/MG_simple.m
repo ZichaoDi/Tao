@@ -26,7 +26,7 @@ for level=length(N):-1:1
     current_n=N(level);
     if(current_n==N(end))
         if(length(N)==1)
-            maxiter=1000;
+            maxiter=10;
         else
         maxiter=10;
         end
@@ -34,11 +34,11 @@ for level=length(N):-1:1
         disp('====================== Start post-smoothing')
         maxiter=1;
         if(current_n==N(1))
-            maxiter=100;
+            maxiter=10;
         end
     end
     if(current_n==N(1))
-        plotResult=0;
+        plotResult=1;
     else
         plotResult=0;
     end

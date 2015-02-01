@@ -21,9 +21,9 @@ grad_type = 'adj';  % 'adj' = adjoint/exact
 % Initialize arrays for discretizations
 Tomo_startup;
 onlyXRF=0;
-N=50;%[17 9 5 3];%[3];%
+N=[3];% 3];%[17 9 5 3];%[3];%
 nm=length(N);
-numThetan=10;%[2 2 1 1];
+numThetan=2;%[2 2 1 1];
 W_level=cell(nm,1);
 xrf_level=cell(nm,1);
 xtm_level=cell(nm,1);
@@ -44,7 +44,7 @@ plotTravel=0; % If plot the intersection of beam with object
 plotUnit=0;
 plotElement=0;
 % plotResult=1;
-LogScale=1;
+LogScale=0;
 for level=1:nm
     current_n=N(level);
     XRF_XTM_Tensor;
@@ -66,6 +66,6 @@ nTol=N(1)^2*NumElement;
 %---------------------------------------------
 % Specify initial guess for optimization.
 rng('default');
-x0=WS(:)+1*10^(-1)*rand(nTol,1);
+x0=1*10^(-1)*rand(nTol,1);%WS(:)+
 xinitial=x0;
 err0=norm(x0-WS(:));

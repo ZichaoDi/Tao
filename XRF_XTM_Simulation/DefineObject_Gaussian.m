@@ -1,15 +1,16 @@
 % function [O,MU,W]=DefineObject(Z,E0)
 %%=======================================================================
-%%% Input: Z: Atomic Numbers of Existing Elements in the object 
+%%% Input: Z: Atomic Numbers of Existing Elements in the object
 %%%        E0: Beam Energy
 %%%        m: Resolution of object
-%%% Output: W: Concentration fraction of each Z in each pixel with 
+%%% Output: W: Concentration fraction of each Z in each pixel with
 %%%            dimension m(1) by m(2) by cardinality(Z)
 %%%         O: Object specified by W.*Z
 %%%         MU: Attenuation matrix of O
 %%=======================================================================
 global x y m omega dz AbsorbScale min_MU max_MU
-global XTMscale NumLines NumElement slice onlyXRF
+global XTMscale NumLines NumElement 
+global whichElement slice onlyXRF
 
 
 AbsorbScale=1e-0;
@@ -25,22 +26,30 @@ center=[0 0];
 %%%========================== the grids of object
 xc = getNodalGrid(omega,[m(2) m(1)]);
 %%%========================== assign weight matrix for each element in each pixel
- if(onlyXRF)
-W=zeros(current_n,current_n,4);
-for i=1:4
-data=Phantom3_Young(:,:,:,i+1);
-W(:,:,i)=data(1:current_n,1:current_n,slice);
-end
- NumElement=4;
- else
-CreateElement;
-% SvenSample;
-% load W_sample10
-% W=W_sample10;
-% W=ones(m(1),m(2),NumElement);
-% for tsub=1:NumElement
-% W(:,:,tsub)=tsub*2e-1;
-% end
+if(onlyXRF)
+    if (xrf_roi)
+        NumElement=1;
+        data=Phantom3_Young(:,:,:,whichElement+1);
+        W=data(1:current_n,1:current_n,slice);
+    else
+        NumElement=4;
+        W=zeros(current_n,current_n,NumElement);
+        for i=1:NumElement
+            data=Phantom3_Young(:,:,:,i+1);
+            W(:,:,i)=data(1:current_n,1:current_n,slice);
+        end
+    end
+else
+    % CreateElement;
+    % CreateCircle;
+    % SvenSample;
+    % load W_sample10
+    % W=W_sample10;
+    NumElement=2;
+    W=ones(m(1),m(2),NumElement);
+    for tsub=1:NumElement
+        W(:,:,tsub)=tsub*2e-1;
+    end
 end
 % NumElement=2;
 %%%%%%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -55,7 +64,7 @@ MU_e=zeros(NumElement,1,1+NumLines);
 for i=1: NumLines
     MU_e(i,1,1)=na(i)*CS_TotalBeam(Z(i),1);%calllib('libxrl','CS_Total',Z(i),E0);
     for j=1:NumElement
-    MU_e(i,1,j+1)=na(i)*CS_Total(Z(i),1,Z(j));%calllib('libxrl','CS_Total',Z(i),BindingEnergy(j));   only consider K_alpha line 
+        MU_e(i,1,j+1)=na(i)*CS_Total(Z(i),1,Z(j));%calllib('libxrl','CS_Total',Z(i),BindingEnergy(j));   only consider K_alpha line
     end
 end
 %%%%%================== Attenuation Matrix at beam energy
@@ -70,13 +79,13 @@ MU_XTM=MU.*XTMscale;
 %%%%% =================== Attenuation Matrix at flourescence energy (Corrected Attenuation)
 MU_after=cell(NumElement,1);
 for i=1:NumElement
-MU_after{i}=sum(W.*repmat(reshape(MU_e(:,1,i+1),1,1,NumElement),[m(1),m(2),1]),3);
+    MU_after{i}=sum(W.*repmat(reshape(MU_e(:,1,i+1),1,1,NumElement),[m(1),m(2),1]),3);
 end
 %%%%% ====================================================================
 
 %%=================== Picture the object based on atomic number and attenuation
 if(PlotObject)
-figureObject(W,Z,m,NumElement,MU_e,0)
+    figureObject(W,Z,m,NumElement,MU_e,0)
 end
 
 %%=======================================================================

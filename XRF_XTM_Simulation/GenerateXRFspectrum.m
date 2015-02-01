@@ -15,10 +15,11 @@ plotElement=0;
 plotSpecSingle=0;
 NoSelfAbsorption=0;
 more off;
-current_n=15;
+current_n=256;
 numThetan=1;
 XRF3=[];
-for slice=1:2
+xrf_roi=0;
+for slice=1:current_n
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
 DefineObject_Gaussian; % Produce W, MU_XTM
 %%%%%%%==============================================================
@@ -150,18 +151,18 @@ XRF3(1:nTau+1,slice,1:numChannel)=reshape(cell2mat(XRF'),[nTau+1,1,numChannel]);
 end
 
 
-dataset={'XRF_roi', 'channel_names', 'channel_units','scaler_names', 'scaler_units', 'scalers','mca_arr'};
+dataset={'channel_names', 'channel_units','scaler_names', 'scaler_units', 'scalers','XRF_roi','mca_arr'};
 % formatH5=cell(length(dataset),1);
 % for i=1:length(dataset)-1
 % formatH5{i}=h5read('/Users/Wendydi/Documents/MATLAB/APSdata/2xfm1211_14/2xfm_0307.h5',['/MAPS/',num2str(dataset{i})]);
 % end
-load formatH5
-formatH5{length(dataset)}=XRF3;
-for i=1:length(dataset)
-if(i==1)
-hdf5write('myXRF.h5',['/MAPS/',num2str(dataset{i})],formatH5{i});
-else
-hdf5write('myXRF.h5',['/MAPS/',num2str(dataset{i})],formatH5{i},'WriteMode', 'append');
-end
-end
+load formatH5_roi
+formatH5_roi{length(dataset)}=XRF3;
+% for i=1:length(dataset)
+% if(i==1)
+% hdf5write('myXRF.h5',['/MAPS/',num2str(dataset{i})],formatH5{i});
+% else
+hdf5write('myXRF.h5','/MAPS/mca_arr',formatH5_roi{end},'WriteMode', 'append');
+% end
+% end
 
