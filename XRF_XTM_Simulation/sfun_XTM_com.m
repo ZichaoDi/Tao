@@ -6,7 +6,9 @@ global SigMa_XTM LogScale
 %%===== f: sum_i ||e^T(L_i.*I)e-M_i||^2, i=1..theta
 beta=1;
 MU=reshape(MU,m(1),m(2));
-e=ones(m(1),1);
+eX=ones(m(1),1);
+eY=ones(m(2),1);
+%%%====================================
 f=0;
 g=zeros(m(1),m(2));
 for n=1:length(thetan)
@@ -14,9 +16,9 @@ for n=1:length(thetan)
     if(LogScale)
         Mt=-log(M(:,n)./I0);
         for i=1:nTau+1
-            L=Ltol{n,i};
+            L=reshape(Ltol(n,i,:),m(1),m(2));
             if(~isempty(find(L,1)))
-                Rdis=e'*(MU.*L)*e;
+                Rdis=eX'*(MU.*L)*eY;
                 sum_Tau=sum_Tau+beta*SigMa_XTM(i)*(Rdis-Mt(i))^2;
                 g=g+2*beta*SigMa_XTM(i)*(Rdis-Mt(i)).*L;               
             end
@@ -24,11 +26,11 @@ for n=1:length(thetan)
     else
         Mt=M(:,n);        
         for i=1:nTau+1
-            L=Ltol{n,i};
+            L=reshape(Ltol(n,i,:),m(1),m(2));
             if(~isempty(find(L,1)))
-                Rdis=I0*exp(-e'*(MU.*L)*e);%% Discrete case
+                Rdis=I0*exp(-eX'*(MU.*L)*eY);%% Discrete case
                 sum_Tau=sum_Tau+beta*SigMa_XTM(i)*(Rdis-Mt(i))^2;
-                g=g-2*beta*SigMa_XTM(i)*Rdis*(Rdis-Mt(i)).*repmat(full(L),[1,1,NumElement]).*repmat(MUe,[m(1),m(2),1]);
+                g=g-2*beta*SigMa_XTM(i)*Rdis*(Rdis-Mt(i)).*L;
             end
         end
     end

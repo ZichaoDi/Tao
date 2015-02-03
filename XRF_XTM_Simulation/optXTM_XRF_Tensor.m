@@ -50,12 +50,13 @@ ws=Wtest(:);
 e=cputime;
 low=0*ones(size(x0));
 up=1e6*ones(size(x0));
-%%%========================================================================
-%  options = optimset('Algorithm','interior-point','Display','iter');%,'DerivativeCheck','off','Diagnostics','off','GradObj','off','Display','iter','AlwaysHonorConstraints','none','TolCon',1e-10,'TolX',1e-16,'TolFun',1e-15);%
+% %%========================================================================
+%  options = optimset('Algorithm','interior-point','Display','iter','MaxFunEvals',10000);%,'DerivativeCheck','off','Diagnostics','off','GradObj','off','Display','iter','AlwaysHonorConstraints','none','TolCon',1e-10,'TolX',1e-16,'TolFun',1e-15);%
 %  [xstar,fval] = fmincon(fctn,x0,[],[],[],[],zeros(size(x0)),[],[],options);
 %  return;
-[xstar,f,g,ierror] = tnbcm (x0,fctn,low,up,maxiter);
-%   [xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
+% [xstar,f,g,ierror] = tnbcm (x0,fctn,low,up,maxiter);
+  [xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
+%   [xstar,f,g,ierror] = tn (x0,fctn);
 if(Joint==-1 & DiscreteScale)
     xtemp=reshape(xstar,m(1),m(2),NumElement);
     err0_1=reshape(err0,m(1),m(2),NumElement);
@@ -86,11 +87,23 @@ errTol=norm(xstar-ws)/norm(err0);
 % figureObject(reshape(x0,m(1),m(2),NumElement),Z,m,NumElement,MU_e,1);
 if(plotResult)
     figure(24);
+    clims=[0 max([x0;ws;xstar])];
     for i=1:NumElement
-        subplot(3,NumElement,i);
+        subplot(4,NumElement,i);
+        
+        errCom=reshape(x0(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-ws(prod(m)*i-prod(m)+1:prod(m)*i
+        imagesc(errCom,clims);colormap gray
+        if(i==1)
+            ylabel('Initial Guess','fontsize',12)
+        end
+        title(['Element ',num2str(i)],'fontsize',12);
+    end
+    
+    for i=1:NumElement
+        subplot(4,NumElement,i+1*NumElement);
         
         errCom=reshape(xstar(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-ws(prod(m)*i-prod(m)+1:prod(m)*i
-        imagesc(errCom);colormap gray
+        imagesc(errCom,clims);colormap gray
         if(i==1)
             ylabel('Final Soluction','fontsize',12)
         end
@@ -98,15 +111,15 @@ if(plotResult)
     end
     
     for i=1:NumElement
-        subplot(3,NumElement,i+NumElement);
+        subplot(4,NumElement,i+2*NumElement);
         
         errCom=reshape(ws(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));
-        imagesc(errCom);colormap gray
+        imagesc(errCom,clims);colormap gray
         if(i==1)
             ylabel('True Soluction','fontsize',12)
         end
     end
-    for i=1:NumElement; subplot(3,NumElement,i+2*NumElement);
+    for i=1:NumElement; subplot(4,NumElement,i+3*NumElement);
         plot(1:prod(m),sort(xinitial(prod(m)*i-prod(m)+1:prod(m)*i)),'ro',1:prod(m),sort(xstar(prod(m)*i-prod(m)+1:prod(m)*i)),'bs',1:prod(m),sort(ws(prod(m)*i-prod(m)+1:prod(m)*i)),'g*')
         xlim([0 prod(m)]);
         if(i==1)

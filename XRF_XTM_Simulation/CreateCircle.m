@@ -39,6 +39,7 @@ W(sub2ind([mLocal(1)+1,mLocal(2)+1,NumElement],indx1,indy1,2*ones(size(indx1))))
 W(sub2ind([mLocal(1)+1,mLocal(2)+1,NumElement],indx1,indy1,3*ones(size(indx1))))=0.35;
 W(sub2ind([mLocal(1)+1,mLocal(2)+1,NumElement],indx1,indy1,4*ones(size(indx1))))=1.05;
 W(sub2ind([mLocal(1)+1,mLocal(2)+1,NumElement],indx1,indy1,5*ones(size(indx1))))=1.05;
+% W=W+0.1;
 % W_sample10=W;
 % save W_sample10 W_sample10
 figure('name','Sample');

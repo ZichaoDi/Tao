@@ -1,50 +1,34 @@
 
 global maxiter NF N low up current_n
 global ptest gv
-close all;
+global penalty gama
+global W0 err0
+global SigMa_XTM SigMa_XRF 
+
+%%%----------------------------Initialize dependent variables
+more on;
+plotResult=1;
+do_setup;
+level=find(N==current_n);
+W= W_level{level};
+XRF=xrf_level{level};
+DisR=xtm_level{level};
+L=L_level{level};
+GlobalInd=GI_level{level};
+SelfInd=SI_level{level};
+m=m_level(level,:);
+nTau=nTau_level(level);
+SigMa_XTM=SigmaT{level};
+SigMa_XRF=SigmaR{level};
 maxiter=10;
-LogScale=1;
-XRF_XTM_Gaussian;
 %%%----------------------------------------------------------------------
 W0=W(:);
+%%%============== Rescale MU_e to make unity contribution
 DiscreteScale=0;
 penalty=0;
-%%%============== Rescale MU_e to make unity contribution
-if(DiscreteScale )
-    Mag=-order(MU_e(:,1,1));
-    gama=-log(MU_e(:,1,1))./MU_e(:,1,1);%5e2*ones(size(MU_e(:,1,1)));%10.^(Mag);%(max_MU-min_MU)./(MU_e(:,1,1)-min_MU);%1./MU_e(:,1,1);%
-else
-    gama=ones(size(MU_e(:,1,1)));
-end
-
-if(penalty)
-    Tik=spalloc(length(W(:))-1,length(W(:)),2*(length(W(:))-1)); %% First-order derivative regularization
-    for i=1:length(W(:))-1
-        Tik(i,i)=-1; Tik(i,i+1)=1;
-    end
-    
-    % Tik=spalloc(length(W(:))-2,length(W(:)),3*(length(W(:))-2)); %% First-order derivative regularization
-    %     for i=1:size(Tik,1)
-    %         Tik(i,i)=-1;Tik(i,i+1)=2; Tik(i,i+2)=-1;
-    %     end
-end
-rng('default');
-Wtest=W;
-
-
-if(DiscreteScale)
-    for i=1:NumElement
-        Wtest(:,:,i)=Wtest(:,:,i)/gama(i);
-        up=1e6*ones(size(W));
-        up(:,:,i)=up(:,:,i)/gama(i);
-    end
-end
-ws=Wtest(:);
-x0=Wtest(:)+1*10^(0)*rand(prod(m)*size(M,1),1);%10*ones(sizEDe(ws));%
+x0=W0(:)+1*10^(0)*rand(prod(m)*size(M,1),1);%10*ones(sizEDe(W0));%
 xinitial=x0;
-err0=xinitial-ws;
-N=m(1);
-current_n=N(1);
+err0=norm(xinitial-W0(:));
 e=cputime;
 figureObject(reshape(x0,m(1),m(2),NumElement),Z,m,NumElement,MU_e,1);
 low=0*ones(size(x0));
@@ -57,19 +41,19 @@ Ntot=zeros(1,2);
 %%%===================================================================
 while (errTol>1e-10 & OuterIter<=5);
     NF = [0*N; 0*N; 0*N];
-    Joint=(-1)^OuterIter; % 1: XRF; -1: XTM; 0: Joint inversion
+    Joint=(-1)^OuterIter; % 0: XRF; -1: XTM; 1: Joint inversion
     if(Joint==-1)
-        fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,Ltol,thetan,m,nTau,NumElement);
+        fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,L,thetan,m,nTau,NumElement);
     elseif(Joint==0)
-        fctn=@(W)sfun_XRF_XTM(W,XRF,DisR,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau,I0);
-    else
-        fctn=@(W)sfun_XRF_full2(W,XRF,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau);
+    fctn=@(W)sfun_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
+    elseif(Joint==1)
+    fctn=@(W)sfun_Tensor4(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
     end
     
     %%%========================================================================
     [x,f,g,ierror] = tnbc (x,fctn,low,up);
     OuterIter=OuterIter+1;
-    errTol=norm(x-ws)/norm(err0);
+    errTol=norm(x-W0)/norm(err0);
     if(Joint==1)
     Ntot(2)=Ntot(2)+NF(2)+NF(3);
     elseif(Joint==-1)
@@ -99,7 +83,7 @@ if(Joint==-1 & DiscreteScale)
     err0_1=err0_1(:);
 end
 for i=1:NumElement
-    err(i)=norm(xstar(9*i-8:9*i)-ws(9*i-8:9*i))/norm(xinitial(9*i-8:9*i)-ws(9*i-8:9*i));
+    err(i)=norm(xstar(9*i-8:9*i)-W0(9*i-8:9*i))/norm(xinitial(9*i-8:9*i)-W0(9*i-8:9*i));
 end
 figure('name','Elemental Residule')
 semilogy(1:NumElement,err,'r.-');
@@ -113,27 +97,41 @@ end
 %%%%%%%%%%%%%%%%%%%%=======================================================
 figureObject(reshape(xstar,m(1),m(2),NumElement),Z,m,NumElement,MU_e,2);
 %%%%%%%%%%%%%%%%%%%%=======================================================
-figure(24);
-for i=1:NumElement
-    subplot(3,NumElement,i);
-    plot(1:prod(m),xinitial(prod(m)*i-prod(m)+1:prod(m)*i),'ro',1:prod(m),xstar(prod(m)*i-prod(m)+1:prod(m)*i),'bs',1:prod(m),ws(prod(m)*i-prod(m)+1:prod(m)*i),'g*')
-    xlim([0 prod(m)]);
-    if(i==1)
-        legend('initial','final','optimal','font',16)
-        ylabel('solution','fontsize',12)
+if(plotResult)
+    figure(24);
+    for i=1:NumElement
+        subplot(3,NumElement,i);
+        
+        errCom=reshape(xstar(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-W0(prod(m)*i-prod(m)+1:prod(m)*i
+        imagesc(errCom);colormap gray
+        if(i==1)
+            ylabel('Final Soluction','fontsize',12)
+        end
+        title(['Element ',num2str(i)],'fontsize',12);
     end
-    title(['Element ',num2str(i)],'fontsize',12);
-end
-for i=1:NumElement; subplot(3,NumElement,i+NumElement);plot(1:prod(m),ptest(prod(m)*i-prod(m)+1:prod(m)*i),'r.','MarkerSize',12);
-    xlim([0 prod(m)]);
-    if(i==1)
-        ylabel('Projected Direction','fontsize',12)
+    
+    for i=1:NumElement
+        subplot(3,NumElement,i+NumElement);
+        
+        errCom=reshape(W0(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));
+        imagesc(errCom);colormap gray
+        if(i==1)
+            ylabel('True Soluction','fontsize',12)
+        end
     end
-end
-for i=1:NumElement; subplot(3,NumElement,i+2*NumElement);plot(1:prod(m),gv(prod(m)*i-prod(m)+1:prod(m)*i),'r.','MarkerSize',12);
-    xlim([0 prod(m)]);
-    if(i==1)
-        ylabel('Projected Gradient','fontsize',12)
+    for i=1:NumElement; subplot(3,NumElement,i+2*NumElement);
+        plot(1:prod(m),sort(xinitial(prod(m)*i-prod(m)+1:prod(m)*i)),'ro',1:prod(m),sort(xstar(prod(m)*i-prod(m)+1:prod(m)*i)),'bs',1:prod(m),sort(W0(prod(m)*i-prod(m)+1:prod(m)*i)),'g*')
+        xlim([0 prod(m)]);
+        if(i==1)
+            legend('initial','final','optimal','font',16)
+            ylabel('solution','fontsize',12)
+        end
     end
+    % for i=1:NumElement; subplot(3,NumElement,i+2*NumElement);plot(1:prod(m),sort(gv(prod(m)*i-prod(m)+1:prod(m)*i)),'r.','MarkerSize',12);
+    %     xlim([0 prod(m)]);
+    %     if(i==1)
+    %         ylabel('Projected Gradient','fontsize',12)
+    %     end
+    % end
 end
 %%%%%%%%%%%%%%%%%%%%=======================================================

@@ -84,7 +84,7 @@ for k = 1:maxit
        if (norm(p)==0);
           disp('MODLNP 03: |p| = 0');
           p=-g; gtp=p'*g;
-          pause(1);
+%           pause(1);
        end;
 %        disp('return3')
        return; 

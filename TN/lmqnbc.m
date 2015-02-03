@@ -113,9 +113,11 @@ while (~conv);
     %---------------------------------------------------------
     % line search
     %---------------------------------------------------------
-    if(i_cauchy~=0)
+%     if(i_cauchy~=0)
         p = ztime (p, ipivot);
-    end
+%     end
+%         figure(999);plot(1:length(x),ipivot,'r.-',1:length(x),x,'bo-');
+%         pause;
     pe = pnorm + eps;
     [spe] = stpmax (stepmx, pe, x, p, ipivot, low, up);
     alpha = step1 (f, gtp, spe);
@@ -127,9 +129,9 @@ while (~conv);
         [x_new, f_new, g_new, nf1, ierror, alpha] = lin1 (p, x, f, alpha0, g, sfun);
     end
     Cauchy=0;
-    %     if(gtp>0)
-    %         Cauchy=1;
-    %     end
+%     if(gtp>0)
+%         Cauchy=1;
+%     end
     %---------------------------------------------------------
     save x_new x_new;
     if (alpha == 0 & alpha0 ~= 0 | ierror == 3);
@@ -160,6 +162,7 @@ while (~conv);
     %---------------------------------------------------------
     newcon = 0;
     if (abs(alpha-spe) <= 10*eps & i_cauchy==0);%
+        disp('update ipivot due to tiny step length')
         newcon = 1;
         ierror = 0;
         [ipivot, flast] = modz (x, p, ipivot, low, up, flast, f, alpha);

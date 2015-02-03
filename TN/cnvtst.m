@@ -26,15 +26,16 @@ if (~ltest)
 end;
 if (imax ~= 0)
     if(i_cauchy==0)
-% disp('statisfy ipivot updated from cnvtst');
+disp('statisfy ipivot updated from cnvtst');
  ipivot(ind(imax)) = 0;
     end
    flast = f;
 else
-   conv = (alpha*pnorm < toleps*(1 + xnorm) ...
-           & abs(dif) < rtleps*ftest        ...
-           & gnorm < accrcy^(1/3)*ftest) ...
-            | gnorm < .01*sqrt(accrcy)*ftest;
+%    conv = (alpha*pnorm < toleps*(1 + xnorm) ...
+%            & abs(dif) < rtleps*ftest        ...
+%            & gnorm < accrcy^(1/3)*ftest) ...
+%             | gnorm < .01*sqrt(accrcy)*ftest;
+    conv = (gnorm < 1d-2*ftest);
 end;
 flast1  = flast;
 ipivot1 = ipivot;

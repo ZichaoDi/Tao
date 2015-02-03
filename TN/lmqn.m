@@ -86,24 +86,8 @@ while (~conv);
     pe     = pnorm + eps;
     spe    = stepmx/pe;
     alpha0 = step1 (f, gtp, spe);
-    %
     [x, f, g, nf1, ierror, alpha] = lin1 (p, x, f, alpha0, g, sfun);
-%     %%%error damping plot===========================================
-%     load vs287;
-%     ee=vs287-x;
-%     n2 = length(x);
-%     nm = sqrt(n2);
-%     vs = reshape(ee,nm,nm);
-%     nx = nm + 2;
-%     ny = nm + 2;
-%     [xt,yt] = getborder(nx,ny);
-%     [xx,yy] = meshgrid(min(xt):.02:max(xt),min(yt):.02:max(yt));
-%     [xt,yt] = meshgrid(xt,yt);
-%     vv = interp2(xt,yt,vs,xx,yy,'cubic');
-%     figure(12);
-%     surfl(xx,yy,vv);
-%     pause;
-%     %%%=============================================================
+    %%%=============================================================
     nf = nf + nf1;
     %---------------------------------------------------------
     nit = nit + 1;
@@ -148,12 +132,12 @@ while (~conv);
     %---------------------------------------------------------
     % convergence test
     %---------------------------------------------------------
-    conv = (alpha*pnorm < toleps*(1 + xnorm) ...
-        & abs(difnew) < rtleps*ftest     ...
-        & gnorm < accrcy^(1/3)*ftest)    ...
-        | gnorm < .01*sqrt(accrcy)*ftest;
+%     conv = (alpha*pnorm < toleps*(1 + xnorm) ...
+%         & abs(difnew) < rtleps*ftest     ...
+%         & gnorm < accrcy^(1/3)*ftest)    ...
+%         | gnorm < .01*sqrt(accrcy)*ftest;
     %+++++++++++++++++++++++++++++++++++++++++++++++++++
-    %conv = (gnorm < 1d-4*ftest);
+    conv = (gnorm < 1d-2*ftest);
     %+++++++++++++++++++++++++++++++++++++++++++++++++++
     if (conv);
         ierror = 0;

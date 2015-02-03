@@ -1,7 +1,7 @@
 global NumElement
 
 A=phantom(m(1));
-
+plotElement=1;
 % load Logan50;
 % A=Logan;
 % A=ones(m);
