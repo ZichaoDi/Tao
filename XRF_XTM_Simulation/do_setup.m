@@ -24,7 +24,7 @@ onlyXRF=0;
 N=[5];%[17 9 5 3];%[3];%
 NF = [0*N; 0*N; 0*N];
 nm=length(N);
-numThetan=4;%[2 2 1 1];
+numThetan=1;%[2 2 1 1];
 W_level=cell(nm,1);
 xrf_level=cell(nm,1);
 xtm_level=cell(nm,1);
@@ -36,7 +36,7 @@ SigmaT=cell(nm,1);
 m_level=zeros(nm,2);
 nTau_level= zeros(nm,1);
 bounds   = 1;  % no bound constraints
-Joint=0; % 0: XRF; -1: XTM; 1: Joint inversion
+Joint=1; % 0: XRF; -1: XTM; 1: Joint inversion
 %----------------------------------------------------------------------
 % Compute the dependent-variable arrays
 PlotObject=0;

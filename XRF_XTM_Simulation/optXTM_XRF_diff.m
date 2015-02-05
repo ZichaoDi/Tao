@@ -45,7 +45,7 @@ while ( OuterIter<=MaxiOuter);
     NF = [0*N; 0*N; 0*N];
     Joint=(-1)^(OuterIter+1); % 1: XRF; -1: XTM; 0: Joint inversion
     if(Joint==-1)
-        fprintf('============================ Transmission Reconstruction\n')
+        fprintf('============================ Attenuation Transmission Reconstruction\n')
         maxiter=10;
         W0=MU_XTM(:);
         err0=norm(x_XTM(:)-MU_XTM(:));
