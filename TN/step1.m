@@ -9,4 +9,5 @@ d  = abs(f-fm);
 alpha = min([1 smax]);
 if (2*d <= (-gtp) & d >= eps);
    alpha = min([-2*d/gtp*ones(size(smax)) smax]);
+   
 end;

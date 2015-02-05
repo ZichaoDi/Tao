@@ -26,7 +26,7 @@ for level=length(N):-1:1
     current_n=N(level);
     if(current_n==N(end))
         if(length(N)==1)
-            maxiter=100;
+            maxiter=10000;
         else
         maxiter=100;
         end

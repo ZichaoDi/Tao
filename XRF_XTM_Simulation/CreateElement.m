@@ -25,7 +25,7 @@ W=zeros(m(1),m(2),NumElement);
 for i=1:length(subind)
     Ws=zeros(m(1),m(2));
     Ws(abs(A(:)-val(i))<tol)=val(i)+ExtraVal(i);
-    W(:,:,i)=Ws+0.1;
+    W(:,:,i)=Ws;%+0.1;
 end
 if(plotElement)
     figure('name','Element Map')

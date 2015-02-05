@@ -10,7 +10,8 @@ au   = spe;
 indl = find(ipivot==0 & p < 0);% 
 if (~isempty(indl));
    tl   = low(indl) - x(indl);
-   al   = min(tl./p(indl));
+   [al,indsub]  = min(tl./p(indl));
+
 end;
 %------------------------------------------------
 indu = find( ipivot==0 & p > 0);%
@@ -20,5 +21,11 @@ if (~isempty(indu) );
 end;
 %------------------------------------------------
 spe  = min([spe al au]);
-
+if(abs(spe)<=eps^(1/2))
+       al
+   indd=indl(indsub);
+   ipivot(indd)
+   x(indd)
+   p(indd)
+end
 

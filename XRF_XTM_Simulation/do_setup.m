@@ -21,10 +21,10 @@ grad_type = 'adj';  % 'adj' = adjoint/exact
 % Initialize arrays for discretizations
 Tomo_startup;
 onlyXRF=0;
-N=[10];%[17 9 5 3];%[3];%
+N=[5];%[17 9 5 3];%[3];%
 NF = [0*N; 0*N; 0*N];
 nm=length(N);
-numThetan=3;%[2 2 1 1];
+numThetan=4;%[2 2 1 1];
 W_level=cell(nm,1);
 xrf_level=cell(nm,1);
 xtm_level=cell(nm,1);
@@ -36,7 +36,7 @@ SigmaT=cell(nm,1);
 m_level=zeros(nm,2);
 nTau_level= zeros(nm,1);
 bounds   = 1;  % no bound constraints
-Joint=0; % 0: XRF; -1: XTM; 1: Joint inversion
+Joint=1; % 0: XRF; -1: XTM; 1: Joint inversion
 %----------------------------------------------------------------------
 % Compute the dependent-variable arrays
 PlotObject=0;
@@ -68,6 +68,6 @@ nTol=N(1)^2*NumElement;
 % Specify initial guess for optimization.
 rng('default');
 load x_new;
-x0=1*10^(-1)*rand(nTol,1);%WS(:)+1e0;%zeros(size(WS(:)));%+x_new%
+x0=1*10^(-1)*rand(nTol,1);%WS(:)+1e-4;%+1e0;%zeros(size(WS(:)));%+x_new%
 xinitial=x0;
 err0=norm(x0-WS(:));

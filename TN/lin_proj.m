@@ -1,14 +1,11 @@
-function [xnew, fnew, gnew, nf1, ierror, alpha1, varargout] = ...
-    lin_proj (p, x, f, g, alpha, sfun, low, up)
+function [x, f, g, nf1, ierror, alpha1, ipivot,newcon,flast] = ...
+    lin_proj (p, x, f, g, alpha, sfun, low, up,ipivot,flast,newcon)
 %---------------------------------------------------------
 % line search: P(x+alpha*p)
 %---------------------------------------------------------
 % set up
 %---------------------------------------------------------
 ierror = 3;
-xnew   = x;
-fnew   = f;
-gnew   = g;
 maxit  = 5;
 %%%%%%%%%%%%%%%%%%%#######################################################
 if (alpha == 0); ierror = 0; maxit = 1; end;
@@ -25,22 +22,55 @@ q0=p'*g;
 if(alpha1<=1)%& alpha1>0
     for trial=1:length(trialAlpha)
         xt = x + trialAlpha(trial).*p;
-        [~,~, xt] = crash (xt, low, up);
+        [ipivot1,~, xt] = crash (xt, low, up);
         [ft, gt] = feval (sfun, xt);
         Armijo =ft<f+1e-4*trialAlpha(trial)*q0;
         Wolfe = abs(p'*gt)<0.25*abs(q0);%
-        if (Armijo & Wolfe);
+        if (Armijo );%& Wolfe);
             fprintf('Armijo and Wolfe satisfied, trial= %d\n',trial);
             ierror = 0;
             iproj  = 1;
-            xnew   = xt;
-            fnew   = ft;
-            gnew   = gt;
+            x   = xt;
+            f   = ft;
+            g   = gt;
             alpha1=trialAlpha(trial);
             itcnt=trial;
+            ipivot=ipivot1;
+            p = ztime(p,ipivot);
+            newcon = 1;
+            flast=f;
             break;
+%         else
+%             Armijo
+%             Wolfe
+%             ft-f
         end;
     end
+    
+%         if(ierror==0)
+%             for trial=1:length(trialAlpha)
+%                 xt = x + trialAlpha(trial).*p;
+%                 [ipivot1,~, xt] = crash (xt, low, up);
+%                 [ft, gt] = feval (sfun, xt);
+%                 Armijo =ft<f+1e-4*trialAlpha(trial)*q0;
+%                 Wolfe = abs(p'*gt)<0.25*abs(q0);%
+%                 if (Armijo & Wolfe);
+%                     fprintf('Projected Direction Armijo and Wolfe satisfied, trial= %d\n',trial);
+%                     ierror = 0;
+%                     iproj  = 1;
+%                     x   = xt;
+%                     f   = ft;
+%                     g   = gt;
+%                     alpha1=trialAlpha(trial);
+%                     itcnt=trial;
+%                     ipivot=ipivot1;
+%                     p = ztime (p, ipivot);
+%                     newcon = 1;
+%                     flast=f;
+%                     break;
+%                 end;
+%             end
+%         end
 end
 if (alpha1 == 0); ierror = 0; maxit = 1; end;
 if(iproj==0)
@@ -49,19 +79,20 @@ if(iproj==0)
         [ft, gt] = feval (sfun, xt);
         if (ft < f);
             ierror = 0;
-            xnew   = xt;
-            fnew   = ft;
-            gnew   = gt;
+            x   = xt;
+            f   = ft;
+            g   = gt;
+            [ipivot1,~, x] = crash (x, low, up);
+            if(norm(ipivot1-ipivot,1)~=0)
+            newcon = 1;
+            flast=f;
+            ipivot=ipivot1;
+            end
             break;
         end;
         alpha1 = alpha1 ./ 2;
     end;
-    itcnt=itcnt+trialLength-1;
+    itcnt=itcnt+trialLength;
 end
 if (ierror == 3); alpha1 = 0; end;
 nf1 = itcnt;
-
-if (nargout == 7)
-    dfdp = dot(gt, p);
-    varargout{1} = dfdp;
-end

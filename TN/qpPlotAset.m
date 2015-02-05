@@ -1,4 +1,4 @@
-function [] = qpPlotAset(Aset,iter,n)
+function [] = qpPlotAset(Aset,iter,n,changeSize,nitOld)
 
 %-----------------------------------------------------------------------
 % [] = qpPlotAset(Aset,iter,n)
@@ -20,15 +20,15 @@ function [] = qpPlotAset(Aset,iter,n)
 %-----------------------------------------------------------------------
 
   % ... initialize/reset active c/s picture
-  if (iter == 0) 
-     clf reset; 
-     title('Cauchy Active Sets (red=low, grn=up, )','FontSize',16);
-     ylabel('variable index','FontSize',14); 
-     xlabel('iteration','FontSize',14);
-     axis([0 10 0 n]); hold on;
-  elseif (mod(iter,10) == 0)
-     hold off; axis([0 iter+10 0 n]); hold on;
-  end; % if 
+%   if (iter == 1) 
+%      clf reset; 
+     title('Cauchy Active Sets (red=low, grn=up, )','FontSize',10);
+     ylabel('variable index','FontSize',8); 
+     xlabel('iteration','FontSize',8);
+     axis([0 10+iter 0 n]); hold on;
+%   elseif (mod(iter,10) == 0)
+%      hold off; axis([0 iter+10 0 n]); hold on;
+%   end;  
 
   % ... plot active constraints
   for i=1:length(Aset)
@@ -37,10 +37,11 @@ function [] = qpPlotAset(Aset,iter,n)
      if (Aset(i) == -1)
 	 fill(ix,iy,'r','LineStyle','none'); 
      elseif (Aset(i) == 1)
-	 fill(ix,iy,'g','LineStyle','none'); 
-    
-     end; 
-  end; 
+	 fill(ix,iy,'g','LineStyle','none');     
+     end;
+     hold on;
+  end;
+ text((iter+nitOld)/2,length(Aset)/2,num2str(changeSize'),'FontSize',12);
   
       %%%#####################################visulize active set
     %     figure(44);

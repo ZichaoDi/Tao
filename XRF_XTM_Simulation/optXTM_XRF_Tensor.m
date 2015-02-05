@@ -38,6 +38,9 @@ else
     fctn=@(W)sfun_Tensor4(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
     fctn1=@(W)sfun_AdiMat(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
 end
+
+% [f,g]=feval(fctn1,WS(:));
+% return;
 Wtest=W;
 if(DiscreteScale)
     for i=1:NumElement
@@ -87,16 +90,16 @@ errTol=norm(xstar-ws)/norm(err0);
 % figureObject(reshape(x0,m(1),m(2),NumElement),Z,m,NumElement,MU_e,1);
 if(plotResult)
     figure(24);
-    clims=[0 max([x0;ws;xstar])];
+    clims=[0 max([xinitial;ws;xstar])];
     for i=1:NumElement
         subplot(4,NumElement,i);
         
-        errCom=reshape(x0(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-ws(prod(m)*i-prod(m)+1:prod(m)*i
+        errCom=reshape(xinitial(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-ws(prod(m)*i-prod(m)+1:prod(m)*i
         imagesc(errCom,clims);colormap gray
         if(i==1)
             ylabel('Initial Guess','fontsize',12)
         end
-        title(['Element ',num2str(i)],'fontsize',12);
+        title(Element{Z(i)},'fontsize',12);
     end
     
     for i=1:NumElement
@@ -107,7 +110,6 @@ if(plotResult)
         if(i==1)
             ylabel('Final Soluction','fontsize',12)
         end
-        title(['Element ',num2str(i)],'fontsize',12);
     end
     
     for i=1:NumElement
@@ -118,12 +120,19 @@ if(plotResult)
         if(i==1)
             ylabel('True Soluction','fontsize',12)
         end
+        if(i==NumElement)
+        hp4 = get(subplot(4,NumElement,i+2*NumElement),'Position');
+        colorbar('Position', [hp4(1)+hp4(3)+0.01  hp4(2)  0.02  hp4(2)+hp4(3)]);
+        end
     end
     for i=1:NumElement; subplot(4,NumElement,i+3*NumElement);
         plot(1:prod(m),sort(xinitial(prod(m)*i-prod(m)+1:prod(m)*i)),'ro',1:prod(m),sort(xstar(prod(m)*i-prod(m)+1:prod(m)*i)),'bs',1:prod(m),sort(ws(prod(m)*i-prod(m)+1:prod(m)*i)),'g*')
         xlim([0 prod(m)]);
         if(i==1)
-            legend('initial','final','optimal','font',16)
+            hleg=legend('initial','final','optimal','FontSize',6, 'Box', 'off');
+            set(hleg,'units','pixels');
+            lp=get(hleg,'outerposition');
+            set(hleg,'Location','NorthWest', 'Box', 'off','outerposition',[lp(1),10,lp(3),20]);
             ylabel('solution','fontsize',12)
         end
     end
