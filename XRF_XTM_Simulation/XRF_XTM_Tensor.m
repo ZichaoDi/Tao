@@ -88,9 +88,6 @@ for n=1:length(thetan)
         end
         %=================================================================
         [index,Lvec,linearInd]=IntersectionSet(SourceKnot(i,:),DetKnot(i,:),xbox,ybox,theta);
-%         if(i==37)
-%             disp('dd')
-%         end
         if(isempty(index))
             EmptyBeam=[EmptyBeam,[n;i]];
         end

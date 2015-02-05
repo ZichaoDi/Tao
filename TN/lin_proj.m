@@ -1,5 +1,6 @@
 function [x, f, g, nf1, ierror, alpha1, ipivot,newcon,flast] = ...
     lin_proj (p, x, f, g, alpha, sfun, low, up,ipivot,flast,newcon)
+global fctn_f
 %---------------------------------------------------------
 % line search: P(x+alpha*p)
 %---------------------------------------------------------
@@ -25,9 +26,9 @@ if(alpha1<=1)%& alpha1>0
         [ipivot1,~, xt] = crash (xt, low, up);
         [ft, gt] = feval (sfun, xt);
         Armijo =ft<f+1e-4*trialAlpha(trial)*q0;
-        Wolfe = abs(p'*gt)<0.25*abs(q0);%
+%         Wolfe = abs(p'*gt)<0.25*abs(q0);%
         if (Armijo );%& Wolfe);
-            fprintf('Armijo and Wolfe satisfied, trial= %d\n',trial);
+%             fprintf('Armijo and Wolfe satisfied, trial= %d\n',trial);
             ierror = 0;
             iproj  = 1;
             x   = xt;
@@ -40,10 +41,6 @@ if(alpha1<=1)%& alpha1>0
             newcon = 1;
             flast=f;
             break;
-%         else
-%             Armijo
-%             Wolfe
-%             ft-f
         end;
     end
     

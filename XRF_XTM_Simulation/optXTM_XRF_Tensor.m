@@ -3,6 +3,7 @@
 global low up penalty gama
 global W0 current_n N
 global SigMa_XTM SigMa_XRF 
+global fctn_f
 
 %%%----------------------------Initialize dependent variables
 level=find(N==current_n);
@@ -34,13 +35,11 @@ if(Joint==-1)
 elseif(Joint==1)
 %     fctn=@(W)sfun_Tensor_Joint_Jacobian(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
     fctn=@(W)sfun_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
+    fctn_f=@(W)func_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 else
     fctn=@(W)sfun_Tensor4(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
     fctn1=@(W)sfun_AdiMat(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
 end
-
-% [f,g]=feval(fctn1,WS(:));
-% return;
 Wtest=W;
 if(DiscreteScale)
     for i=1:NumElement

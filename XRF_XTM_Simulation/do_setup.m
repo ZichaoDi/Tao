@@ -36,7 +36,7 @@ SigmaT=cell(nm,1);
 m_level=zeros(nm,2);
 nTau_level= zeros(nm,1);
 bounds   = 1;  % no bound constraints
-Joint=1; % 0: XRF; -1: XTM; 1: Joint inversion
+Joint=0; % 0: XRF; -1: XTM; 1: Joint inversion
 %----------------------------------------------------------------------
 % Compute the dependent-variable arrays
 PlotObject=0;

@@ -39,26 +39,29 @@ errTol=1;
 x=x0;
 Ntot=zeros(1,2);
 %%%===================================================================
-while (errTol>1e-10 & OuterIter<=5);
+while (OuterIter <= 15);
     NF = [0*N; 0*N; 0*N];
     Joint=(-1)^OuterIter; % 0: XRF; -1: XTM; 1: Joint inversion
     if(Joint==-1)
         fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,L,thetan,m,nTau,NumElement);
-    elseif(Joint==0)
-    fctn=@(W)sfun_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
     elseif(Joint==1)
     fctn=@(W)sfun_Tensor4(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
     end
-    
+    errTolOld=norm(x-W0);
     %%%========================================================================
-    [x,f,g,ierror] = tnbc (x,fctn,low,up);
+[x,f,g,ierror] = tnbc (x,fctn,low,up);
     OuterIter=OuterIter+1;
-    errTol=norm(x-W0)/norm(err0);
+    errTol=norm(x-W0);
+
     if(Joint==1)
     Ntot(2)=Ntot(2)+NF(2)+NF(3);
+if(abs(errTol-errTolOld)<1e-6)
+break;
+end
     elseif(Joint==-1)
     Ntot(1)=Ntot(1)+NF(2)+NF(3);
     end
+   if()
     figure(333)
     hold on; drawnow;
     if(Joint==1)

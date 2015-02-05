@@ -16,21 +16,23 @@ for n=1:length(thetan)
     if(LogScale)
         Mt=-log(M(:,n)./I0);
         for i=1:nTau+1
+            count=(nTau+1)*(n-1)+i;
             L=reshape(Ltol(n,i,:),m(1),m(2));
             if(~isempty(find(L,1)))
                 Rdis=eX'*(MU.*L)*eY;
-                sum_Tau=sum_Tau+beta*SigMa_XTM(i)*(Rdis-Mt(i))^2;
-                g=g+2*beta*SigMa_XTM(i)*(Rdis-Mt(i)).*L;               
+                sum_Tau=sum_Tau+beta*SigMa_XTM(count)*(Rdis-Mt(i))^2;              
+                g=g+2*beta*SigMa_XTM(count)*(Rdis-Mt(i)).*L;               
             end
         end
     else
         Mt=M(:,n);        
         for i=1:nTau+1
+            count=(nTau+1)*(n-1)+i;
             L=reshape(Ltol(n,i,:),m(1),m(2));
             if(~isempty(find(L,1)))
                 Rdis=I0*exp(-eX'*(MU.*L)*eY);%% Discrete case
-                sum_Tau=sum_Tau+beta*SigMa_XTM(i)*(Rdis-Mt(i))^2;
-                g=g-2*beta*SigMa_XTM(i)*Rdis*(Rdis-Mt(i)).*L;
+                sum_Tau=sum_Tau+beta*SigMa_XTM(count)*(Rdis-Mt(i))^2;
+                g=g-2*beta*SigMa_XTM(count)*Rdis*(Rdis-Mt(i)).*L;
             end
         end
     end

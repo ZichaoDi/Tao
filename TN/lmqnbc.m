@@ -121,7 +121,6 @@ while (~conv);
     alpha0 = alpha;
     PieceLinear=1;
     newcon = 0;
-    %     fprintf('alpha0 = %.1e\n',alpha0)
     if(PieceLinear)
         [x_new, f_new, g_new, nf1, ierror, alpha,ipivot,newcon,flast] = lin_proj (p, x, f, g, alpha0, sfun, low, up,ipivot,flast,newcon);
     else
@@ -224,8 +223,9 @@ while (~conv);
     if (nit>=maxiter); conv = 1; end;
     %------------------------------- Active set plot
     
-        if(mod(nit,10)==0 | conv | nit==1) %
-%     if(conv)
+    %     if((mod(nit,10)==0 | conv | nit==1) & Joint~=-1) %
+    plotAS=0;
+    if(conv& Joint~=-1 & plotAS)
         
         addAS=length(find(-ipivot+ipivotOld==1));
         dropAS=length(find(-ipivot+ipivotOld==-1));
@@ -313,7 +313,7 @@ while (~conv);
     %---------------------------------------------------------
     argvec = [accrcy gnorm xnorm];
     [p, gtp, ncg1, d, eig_val] = ...
-        modlnp (d, x, g, maxit, upd1, ireset, bounds, ipivot, argvec, sfun);
+        modlnp (d, x, g, 10, upd1, ireset, bounds, ipivot, argvec, sfun);
     ptest=p;
     ncg = ncg + ncg1;
     % %---------------------------------------------------------

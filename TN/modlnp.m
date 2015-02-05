@@ -33,7 +33,6 @@ if (maxit == 0);
       disp('MODLNP 01: |p| = 0');
       pause(1);
   end;
-%   disp('return 1')
   return;
 end;
 first = 1;
@@ -66,7 +65,6 @@ for k = 1:maxit
        ind = 80;
        if (norm(p)==0); p = -g; gtp = p'*g; 
        end;
-%        disp('return 2')
        return; 
    end;
    if (k > 1) 
@@ -84,9 +82,7 @@ for k = 1:maxit
        if (norm(p)==0);
           disp('MODLNP 03: |p| = 0');
           p=-g; gtp=p'*g;
-%           pause(1);
        end;
-%        disp('return3')
        return; 
    end;
    ndia3 (dnew, v, gv, r, v_gv(k));
@@ -111,15 +107,11 @@ for k = 1:maxit
    pr = r'*p;
    q = (gtp + pr) / 2;
    qtest = k * (1 - qold/q);
-   if(gtp>0)
-       disp('no descent direction');
-   end
    if (qtest <= 0.5); 
        if (norm(p)==0);
           disp('MODLNP 04: |p| = 0');
           pause(1);
        end;
-%        disp('return4')
        return; 
    end;
    qold = q;
@@ -132,7 +124,6 @@ for k = 1:maxit
           disp('MODLNP 05: |p| = 0');
           pause(1);
        end;
-%        disp('return 5')
        return; 
    end;
    rzold = rz;
@@ -166,7 +157,6 @@ if (norm(p)==0);
     disp('MODLNP 06: |p| = 0');
     pause(1);
 end;
-% disp('return6')
 return;
 
 %------------------------------------------------------------------------------

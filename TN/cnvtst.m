@@ -32,7 +32,6 @@ rtleps = accrcy + eps;
            & abs(dif) < rtleps*ftest        ...
            & gnorm < accrcy^(1/3)*ftest) ...
             | gnorm < .01*sqrt(accrcy)*ftest;
-%     conv = (gnorm < 1d-2*ftest);
 % end;
 flast1  = flast;
 ipivot1 = ipivot;

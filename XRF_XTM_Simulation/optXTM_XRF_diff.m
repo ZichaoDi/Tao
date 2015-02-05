@@ -18,14 +18,15 @@ m=m_level(level,:);
 nTau=nTau_level(level);
 SigMa_XTM=SigmaT{level};
 SigMa_XRF=SigmaR{level};
-maxiter=10;
 %%%----------------------------------------------------------------------
-W0=W(:);
-x0_XRF=W0+1*10^(0)*rand(prod(m)*size(M,1),1);%10*ones(sizEDe(W0));%
-x0_XTM=ones(size(MU_XTM(:)+1*10^(0)*rand(prod(m),1)));
+
+x0_XRF=x0;
+x0_XTM=sum(reshape(x0,m(1),m(2),NumElement).*repmat(MUe,[m(1),m(2),1]),3);
+x0_XTM=x0_XTM(:);
 xinitial=x0_XRF;
-err0=norm(xinitial-W0);
-err0_XTM=x0_XTM-MU_XTM(:);
+err0_XTM=norm(x0_XTM(:)-MU_XTM(:));
+err0_XRF=norm(x0_XRF-WS(:));
+errTolOld=err0_XRF;
 e=cputime;
 figureObject(reshape(x0_XRF,m(1),m(2),NumElement),Z,m,NumElement,MU_e,1);
 low_XRF=0*ones(size(x0_XRF));
@@ -41,13 +42,23 @@ Ntot=zeros(1,2);
 %%%===================================================================
 MaxiOuter=2^6+1; %% choose odd number to make sure the outer iteration stops at XRF
 while ( OuterIter<=MaxiOuter);
+    NF = [0*N; 0*N; 0*N];
     Joint=(-1)^(OuterIter+1); % 1: XRF; -1: XTM; 0: Joint inversion
     if(Joint==-1)
+        fprintf('============================ Transmission Reconstruction\n')
+        maxiter=10;
+        W0=MU_XTM(:);
+        err0=norm(x_XTM(:)-MU_XTM(:));
         fctn=@(MU)sfun_XTM_com(DisR,MU,I0,L,thetan,m,nTau);
-        [x_XTM,f,g,ierror] = tnbc (x_XTM,fctn,low_XTM,up_XTM);
+        [x_XTM,f,g,ierror] = tnbc (x_XTM(:),fctn,low_XTM,up_XTM);
     elseif(Joint==1)
-        fctn=@(W)sfun_Tensor4(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
+        fprintf('============================ Fluorescence Reconstruction\n')
+        maxiter=50;
+        W0=W(:);
+        err0=norm(x_XRF-WS(:));
+        fctn=@(W)sfun_Tensor4_diff(W,x_XTM,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
         [x_XRF,f,g,ierror] = tnbc (x_XRF,fctn,low_XRF,up_XRF);
+        x_XTM=sum(reshape(x_XRF,m(1),m(2),NumElement).*repmat(MUe,[m(1),m(2),1]),3);
     end
     
     %%%========================================================================
@@ -59,12 +70,13 @@ while ( OuterIter<=MaxiOuter);
     
     OuterIter=OuterIter+1;
     if(Joint==1)
-        errTol=norm(x_XRF-W0)/err0;
-        if(errTol<1e-10)
+        errTol=norm(x_XRF-WS(:));
+        if(abs(errTol-errTolOld)<eps)
             break;
         end
+        errTolOld=errTol;
     elseif(Joint==-1)
-        errTol=norm(x_XTM-MU_XTM(:))/norm(err0_XTM);
+        errTol=norm(x_XTM-MU_XTM(:));
     end
     figure(333)
     hold on; drawnow;
