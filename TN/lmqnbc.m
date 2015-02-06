@@ -196,21 +196,9 @@ while (~conv);
     gnorm = norm(gv, 'inf');
     ftest = 1 + abs(f);
     xnorm = norm(x,'inf');
-    %--------------------------------- Error Plot
-    %     if(mod(nit,50)==0)
-    if(Joint==1 |Joint==0)
-        %         figure(100);
-        %         CurrentErr=abs(x-W0(VarInd));
-        %         FunEva(nit)=Ntot(2)+nf+ncg;
-        ErrIter(nit)=norm(x-W0);%/err0;
-        %         save ErrIter ErrIter;
-        %         subplot(1,2,1)
-        %         vs=sum(reshape(CurrentErr,m(1),m(2),length(VarInd)/prod(m)),3);
-        %         surf(vs);
-        %          subplot(1,2,2)
-        %         plot(FunEva,ErrIter,'ro-');drawnow;hold on;
-    end
-    %     end
+    %--------------------------------- Error
+    ErrIter(nit)=norm(x-W0);
+    %         save ErrIter ErrIter;
     
     fprintf(1,'%4i   %4i   %4i   % .8e   %.1e     %.1e      %.3e\n', ...
         nit, nf, ncg, f, gnorm, alpha, norm(x-W0));
@@ -220,7 +208,9 @@ while (~conv);
     [conv, flast, ipivot] = cnvtst (alpha, pnorm, xnorm, ...
         difnew, ftest, gnorm, gtp, f, flast, g, ...
         ipivot, accrcy);
-    if (nit>=maxiter); conv = 1; end;
+    if ((nit>=2 & abs(ErrIter(nit)-ErrIter(nit-1))<eps)|nit>=maxiter); 
+        conv = 1; 
+    end;
     %------------------------------- Active set plot
     
     %     if((mod(nit,10)==0 | conv | nit==1) & Joint~=-1) %

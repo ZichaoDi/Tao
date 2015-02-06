@@ -1,13 +1,15 @@
-function [f,g]=sfun_Tensor_Joint(W,xrfData,xtmData,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0)
+function [f,g,f_XRF,f_XTM]=sfun_Tensor_Joint(W,xrfData,xtmData,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0)
 global NumSSDlet numChannel NoSelfAbsorption XTMscale gama
 global  SigMa_XTM SigMa_XRF
 global LogScale Beta EmptyBeam
 % load WeightMatrix
 f=0;
+f_XRF=0;
+f_XTM=0;
 mtol=prod(m);
 W=reshape(W,mtol,NumElement);
 L=reshape(L,length(thetan),nTau+1,mtol);
-Beta=1e0;
+% Beta=1e1;
 %%%%% =================== Attenuation Matrix at beam energy
 MUe=reshape(MU_e(:,1,1),1,1,NumElement);
 MUe_XTM=reshape(MU_e(:,1,1).*gama,1,1,NumElement).*XTMscale;
@@ -80,17 +82,20 @@ for n=1:length(thetan)
                 count=(nTau+1)*(n-1)+i;
                 Rdis=eX'*(MU_XTM.*Lsub)*eY; %% Discrete case
                 f=f+Beta*SigMa_XTM(count)*(Rdis-Mt(i))^2;
+                f_XTM=f_XTM+SigMa_XTM(count)*(Rdis-Mt(i))^2;
                 g=g+reshape(2*Beta*SigMa_XTM(count)*(Rdis-Mt(i)).*repmat(full(Lsub),[1,1,NumElement]).*repmat(MUe_XTM,[m(1),m(2),1]),mtol,NumElement);
             else
                 count=(nTau+1)*(n-1)+i;
                 Rdis=I0*exp(-eX'*(MU_XTM.*Lsub)*eY);
                 f=f+Beta*SigMa_XTM(count)*(Rdis-Mt(i))^2;
+                f_XTM=f_XTM+SigMa_XTM(count)*(Rdis-Mt(i))^2;
                 g=g-reshape(2*Beta*SigMa_XTM(count)*Rdis*(Rdis-Mt(i)).*repmat(full(Lsub),[1,1,NumElement]).*repmat(MUe_XTM,[m(1),m(2),1]),mtol,NumElement);
             end
 %              SigMa1(:,i)=diag(diag(-inv(WeightMatrix{n,i}*WeightMatrix{n,i}')))*(XRF_v{n,i}-xrfData{n,i})';
         end
     end
     count=(nTau+1)*(n-1)+1:(nTau+1)*n;
+    f_XRF=f_XRF+sum(SigMa_XRF(count).*sum((cat(1,XRF_v{n,:})-cat(1,xrfData{n,:})).^2,2),1);
     f=f+sum(SigMa_XRF(count).*sum((cat(1,XRF_v{n,:})-cat(1,xrfData{n,:})).^2,2),1);
     g=g+2*reshape(sum(sum(bsxfun(@times,TempSub,repmat(SigMa_XRF(count),[1 1 1 numChannel]).*reshape((cat(1,XRF_v{n,:})-cat(1,xrfData{n,:})),nTau+1,1,1,numChannel)),1),4),mtol,NumElement);
     

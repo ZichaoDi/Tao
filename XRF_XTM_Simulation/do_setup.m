@@ -4,7 +4,7 @@
 % W,xrfData,xtmData,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0
 %
 
-global N numThetan
+global N numThetan NF
 global bounds LogScale Joint
 global grad_type err0 WS
 global onlyXRF
@@ -24,7 +24,7 @@ onlyXRF=0;
 N=[5];%[17 9 5 3];%[3];%
 NF = [0*N; 0*N; 0*N];
 nm=length(N);
-numThetan=1;%[2 2 1 1];
+numThetan=4;%[2 2 1 1];
 W_level=cell(nm,1);
 xrf_level=cell(nm,1);
 xtm_level=cell(nm,1);
