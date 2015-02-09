@@ -9,6 +9,7 @@ global N current_n
 global bounds v_low v_up
 global GRAPH_N_OLD GRAPH_INDEX_OLD 
 global Hess_norm_H % norm of coarse-grid Hessian 
+global sfun W0
 %----------------------------------------------------------------------
 % DECIDE WHETHER TO PRINT ASSESSMENT TEST RESULTS
 % AND WHETHER TO PAUSE AFTER PRINTING TESTS
@@ -31,7 +32,7 @@ GRAPH_INDEX_OLD = GRAPH_INDEX_OLD+1;
 %%%%%%%%%%%%######################################################
 %--------------------------------------------------
 n = current_n;
-global_setup(n);
+sfun=global_setup(n);
 alpha = 0; % added to try to deal with error message
 %--------------------------------------------------
 % Determine update/downdate constant
@@ -61,7 +62,7 @@ end;
 if (res_prob);
     myfun = 'sfun_mg';
 else
-    myfun = 'sfun';
+    myfun = sfun;
 end;
 %--------------------------------------------------
 T  = ['In  mgrid: n = ' num2str(current_n)];
@@ -78,7 +79,7 @@ if (current_n <= nmin);
     %--------------------------------------------------
     % solve (exactly) problem on coarsest grid
     %--------------------------------------------------
-    nit_solve = 250;
+    nit_solve = 20;
     if (step_bnd == 0);
         if (bounds);
             
@@ -184,7 +185,7 @@ else
     current_n   = N(j);
     %--------------------------------------------------
     n = current_n;
-    global_setup(n);
+    sfun=global_setup(n);
     %--------------------------------------------------
     
     
@@ -218,7 +219,8 @@ else
     j           = j-1;
     current_n   = N(j);
     e           = update(e2-current_v,1);
-    
+    n = current_n;
+    sfun=global_setup(n);
     if (Hess_norm_H > 0)
         sep_denom = norm(p_h) * Hess_norm_H;
         sep_quot = norm(Ap_H) / sep_denom;
@@ -239,7 +241,7 @@ else
         Hess_norm_H = Hessian_norm;
         accrcy = 128*eps;
         vnorm  = norm(v, 'inf');
-        He = gtims (e, v, G_before_recursion_reg, accrcy, vnorm, @sfun);
+        He = gtims (e, v, G_before_recursion_reg, accrcy, vnorm, sfun);
         approx_Rayleigh_quot = (dot(He,He)/(Hessian_norm * dot(e,He)));
         if (assess_print);
             fprintf('MESH COMPLEMENTARITY TEST (nh = %d): %f\n',N(j),approx_Rayleigh_quot);
@@ -269,8 +271,7 @@ else
     GRAPH_N_OLD = current_n;
     GRAPH_INDEX_OLD = GRAPH_INDEX_OLD+1;
     %--------------------------------------------------
-    n = current_n;
-    global_setup(n);
+
     if (bounds);
             [v_low,v_up] = set_bounds(j,res_prob);
     end;
@@ -338,7 +339,6 @@ else
     disp(T)
     if (step_bnd == 0);
         if (bounds);
-            
             nit = 1; [v,F,G,ierror]  = tnbcm(v,myfun,v_low,v_up,nit);
             
         else

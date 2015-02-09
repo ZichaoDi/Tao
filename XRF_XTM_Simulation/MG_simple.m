@@ -9,12 +9,12 @@ do_setup;
 tic;
 cycle=1;
 maxCycle=1;
-fid = fopen('betaPareto_Tensor.txt','a');
+% fid = fopen('betaPareto_Tensor.txt','a');
     
 while(cycle<=maxCycle)
 
-for it=-6:4
-Beta=10^(it);    
+% for it=-6:4
+Beta=1;%10^(it);    
 
 for level=1:length(N)-1
     current_n=N(level);
@@ -59,9 +59,9 @@ err_h=norm(xstar-W(:));
 T=toc;
 report_results(N);
 
-[f,g,f1,f2]=feval(fctn,xstar);
-fprintf(fid,'%12.4e    %12.4e     %12.4e    %12.4e      %12.4e     %f\n',Beta,f,f1,f2,err_h,T);
+% [f,g,f1,f2]=feval(fctn,xstar);
+% fprintf(fid,'%12.4e    %12.4e     %12.4e    %12.4e      %12.4e     %f\n',Beta,f,f1,f2,err_h,T);
 end
 
-end
-  fclose(fid);
+% end
+%   fclose(fid);

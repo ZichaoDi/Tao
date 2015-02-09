@@ -8,7 +8,8 @@ global N numThetan NF
 global bounds LogScale Joint
 global grad_type err0 WS
 global onlyXRF
-
+global W_level xrf_level xtm_level L_level GI_level SI_level SigmaR SigmaT m_level nTau_level
+global NumElement MU_e I0 M thetan xinitial Z Element
 %--------------------------------------------------
 % Select technique for gradient calculation.
 %
@@ -67,7 +68,8 @@ nTol=N(1)^2*NumElement;
 %---------------------------------------------
 % Specify initial guess for optimization.
 rng('default');
-load x_new;
+% load x_new;
 x0=1*10^(-1)*rand(nTol,1);%WS(:)+1e-4;%+1e0;%zeros(size(WS(:)));%+x_new%
 xinitial=x0;
 err0=norm(x0-WS(:));
+v0=x0;

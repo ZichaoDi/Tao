@@ -50,7 +50,7 @@ stepmx = 10;
 accrcy = 100*eps;
 %---------------------------------------------------------
 [xstar, f, g, ierror, eig_val] = ...
-   lmqnbcm (x, sfun, low, up, maxiter, maxit, maxfun, stepmx, accrcy);
+   lmqnbcm1 (x, sfun, low, up, maxiter, maxit, maxfun, stepmx, accrcy);
 
 if (nargout == 5)
   varargout{1} = eig_val;

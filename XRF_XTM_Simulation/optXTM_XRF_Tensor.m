@@ -40,6 +40,7 @@ else
     fctn=@(W)sfun_Tensor4(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
     fctn1=@(W)sfun_AdiMat(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
 end
+
 Wtest=W;
 if(DiscreteScale)
     for i=1:NumElement

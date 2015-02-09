@@ -129,7 +129,7 @@ while (~conv);
     
     Cauchy=0;
     %---------------------------------------------------------
-    save x_new x_new;
+%     save x_new x_new;
     if (alpha == 0 & alpha0 ~= 0 | ierror == 3);
         fprintf('Error in Line Search\n');
         fprintf('    ierror = %3i\n',    ierror);
@@ -151,7 +151,7 @@ while (~conv);
     nf  = nf  + nf1;
     nit = nit +   1;
     ASchange(nit)=norm(-ipivot+ipivotOld,1);
-    save ASchange ASchange
+%     save ASchange ASchange
     %---------------------------------------------------------
     % update active set, if appropriate
     %---------------------------------------------------------
@@ -198,7 +198,12 @@ while (~conv);
     xnorm = norm(x,'inf');
     %--------------------------------- Error
     ErrIter(nit)=norm(x-W0);
-    %         save ErrIter ErrIter;
+    ErrDis=reshape(x-W0,current_n, current_n, NumElement);
+    figure(9);
+    for iPlot=1:NumElement
+    subplot(2,2,iPlot),surf(ErrDis(:,:,iPlot));
+    end
+    drawnow;
     
     fprintf(1,'%4i   %4i   %4i   % .8e   %.1e     %.1e      %.3e\n', ...
         nit, nf, ncg, f, gnorm, alpha, norm(x-W0));
