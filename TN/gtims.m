@@ -1,4 +1,5 @@
 function gv = gtims (v, x, g, accrcy, xnorm, sfun)
+
 %%%%%%%%%%%%%%%%%##################
 %---------------------------------------------------------
 % compute the product of the Hessian times the vector v;

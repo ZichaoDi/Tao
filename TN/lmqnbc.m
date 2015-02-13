@@ -11,7 +11,7 @@ global sk yk sr yr yksk yrsr
 global NF N current_n  fiter itertest
 global ptest gv ipivot nit
 global i_cauchy W0  m NumElement
-global maxiter err0 Joint
+global maxiter err0 Joint free_ind
 %---------------------------------------------------------
 % check that initial x is feasible and that the bounds
 % are consistent
@@ -31,7 +31,12 @@ end;
 %---------------------------------------------------------
 % initialize variables, parameters, and constants
 %---------------------------------------------------------
-fprintf(1,'  it     nf     cg           f             |g|      alpha        error\n');
+if(Joint==1)
+fprintf(1,'  it     nf     cg           f             f_xrf             f_xtm            |g|        alpha        error\n');
+else
+fprintf(1,'  it     nf     cg           f            |g|      alpha        error\n');   
+end
+
 nind   = find(N==current_n);
 upd1   = 1;
 ncg    = 0;
@@ -60,12 +65,12 @@ itertest(1)=nf+ncg;
 % multipliers are components of the gradient.
 % Then form the projected gradient.
 %---------------------------------------------------------
-% ind = find((ipivot ~= 2) & (ipivot.*g>0));
-% if (~isempty(ind));
-%     ipivot(ind) = zeros(length(ind),1);
-% end;
+ind = find((ipivot ~= 2) & (ipivot.*g>0));
+if (~isempty(ind));
+    ipivot(ind) = zeros(length(ind),1);
+end;
 ipivotOld=ipivot;
-g = ztime (g, ipivot);
+% g = ztime (g, ipivot);
 gnorm = norm(g,'inf');
 fprintf(1,'%4i   %4i   %4i   % .8e   %.1e     %.1e      %.3e\n', ...
     nit, nf, ncg, f, gnorm, 1, err0);
@@ -122,14 +127,19 @@ while (~conv);
     PieceLinear=1;
     newcon = 0;
     if(PieceLinear)
-        [x_new, f_new, g_new, nf1, ierror, alpha,ipivot,newcon,flast] = lin_proj (p, x, f, g, alpha0, sfun, low, up,ipivot,flast,newcon);
+        if(Joint==1)
+        [x_new, f_new, g_new, nf1, ierror, alpha,ipivot,newcon,flast,f_xrf,f_xtm] = lin_proj (p, x, f, g, alpha0, sfun, low, up,ipivot,flast,newcon);
+        else
+        [x_new, f_new, g_new, nf1, ierror, alpha,ipivot,newcon,flast] = lin_proj (p, x, f, g, alpha0, sfun, low, up,ipivot,flast,newcon); 
+        end
     else
         [x_new, f_new, g_new, nf1, ierror, alpha] = lin1 (p, x, f, alpha0, g, sfun);
     end
     
     Cauchy=0;
-    %---------------------------------------------------------
-%     save x_new x_new;
+    %---------------------------------------------------------%    
+    xTest{nit+1} = x_new;
+    save xTest xTest
     if (alpha == 0 & alpha0 ~= 0 | ierror == 3);
         fprintf('Error in Line Search\n');
         fprintf('    ierror = %3i\n',    ierror);
@@ -198,30 +208,38 @@ while (~conv);
     xnorm = norm(x,'inf');
     %--------------------------------- Error
     ErrIter(nit)=norm(x-W0);
-    ErrDis=reshape(x-W0,current_n, current_n, NumElement);
-    figure(9);
-    for iPlot=1:NumElement
-    subplot(2,2,iPlot),surf(ErrDis(:,:,iPlot));
-    end
-    drawnow;
-    
+%     ErrDis=reshape(x-W0,current_n, current_n, NumElement);
+%     figure(9);
+%     for iPlot=1:NumElement
+%     subplot(2,2,iPlot),surf(ErrDis(:,:,iPlot));
+%     end
+%     drawnow;
+if(Joint==1)
+    fprintf(1,'%4i   %4i   %4i   % .8e   % .8e    % .8e    %.1e     %.1e      %.3e\n', ...
+        nit, nf, ncg, f, f_xrf, f_xtm, gnorm, alpha, norm(x-W0));
+else
     fprintf(1,'%4i   %4i   %4i   % .8e   %.1e     %.1e      %.3e\n', ...
         nit, nf, ncg, f, gnorm, alpha, norm(x-W0));
+end
     %---------------------------------------------------------
     % test for convergence
     %---------------------------------------------------------
     [conv, flast, ipivot] = cnvtst (alpha, pnorm, xnorm, ...
         difnew, ftest, gnorm, gtp, f, flast, g, ...
         ipivot, accrcy);
-    if ((nit>=2 & abs(ErrIter(nit)-ErrIter(nit-1))<eps)|nit>=maxiter); 
-        conv = 1; 
+%     if ((nit>=2 & abs(ErrIter(nit)-ErrIter(nit-1))<eps)|nit>=maxiter);
+    if(nit>=maxiter)
+        conv = 1;
     end;
     %------------------------------- Active set plot
-    
-    %     if((mod(nit,10)==0 | conv | nit==1) & Joint~=-1) %
+%     load BindInd
+%     figure(10);plot(1:length(x),g,'r-',BindInd,g(BindInd),'ro',1:length(x),ipivot,'g.-',1:length(x),p,'m*');
+%     pause;
     plotAS=0;
-    if(conv& Joint~=-1 & plotAS)
-        
+    if((mod(nit,10)==0 | conv | nit==1) & Joint~=-1 & plotAS==1) %
+        %     if(conv& Joint~=-1 & plotAS)
+        load BindInd
+        figure(10);plot(1:length(x),g,'r.-',1:length(BindInd),g(BindInd),'ro',1:length(x),ipivot,'g.-',1:length(x),p,'m*');
         addAS=length(find(-ipivot+ipivotOld==1));
         dropAS=length(find(-ipivot+ipivotOld==-1));
         figure(19);plot(1:nit,ASchange,'r.-');
@@ -307,8 +325,18 @@ while (~conv);
     % compute the search direction
     %---------------------------------------------------------
     argvec = [accrcy gnorm xnorm];
-    [p, gtp, ncg1, d, eig_val] = ...
+    
+    [p, gtp, ncg1, d] = ...
         modlnp (d, x, g, 10, upd1, ireset, bounds, ipivot, argvec, sfun);
+    
+    %------------ Start reduction of the dimension of Hp=-g;
+%     free_ind=find(ipivot==0);
+%     [p_sub, gtp, ncg1, d_sub] = ...
+%         modlnp_sub (d, x, g, 10, upd1, ireset, bounds, ipivot, argvec, sfun);
+%     p=zeros(size(x));
+%     p(free_ind)=p_sub;
+%     d(free_ind)=d_sub;
+    %----------------------------------------------------------------
     ptest=p;
     ncg = ncg + ncg1;
     % %---------------------------------------------------------

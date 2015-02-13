@@ -56,7 +56,7 @@ else
 end
 % NumElement=2;
 %%%%%%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Z=[29 30 46 49 57 74 79];%% 42 29 26 ];%20 49 57 46];% reference sample: Pb La Pd Mo Cu Fe Ca
+Z=[20 29 79 30 46 59];%[29 30 46 49 57 74 79];%% 42 29 26 ];%% reference sample: Pb La Pd Mo Cu Fe Ca
 % ComChoices=nchoosek(1:6,3);
 % Z=Z(ComChoices(1,:));
 Z=Z(1:NumElement);

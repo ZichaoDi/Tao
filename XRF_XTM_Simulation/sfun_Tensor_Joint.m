@@ -1,7 +1,7 @@
 function [f,g,f_XRF,f_XTM]=sfun_Tensor_Joint(W,xrfData,xtmData,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0)
 global NumSSDlet numChannel NoSelfAbsorption XTMscale gama
 global  SigMa_XTM SigMa_XRF
-global LogScale Beta EmptyBeam
+global LogScale Beta EmptyBeam Tol
 % load WeightMatrix
 f=0;
 f_XRF=0;
@@ -77,7 +77,7 @@ for n=1:length(thetan)
                 end
                 
             end
-            Lsub=reshape(L(n,i,:),m(1),m(2));
+            Lsub=reshape(L(n,i,:),m(1),m(2))./Tol;
             if(LogScale)
                 count=(nTau+1)*(n-1)+i;
                 Rdis=eX'*(MU_XTM.*Lsub)*eY; %% Discrete case

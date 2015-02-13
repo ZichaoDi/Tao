@@ -22,7 +22,7 @@ grad_type = 'adj';  % 'adj' = adjoint/exact
 % Initialize arrays for discretizations
 Tomo_startup;
 onlyXRF=0;
-N=[5];%[17 9 5 3];%[3];%
+N=[3];%[17 9 5 3];%[3];%
 NF = [0*N; 0*N; 0*N];
 nm=length(N);
 numThetan=4;%[2 2 1 1];
@@ -43,7 +43,7 @@ Joint=1; % 0: XRF; -1: XTM; 1: Joint inversion
 PlotObject=0;
 plotSpec = 0; % Do you want to see the spectra? If so plotSpec = 1
 plotTravel=0; % If plot the intersection of beam with object
-plotUnit=0;
+plotUnit=1;
 plotElement=0;
 % plotResult=1;
 LogScale=1; %% determine if the XTM is solved taking log first or not
@@ -68,8 +68,8 @@ nTol=N(1)^2*NumElement;
 %---------------------------------------------
 % Specify initial guess for optimization.
 rng('default');
-% load x_new;
-x0=1*10^(-1)*rand(nTol,1);%WS(:)+1e-4;%+1e0;%zeros(size(WS(:)));%+x_new%
+ load x_new;
+x0=1*10^(-1)*rand(nTol,1);%zeros(size(WS(:)));%WS(:)+1e-4;%+1e0;%+x_new%
 xinitial=x0;
 err0=norm(x0-WS(:));
 v0=x0;

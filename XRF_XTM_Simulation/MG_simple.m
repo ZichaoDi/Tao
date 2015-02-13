@@ -1,6 +1,6 @@
 %%% simple multigrid
 global x0 current_n N;
-global Beta;
+global Beta maxiter Joint
 
 close all;
 more on;
@@ -9,12 +9,12 @@ do_setup;
 tic;
 cycle=1;
 maxCycle=1;
-% fid = fopen('betaPareto_Tensor.txt','a');
+fid = fopen('betaPareto_Tensor.txt','a');
     
 while(cycle<=maxCycle)
 
-% for it=-6:4
-Beta=1;%10^(it);    
+for it=0;%-6:4
+Beta=10^(it);    
 
 for level=1:length(N)-1
     current_n=N(level);
@@ -32,7 +32,7 @@ for level=length(N):-1:1
     current_n=N(level);
     if(current_n==N(end))
         if(length(N)==1)
-            maxiter=10000;
+            maxiter=100;
         else
         maxiter=100;
         end
@@ -58,10 +58,12 @@ cycle=cycle+1;
 err_h=norm(xstar-W(:));
 T=toc;
 report_results(N);
-
-% [f,g,f1,f2]=feval(fctn,xstar);
-% fprintf(fid,'%12.4e    %12.4e     %12.4e    %12.4e      %12.4e     %f\n',Beta,f,f1,f2,err_h,T);
+if(Joint==1)
+[f,g,f1,f2]=feval(fctn,xstar);
+fprintf(fid,'%12.4e    %12.4e     %12.4e    %12.4e      %12.4e     %f\n',Beta,f,f1,f2,err_h,T);
 end
 
-% end
-%   fclose(fid);
+end
+
+end
+  fclose(fid);

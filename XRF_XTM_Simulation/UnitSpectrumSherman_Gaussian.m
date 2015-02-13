@@ -1,3 +1,4 @@
+
 % Net intensity = I0*c_e*omega_e*(1-1/JumpFactor)*mu*T
 % c_e: element concentration , for single element, c_e=1
 % omega_e: fluorescence yield
