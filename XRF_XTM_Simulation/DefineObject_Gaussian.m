@@ -41,8 +41,8 @@ if(onlyXRF)
         end
     end
 else    
-  CreateElement; %load Phantom5; W=Phantom5; NumElement=size(W,3);%% shepp-logan phantom
-%     CreateCircle; %% sample with circles 
+%   CreateElement; %load Phantom5; W=Phantom5; NumElement=size(W,3);%% shepp-logan phantom
+    CreateCircle; %% sample with circles 
     %------------------------- a sample to test the different impact from heavy and light elements
     % SvenSample;
     %----------------------------

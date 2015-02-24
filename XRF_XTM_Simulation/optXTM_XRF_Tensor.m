@@ -3,13 +3,16 @@
 global low up penalty gama
 global W0 current_n N
 global SigMa_XTM SigMa_XRF
-global fctn_f err0
+global fctn_f err0 fiter nit
+
+global   maxiter
+maxiter=30;
 
 %%%----------------------------Initialize dependent variables
 level=find(N==current_n);
 W= W_level{level};
-XRF=xrf_level{1};
-DisR=xtm_level{1};
+XRF=xrf_level{level};
+DisR=xtm_level{level};
 L=L_level{level};
 GlobalInd=GI_level{level};
 SelfInd=SI_level{level};
@@ -54,12 +57,12 @@ if(DiscreteScale)
     end
 end
 
-fctn_J=@(W)sfun_Tensor_Joint_Jacobian(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
-feval(fctn_J,x0);
-% tic;
-% [f,g]=feval(fctn,W(:));
-% toc;
-% return;
+% fctn_J=@(W)sfun_Tensor_Joint_Jacobian(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
+% feval(fctn_J,x0);
+
+nTol=current_n^2*NumElement;
+rng('default');
+x0=W0+10^(-2)*rand(nTol,1);
 err0=norm(x0-W0);
 ws=Wtest(:);
 e=cputime;
@@ -74,15 +77,15 @@ up=1e6*ones(size(x0));
 % xstar = lsqnonlin(fctn,x0,[],[],options);
 [xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
 %   [xstar,f,g,ierror] = tn (x0,fctn);
-if(Joint==-1 & DiscreteScale)
-    xtemp=reshape(xstar,m(1),m(2),NumElement);
-    err0_1=reshape(err0,m(1),m(2),NumElement);
-    for i=1:NumElement
-        xtemp(:,:,i)=xtemp(:,:,i)*gama(i);
-        err0_1(:,:,i)=err0_1(:,:,i)*gama(i);
-    end
-    err0_1=err0_1(:);
-end
+% if(Joint==-1 & DiscreteScale)
+%     xtemp=reshape(xstar,m(1),m(2),NumElement);
+%     err0_1=reshape(err0,m(1),m(2),NumElement);
+%     for i=1:NumElement
+%         xtemp(:,:,i)=xtemp(:,:,i)*gama(i);
+%         err0_1(:,:,i)=err0_1(:,:,i)*gama(i);
+%     end
+%     err0_1=err0_1(:);
+% end
 %%%====================================================== Report Result
 
 % for i=1:NumElement
@@ -90,8 +93,16 @@ end
 % end
 % figure('name','Elemental Residule')
 % semilogy(1:NumElement,err,'r.-');
-t=cputime-e;
-errTol=norm(xstar-ws)/norm(err0);
+
+if(Joint==1)
+convFac_J=(fiter(end)/fiter(1))^(1/(nit+1));
+t_J=cputime-e;
+errTol_J=norm(xstar-ws)/norm(err0);
+elseif(Joint==0)
+  convFac_XRF=(fiter(end)/fiter(1))^(1/(nit+1));
+  t_XRF=cputime-e;
+errTol_XRF=norm(xstar-ws)/norm(err0);
+end
 % if(DiscreteScale)
 %     AbsErr=norm(xtemp(:)-W(:))
 %     IniErr=norm(err0_1)

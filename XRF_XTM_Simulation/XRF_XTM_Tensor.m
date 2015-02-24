@@ -27,6 +27,10 @@ LocalInd=cell(length(thetan),nTau+1,m(1),m(2),NumSSDlet);
 L_after=cell(length(thetan),nTau+1,m(1),m(2),NumSSDlet);
 SelfInd=cell(length(thetan),nTau+1,prod(m));
 mtol=prod(m);
+if(m(1)==50 & length(thetan==10))
+ load SelfInd0_50_10
+ SelfInd=SelfInd0_50_10;
+else
 for im=1:length(thetan)
     for jm=1:nTau+1
         for iv=1:prod(m)
@@ -37,6 +41,7 @@ for im=1:length(thetan)
             end
         end
     end
+end
 end
 EmptyBeam=[];
 RMlocal=zeros(m(1),m(2),numChannel); %% assign all the contributions from seperate beam to each pixel

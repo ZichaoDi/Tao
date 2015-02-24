@@ -11,7 +11,7 @@ global sk yk sr yr yksk yrsr
 global NF N current_n  fiter itertest
 global ptest gv ipivot nit
 global i_cauchy W0  m NumElement
-global maxiter err0 Joint free_ind
+global maxiter err0 Joint 
 %---------------------------------------------------------
 % check that initial x is feasible and that the bounds
 % are consistent
