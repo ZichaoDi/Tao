@@ -1,10 +1,9 @@
 %%%Simulate XRF of a given object with predifined detector and beam
 % function XRF=SimulateXRF(W,MU,BindingEenergy,M,thetan,DetChannel, numChannel, nTau, DetKnot0, SourceKnot0);
-global plotSpecSingle BeforeEmit plotTravel SSDlet NoSelfAbsorption
+global plotSpecSingle BeforeEmit plotTravel SSDlet
 global fig2  fig5 finalfig EmptyBeam
 global LogScale Tol
 plotSpecSingle=0;
-NoSelfAbsorption=0;
 more off;
 % load slice1_50;
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
@@ -17,7 +16,7 @@ end
 Energy=BindingEnergy;
 eX=ones(m(1),1);
 eY=ones(m(2),1);
-XRF=cell(length(thetan),nTau+1);
+XRF=cell(length(thetan),nTau+1);%zeros(length(thetan),nTau+1,numChannel);
 SigMa_XRF=zeros(length(thetan)*(nTau+1),numChannel);
 DisR=zeros(nTau+1,length(thetan));
 % DisR=DisR(subTheta,:);
@@ -41,11 +40,6 @@ for im=1:length(thetan)
 end
 EmptyBeam=[];
 RMlocal=zeros(m(1),m(2),numChannel); %% assign all the contributions from seperate beam to each pixel
-if(NoSelfAbsorption)
-    fprintf(1,'====== No Self Absorption, Transmission Detector Resolution is %d\n',nTau);
-else
-    fprintf(1,'====== With Self Absorption, Transmission Detector Resolution is %d\n',nTau);
-end
 fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel);
 
 for n=1:length(thetan)
@@ -68,7 +62,7 @@ for n=1:length(thetan)
         % Initialize
         xbox=[omega(1) omega(1) omega(2) omega(2) omega(1)];
         ybox=[omega(3) omega(4) omega(4) omega(3) omega(3)];
-        XRF{n,i} = zeros(numChannel,1);
+%         XRF(n,i,:) = zeros(numChannel,1);
         BeforeEmit=1;
         %============================= Plot Grid and Current Light Beam
         if(plotSpec)
@@ -123,9 +117,9 @@ for n=1:length(thetan)
             
             BeforeEmit=0;
             I_after=ones(NumElement,1);
-            if(NoSelfAbsorption)
-                NumSSDlet=1;%% Turn off self-absorption
-            else
+%             if(NoSelfAbsorption)
+%                 NumSSDlet=1;%% Turn off self-absorption
+%             else
                 I_after=0*I_after;
                 for SSDi=1:NumSSDlet
                     temp_after=0;
@@ -169,7 +163,7 @@ for n=1:length(thetan)
                     end
                     %%%**************************************
                 end %% End loop for existing fluorescence energy from current pixel
-            end
+%             end
             %% ====================================================================
             RM{index(j,2),index(j,1)}=Lvec(j)*I_incident*(I_after.*Wsub)'*M;% fluorescence emitted from current pixel
             temp=zeros(size(RMlocal(index(j,2),index(j,1),:)));
@@ -179,7 +173,7 @@ for n=1:length(thetan)
         end
         [~,~,subm,subn]=size(L(n,i,:,:));
         Rdis(i)=I0*exp(-eX'*(MU_XTM.*reshape(L(n,i,:,:),subm,subn)./Tol)*eY); %% Discrete case
-        XRF{n,i}=xrfSub;%+0.1*rand(size(xrfSub));%reshape(DisXRF(subTheta(n),i,:),1,numChannel);%
+        XRF{n,i}=xrfSub;%(n,i,:)=xrfSub;%+0.1*rand(size(xrfSub));%reshape(DisXRF(subTheta(n),i,:),1,numChannel);%
         SigMa_XRF((nTau+1)*(n-1)+i,:)=xrfSub;
         if(plotSpec)
             figure(finalfig)

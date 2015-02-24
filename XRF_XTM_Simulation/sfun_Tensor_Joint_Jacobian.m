@@ -70,7 +70,9 @@ for n=1:length(thetan)
                 else
                     TempSub(i,v,:,:)=TempSub(i,v,:,:)+1*reshape(L(n,i,v)*InTens(i,v)*bsxfun(@times,squeeze(OutTens(i,v,:)),M),1,1,NumElement,numChannel); % part 3
                 end
-                
+                if(NoSelfAbsorption)
+                    JacobSub1(v,:,:)=JacobSub1(v,:,:)+reshape(TempSub(i,v,:,:),1,NumElement,numChannel);
+                end
             end
             Lsub=reshape(L(n,i,:),m(1),m(2));
             if(LogScale)
@@ -87,6 +89,9 @@ for n=1:length(thetan)
                 JacobSub2=-2*Beta*SigMa_XTM(count)*Rdis*repmat(full(Lsub),[1,1,NumElement]).*repmat(MUe_XTM,[m(1),m(2),1]);
             end
             Jacob2=[Jacob2;JacobSub2(:)'];
+            if(NoSelfAbsorption)
+                Jacob1=[Jacob1; reshape(JacobSub1,m(1)*m(2)*NumElement,numChannel)'];
+            end
         end
     end
     if(~NoSelfAbsorption)
@@ -113,9 +118,11 @@ for n=1:length(thetan)
                 JacobSub1(v,:,:)=JacobSub1(v,:,:)+reshape(TempSub(i_sub,v,:,:),1,NumElement,numChannel);
             end
             WeightMatrix{n,i_sub}= reshape(TempSub(i_sub,:,:,:),m(1)*m(2)*NumElement,numChannel)';
-            Jacob1=[Jacob1;reshape(JacobSub1,m(1)*m(2)*NumElement,numChannel)'];
+            %             Jacob1=[Jacob1,sum(reshape(JacobSub1,m(1)*m(2)*NumElement,numChannel).^2,2)];
+            Jacob1=[Jacob1; reshape(JacobSub1,m(1)*m(2)*NumElement,numChannel)'];
         end
     end
+    
     count=(nTau+1)*(n-1)+1:(nTau+1)*n;
     f=f+sum(SigMa_XRF(count).*sum((cat(1,XRF_v{n,:})-cat(1,xrfData{n,:})).^2,2),1);
     g=g+2*reshape(sum(sum(bsxfun(@times,TempSub,repmat(SigMa_XRF(count),[1 1 1 numChannel]).*reshape((cat(1,XRF_v{n,:})-cat(1,xrfData{n,:})),nTau+1,1,1,numChannel)),1),4),mtol,NumElement);
@@ -126,16 +133,16 @@ g=g(:);
 tol=eps;
 size(Jacob1)
 size(Jacob2)
-[~,idx]=rref(Jacob1,eps);
-J1=length(idx)  %sprank(Jacob1)
+% [~,idx]=rref(Jacob1,eps);
+J1=rank(Jacob1) %length(idx)  %
 % k1=cond(Jacob1);
-% [U1,S1,V1]=svd(Jacob1);
-[~,idx]=rref(Jacob2,eps);
-J2=length(idx) %sprank(Jacob2)
+[U1,S1,V1]=svd(Jacob1);
+% [~,idx]=rref(Jacob2,eps);
+J2=rank(Jacob2) %length(idx) %
 % k2=cond(Jacob2);
 % [U2,S2,V2]=svd(Jacob2);
 % [U,S,V]=svd([Jacob1;Jacob2]);
-[~,idx]=rref([Jacob1;Jacob2],eps);
-J3=length(idx) %sprank([Jacob1;Jacob2])
+% [~,idx]=rref([Jacob1;Jacob2],eps);
+J3=rank([Jacob1;Jacob2]) %sprank(Jacob1'+Jacob2) %length(idx) %
 % fprintf('Cond1=%d, Rank1=%d, Cond2=%d, Rank2=%d, cond=%d, minS=%d, rank=%d \n',k1,J1,k2,J2,cond([Jacob1;Jacob2]),min(diag(S)),J3);
 %%=====================================================================

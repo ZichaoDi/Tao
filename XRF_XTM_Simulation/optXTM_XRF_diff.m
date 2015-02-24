@@ -40,17 +40,24 @@ x_XRF=x0_XRF;
 x_XTM=x0_XTM;
 Ntot=zeros(1,2);
 %%%===================================================================
-MaxiOuter=2^6+1; %% choose odd number to make sure the outer iteration stops at XRF
+MaxiOuter=1;%2^6+1; %% choose odd number to make sure the outer iteration stops at XRF
 while ( OuterIter<=MaxiOuter);
     NF = [0*N; 0*N; 0*N];
     Joint=(-1)^(OuterIter+1); % 1: XRF; -1: XTM; 0: Joint inversion
     if(Joint==-1)
         fprintf('============================ Attenuation Transmission Reconstruction\n')
-        maxiter=10;
+        maxiter=100;
         W0=MU_XTM(:);
         err0=norm(x_XTM(:)-MU_XTM(:));
         fctn=@(MU)sfun_XTM_com(DisR,MU,I0,L,thetan,m,nTau);
-        [x_XTM,f,g,ierror] = tnbc (x_XTM(:),fctn,low_XTM,up_XTM);
+%         [x_XTM,f,g,ierror] = tnbc (x_XTM(:),fctn,low_XTM,up_XTM);
+ options = optimset('Algorithm','interior-point','Display','iter','MaxFunEvals',10000);%,'DerivativeCheck','off','Diagnostics','off','GradObj','off','Display','iter','AlwaysHonorConstraints','none','TolCon',1e-10,'TolX',1e-16,'TolFun',1e-15);%
+ [xstar,fval] = fmincon(fctn,x_XTM(:),[],[],[],[],zeros(size(x_XTM(:))),[],[],options);
+        figure(10);clims=[0,1];
+        subplot(1,3,1);imagesc(reshape(x0_XTM,m(1),m(2)),clims);
+        subplot(1,3,2);imagesc(reshape(x_XTM,m(1),m(2)),clims);
+        subplot(1,3,3);imagesc(MU_XTM,clims);
+        return;
     elseif(Joint==1)
         fprintf('============================ Fluorescence Reconstruction\n')
         maxiter=50;

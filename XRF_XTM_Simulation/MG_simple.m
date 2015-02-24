@@ -2,7 +2,7 @@
 global x0 current_n N;
 global Beta maxiter Joint
 
-close all;
+% close all;
 more on;
 plotResult=0;
 do_setup;
@@ -24,23 +24,24 @@ for level=1:length(N)-1
     end
     fprintf('===================== %d\n',current_n)
     optXTM_XRF_Tensor;
-    if(current_n~=N(end))
-        x0=downdate(xstar,1);
-    end
+%     xs{level}=xstar;
+%     if(current_n~=N(end))
+%         x0=downdate(xstar,1);
+%     end
 end
 for level=length(N):-1:1
     current_n=N(level);
     if(current_n==N(end))
         if(length(N)==1)
-            maxiter=100;
+            maxiter=300;
         else
-        maxiter=100;
+        maxiter=1;
         end
     else
         disp('====================== Start post-smoothing')
         maxiter=1;
         if(current_n==N(1))
-            maxiter=100;
+            maxiter=1;
         end
     end
     if(current_n==N(1))
@@ -51,7 +52,8 @@ for level=length(N):-1:1
     fprintf('===================== %d\n',current_n)
     optXTM_XRF_Tensor;
     if(current_n~=N(1))
-        x0=update(xstar,1);
+        e=update(xstar-x0,1);
+        x0=xs{level-1}+e;
     end
 end
 cycle=cycle+1;

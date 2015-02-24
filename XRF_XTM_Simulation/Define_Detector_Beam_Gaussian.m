@@ -1,13 +1,13 @@
 % Define detector and beam 
-global m numThetan Tol
+global m numThetan Tol N
 global DetChannel numChannel nTau DetKnot0 SourceKnot0 NumSSDlet 
  Tol=1e-3; %%the threshod to gurantee the beam will cover the whole object
 omega=[-2     2    -2     2].*Tol;
-m=[current_n current_n];
+m=[current_n current_n]; %Numerical Resolution
 % subm=1;
 % m=subm.*[3 3];
  alpha=atan((omega(4)-omega(3))/(omega(2)-omega(1)));
-dTau=(omega(2)-omega(1))/m(2)*1.5;%%% width of the each discrete beam
+dTau=(omega(2)-omega(1))/N(1);%%% width of the each discrete beam
 Tau=sqrt((omega(2)-omega(1))^2+(omega(4)-omega(3))^2);
 nTau=ceil(Tau/dTau)+1;%m(1)+1;% % number of discrete beam%nTau;%
 tol1=eps^(1/2);

@@ -42,15 +42,30 @@ W(sub2ind([mLocal(1)+1,mLocal(2)+1,NumElement],indx1,indy1,5*ones(size(indx1))))
 % W=W+0.1;
 % W_sample10=W;
 % save W_sample10 W_sample10
-figure('name','Sample');
-for i=1:5
-subplot(2,3,i),
-clims=[0 2];
-imagesc(W(:,:,i),clims);
-axis image xy
-colormap(jet)
+clims=[0 max(W(:))];
+if(plotElement)
+    figure('name','Sample');
+    for i=1:5
+        ax(i)=subplot(1,5,i);
+        imagesc(W(:,:,i),clims);
+        if(i==1)
+            xlabel('\leftarrow  0.1mm \rightarrow','FontSize',13,'FontWeight','bold')
+        end
+        title(Element{Z(i)},'FontSize',18,'FontWeight','bold');
+        set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',[],'YTick',[])
+        axis image xy
+        colormap(jet)
+    end
+    h=colorbar('SouthOutside');
+    set(h, 'Position', [.125 .35 .50 .03]);
+%     set(get(h,'title'),'String','Density (g/cm^{3})');
+% ylabel(h,'Density (g/cm^{3})','FontSize',13,'FontWeight','bold')
+    for i=1:5
+        pos=get(ax(i), 'Position');
+        set(ax(i), 'Position', [pos(1) 0.1+pos(2) pos(3) 0.8*pos(4)]);
+    end;
+    drawnow;
 end
-
 
 
 

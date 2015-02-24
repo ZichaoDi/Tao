@@ -21,7 +21,6 @@ NA=6.02e23;%Avogadro's number
 % end
 load AtomicWeight
 load(['xRayLib',num2str(E0),'.mat'])
-load PeriodicTable
 Line=1:36;%[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
 shell=0;  %% Shell type
 BindingEnergy=zeros(NumElement*length(Line),1);

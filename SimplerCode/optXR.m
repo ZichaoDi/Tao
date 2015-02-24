@@ -2,7 +2,7 @@
 % save('data/CornerSphere10theta90.mat','M','I0','Ltol','thetan','omega','m','dTau');
 % return;
 more off;
-load DisCornerSphere20theta90;
+load('data/DisCornerSphere20theta90.mat');
 fctn=@(I)sfun_discrete(I,M,I0,Ltol,thetan,omega,m,dTau);
 x0=I0(:)+1*rand(size(I0(:)));%ones(prod(size(I0)),1);%
 options = optimset('GradObj','on','Display','iter');

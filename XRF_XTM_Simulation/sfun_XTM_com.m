@@ -1,5 +1,5 @@
 function [f,g]=sfun_XTM_com(M,MU,I0,Ltol,thetan,m,nTau)
-global SigMa_XTM LogScale
+global SigMa_XTM LogScale Tol
 %%===== Reconstruction discrete objective
 %%===== L: intersection length matrix
 %%===== M: Radon transform with t beam lines and theta angles
@@ -17,7 +17,7 @@ for n=1:length(thetan)
         Mt=-log(M(:,n)./I0);
         for i=1:nTau+1
             count=(nTau+1)*(n-1)+i;
-            L=reshape(Ltol(n,i,:),m(1),m(2));
+            L=reshape(Ltol(n,i,:),m(1),m(2))./Tol;
             if(~isempty(find(L,1)))
                 Rdis=eX'*(MU.*L)*eY;
                 sum_Tau=sum_Tau+beta*SigMa_XTM(count)*(Rdis-Mt(i))^2;              
@@ -28,7 +28,7 @@ for n=1:length(thetan)
         Mt=M(:,n);        
         for i=1:nTau+1
             count=(nTau+1)*(n-1)+i;
-            L=reshape(Ltol(n,i,:),m(1),m(2));
+            L=reshape(Ltol(n,i,:),m(1),m(2))./Tol;
             if(~isempty(find(L,1)))
                 Rdis=I0*exp(-eX'*(MU.*L)*eY);%% Discrete case
                 sum_Tau=sum_Tau+beta*SigMa_XTM(count)*(Rdis-Mt(i))^2;

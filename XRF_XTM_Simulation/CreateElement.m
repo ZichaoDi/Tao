@@ -1,7 +1,6 @@
 global NumElement
 
 A=phantom(m(1));
-plotElement=0;
 % load Logan50;
 % A=Logan;
 % A=ones(m);
@@ -29,9 +28,23 @@ for i=1:length(subind)
 end
 if(plotElement)
     figure('name','Element Map')
+    clims=[0 max(W(:))];
     for i=1:NumElement
-        subplot(1,NumElement,i);
-        clims=[0 1];
+        ax(i)=subplot(1,NumElement,i);
         imagesc(W(:,:,i),clims);
+        if(i==1)
+            xlabel('\leftarrow       0.1mm      \rightarrow','FontSize',13,'FontWeight','bold')
+        end
+        title(Element{Z(i)},'FontSize',18,'FontWeight','bold');
+        set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',[],'YTick',[])
+        axis image xy
+        colormap(jet)
     end
+    h=colorbar('SouthOutside');
+    set(h, 'Position', [.125 .28 .50 .03]);
+    for i=1:NumElement
+        pos=get(ax(i), 'Position');
+        set(ax(i), 'Position', [pos(1) 0.1+pos(2) pos(3) 0.8*pos(4)]);
+    end;
+    drawnow;
 end

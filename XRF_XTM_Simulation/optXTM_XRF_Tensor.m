@@ -2,14 +2,14 @@
 % global gv
 global low up penalty gama
 global W0 current_n N
-global SigMa_XTM SigMa_XRF 
-global fctn_f
+global SigMa_XTM SigMa_XRF
+global fctn_f err0
 
 %%%----------------------------Initialize dependent variables
 level=find(N==current_n);
 W= W_level{level};
-XRF=xrf_level{level};
-DisR=xtm_level{level};
+XRF=xrf_level{1};
+DisR=xtm_level{1};
 L=L_level{level};
 GlobalInd=GI_level{level};
 SelfInd=SI_level{level};
@@ -17,6 +17,11 @@ m=m_level(level,:);
 nTau=nTau_level(level);
 SigMa_XTM=SigmaT{level};
 SigMa_XRF=SigmaR{level};
+if(NoSelfAbsorption)
+    fprintf(1,'====== No Self Absorption, Transmission Detector Resolution is %d\n',nTau);
+else
+    fprintf(1,'====== With Self Absorption, Transmission Detector Resolution is %d\n',nTau);
+end
 %%%----------------------------------------------------------------------
 W0=W(:);
 %%%============== Rescale MU_e to make unity contribution
@@ -33,7 +38,6 @@ end
 if(Joint==-1)
     fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,L,thetan,m,nTau,NumElement);
 elseif(Joint==1)
-    fctn1=@(W)sfun_Tensor_Joint_Jacobian(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
     fctn=@(W)sfun_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 %     fctn_f=@(W)func_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 else
@@ -49,11 +53,14 @@ if(DiscreteScale)
         up(:,:,i)=up(:,:,i)/gama(i);
     end
 end
-if(Joint==1)
-tic;
-[f,g]=feval(fctn1,W(:));
-toc;
-end
+
+fctn_J=@(W)sfun_Tensor_Joint_Jacobian(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
+feval(fctn_J,x0);
+% tic;
+% [f,g]=feval(fctn,W(:));
+% toc;
+% return;
+err0=norm(x0-W0);
 ws=Wtest(:);
 e=cputime;
 low=0*ones(size(x0));
@@ -63,7 +70,9 @@ up=1e6*ones(size(x0));
 %  [xstar,fval] = fmincon(fctn,x0,[],[],[],[],zeros(size(x0)),[],[],options);
 %  return;
 % [xstar,f,g,ierror] = tnbcm (x0,fctn,low,up,maxiter);
-  [xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
+% options = optimset('Display','iter','TolFun',1e-8);
+% xstar = lsqnonlin(fctn,x0,[],[],options);
+[xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
 %   [xstar,f,g,ierror] = tn (x0,fctn);
 if(Joint==-1 & DiscreteScale)
     xtemp=reshape(xstar,m(1),m(2),NumElement);
@@ -94,41 +103,44 @@ errTol=norm(xstar-ws)/norm(err0);
 
 % figureObject(reshape(x0,m(1),m(2),NumElement),Z,m,NumElement,MU_e,1);
 if(plotResult)
-    figure(24);
-    clims=[0 max([xinitial;ws;xstar])];
+    figure('name','Elemental Residule');
+    %     clims=[0 max([xinitial;ws;xstar])];
     for i=1:NumElement
         subplot(4,NumElement,i);
         
         errCom=reshape(xinitial(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-ws(prod(m)*i-prod(m)+1:prod(m)*i
-        imagesc(errCom,clims);colormap gray
+        imagesc(errCom,clims);colormap jet
         if(i==1)
             ylabel('Initial Guess','fontsize',12)
         end
         title(Element{Z(i)},'fontsize',12);
+        set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',[],'YTick',[])
     end
     
     for i=1:NumElement
         subplot(4,NumElement,i+1*NumElement);
         
         errCom=reshape(xstar(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-ws(prod(m)*i-prod(m)+1:prod(m)*i
-        imagesc(errCom,clims);colormap gray
+        imagesc(errCom,clims);colormap jet
         if(i==1)
             ylabel('Final Soluction','fontsize',12)
         end
+        set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',[],'YTick',[])
     end
     
     for i=1:NumElement
         subplot(4,NumElement,i+2*NumElement);
         
         errCom=reshape(ws(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));
-        imagesc(errCom,clims);colormap gray
+        imagesc(errCom,clims);colormap jet
         if(i==1)
             ylabel('True Soluction','fontsize',12)
         end
         if(i==NumElement)
-        hp4 = get(subplot(4,NumElement,i+2*NumElement),'Position');
-        colorbar('Position', [hp4(1)+hp4(3)+0.01  hp4(2)  0.02  hp4(2)+hp4(3)]);
+            hp4 = get(subplot(4,NumElement,i+2*NumElement),'Position');
+            colorbar('Position', [hp4(1)+hp4(3)+0.01  hp4(2)  0.02  hp4(2)+hp4(3)]);
         end
+        set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',[],'YTick',[])
     end
     for i=1:NumElement; subplot(4,NumElement,i+3*NumElement);
         plot(1:prod(m),sort(xinitial(prod(m)*i-prod(m)+1:prod(m)*i)),'ro',1:prod(m),sort(xstar(prod(m)*i-prod(m)+1:prod(m)*i)),'bs',1:prod(m),sort(ws(prod(m)*i-prod(m)+1:prod(m)*i)),'g*')
@@ -140,7 +152,9 @@ if(plotResult)
             set(hleg,'Location','NorthWest', 'Box', 'off','outerposition',[lp(1),10,lp(3),20]);
             ylabel('solution','fontsize',12)
         end
+        set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',[],'YTick',[])
     end
+    
     % for i=1:NumElement; subplot(3,NumElement,i+2*NumElement);plot(1:prod(m),sort(gv(prod(m)*i-prod(m)+1:prod(m)*i)),'r.','MarkerSize',12);
     %     xlim([0 prod(m)]);
     %     if(i==1)

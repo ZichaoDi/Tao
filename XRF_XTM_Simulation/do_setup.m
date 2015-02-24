@@ -7,7 +7,7 @@
 global N numThetan NF
 global bounds LogScale Joint
 global grad_type err0 WS
-global onlyXRF
+global onlyXRF NoSelfAbsorption
 global W_level xrf_level xtm_level L_level GI_level SI_level SigmaR SigmaT m_level nTau_level
 global NumElement MU_e I0 M thetan xinitial Z Element
 %--------------------------------------------------
@@ -21,14 +21,15 @@ grad_type = 'adj';  % 'adj' = adjoint/exact
 %--------------------------------------------
 % Initialize arrays for discretizations
 Tomo_startup;
+NoSelfAbsorption=0;
 onlyXRF=0;
-N=[3];%[17 9 5 3];%[3];%
+N=15;%[129 65 33 17 9 5 3];%[17 9 5 3];%[3];%
 NF = [0*N; 0*N; 0*N];
 nm=length(N);
-numThetan=4;%[2 2 1 1];
+numThetan=6;%[2 2 1 1];
 W_level=cell(nm,1);
-xrf_level=cell(nm,1);
-xtm_level=cell(nm,1);
+% xrf_level=cell(nm,1);
+% xtm_level=cell(nm,1);
 L_level=cell(nm,1);
 GI_level=cell(nm,1);
 SI_level=cell(nm,1);
@@ -43,7 +44,7 @@ Joint=1; % 0: XRF; -1: XTM; 1: Joint inversion
 PlotObject=0;
 plotSpec = 0; % Do you want to see the spectra? If so plotSpec = 1
 plotTravel=0; % If plot the intersection of beam with object
-plotUnit=1;
+plotUnit=0;
 plotElement=0;
 % plotResult=1;
 LogScale=1; %% determine if the XTM is solved taking log first or not
@@ -54,8 +55,10 @@ for level=1:nm
     if(level==1)
         WS=W;
     end
+    if(level==1)
     xrf_level{level}=XRF;
     xtm_level{level}=DisR;
+    end
     L_level{level}=L;
     GI_level{level}=GlobalInd;
     SI_level{level}=SelfInd;
@@ -69,7 +72,8 @@ nTol=N(1)^2*NumElement;
 % Specify initial guess for optimization.
 rng('default');
  load x_new;
-x0=1*10^(-1)*rand(nTol,1);%zeros(size(WS(:)));%WS(:)+1e-4;%+1e0;%+x_new%
+ ww=WS;ww(:,:,2:3)=ww(:,:,2:3)+0.1*randn(m(1),m(2),2);
+x0=10^(-1)*rand(nTol,1);%+WS(:);%WS(:)+1e-4;%ww(:);%;%zeros(size(WS(:)));%
 xinitial=x0;
 err0=norm(x0-WS(:));
 v0=x0;

@@ -12,7 +12,7 @@ global x y m omega dz AbsorbScale min_MU max_MU
 global XTMscale NumLines NumElement 
 global whichElement slice onlyXRF
 
-
+load PeriodicTable
 AbsorbScale=1e-0;
 ScaleM=1e-5;
 %%%%%======================================
@@ -26,6 +26,7 @@ center=[0 0];
 %%%========================== the grids of object
 xc = getNodalGrid(omega,[m(2) m(1)]);
 %%%========================== assign weight matrix for each element in each pixel
+Z=[19 31 26  46 50];%[ 8 14 20 29 79 30 46 59];%[29 30 46 49 57 74 79];%% 42 29 26 ];%% reference sample: Pb La Pd Mo Cu Fe Ca
 if(onlyXRF)
     if (xrf_roi)
         NumElement=1;
@@ -39,7 +40,7 @@ if(onlyXRF)
             W(:,:,i)=data(1:current_n,1:current_n,slice);
         end
     end
-else
+else    
   CreateElement; %load Phantom5; W=Phantom5; NumElement=size(W,3);%% shepp-logan phantom
 %     CreateCircle; %% sample with circles 
     %------------------------- a sample to test the different impact from heavy and light elements
@@ -56,7 +57,6 @@ else
 end
 % NumElement=2;
 %%%%%%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Z=[20 29 79 30 46 59];%[29 30 46 49 57 74 79];%% 42 29 26 ];%% reference sample: Pb La Pd Mo Cu Fe Ca
 % ComChoices=nchoosek(1:6,3);
 % Z=Z(ComChoices(1,:));
 Z=Z(1:NumElement);
