@@ -1,21 +1,21 @@
-function doplot(it,v)
-global xinitial current_n NumElement WS Z Element
+function doplot(it,v,W_level)
+global xinitial current_n NumElement Z Element
 %--------------------------------------------------------------
 % Plot results of soap-film minimal surface
 %--------------------------------------------------------------
 m = [current_n current_n];
-ws=WS(:);
+ws=reshape(W_level{1},prod(m)*NumElement,1);
 xstar=v;
 %--------------------------------------------------------------
 % set up boundary conditions
 %--------------------------------------------------------------
  figure(24);
-    clims=[0 max([xinitial;ws;xstar])];
+    clims=[0 max(ws)];
     for i=1:NumElement
         subplot(4,NumElement,i);
         
         errCom=reshape(xinitial(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-ws(prod(m)*i-prod(m)+1:prod(m)*i
-        imagesc(errCom,clims);colormap gray
+        imagesc(errCom,clims);colormap jet
         if(i==1)
             ylabel('Initial Guess','fontsize',12)
         end
@@ -26,7 +26,7 @@ xstar=v;
         subplot(4,NumElement,i+1*NumElement);
         
         errCom=reshape(xstar(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-ws(prod(m)*i-prod(m)+1:prod(m)*i
-        imagesc(errCom,clims);colormap gray
+        imagesc(errCom,clims);colormap jet
         if(i==1)
             ylabel('Final Soluction','fontsize',12)
         end
@@ -36,7 +36,7 @@ xstar=v;
         subplot(4,NumElement,i+2*NumElement);
         
         errCom=reshape(ws(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));
-        imagesc(errCom,clims);colormap gray
+        imagesc(errCom,clims);colormap jet
         if(i==1)
             ylabel('True Soluction','fontsize',12)
         end

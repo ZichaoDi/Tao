@@ -19,8 +19,9 @@ do_setup;
 NF   = [0*N; 0*N; 0*N];
 it   = 1;
 fnl  = 0*v0;
-n    = N(end);
-global_setup(n);
+current_n    = N(end);
+init_level=1;
+global_setup;
 current_n = N(1);
 %----------------------------------------------------------------------
 % CREATE MULTIGRID GRAPH
@@ -55,7 +56,7 @@ hold on;
 step_bnd  = 0;
 v = mgrid(v0,fnl,0,step_bnd);
 
-doplot(it,v);
+doplot(it,v, W_level);
 report_results(N);
 more on;
 %----------------------------------------------------------------------

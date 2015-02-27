@@ -1,16 +1,10 @@
-function [f, g] = sfun (v)
+function [f, g, shift_y, shift_yT] = sfun (W)
 %--------------------------------------------------------------
-% compute objective function and gradient
-%--------------------------------------------------------------
-global grad_type
-%--------------------------------------------------------------
-f = getf(v);
-if (strcmp(grad_type,'adj'));
-  g = getg_adj(v);        % via adjoint, or exact
-end;
-if (strcmp(grad_type,'fdr'));
-  g = getg_fd (v);        % via finite-difference [real]
-end;
-if (strcmp(grad_type,'fdi'));
-  g = getg_fdi(v);        % via finite-difference [complex]
+global Joint
+
+if(Joint==1)
+    [f,g,shift_y, shift_yT]=sfun_J(W);
+elseif(Joint==0)
+    [f, g, shift_y] = sfun_R (W);
+    shift_yT=[];
 end

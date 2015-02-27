@@ -8,8 +8,7 @@ global current_fnl
 global N current_n
 global bounds v_low v_up
 global GRAPH_N_OLD GRAPH_INDEX_OLD 
-global Hess_norm_H % norm of coarse-grid Hessian 
-global sfun W0
+global Hess_norm_H  x_level% norm of coarse-grid Hessian 
 %----------------------------------------------------------------------
 % DECIDE WHETHER TO PRINT ASSESSMENT TEST RESULTS
 % AND WHETHER TO PAUSE AFTER PRINTING TESTS
@@ -32,7 +31,8 @@ GRAPH_INDEX_OLD = GRAPH_INDEX_OLD+1;
 %%%%%%%%%%%%######################################################
 %--------------------------------------------------
 n = current_n;
-sfun=global_setup(n);
+init_level=1;
+global_setup;
 alpha = 0; % added to try to deal with error message
 %--------------------------------------------------
 % Determine update/downdate constant
@@ -62,7 +62,7 @@ end;
 if (res_prob);
     myfun = 'sfun_mg';
 else
-    myfun = sfun;
+    myfun = 'sfun';
 end;
 %--------------------------------------------------
 T  = ['In  mgrid: n = ' num2str(current_n)];
@@ -79,7 +79,7 @@ if (current_n <= nmin);
     %--------------------------------------------------
     % solve (exactly) problem on coarsest grid
     %--------------------------------------------------
-    nit_solve = 20;
+    nit_solve = 10;
     if (step_bnd == 0);
         if (bounds);
             
@@ -91,20 +91,23 @@ if (current_n <= nmin);
         [low1,up1] = get_bnd (v0,step_bnd);
         nit = nit_solve; [v,F,G,ierror]  = tnbcm(v0,myfun,low1,up1,nit);
     end
+        x_level{level}=v;
 else
     %--------------------------------------------------
     % "relax" on current grid
     %--------------------------------------------------
+    nit_solve=1;
     if (step_bnd == 0);
         if (bounds);
-            nit = 1; [v,F,G,ierror,eig_val]  = tnbcm(v0,myfun,v_low,v_up,nit);
+            nit = nit_solve; [v,F,G,ierror,eig_val]  = tnbcm(v0,myfun,v_low,v_up,nit);
         else
-            nit = 1; [v,F,G,ierror,eig_val]  = tnm  (v0,myfun,nit);
+            nit = nit_solve; [v,F,G,ierror,eig_val]  = tnm  (v0,myfun,nit);
         end;
     else
         [low1,up1] = get_bnd (v0,step_bnd);
-        nit = 1; [v,F,G,ierror,eig_val]  = tnbcm(v0,myfun,low1,up1,nit);
+        nit = nit_solve; [v,F,G,ierror,eig_val]  = tnbcm(v0,myfun,low1,up1,nit);
     end;
+
     if (res_prob);
         [F_before_recursion, G_before_recursion] = sfun_mg(v);
         [F_foo, G_before_recursion_reg] = sfun(v);
@@ -121,7 +124,8 @@ else
             [v_low_1,v_up_1] = set_bounds(j+1,res_prob);
         current_v = bound_project(current_v,v_low_1,v_up_1);
     end;
-    [Fv  ,Gv  ] = sfun   (v);
+    
+    [Fv  ,Gv ,shift_y, shift_yT] = sfun(v); 
     [Fvmg,Gvmg] = sfun_mg(v);
     
     %%%%#######################################
@@ -183,13 +187,9 @@ else
     
     j           = j+1;
     current_n   = N(j);
+    init_level=0;
+    global_setup;
     %--------------------------------------------------
-    n = current_n;
-    sfun=global_setup(n);
-    %--------------------------------------------------
-    
-    
-    [~ ,Gv2 ] = sfun   (current_v);
     tau         = Gv2 - dGv;
     fnl2        = fnl2 + tau;
     %--------------------------------------------------
@@ -215,12 +215,11 @@ else
     % update solution on current grid (V cycle)
     %--------------------------------------------------
     [e2, pred]  = mgrid(current_v,fnl2,1,step_bnd1);
-    
     j           = j-1;
     current_n   = N(j);
     e           = update(e2-current_v,1);
-    n = current_n;
-    sfun=global_setup(n);
+    init_level=1;
+    global_setup;
     if (Hess_norm_H > 0)
         sep_denom = norm(p_h) * Hess_norm_H;
         sep_quot = norm(Ap_H) / sep_denom;
@@ -241,7 +240,7 @@ else
         Hess_norm_H = Hessian_norm;
         accrcy = 128*eps;
         vnorm  = norm(v, 'inf');
-        He = gtims (e, v, G_before_recursion_reg, accrcy, vnorm, sfun);
+        He = gtims (e, v, G_before_recursion_reg, accrcy, vnorm, @sfun);
         approx_Rayleigh_quot = (dot(He,He)/(Hessian_norm * dot(e,He)));
         if (assess_print);
             fprintf('MESH COMPLEMENTARITY TEST (nh = %d): %f\n',N(j),approx_Rayleigh_quot);
@@ -274,15 +273,15 @@ else
 
     if (bounds);
             [v_low,v_up] = set_bounds(j,res_prob);
+            ipivot = crash (v,v_low,v_up);
+            e(ipivot~=0)=0;
     end;
     %--------------------------------------------------
     current_fnl = fnl;
-    
     testd       = e'*Gvmg;
     
     if (testd<0)
-        if (bounds)
-            
+        if (bounds)          
             alpha0 = stpmax1 (v, e, v_low, v_up);
         else
             alpha0 = 1;
@@ -297,13 +296,13 @@ else
             disp('Hit any key to continue')
             pause
         end
+        if(bounds)
+            [v, ~, ~, ~, alpha, ~, dfdp] = ...
+                lin_mg (e, v, Fvmg, alpha0, Gvmg, myfun,v_low,v_up);
+        else
             [v, ~, ~, ~, alpha, ~, dfdp] = ...
                 lin2 (e, v, Fvmg, alpha0, Gvmg, myfun);
-        if (res_prob);
-            [F_after_linesearch, G_after_linesearch] = sfun_mg(v);
-        else
-            [F_after_linesearch, G_after_linesearch] = sfun(v);
-        end;
+        end
         dfdp = dfdp/npts;
         if (assess_print);
             fprintf('NONLINEARITY TEST (nh = %d, alpha = %8.2e): %8.2e\n',N(j),alpha,dfdp);
@@ -314,9 +313,9 @@ else
     end;
     
     if (res_prob);
-        [F_after_recursion, G_after_recursion] = sfun_mg(v);
+        [F_after_recursion] = sfun_mg(v);
     else
-        [F_after_recursion, G_after_recursion] = sfun(v);
+        [F_after_recursion] = sfun(v);
     end;
     
     aared = F_before_recursion - F_after_recursion;
@@ -339,6 +338,7 @@ else
     disp(T)
     if (step_bnd == 0);
         if (bounds);
+
             nit = 1; [v,F,G,ierror]  = tnbcm(v,myfun,v_low,v_up,nit);
             
         else
@@ -348,6 +348,8 @@ else
         [low1,up1] = get_bnd (v,step_bnd);
         nit = 1; [v,F,G,ierror]  = tnbcm(v,myfun,low1,up1,nit);
     end;
+        x_level{level}=v;
+    save x_level x_level
 end
 
 %%%%%%%%%%%%%%%##############################################
@@ -356,9 +358,9 @@ end
 % to serve as the predicted reduction on the next finer mesh.
 % RML: The scaling by current_n needs to be corrected.
 if (res_prob);
-    [F_on_exit, G_on_exit] = sfun_mg(v);
+    [F_on_exit] = sfun_mg(v);
 else
-    [F_on_exit, G_on_exit] = sfun(v);
+    [F_on_exit] = sfun(v);
 end;
 
 if (current_n > nmin)

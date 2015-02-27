@@ -5,14 +5,13 @@ global W0 current_n N
 global SigMa_XTM SigMa_XRF
 global fctn_f err0 fiter nit
 
-global   maxiter
-maxiter=30;
-
 %%%----------------------------Initialize dependent variables
 level=find(N==current_n);
 W= W_level{level};
-XRF=xrf_level{level};
-DisR=xtm_level{level};
+XRF=xrf_level{1};
+DisR=xtm_level{1};
+% XRF=xrf_level{level};
+% DisR=xtm_level{level};
 L=L_level{level};
 GlobalInd=GI_level{level};
 SelfInd=SI_level{level};
@@ -45,6 +44,7 @@ elseif(Joint==1)
 %     fctn_f=@(W)func_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 else
     fctn=@(W)sfun_Tensor4(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
+    fctn_par=@(W)sfun_Tensor_par(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
     fctn1=@(W)sfun_AdiMat(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
 end
 
@@ -56,13 +56,17 @@ if(DiscreteScale)
         up(:,:,i)=up(:,:,i)/gama(i);
     end
 end
-
+%-----------------------------------------------------------------------
 % fctn_J=@(W)sfun_Tensor_Joint_Jacobian(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 % feval(fctn_J,x0);
-
-nTol=current_n^2*NumElement;
-rng('default');
-x0=W0+10^(-2)*rand(nTol,1);
+% tic;
+% feval(fctn_par,x0);
+% toc;
+% return;
+% nTol=current_n^2*NumElement;
+% rng('default');
+% x0=10^(-1)*rand(nTol,1);
+%-----------------------------------------------------------------------
 err0=norm(x0-W0);
 ws=Wtest(:);
 e=cputime;
@@ -115,7 +119,7 @@ end
 % figureObject(reshape(x0,m(1),m(2),NumElement),Z,m,NumElement,MU_e,1);
 if(plotResult)
     figure('name','Elemental Residule');
-    %     clims=[0 max([xinitial;ws;xstar])];
+     clims=[0 max(ws)];
     for i=1:NumElement
         subplot(4,NumElement,i);
         

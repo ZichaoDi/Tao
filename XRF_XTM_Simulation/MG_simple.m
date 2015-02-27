@@ -9,8 +9,8 @@ do_setup;
 tic;
 cycle=1;
 maxCycle=1;
-fid = fopen('betaPareto_Tensor.txt','a');
-    
+% fid = fopen('betaPareto_Tensor.txt','a');
+x_level=cell(length(N),1);
 while(cycle<=maxCycle)
 
 for it=0;%-6:4
@@ -24,24 +24,25 @@ for level=1:length(N)-1
     end
     fprintf('===================== %d\n',current_n)
     optXTM_XRF_Tensor;
-%     xs{level}=xstar;
-%     if(current_n~=N(end))
-%         x0=downdate(xstar,1);
-%     end
+    xs{level}=xstar;
+    g_level{level}=g;
+    if(current_n~=N(end))
+        x0=downdate(xstar,1);
+    end
 end
 for level=length(N):-1:1
     current_n=N(level);
     if(current_n==N(end))
         if(length(N)==1)
-            maxiter=300;
+            maxiter=7;
         else
-        maxiter=1;
+        maxiter=20;
         end
     else
         disp('====================== Start post-smoothing')
         maxiter=1;
         if(current_n==N(1))
-            maxiter=1;
+            maxiter=5;
         end
     end
     if(current_n==N(1))
@@ -51,9 +52,20 @@ for level=length(N):-1:1
     end
     fprintf('===================== %d\n',current_n)
     optXTM_XRF_Tensor;
+    x_level{level}=xstar;
+    save x_level x_level;
     if(current_n~=N(1))
         e=update(xstar-x0,1);
-        x0=xs{level-1}+e;
+        descent1=g_level{level-1}'*e;
+        descent2=g_level{level-1}'*(update(xstar)-xs{level-1});
+        if(descent1<=0)
+            x0=xs{level-1}+e;
+        elseif(descent2<=0)
+            x0=update(xstar,1);
+        else
+            disp('No Descent Direction');
+            x0=xs{level-1};
+        end
     end
 end
 cycle=cycle+1;
@@ -62,10 +74,10 @@ T=toc;
 report_results(N);
 if(Joint==1)
 [f,g,f1,f2]=feval(fctn,xstar);
-fprintf(fid,'%12.4e    %12.4e     %12.4e    %12.4e      %12.4e     %f\n',Beta,f,f1,f2,err_h,T);
+% fprintf(fid,'%12.4e    %12.4e     %12.4e    %12.4e      %12.4e     %f\n',Beta,f,f1,f2,err_h,T);
 end
 
 end
 
 end
-  fclose(fid);
+%   fclose(fid);

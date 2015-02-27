@@ -12,8 +12,8 @@ SigMa=SigMa_XRF;
 %%%%% ====================================================================
 f=zeros(length(thetan),1);
 g=zeros(length(thetan),mtol,NumElement);
-matlabpool open
-parfor n=1:length(thetan)
+% parfor n=1:length(thetan)
+for n=1:length(thetan)
     InTens=ones(nTau+1,mtol);
     OutTens=ones(nTau+1,mtol,NumElement);
     OutTens_d=ones(nTau+1,mtol,NumSSD,NumElement);
@@ -73,6 +73,5 @@ parfor n=1:length(thetan)
     g(n,:,:)=2*reshape(sum(sum(bsxfun(@times,TempSub,repmat(SigMa(count),[1 1 1 numC]).* ...
         reshape((XRF_v-squeeze(xrfData(n,:,:))),nTau+1,1,1,numC)),1),4),mtol,NumElement);
 end
-matlabpool close;
 ft=sum(f);
 gt=reshape(sum(g,1),mtol*NumElement,1);

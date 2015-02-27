@@ -3,9 +3,6 @@ function [xnew, fnew, gnew, nf1, alpha, ierror, varargout] = ...
 %---------------------------------------------------------
 % line search (naive)
 %---------------------------------------------------------
-% set up
-%---------------------------------------------------------
-ptn=p;
 alpha  = alphamax;
 ierror = 3;
 xnew   = x;
@@ -22,7 +19,7 @@ for itcnt = 1:20;
       xnew   = xt;
       fnew   = ft;
       gnew   = gt;
-      fprintf('MG/Opt line search: alpha = %16.8e\n',alpha)
+      fprintf('MG/Opt line search: alpha = %16.1e\n',alpha)
       break;
    end;
    alpha = alpha / 2;

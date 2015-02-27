@@ -8,11 +8,10 @@
 % mu=n_a*CrossSection
 % K_shell:0 L1:1 L2:2 L3:3 M1:4 M2:5 M3:6 M4:7 M5:8
 % KA_LINE:0 KB:1 LA:2 LB:3
-global TakeLog NumElement
+global TakeLog
 E0=10;
 E2I=1/3e8/6.62e-34*1e-15;
 I0=E0*E2I;
-NumElement=length(Z);
 NA=6.02e23;%Avogadro's number
 % if(ismac)
 %     loadlibrary('/opt/local/lib/libxrl.dylib','/opt/local/include/xraylib/xraylib.h');
@@ -21,12 +20,13 @@ NA=6.02e23;%Avogadro's number
 % end
 load AtomicWeight
 load(['xRayLib',num2str(E0),'.mat'])
-Line=1:10;%:36;%[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
+Line=1:36;%[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
 shell=0;  %% Shell type
 BindingEnergy=zeros(NumElement*length(Line),1);
 M=zeros(NumElement,numChannel);
 i=1;
 T=1;
+plotUnit=1;
 if(plotUnit)
     figure('name', 'Unit Spectrum');
 end
@@ -36,6 +36,7 @@ mu=0;
 sigma=(DetChannel(2)-DetChannel(1))/2.35;
 G=fft(1*exp(-(DetChannel-mu).^2./(2*sigma^2))/(sigma*sqrt(2*pi)));
 %%======================================================================
+EmitEner=cell()
 while(i<=NumElement)
     PurePeak=0.*DetChannel;
     %     ElementDensity(i)=calllib('libxrl','ElementDensity',Z(i));%
@@ -56,13 +57,14 @@ while(i<=NumElement)
         intensity=I0*CS_FluoLine(Z(i),Line(j));%
         BindingEnergy(length(Line)*(i-1)+j)=new_energy;
         [~,adj]=min(abs(repmat(new_energy,size(DetChannel))-DetChannel));
-        PurePeak(adj)=PurePeak(adj)+intensity;    
+        PurePeak(adj)=PurePeak(adj)+intensity; 
+        EmitEner{i}
         j=j+1;
     end
     % fprintf('    %s           %d          %i          %5.2f               %5.2f\n', Element{Z(i)}, Z(i),-Line(j), new_energy, intensity);
     
     %%%%=============================== Start Gaussian Convolution
-    M(i,:)=ifft(fft(PurePeak).*G);
+    M(i,:)=PurePeak;%ifft(fft(PurePeak).*G);
     if(plotUnit)
         cmap=colormap(lines);
         cmap = cmap(1:NumElement,:);

@@ -1,140 +1,149 @@
 
-global NF N current_n ptest gv 
-global low up Tik penalty gama  
-global W0 LogScale maxiter err0 Joint
+global low up penalty gama
+global W0
+global SigMa_XTM SigMa_XRF
+global fctn_f err0 fiter nit
 
-% close all;
-more off;
-PlotObject=1;
-plotElement=1;
-LogScale=0;
-maxiter=10000;
-XRF_XTM_Gaussian;
+%%%----------------------------Initialize dependent variables
+do_setup;
+level=1;
+W= W_level{level};
+XRF=xrf_level{level};
+DisR=xtm_level{level};
+L=L_level{level};
+GlobalInd=GI_level{level};
+SelfInd=SI_level{level};
+m=m_level(level,:);
+nTau=nTau_level(level);
+SigMa_XTM=SigmaT{level};
+SigMa_XRF=SigmaR{level};
+if(NoSelfAbsorption)
+    fprintf(1,'====== No Self Absorption, Transmission Detector Resolution is %d\n',nTau);
+else
+    fprintf(1,'====== With Self Absorption, Transmission Detector Resolution is %d\n',nTau);
+end
 %%%----------------------------------------------------------------------
 W0=W(:);
-Joint=1; % 1: XRF; -1: XTM; 0: Joint inversion
 %%%============== Rescale MU_e to make unity contribution
-DiscreteScale=0;
 penalty=0;
-
-if(DiscreteScale )
-    Mag=-order(MU_e(:,1,1));
-    gama=-log(MU_e(:,1,1))./MU_e(:,1,1);%5e2*ones(size(MU_e(:,1,1)));%10.^(Mag);%(max_MU-min_MU)./(MU_e(:,1,1)-min_MU);%1./MU_e(:,1,1);%
-else
-    gama=ones(size(MU_e(:,1,1)));
-end
-
-if(penalty)
-    Tik=spalloc(length(W(:))-1,length(W(:)),2*(length(W(:))-1)); %% First-order derivative regularization
-    for i=1:length(W(:))-1
-        Tik(i,i)=-1; Tik(i,i+1)=1;
-    end
-    
-    % Tik=spalloc(length(W(:))-2,length(W(:)),3*(length(W(:))-2)); %% First-order derivative regularization
-    %     for i=1:size(Tik,1)
-    %         Tik(i,i)=-1;Tik(i,i+1)=2; Tik(i,i+2)=-1;
-    %     end
-end
-
 if(Joint==-1)
-    fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,Ltol,thetan,m,nTau,NumElement);
-elseif(Joint==0)
-    fctn=@(W)sfun_XRF_XTM(W,XRF,DisR,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau,I0);
-      fctn=@(W)sfun_XRF_XTM_Jacobian(W,XRF,DisR,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau,I0);
+    fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,L,thetan,m,nTau,NumElement);
+elseif(Joint==1)
+    fctn=@(W)sfun_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
+%     fctn_f=@(W)func_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 else
-     fctn=@(W)sfun_XRF_For_Forward(W,XRF,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau);
-%       fctn1=@(W)sfun_XRF_full2(W,XRF,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau);
-      fctn1=@(W)sfun_For_AdiMat(W,XRF,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau);
+    fctn=@(W)sfun_Tensor4(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
+    fctn_par=@(W)sfun_Tensor_par(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
+    fctn1=@(W)sfun_AdiMat(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
 end
-rng('default');
-Wtest=W;
-if(DiscreteScale)
-    for i=1:NumElement
-        Wtest(:,:,i)=Wtest(:,:,i)/gama(i);
-        up=1e6*ones(size(W));
-        up(:,:,i)=up(:,:,i)/gama(i);
-    end
-end
-ws=Wtest(:);
-xinitial=x0;
-err0=xinitial-ws;
-   gForh3=foo(fctn,x0);
- [fFor3,gFor3]=feval(fctn1,x0);
-% gForh=foo(fctn1,x0);
-% % % [fFor2,gFor2]=feval(fctn1,x0);
-return;
-N=m(1);
-current_n=N(1);
-NF = [0*N; 0*N; 0*N];
+%-----------------------------------------------------------------------
+% fctn_J=@(W)sfun_Tensor_Joint_Jacobian(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
+% feval(fctn_J,x0);
+tic;
+feval(fctn,x0);
+toc;
+% return;
+% nTol=current_n^2*NumElement;
+% rng('default');
+% x0=10^(-1)*rand(nTol,1);
+%-----------------------------------------------------------------------
+err0=norm(x0-W0);
+ws=W(:);
 e=cputime;
-figureObject(reshape(x0,m(1),m(2),NumElement),Z,m,NumElement,MU_e,1);
 low=0*ones(size(x0));
 up=1e6*ones(size(x0));
-%%%========================================================================
+% %%========================================================================
+%  options = optimset('Algorithm','interior-point','Display','iter','MaxFunEvals',10000);%,'DerivativeCheck','off','Diagnostics','off','GradObj','off','Display','iter','AlwaysHonorConstraints','none','TolCon',1e-10,'TolX',1e-16,'TolFun',1e-15);%
+%  [xstar,fval] = fmincon(fctn,x0,[],[],[],[],zeros(size(x0)),[],[],options);
+%  return;
+% [xstar,f,g,ierror] = tnbcm (x0,fctn,low,up,maxiter);
+% options = optimset('Display','iter','TolFun',1e-8);
+% xstar = lsqnonlin(fctn,x0,[],[],options);
 [xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
-% xstar_Joint1=xstar;
-% save xstar_Joint1 xstar_Joint1;
-%%%========================================================================
-% load xstar_Joint1
-% xstar=xstar_Joint1;
-if(Joint==-1 & DiscreteScale)
-    xtemp=reshape(xstar,m(1),m(2),NumElement);
-    err0_1=reshape(err0,m(1),m(2),NumElement);
-    for i=1:NumElement
-        xtemp(:,:,i)=xtemp(:,:,i)*gama(i);
-        err0_1(:,:,i)=err0_1(:,:,i)*gama(i);
-    end
-    err0_1=err0_1(:);
-end
 %%%====================================================== Report Result
-t=cputime-e;
-errTol=norm(xstar-ws)/norm(err0);
-% errTol=(norm(xstar-ws)^2/length(xstar))^(1/2)/(max(ws)-min(ws)); %% NRMSE 
-if(DiscreteScale)
-    AbsErr=norm(xtemp(:)-W(:));
-    IniErr=norm(err0_1);
-    errOri=norm(xtemp(:)-W(:))/norm(err0_1);
-    fprintf('Time elapsed is %f, residule is %d, original residule is %d\n',t,errTol,errOri);
-else
-    fprintf('Time elapsed is %f, residule is %d\n',t,errTol);
-end
-%%%%%%%%%%%%%%%%%%%%=======================================================
-% load xstar_Joint1
-% load xstar_diff1
-% for iplot=2:3
-%     if(iplot==2)
-% xstar=xstar_Joint1;
-%     elseif(iplot==3)
-%         xstar=xstar_diff1;
-%     end
-% figureObject(reshape(xstar,m(1),m(2),NumElement),Z,m,NumElement,MU_e,iplot);
-% end
-%%%%%%%%%%%%%%%%%%%%=======================================================
-figure(24);
-for i=1:NumElement
-    subplot(3,NumElement,i);
 
-errCom=reshape(xstar(prod(m)*i-prod(m)+1:prod(m)*i)-ws(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));
-imagesc(errCom);colormap gray
-    title(['Element ',num2str(i)],'fontsize',12);
+% for i=1:NumElement
+%     err(i)=norm(xstar(prod(m)*i-(prod(m)-1):prod(m)*i)-ws(prod(m)*i-(prod(m)-1):prod(m)*i))/norm(xinitial(prod(m)*i-(prod(m)-1):prod(m)*i)-ws(prod(m)*i-(prod(m)-1):prod(m)*i));
+% end
+% figure('name','Elemental Residule')
+% semilogy(1:NumElement,err,'r.-');
+
+if(Joint==1)
+convFac_J=(fiter(end)/fiter(1))^(1/(nit+1));
+t_J=cputime-e;
+errTol_J=norm(xstar-ws)/norm(err0);
+elseif(Joint==0)
+  convFac_XRF=(fiter(end)/fiter(1))^(1/(nit+1));
+  t_XRF=cputime-e;
+errTol_XRF=norm(xstar-ws)/norm(err0);
 end
-for i=1:NumElement; subplot(3,NumElement,i+NumElement);
+% if(DiscreteScale)
+%     AbsErr=norm(xtemp(:)-W(:))
+%     IniErr=norm(err0_1)
+%     errOri=norm(xtemp(:)-W(:))/norm(err0_1);
+%     fprintf('Time elapsed is %f, residual is %d, original residual is %d\n',t,errTol,errOri);
+% else
+%     fprintf('Time elapsed is %f, residual is %d\n',t,errTol);
+% end
+
+% figureObject(reshape(x0,m(1),m(2),NumElement),Z,m,NumElement,MU_e,1);
+if(plotResult)
+    figure('name','Elemental Residule');
+     clims=[0 max(ws)];
+    for i=1:NumElement
+        subplot(4,NumElement,i);
+        
+        errCom=reshape(xinitial(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-ws(prod(m)*i-prod(m)+1:prod(m)*i
+        imagesc(errCom,clims);colormap jet
+        if(i==1)
+            ylabel('Initial Guess','fontsize',12)
+        end
+        title(Element{Z(i)},'fontsize',12);
+        set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',[],'YTick',[])
+    end
+    
+    for i=1:NumElement
+        subplot(4,NumElement,i+1*NumElement);
+        
+        errCom=reshape(xstar(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-ws(prod(m)*i-prod(m)+1:prod(m)*i
+        imagesc(errCom,clims);colormap jet
+        if(i==1)
+            ylabel('Final Soluction','fontsize',12)
+        end
+        set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',[],'YTick',[])
+    end
+    
+    for i=1:NumElement
+        subplot(4,NumElement,i+2*NumElement);
+        
+        errCom=reshape(ws(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));
+        imagesc(errCom,clims);colormap jet
+        if(i==1)
+            ylabel('True Soluction','fontsize',12)
+        end
+        if(i==NumElement)
+            hp4 = get(subplot(4,NumElement,i+2*NumElement),'Position');
+            colorbar('Position', [hp4(1)+hp4(3)+0.01  hp4(2)  0.02  hp4(2)+hp4(3)]);
+        end
+        set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',[],'YTick',[])
+    end
+    for i=1:NumElement; subplot(4,NumElement,i+3*NumElement);
         plot(1:prod(m),sort(xinitial(prod(m)*i-prod(m)+1:prod(m)*i)),'ro',1:prod(m),sort(xstar(prod(m)*i-prod(m)+1:prod(m)*i)),'bs',1:prod(m),sort(ws(prod(m)*i-prod(m)+1:prod(m)*i)),'g*')
-    xlim([0 prod(m)]);
-    if(i==1)
-        legend('initial','final','optimal','font',16)
-        ylabel('solution','fontsize',12)
+        xlim([0 prod(m)]);
+        if(i==1)
+            hleg=legend('initial','final','optimal','FontSize',6, 'Box', 'off');
+            set(hleg,'units','pixels');
+            lp=get(hleg,'outerposition');
+            set(hleg,'Location','NorthWest', 'Box', 'off','outerposition',[lp(1),10,lp(3),20]);
+            ylabel('solution','fontsize',12)
+        end
+        set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',[],'YTick',[])
     end
-%     plot(1:prod(m),ptest(prod(m)*i-prod(m)+1:prod(m)*i),'r.','MarkerSize',12);
-%     xlim([0 prod(m)]);
-%     if(i==1)
-%         ylabel('Projected Direction','fontsize',12)
-%     end
+    
+    % for i=1:NumElement; subplot(3,NumElement,i+2*NumElement);plot(1:prod(m),sort(gv(prod(m)*i-prod(m)+1:prod(m)*i)),'r.','MarkerSize',12);
+    %     xlim([0 prod(m)]);
+    %     if(i==1)
+    %         ylabel('Projected Gradient','fontsize',12)
+    %     end
+    % end
 end
-for i=1:NumElement; subplot(3,NumElement,i+2*NumElement);plot(1:prod(m),sort(gv(prod(m)*i-prod(m)+1:prod(m)*i)),'r.','MarkerSize',12);
-    xlim([0 prod(m)]);
-    if(i==1)
-        ylabel('Projected Gradient','fontsize',12)
-    end
-end
-% %%%%%%%%%%%%%%%%%%%%=======================================================

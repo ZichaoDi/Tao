@@ -1,7 +1,8 @@
 %%%Simulate XRF of a given object with predifined detector and beam
 % function XRF=SimulateXRF(W,MU,BindingEenergy,M,thetan,DetChannel, numChannel, nTau, DetKnot0, SourceKnot0);
 global plotSpecSingle BeforeEmit plotTravel
-global fig2  fig5 finalfig slice onlyXRF
+global fig2  fig5 finalfig slice 
+global onlyXRF whichElement
 
 Tomo_startup;
 close all;
@@ -15,15 +16,28 @@ plotElement=0;
 plotSpecSingle=0;
 NoSelfAbsorption=0;
 more off;
-current_n=1;
+current_n=256;
 numThetan=1;
-XRF3=zeros(nTau+1,current_n,numChannel);
-xrf_roi=0;
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
-DefineObject_Gaussian; % Produce W, MU_XTM
+XRF_roi=zeros(nTau+1,256,4);
+for whichElement=1:4
+    xrf_roi=1;
+for slice=1:current_n
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+DefineObject_Gaussian; % Produce W, MU_XTM
+%%%%%%%==============================================================
+if plotTravel
+    fig2=[];  fig5=[];
+end
+%%%=========Start Simulation
+
 XRF=cell(length(thetan),nTau+1);
+if(NoSelfAbsorption)
+    fprintf(1,'====== No Self Absorption, Transmission Detector Resolution is %d\n',nTau);
+else
+    fprintf(1,'====== With Self Absorption, Transmission Detector Resolution is %d\n',nTau);
+end
+fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel);
 for n=1:length(thetan)
     theta=thetan(n)/180*pi;
     fprintf(1,'====== Angle Number  %d of %d: %d\n',n,length(thetan),thetan(n));
@@ -31,11 +45,37 @@ for n=1:length(thetan)
     DetKnot=DetKnot0*TransMatrix;
     SourceKnot=SourceKnot0*TransMatrix;
     SSDknot=SSDlet*TransMatrix;
+    %%%%%============================================================
+    %         fig=figure('name','grids & beam line');
+    %         plotGrid(xc,omega,[m(2) m(1)]); hold on;
+    %         for i=1:nTau+1
+    %             fig3=plot([SourceKnot(i,1),DetKnot(i,1)],[SourceKnot(i,2),DetKnot(i,2)],'r.-');hold on;
+    %         end
+    %         pause;
+    %%%%%%%===============================================
     for i=1:nTau+1 %%%%%%%%%================================================================
-        XRF{n,i} = zeros(numChannel,1);   
+        % Initialize
+        XRF{n,i} = zeros(numChannel,1);
+        
         xbox=[omega(1) omega(1) omega(2) omega(2) omega(1)];
         ybox=[omega(3) omega(4) omega(4) omega(3) omega(3)];
         BeforeEmit=1;
+        %============================= Plot Grid and Current Light Beam
+        if(plotSpec)
+            finalfig=figure('name',sprintf('XRF at beam %d with angle %d',i,thetan(n)));
+            subplot(1,2,1);
+            plotGrid(xc,omega,[m(2) m(1)]);
+            hold on;
+            plot(DetKnot(:,1),DetKnot(:,2),'k+-',SourceKnot(:,1),SourceKnot(:,2),'m+-',SSDknot(:,1),SSDknot(:,2),'g+-','LineWidth',0.5)
+            axis equal
+            set(gcf,'Units','normalized')
+            set(gca,'Units','normalized')
+            ax = axis;
+            ap = get(gca,'Position');
+            xp = ([SourceKnot(i,1),DetKnot(i,1)]-ax(1))/(ax(2)-ax(1))*ap(3)+ap(1);
+            yp = ([SourceKnot(i,2),DetKnot(i,2)]-ax(3))/(ax(4)-ax(3))*ap(4)+ap(2);
+            ah=annotation('arrow',xp,yp,'Color','r','LineStyle','--');
+        end
         %=================================================================
         [index,Lvec,linearInd]=IntersectionSet(SourceKnot(i,:),DetKnot(i,:),xbox,ybox,theta);
         xrfSub=zeros(1,numChannel);
@@ -85,19 +125,6 @@ for n=1:length(thetan)
                     [index_after,otherInd]=setdiff(index_after,index(j,:),'rows');
                     Lvec_after=Lvec_after(otherInd');
                     LinearInd=sub2ind(m,index_after(:,2),index_after(:,1));
-                    
-                    
-  for slice=1:current_n
-MU_after=cell(NumElement,1);
-for i=1:NumElement
-    MU_after{i}=sum(W.*repmat(reshape(MU_e(:,1,i+1),1,1,NumElement),[m(1),m(2),1]),3);
-end
-W=zeros(current_n,current_n,NumElement);
-        for i=1:NumElement
-            data=Phantom3_Young(:,:,:,i+1);
-            W(:,:,i)=data(1:current_n,1:current_n,slice);
-        end                  
-                    
                     for tsub=1:NumElement
                         if(~isempty(Lvec_after))
                             temp_after=sum(Lvec_after.*reshape(MU_after{tsub}(LinearInd),size(Lvec_after))); %% Attenuation of Flourescent energy emitted from current pixel
@@ -113,26 +140,36 @@ W=zeros(current_n,current_n,NumElement);
             
         end
         XRF{n,i}=xrfSub;
+        if(plotSpec)
+            figure(finalfig)
+            subplot(1,2,2);
+            semilogy(DetChannel,XRF{n,i}+eps,'r-')
+            xlabel('Energy Channel','fontsize',12); ylabel('Intensity','fontsize',12)
+        end
+     XRF_roi(i,slice,whichElement)=sum(XRF{n,i},2);
     end
 end
-
-XRF3(1:nTau+1,slice,1:numChannel)=reshape(cell2mat(XRF'),[nTau+1,1,numChannel]);
 end
+
+end
+
+
+
 
 
 dataset={'channel_names', 'channel_units','scaler_names', 'scaler_units', 'scalers','XRF_roi','mca_arr'};
-% formatH5=cell(length(dataset),1);
-% for i=1:length(dataset)-1
-% formatH5{i}=h5read('/Users/Wendydi/Documents/MATLAB/APSdata/2xfm1211_14/2xfm_0307.h5',['/MAPS/',num2str(dataset{i})]);
+% formatH5_roi=cell(length(dataset),1);
+% for i=1:length(dataset)-2
+% formatH5_roi{i}=h5read('/Users/Wendydi/Documents/MATLAB/APSdata/2xfm1211_14/2xfm_0307.h5',['/MAPS/',num2str(dataset{i})]);
 % end
+% save formatH5_roi formatH5_roi
 load formatH5_roi
-formatH5_roi{length(dataset)}=XRF3;
-% for i=1:length(dataset)
-% if(i==1)
-% hdf5write('myXRF.h5',['/MAPS/',num2str(dataset{i})],formatH5{i});
-% else
-% hdf5write('myXRF.h5','/MAPS/mca_arr',formatH5_roi{end},'WriteMode', 'append');
-hdf5write('myXRF1.h5','/MAPS/mca_arr',formatH5_roi{end});
-% end
-% end
+formatH5_roi{length(dataset)-1}=XRF_roi;
+for i=1:length(dataset)-1
+if(i==1)
+hdf5write('myXRF.h5',['/MAPS/',num2str(dataset{i})],formatH5_roi{i});
+else
+hdf5write('myXRF.h5',['/MAPS/',num2str(dataset{i})],formatH5_roi{i},'WriteMode', 'append');
+end
+end
 

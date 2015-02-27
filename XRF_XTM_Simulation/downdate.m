@@ -16,4 +16,4 @@ j=find(N==current_n);
     end
     
 % end
-vH=vH(:)/4;
+vH=vH(:)/2;

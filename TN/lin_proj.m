@@ -26,8 +26,8 @@ if(alpha1<=1)%& alpha1>0
     for trial=1:length(trialAlpha)
         xt = x + trialAlpha(trial).*p;
         [ipivot1,~, xt] = crash (xt, low, up);
-        
-        if(Joint==1)
+        mg=1;
+        if(Joint==1 & mg==0)
             [ft, gt,f_xrf,f_xtm] = feval (sfun, xt);
         else
             [ft, gt] = feval (sfun, xt);

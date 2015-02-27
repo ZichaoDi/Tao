@@ -16,7 +16,7 @@ end
 Energy=BindingEnergy;
 eX=ones(m(1),1);
 eY=ones(m(2),1);
-XRF=cell(length(thetan),nTau+1);%zeros(length(thetan),nTau+1,numChannel);
+XRF=zeros(length(thetan),nTau+1,numChannel);%cell(length(thetan),nTau+1);%
 SigMa_XRF=zeros(length(thetan)*(nTau+1),numChannel);
 DisR=zeros(nTau+1,length(thetan));
 % DisR=DisR(subTheta,:);
@@ -27,10 +27,11 @@ LocalInd=cell(length(thetan),nTau+1,m(1),m(2),NumSSDlet);
 L_after=cell(length(thetan),nTau+1,m(1),m(2),NumSSDlet);
 SelfInd=cell(length(thetan),nTau+1,prod(m));
 mtol=prod(m);
-if(m(1)==50 & length(thetan==10))
- load SelfInd0_50_10
- SelfInd=SelfInd0_50_10;
-else
+
+% if(m(1)==50 & length(thetan)==10)
+%  load SelfInd0_50_10
+%  SelfInd=SelfInd0_50_10;
+% else
 for im=1:length(thetan)
     for jm=1:nTau+1
         for iv=1:prod(m)
@@ -42,7 +43,10 @@ for im=1:length(thetan)
         end
     end
 end
-end
+
+SelfInd0_50_10=SelfInd;
+save SelfInd0_50_10 SelfInd0_50_10
+% end
 EmptyBeam=[];
 RMlocal=zeros(m(1),m(2),numChannel); %% assign all the contributions from seperate beam to each pixel
 fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel);
@@ -67,7 +71,7 @@ for n=1:length(thetan)
         % Initialize
         xbox=[omega(1) omega(1) omega(2) omega(2) omega(1)];
         ybox=[omega(3) omega(4) omega(4) omega(3) omega(3)];
-%         XRF(n,i,:) = zeros(numChannel,1);
+        XRF(n,i,:) = zeros(numChannel,1);
         BeforeEmit=1;
         %============================= Plot Grid and Current Light Beam
         if(plotSpec)
@@ -178,7 +182,7 @@ for n=1:length(thetan)
         end
         [~,~,subm,subn]=size(L(n,i,:,:));
         Rdis(i)=I0*exp(-eX'*(MU_XTM.*reshape(L(n,i,:,:),subm,subn)./Tol)*eY); %% Discrete case
-        XRF{n,i}=xrfSub;%(n,i,:)=xrfSub;%+0.1*rand(size(xrfSub));%reshape(DisXRF(subTheta(n),i,:),1,numChannel);%
+        XRF(n,i,:)=xrfSub;%{n,i}=xrfSub;%+0.1*rand(size(xrfSub));%reshape(DisXRF(subTheta(n),i,:),1,numChannel);%
         SigMa_XRF((nTau+1)*(n-1)+i,:)=xrfSub;
         if(plotSpec)
             figure(finalfig)

@@ -20,8 +20,8 @@ plot([GRAPH_INDEX_OLD GRAPH_INDEX_OLD+1],[IND_OLD IND_NEW],'x');
 GRAPH_N_OLD = current_n;
 GRAPH_INDEX_OLD = GRAPH_INDEX_OLD+1;
 %--------------------------------------------------
-n = current_n;
-global_setup(n);
+init_level=1;
+global_setup;
 %--------------------------------------------------
 current_fnl = fnl;
 j           = find(N==current_n);
@@ -59,8 +59,8 @@ else
   j         = j-1;
   current_n = N(j);
   %--------------------------------------------------
-  n = current_n;
-  global_setup(n);
+  init_level=1;
+  global_setup;
   %--------------------------------------------------
   v_u       = update(v_d,res_prob);
   step_bnd  = 0;

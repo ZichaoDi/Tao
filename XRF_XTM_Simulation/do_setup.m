@@ -23,13 +23,13 @@ grad_type = 'adj';  % 'adj' = adjoint/exact
 Tomo_startup;
 NoSelfAbsorption=0;
 onlyXRF=0;
-N=[33 17 9 5 3];%[17 9 5 3];%[3];%
+N=[10];%[9 5 3];%[33 17 9 5 3];%[17 9 5 3];%
 NF = [0*N; 0*N; 0*N];
 nm=length(N);
-numThetan=1;%[2 2 1 1];
+numThetan=1;%
 W_level=cell(nm,1);
-% xrf_level=cell(nm,1);
-% xtm_level=cell(nm,1);
+xrf_level=cell(nm,1);
+xtm_level=cell(nm,1);
 L_level=cell(nm,1);
 GI_level=cell(nm,1);
 SI_level=cell(nm,1);
@@ -37,17 +37,17 @@ SigmaR=cell(nm,1);
 SigmaT=cell(nm,1);
 m_level=zeros(nm,2);
 nTau_level= zeros(nm,1);
-bounds   = 1;  % no bound constraints
+bounds = 1;  % no bound constraints
 Joint=0; % 0: XRF; -1: XTM; 1: Joint inversion
+LogScale=1; %% determine if the XTM is solved taking log first or not
 %----------------------------------------------------------------------
 % Compute the dependent-variable arrays
 PlotObject=0;
 plotSpec = 0; % Do you want to see the spectra? If so plotSpec = 1
 plotTravel=0; % If plot the intersection of beam with object
-plotUnit=0;
+plotUnit=1;
 plotElement=0;
- plotResult=0;
-LogScale=1; %% determine if the XTM is solved taking log first or not
+plotResult=0;
 for level=1:nm
     current_n=N(level);
     XRF_XTM_Tensor;
@@ -73,7 +73,7 @@ nTol=N(1)^2*NumElement;
 rng('default');
 %  load x_new;
 %  ww=WS;ww(:,:,2:3)=ww(:,:,2:3)+0.1*randn(m(1),m(2),2);
-x0=WS(:)+10^(-2)*rand(nTol,1);%+WS(:);%ww(:);%;%zeros(size(WS(:)));%
+x0=10^(-1)*rand(nTol,1);%WS(:)+10^(-2)*rand(nTol,1);%+WS(:);%ww(:);%;%zeros(size(WS(:)));%
 xinitial=x0;
 err0=norm(x0-WS(:));
 v0=x0;

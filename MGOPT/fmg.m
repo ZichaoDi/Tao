@@ -5,7 +5,7 @@
 % MODIFIED:  04/15/06
 %----------------------------------------------------------------------
 global current_n
-global NF N        % NF counts # of function evals on each grid
+global NF N  W_level      % NF counts # of function evals on each grid
 global GRAPH_N_OLD GRAPH_INDEX_OLD
 %----------------------------------------------------------------------
 % SETUP FOR FULL MULTIGRID
@@ -16,8 +16,9 @@ do_setup;
 NF   = [0*N; 0*N; 0*N];
 it   = 1;
 fnl  = 0*v0;
-n    = N(end);
-global_setup(n);
+current_n    = N(end);
+init_level=1;
+global_setup;
 current_n = N(1);
 %----------------------------------------------------------------------
 % CREATE MULTIGRID GRAPH
@@ -48,7 +49,7 @@ hold on;
 % FULL MULTIGRID
 %----------------------------------------------------------------------
 v = fmgrid(v0,fnl,0);
-doplot(it,v);
+doplot(it,v,W_level);
 report_results(N);
 more on;
 %----------------------------------------------------------------------

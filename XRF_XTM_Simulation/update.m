@@ -26,4 +26,4 @@ j=find(N==sqrt(size(vH,1)/NumElement));
     
 % end
 vh=vh(2:N(j-1)+1,2:N(j-1)+1,:);
-vh=vh(:);
+vh=2*vh(:);
