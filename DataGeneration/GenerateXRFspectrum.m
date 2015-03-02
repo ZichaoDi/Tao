@@ -7,7 +7,7 @@ more off;
 current_n=size(Phantom3_Young,1);
 xrf_roi=0;
 NumElement=4;
-numThetan=30;
+numThetan=1;
 DefineGeometry;
 DefineObject_Gaussian; % Produce W, MU_XTM
 %%-------------------------------------------------------

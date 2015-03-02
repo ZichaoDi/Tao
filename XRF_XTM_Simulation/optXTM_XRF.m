@@ -1,12 +1,13 @@
 
-global low up penalty gama
-global W0
+global low up penalty
+global W0 current_n
 global SigMa_XTM SigMa_XRF
-global fctn_f err0 fiter nit
+global fctn_f err0 fiter nit maxiter
 
 %%%----------------------------Initialize dependent variables
 do_setup;
 level=1;
+current_n = N(level);
 W= W_level{level};
 XRF=xrf_level{level};
 DisR=xtm_level{level};
@@ -32,7 +33,7 @@ elseif(Joint==1)
     fctn=@(W)sfun_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 %     fctn_f=@(W)func_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 else
-    fctn=@(W)sfun_Tensor4(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
+    fctn=@(W)sfun_Tensor(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
     fctn_par=@(W)sfun_Tensor_par(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
     fctn1=@(W)sfun_AdiMat(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
 end
@@ -42,7 +43,6 @@ end
 tic;
 feval(fctn,x0);
 toc;
-% return;
 % nTol=current_n^2*NumElement;
 % rng('default');
 % x0=10^(-1)*rand(nTol,1);
@@ -59,7 +59,12 @@ up=1e6*ones(size(x0));
 % [xstar,f,g,ierror] = tnbcm (x0,fctn,low,up,maxiter);
 % options = optimset('Display','iter','TolFun',1e-8);
 % xstar = lsqnonlin(fctn,x0,[],[],options);
+if(bounds)
+maxiter=1000;
 [xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
+else
+[xstar,f,g,ierror] = tn (x0,fctn);
+end
 %%%====================================================== Report Result
 
 % for i=1:NumElement

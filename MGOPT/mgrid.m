@@ -270,7 +270,10 @@ else
     GRAPH_N_OLD = current_n;
     GRAPH_INDEX_OLD = GRAPH_INDEX_OLD+1;
     %--------------------------------------------------
-
+    testd_beforeCut=e'*Gvmg;
+    if(testd_beforeCut>=0)
+        disp('not a descent direction')
+    end
     if (bounds);
             [v_low,v_up] = set_bounds(j,res_prob);
             ipivot = crash (v,v_low,v_up);

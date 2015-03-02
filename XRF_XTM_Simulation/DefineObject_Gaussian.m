@@ -8,7 +8,7 @@
 %%%         O: Object specified by W.*Z
 %%%         MU: Attenuation matrix of O
 %%=======================================================================
-global x y m omega dz AbsorbScale min_MU max_MU
+global x y m omega dz AbsorbScale MU_e Z
 global XTMscale NumLines NumElement 
 global whichElement slice onlyXRF
 
@@ -26,8 +26,9 @@ center=[0 0];
 %%%========================== the grids of object
 xc = getNodalGrid(omega,[m(2) m(1)]);
 %%%========================== assign weight matrix for each element in each pixel
-Z=[8 30 20 16];%19 31 26  46 50];%[ 8 14 20 29 79 30 46 59];%[29 30 46 49 57 74 79];%% 42 29 26 ];%% reference sample: Pb La Pd Mo Cu Fe Ca
+Z=[19 31 26  46 50];%[ 8 14 20 29 79 30 46 59];%[29 30 46 49 57 74 79];%% 42 29 26 ];%% reference sample: Pb La Pd Mo Cu Fe Ca
 if(onlyXRF)
+    Z=[8 30 20 16];
     if (xrf_roi)
         NumElement=1;
         data=Phantom3_Young(:,:,:,whichElement+1);
@@ -41,8 +42,8 @@ if(onlyXRF)
         end
     end
 else    
-  CreateElement; %load Phantom5; W=Phantom5; NumElement=size(W,3);%% shepp-logan phantom
-%     CreateCircle; %% sample with circles 
+%   CreateElement; %load Phantom5; W=Phantom5; NumElement=size(W,3);%% shepp-logan phantom
+    CreateCircle; %% sample with circles 
     %------------------------- a sample to test the different impact from heavy and light elements
     % SvenSample;
     %----------------------------
@@ -72,8 +73,6 @@ for i=1: NumLines
 end
 %%%%%================== Attenuation Matrix at beam energy
 MU_e=MU_e.*AbsorbScale; %% Discrete Scale
-min_MU=min(MU_e(:,1,1))-1;%=-1./log(MU_e(:,1,1));
-max_MU=max(MU_e(:,1,1));
 %%%%% =================== Attenuation Matrix at beam energy
 MUe=reshape(MU_e(:,1,1),1,1,NumElement);
 MU=sum(W.*repmat(MUe,[m(1),m(2),1]),3);

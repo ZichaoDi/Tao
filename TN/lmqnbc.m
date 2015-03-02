@@ -70,7 +70,7 @@ if (~isempty(ind));
     ipivot(ind) = zeros(length(ind),1);
 end;
 ipivotOld=ipivot;
-% g = ztime (g, ipivot);
+g = ztime (g, ipivot);
 gnorm = norm(g,'inf');
 fprintf(1,'%4i   %4i   %4i   % .8e   %.1e     %.1e      %.3e\n', ...
     nit, nf, ncg, f, gnorm, 1, err0);

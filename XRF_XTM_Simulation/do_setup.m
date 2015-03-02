@@ -6,10 +6,10 @@
 
 global N numThetan NF
 global bounds LogScale Joint
-global grad_type err0 WS
+global grad_type err0 WS Beta
 global onlyXRF NoSelfAbsorption
 global W_level xrf_level xtm_level L_level GI_level SI_level SigmaR SigmaT m_level nTau_level
-global NumElement MU_e I0 M thetan xinitial Z Element
+global NumElement xinitial
 %--------------------------------------------------
 % Select technique for gradient calculation.
 %
@@ -23,10 +23,10 @@ grad_type = 'adj';  % 'adj' = adjoint/exact
 Tomo_startup;
 NoSelfAbsorption=0;
 onlyXRF=0;
-N=[10];%[9 5 3];%[33 17 9 5 3];%[17 9 5 3];%
+N=9;%[17 9];%5 3];%[17 9 5 3];%
 NF = [0*N; 0*N; 0*N];
 nm=length(N);
-numThetan=1;%
+numThetan=4;
 W_level=cell(nm,1);
 xrf_level=cell(nm,1);
 xtm_level=cell(nm,1);
@@ -40,14 +40,15 @@ nTau_level= zeros(nm,1);
 bounds = 1;  % no bound constraints
 Joint=0; % 0: XRF; -1: XTM; 1: Joint inversion
 LogScale=1; %% determine if the XTM is solved taking log first or not
+Beta=10^8;
 %----------------------------------------------------------------------
 % Compute the dependent-variable arrays
 PlotObject=0;
 plotSpec = 0; % Do you want to see the spectra? If so plotSpec = 1
 plotTravel=0; % If plot the intersection of beam with object
-plotUnit=1;
+plotUnit=0;
 plotElement=0;
-plotResult=0;
+plotResult=1;
 for level=1:nm
     current_n=N(level);
     XRF_XTM_Tensor;
@@ -55,10 +56,8 @@ for level=1:nm
     if(level==1)
         WS=W;
     end
-%     if(level==1)
     xrf_level{level}=XRF;
     xtm_level{level}=DisR;
-%     end
     L_level{level}=L;
     GI_level{level}=GlobalInd;
     SI_level{level}=SelfInd;
@@ -71,9 +70,9 @@ nTol=N(1)^2*NumElement;
 %---------------------------------------------
 % Specify initial guess for optimization.
 rng('default');
-%  load x_new;
+load x_new;
 %  ww=WS;ww(:,:,2:3)=ww(:,:,2:3)+0.1*randn(m(1),m(2),2);
-x0=10^(-1)*rand(nTol,1);%WS(:)+10^(-2)*rand(nTol,1);%+WS(:);%ww(:);%;%zeros(size(WS(:)));%
+x0= 10^(-1)*rand(nTol,1);%WS(:)+10^(-2)*rand(nTol,1);%+WS(:);%ww(:);%;%zeros(size(WS(:)));%
 xinitial=x0;
 err0=norm(x0-WS(:));
 v0=x0;

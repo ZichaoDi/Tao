@@ -1,14 +1,14 @@
 function [f,g,shift_y]=sfun_Tensor4(W,xrfData,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau)
 global NumSSDlet numChannel NoSelfAbsorption
-global  SigMa_XRF
+global  SigMa_XRF numThetan
 f=0;
 mtol=prod(m);
 W=reshape(W,mtol,NumElement);
-L=reshape(L,length(thetan),nTau+1,mtol);
-shift_y=zeros(length(thetan),nTau+1,numChannel);
+L=reshape(L,numThetan,nTau+1,mtol);
+shift_y=zeros(numThetan,nTau+1,numChannel);
 %%%%% ====================================================================
 g=zeros(mtol,NumElement);
-for n=1:length(thetan)
+for n=1:numThetan
     InTens=ones(nTau+1,mtol);
     OutTens=ones(nTau+1,mtol,NumElement);
     OutTens_d=ones(nTau+1,mtol,NumSSDlet,NumElement);
@@ -46,8 +46,6 @@ for n=1:length(thetan)
                                     TempSub(i,v_self,:,:)=TempSub(i,v_self,:,:)-...
                                         reshape(Lsub(sub_v)*InTens(i,sub_v)/NumSSDlet...
                                         *bsxfun(@times,reshape(OutTens_d(i,sub_v,d,:),1,NumElement).*W(sub_v,:),reshape(SelfInd{n,i,v_self}{8}{d}(:,:,sub_v==SelfInd{n,i,v_self}{7}{d}),NumElement,NumElement))*M,[1 1 NumElement numChannel]);
-aa=bsxfun(@times,reshape(OutTens_d(i,sub_v,d,:),1,NumElement).*W(sub_v,:),reshape(SelfInd{n,i,v_self}{8}{d}(:,:,sub_v==SelfInd{n,i,v_self}{7}{d}),NumElement,NumElement))*M
-           reshape(Lsub(sub_v)*InTens(i,sub_v)/NumSSDlet*aa,[1 1 NumElement numChannel])                     
                                 end
                             end
                         end
@@ -60,9 +58,7 @@ aa=bsxfun(@times,reshape(OutTens_d(i,sub_v,d,:),1,NumElement).*W(sub_v,:),reshap
                     TempSub(i,v,:,:)=TempSub(i,v,:,:)+1*reshape(-bsxfun(@times,reshape(Lsub(v5),1,length(v5)).*InTens(i,v5),SelfInd{n,i,v}{6}')*(W(v5,:).*reshape(OutTens(i,v5,:),length(v5),NumElement)*M)...
                         +Lsub(v)*InTens(i,v)*bsxfun(@times,squeeze(OutTens(i,v,:)),M),1,1,NumElement,numChannel); % part 3
                 else
-bb=bsxfun(@times,squeeze(OutTens(i,v,:)),M)
-reshape(Lsub(v).*InTens(i,v)*bb,[1,1,NumElement,numChannel])
-                    TempSub(i,v,:,:)=TempSub(i,v,:,:)+1*reshape(Lsub(v).*InTens(i,v)*bsxfun(@times,squeeze(OutTens(i,v,:)),M),[1,1,NumElement,numChannel]); % part 3
+                    TempSub(i,v,:,:)=TempSub(i,v,:,:)+reshape(full(Lsub(v))*InTens(i,v)*bsxfun(@times,squeeze(OutTens(i,v,:)),M),[1,1,NumElement,numChannel]); % part 3
                 end
                 
             end
@@ -70,8 +66,7 @@ reshape(Lsub(v).*InTens(i,v)*bb,[1,1,NumElement,numChannel])
     end
     count=(nTau+1)*(n-1)+1:(nTau+1)*n;
     shift_y(n,:,:)=XRF_v;
-    y_temp=squeeze(xrfData(n,:,:));
-    f=f+sum(SigMa_XRF(count).*sum((XRF_v-y_temp).^2,2),1);
-    g=g+2*reshape(sum(sum(bsxfun(@times,TempSub,repmat(SigMa_XRF(count),[1 1 1 numChannel]).*reshape((XRF_v-y_temp),nTau+1,1,1,numChannel)),1),4),mtol,NumElement);
+    f=f+sum(SigMa_XRF(count).*sum((XRF_v-squeeze(xrfData(n,:,:))).^2,2),1);
+    g=g+2*reshape(sum(sum(bsxfun(@times,TempSub,repmat(SigMa_XRF(count),[1 1 1 numChannel]).*reshape((XRF_v-squeeze(xrfData(n,:,:))),nTau+1,1,1,numChannel)),1),4),mtol,NumElement);
 end
 g=g(:);

@@ -8,7 +8,8 @@
 % mu=n_a*CrossSection
 % K_shell:0 L1:1 L2:2 L3:3 M1:4 M2:5 M3:6 M4:7 M5:8
 % KA_LINE:0 KB:1 LA:2 LB:3
-global TakeLog NumElement
+global TakeLog I0 M Element
+
 E0=10;
 E2I=1/3e8/6.62e-34*1e-15;
 I0=E0*E2I;
@@ -21,7 +22,7 @@ NA=6.02e23;%Avogadro's number
 % end
 load AtomicWeight
 load(['xRayLib',num2str(E0),'.mat'])
-Line=1:10;%:36;%[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
+Line=1:36;%[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
 shell=0;  %% Shell type
 BindingEnergy=zeros(NumElement*length(Line),1);
 M=zeros(NumElement,numChannel);

@@ -1,6 +1,6 @@
-function [ft,gt]=sfun_Tensor(W,xrfData,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau)
-global NumSSDlet numChannel NoSelfAbsorption numThetan
-global  SigMa_XRF
+function [ft,gt]=sfun_Tensor_par(W,xrfData,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau)
+global NumSSDlet numChannel NoSelfAbsorption
+ global  SigMa_XRF
 
 mtol=prod(m);
 W=reshape(W,mtol,NumElement);
@@ -10,17 +10,16 @@ numC=numChannel;
 NoS=NoSelfAbsorption;
 SigMa=SigMa_XRF;
 %%%%% ====================================================================
-f=zeros(numThetan,1);
-g=zeros(numThetan,mtol,NumElement);
-% parfor n=1:numThetan
-for n=1:numThetan
+f=zeros(length(thetan),1);
+g=zeros(length(thetan),mtol,NumElement);
+parfor n=1:length(thetan)
     InTens=ones(nTau+1,mtol);
     OutTens=ones(nTau+1,mtol,NumElement);
     OutTens_d=ones(nTau+1,mtol,NumSSD,NumElement);
     TempSub=zeros(nTau+1,mtol,NumElement,numC);
     XRF_v=zeros(nTau+1,numC);
     for i=1:nTau+1
-        counted_v=zeros(mtol,1);
+        counted_v=[];
         index=GlobalInd{n,i};
         if(~isempty(index))
             index_sub=sub2ind(m,index(:,2),index(:,1));
@@ -31,7 +30,7 @@ for n=1:numThetan
                 v7=cell2mat(SelfInd{n,i,v}{7});
                 related_v=unique([v;v5;v7']);
                 nonCounted=find(ismember(related_v,counted_v)==0);
-                counted_v(related_v(nonCounted))=related_v(nonCounted);
+                counted_v=[counted_v;related_v(nonCounted)];
                 for sub_i=1:length(nonCounted)
                     sub_v=related_v(nonCounted);
                     sub_v=sub_v(sub_i);

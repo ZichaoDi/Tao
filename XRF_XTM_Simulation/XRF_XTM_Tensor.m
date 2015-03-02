@@ -14,27 +14,22 @@ if plotTravel
 end
 %%%=========Start Simulation
 Energy=BindingEnergy;
+mtol=prod(m);
 eX=ones(m(1),1);
 eY=ones(m(2),1);
-XRF=zeros(length(thetan),nTau+1,numChannel);%cell(length(thetan),nTau+1);%
-SigMa_XRF=zeros(length(thetan)*(nTau+1),numChannel);
-DisR=zeros(nTau+1,length(thetan));
-% DisR=DisR(subTheta,:);
-Ltol=cell(length(thetan),nTau+1);
-L=zeros(length(thetan),nTau+1,m(1),m(2));
-GlobalInd=cell(length(thetan),nTau+1);
-LocalInd=cell(length(thetan),nTau+1,m(1),m(2),NumSSDlet);
-L_after=cell(length(thetan),nTau+1,m(1),m(2),NumSSDlet);
-SelfInd=cell(length(thetan),nTau+1,prod(m));
-mtol=prod(m);
+XRF=zeros(numThetan,nTau+1,numChannel);%cell(numThetan,nTau+1);%
+SigMa_XRF=zeros(numThetan*(nTau+1),numChannel);
+DisR=zeros(nTau+1,numThetan);
+Ltol=cell(numThetan,nTau+1);
+L=zeros(numThetan,nTau+1,m(1),m(2));
+GlobalInd=cell(numThetan,nTau+1);
+LocalInd=cell(numThetan,nTau+1,m(1),m(2),NumSSDlet);
+L_after=cell(numThetan,nTau+1,m(1),m(2),NumSSDlet);
+SelfInd=cell(numThetan,nTau+1,mtol);
 
-% if(m(1)==50 & length(thetan)==10)
-%  load SelfInd0_50_10
-%  SelfInd=SelfInd0_50_10;
-% else
-for im=1:length(thetan)
+for im=1:numThetan
     for jm=1:nTau+1
-        for iv=1:prod(m)
+        for iv=1:mtol
             SelfInd{im,jm,iv}=cell(8,1);
             for d=1:NumSSDlet
                 SelfInd{im,jm,iv}{7}{d}=[];
@@ -44,16 +39,13 @@ for im=1:length(thetan)
     end
 end
 
-SelfInd0_50_10=SelfInd;
-save SelfInd0_50_10 SelfInd0_50_10
-% end
 EmptyBeam=[];
 RMlocal=zeros(m(1),m(2),numChannel); %% assign all the contributions from seperate beam to each pixel
 fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel);
 
-for n=1:length(thetan)
+for n=1:numThetan
     theta=thetan(n)/180*pi;
-    fprintf(1,'====== Angle Number  %d of %d: %d\n',n,length(thetan),thetan(n));
+    fprintf(1,'====== Angle Number  %d of %d: %d\n',n,numThetan,thetan(n));
     TransMatrix=[cos(theta) sin(theta);-sin(theta) cos(theta)];
     DetKnot=DetKnot0*TransMatrix;
     SourceKnot=SourceKnot0*TransMatrix;
@@ -126,9 +118,6 @@ for n=1:length(thetan)
             
             BeforeEmit=0;
             I_after=ones(NumElement,1);
-%             if(NoSelfAbsorption)
-%                 NumSSDlet=1;%% Turn off self-absorption
-%             else
                 I_after=0*I_after;
                 for SSDi=1:NumSSDlet
                     temp_after=0;
@@ -172,7 +161,6 @@ for n=1:length(thetan)
                     end
                     %%%**************************************
                 end %% End loop for existing fluorescence energy from current pixel
-%             end
             %% ====================================================================
             RM{index(j,2),index(j,1)}=Lvec(j)*I_incident*(I_after.*Wsub)'*M;% fluorescence emitted from current pixel
             temp=zeros(size(RMlocal(index(j,2),index(j,1),:)));
@@ -181,13 +169,13 @@ for n=1:length(thetan)
             xrfSub=xrfSub+RM{index(j,2),index(j,1)};
         end
         [~,~,subm,subn]=size(L(n,i,:,:));
-        Rdis(i)=I0*exp(-eX'*(MU_XTM.*reshape(L(n,i,:,:),subm,subn)./Tol)*eY); %% Discrete case
-        XRF(n,i,:)=xrfSub;%{n,i}=xrfSub;%+0.1*rand(size(xrfSub));%reshape(DisXRF(subTheta(n),i,:),1,numChannel);%
+        Rdis(i)=I0*exp(-eX'*(MU_XTM.*reshape(L(n,i,:,:),subm,subn))*eY); %% Discrete case
+        XRF(n,i,:)=xrfSub;%+0.1*rand(size(xrfSub));%reshape(DisXRF(subTheta(n),i,:),1,numChannel);%
         SigMa_XRF((nTau+1)*(n-1)+i,:)=xrfSub;
         if(plotSpec)
             figure(finalfig)
             subplot(1,2,2);
-            plot(DetChannel,XRF{n,i},'r-')
+            plot(DetChannel,squeeze(XRF(n,i,:)),'r-')
             xlabel('Energy Channel','fontsize',12); ylabel('Intensity','fontsize',12)
             pause;
         end
@@ -202,7 +190,7 @@ else
     SigMa_XTM=1./DisR(:);
 end
 SigMa_XRF=1./diag(cov(SigMa_XRF'));%1./sum(SigMa_XRF,2);%
-SigMa_XRF((sub2ind([nTau+1,length(thetan)],EmptyBeam(2,:),EmptyBeam(1,:))))=0;
-% SigMa_XTM((sub2ind([nTau+1,length(thetan)],EmptyBeam(2,:),EmptyBeam(1,:))))=0;
-%  SigMa_XRF=ones(size(SigMa_XRF));
-%  SigMa_XTM=ones(size(SigMa_XTM));
+SigMa_XRF((sub2ind([nTau+1,numThetan],EmptyBeam(2,:),EmptyBeam(1,:))))=0;
+SigMa_XTM((sub2ind([nTau+1,numThetan],EmptyBeam(2,:),EmptyBeam(1,:))))=0;
+ SigMa_XRF=ones(size(SigMa_XRF));
+ SigMa_XTM=ones(size(SigMa_XTM));

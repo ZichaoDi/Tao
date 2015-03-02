@@ -17,19 +17,19 @@ SigMa_XRF=SigmaR{level};
 W0=W_level{level};
 W0=W0(:);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% if(level==1 | init_level==1)
+if(level==1 | init_level==1)
     XRF=xrf_level{level};
     DisR=xtm_level{level};
-%----------------------------------------------------------------------
-% elseif(level~=1 & init_level == 0)
-if(level~=1 & init_level == 0)
+%%%%%----------------------------------------------------------------------
+elseif(level~=1 & init_level == 0)
+% if(level~=1 & init_level == 0)
     [~ ,Gv2 ,shift_yH, shift_yTH] = sfun(current_v);
-end
-%     XRF=XRF-shift_y+shift_yH;
-%     xrf_level{level}=XRF;
-%     if(Joint==1)
-%     DisR=DisR-shift_yT'+shift_yTH';
-%     xtm_level{level}=DisR;
-%     end
 % end
+%     XRF=XRF-shift_y+shift_yH;
+    xrf_level{level}=XRF;
+    if(Joint==1)
+%     DisR=DisR-shift_yT'+shift_yTH';
+    xtm_level{level}=DisR;
+    end
+end
 
