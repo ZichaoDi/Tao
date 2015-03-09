@@ -1,7 +1,7 @@
 % Perform one iteration of multigrid.
 % Can only be used after using mg.m or fmg.m
 %----------------------------------------------------------------------
-global GRAPH_N_OLD GRAPH_INDEX_OLD it W_level
+global GRAPH_N_OLD GRAPH_INDEX_OLD it W_level WS
 %----------------------------------------------------------------------
 % Update the multi-grid solution: given current solution v
 %----------------------------------------------------------------------
@@ -32,6 +32,9 @@ step_bnd = 0;
 v  = mgrid(v,fnl,0,step_bnd);
 doplot(it,v,W_level);
 report_results(N);
+MGiter=0;
+for i=1:size(NF,2),MGiter=MGiter+sum(NF(2:3,i),1)/(4^(i-1));end
+ErrMg(it,1:2)=[MGiter,norm(v-WS(:))];
 more on;
 %----------------------------------------------------------------------
 figure(findobj('Tag', 'multigrid_graph'));

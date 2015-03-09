@@ -7,4 +7,7 @@ if(Joint==1)
 elseif(Joint==0)
     [f, g, shift_y] = sfun_R (W);
     shift_yT=[];
+elseif(Joint==-1)
+    [f, g, shift_yT] = sfun_T (W);
+     shift_y=[];
 end

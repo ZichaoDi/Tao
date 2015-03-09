@@ -2,6 +2,7 @@ function vh=update(vH,res_prob)
 global N NumElement
 %== Full Weighting to interpolate
 %== res_prob=0: upsample data; res_prob=1: upsample variable
+NumElement=1;
 j=find(N==sqrt(size(vH,1)/NumElement));
 % if(res_prob)
     vH=reshape(vH,N(j),N(j),NumElement);
@@ -26,4 +27,7 @@ j=find(N==sqrt(size(vH,1)/NumElement));
     
 % end
 vh=vh(2:N(j-1)+1,2:N(j-1)+1,:);
+% figure(11);clims=[0 max([vh(:);vH(:)])];subplot(1,2,1),imagesc(2*vh,clims);
+% subplot(1,2,2),imagesc(vH,clims);
+% pause;
 vh=2*vh(:);

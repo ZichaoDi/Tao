@@ -1,5 +1,5 @@
-function [f,g]=sfun_Tensor_Joint_Jacobian(W,xrfData,xtmData,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0)
-global NumSSDlet numChannel NoSelfAbsorption XTMscale gama
+function [f,g]=sfun_Tensor_Joint_Jacobian(W,XRF,xtmData,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0)
+global NumSSDlet numChannel NoSelfAbsorption XTMscale
 global SigMa_XTM SigMa_XRF
 global LogScale Beta EmptyBeam
 f=0;
@@ -9,7 +9,7 @@ L=reshape(L,length(thetan),nTau+1,mtol);
 Beta=1e0;
 %%%%% =================== Attenuation Matrix at beam energy
 MUe=reshape(MU_e(:,1,1),1,1,NumElement);
-MUe_XTM=reshape(MU_e(:,1,1).*gama,1,1,NumElement).*XTMscale;
+MUe_XTM=reshape(MU_e(:,1,1),1,1,NumElement).*XTMscale;
 MU_XTM=sum(reshape(W,m(1),m(2),NumElement).*repmat(MUe,[m(1),m(2),1]),3).*XTMscale;
 %%%%% ====================================================================
 eX=ones(m(1),1);
@@ -32,7 +32,7 @@ for n=1:length(thetan)
     TempSub=zeros(nTau+1,mtol,NumElement,numChannel);
     for i=1:nTau+1
         JacobSub1=zeros(mtol,NumElement,numChannel);
-        XRF_v{n,i}=zeros(1,numChannel);
+        XRF_v=zeros(nTau+1,numChannel);
         counted_v=[];
         index=GlobalInd{n,i};
         if(~isempty(index))
@@ -63,7 +63,7 @@ for n=1:length(thetan)
                         OutTens(i,sub_v,:)=sum(OutTens_d(i,sub_v,:,:),3)/NumSSDlet;
                     end
                 end
-                XRF_v{n,i}=XRF_v{n,i}+L(n,i,v)*(InTens(i,v)*reshape(OutTens(i,v,:),1,NumElement).*W(v,:))*M;
+               XRF_v(i,:)=XRF_v(i,:)+L(n,i,v)*(InTens(i,v)*reshape(OutTens(i,v,:),1,NumElement).*W(v,:))*M;
                 if(~isempty(v5))
                     TempSub(i,v,:,:)=TempSub(i,v,:,:)+1*reshape(-bsxfun(@times,reshape(L(n,i,v5),1,length(v5)).*InTens(i,v5),SelfInd{n,i,v}{6}')*(W(v5,:).*reshape(OutTens(i,v5,:),length(v5),NumElement)*M)...
                         +L(n,i,v)*InTens(i,v)*bsxfun(@times,squeeze(OutTens(i,v,:)),M),1,1,NumElement,numChannel); % part 3
@@ -124,8 +124,8 @@ for n=1:length(thetan)
     end
     
     count=(nTau+1)*(n-1)+1:(nTau+1)*n;
-    f=f+sum(SigMa_XRF(count).*sum((cat(1,XRF_v{n,:})-cat(1,xrfData{n,:})).^2,2),1);
-    g=g+2*reshape(sum(sum(bsxfun(@times,TempSub,repmat(SigMa_XRF(count),[1 1 1 numChannel]).*reshape((cat(1,XRF_v{n,:})-cat(1,xrfData{n,:})),nTau+1,1,1,numChannel)),1),4),mtol,NumElement);
+    f=f+sum(SigMa_XRF(count).*sum((XRF_v-squeeze(XRF(n,:,:))).^2,2),1);
+    g=g+2*reshape(sum(sum(bsxfun(@times,TempSub,repmat(SigMa_XRF(count),[1 1 1 numChannel]).*reshape((XRF_v-squeeze(XRF(n,:,:))),nTau+1,1,1,numChannel)),1),4),mtol,NumElement);
 end
 g=g(:);
 % save WeightMatrix WeightMatrix

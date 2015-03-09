@@ -20,20 +20,20 @@ close all
 % load PeriodicTable
 % load xs20_12Jp
 % load xs20_12Xp;%pNoSelf
-load Phantom20;
-w=Phantom20;
+load Phantom10;
+w=Phantom10;
 load PeriodicTable
-load xs20_10J
-load xs20_10X;%pNoSelf
+load xs10_6J
+load xs10_6X;%pNoSelf
 Z=[19 31 26];%  46 50];%
 NumElement=length(Z);
 rng('default')
 w0=0.1*rand(size(w));
- e0=abs(sum(w0-w,3));
-w2=reshape(xs20_10J,20,20,NumElement);%w+0.06*rand(size(w));
- e2=abs(sum(w2-w,3));
-w1=reshape(xs20_10X,20,20,NumElement);%w+0.01*rand(size(w));
-e1=abs(sum(w1-w,3));
+ e0=sum(abs(w0-w),3);
+w2=reshape(xs10_6J,10,10,NumElement);%w+0.06*rand(size(w));
+ e2=sum(abs(w2-w),3);
+w1=reshape(xs10_6X,10,10,NumElement);%w+0.01*rand(size(w));
+e1=sum(abs(w1-w),3);
 clims=[0,max(w(:))];
 
 for i=1:NumElement+1,

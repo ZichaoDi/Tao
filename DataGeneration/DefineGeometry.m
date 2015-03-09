@@ -1,6 +1,7 @@
 %----- Define Geometry for a given grid, thetan and experimental equipment
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
-thetan=linspace(0,180,numThetan);%mod(thetan+360,360);% Projection Angles, has to be positive.
+thetan=linspace(0,180,30);%mod(thetan+360,360);% Projection Angles, has to be positive.
+thetan=thetan(2:4);
 %%---------------------------------------------------------------------------
 ID=cell(numThetan,nTau+1);
 LD=cell(numThetan,nTau+1);

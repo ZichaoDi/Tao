@@ -12,4 +12,5 @@ else
     [F,G] = sfun(v);
 end
 F     = F - v'*current_fnl;
-G     = G - current_fnl;
+
+G     = G- current_fnl;

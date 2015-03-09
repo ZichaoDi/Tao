@@ -2,15 +2,23 @@
 global low up penalty
 global W0 current_n
 global SigMa_XTM SigMa_XRF
-global fctn_f err0 fiter nit maxiter
+global fctn_f err0 fiter nit maxiter xinitial
 
 %%%----------------------------Initialize dependent variables
-do_setup;
+% do_setup;
 level=1;
 current_n = N(level);
 W= W_level{level};
 XRF=xrf_level{level};
+load dr2;
+load dr;
 DisR=xtm_level{level};
+%%---- smooth data
+% DisR=BlurGaussian(DisR);
+% for i_theta=1:size(DisR,2)
+% DisR(:,i_theta)=smooth(DisR(:,i_theta));
+% end
+%%--------------------------------
 L=L_level{level};
 GlobalInd=GI_level{level};
 SelfInd=SI_level{level};
@@ -24,11 +32,11 @@ else
     fprintf(1,'====== With Self Absorption, Transmission Detector Resolution is %d\n',nTau);
 end
 %%%----------------------------------------------------------------------
-W0=W(:);
 %%%============== Rescale MU_e to make unity contribution
 penalty=0;
 if(Joint==-1)
-    fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,L,thetan,m,nTau,NumElement);
+%     fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,L,thetan,m,nTau,NumElement);
+    fctn=@(MU)sfun_XTM_com(DisR,MU,I0,L,thetan,m,nTau);
 elseif(Joint==1)
     fctn=@(W)sfun_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 %     fctn_f=@(W)func_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
@@ -39,16 +47,17 @@ else
 end
 %-----------------------------------------------------------------------
 % fctn_J=@(W)sfun_Tensor_Joint_Jacobian(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
-% feval(fctn_J,x0);
-tic;
-feval(fctn,x0);
-toc;
-% nTol=current_n^2*NumElement;
-% rng('default');
-% x0=10^(-1)*rand(nTol,1);
-%-----------------------------------------------------------------------
+nTol=current_n^2*NumElement;
+rng('default');
+% x0=W0(:)+10^(-2)*rand(nTol,1);
+% if(Joint==-1)
+% W0=sum(reshape(W,current_n,current_n,NumElement).*repmat(MUe,[current_n,current_n,1]),3);
+% W0=W0(:);
+ x0=W0(:)+10^(-1)*rand(nTol/NumElement,1);%sum(reshape(x0,current_n,current_n,NumElement).*repmat(MUe,[current_n,current_n,1]),3);
+xinitial=x0;
+% end
+
 err0=norm(x0-W0);
-ws=W(:);
 e=cputime;
 low=0*ones(size(x0));
 up=1e6*ones(size(x0));
@@ -59,9 +68,10 @@ up=1e6*ones(size(x0));
 % [xstar,f,g,ierror] = tnbcm (x0,fctn,low,up,maxiter);
 % options = optimset('Display','iter','TolFun',1e-8);
 % xstar = lsqnonlin(fctn,x0,[],[],options);
+maxiter=500;
 if(bounds)
-maxiter=1000;
 [xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
+% [xstar] = GaussNewtonArmijo(fctn,x0);
 else
 [xstar,f,g,ierror] = tn (x0,fctn);
 end
@@ -72,7 +82,7 @@ end
 % end
 % figure('name','Elemental Residule')
 % semilogy(1:NumElement,err,'r.-');
-
+doplot(1,xstar, W_level);
 if(Joint==1)
 convFac_J=(fiter(end)/fiter(1))^(1/(nit+1));
 t_J=cputime-e;
