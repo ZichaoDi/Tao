@@ -1,13 +1,13 @@
 %%%Simulate XRF of a given object with predifined detector and beam
 close all;
 load Phantom3_Young
-% Phantom3_Young=Phantom3_Young(100:120,100:120,100:120,:);
+%Phantom3_Young=Phantom3_Young(100:120,100:120,100:120,:);
 onlyXRF=1;
 more off;
 current_n=size(Phantom3_Young,1);
 xrf_roi=0;
 NumElement=4;
-numThetan=1;
+numThetan=10;
 DefineGeometry;
 DefineObject_Gaussian; % Produce W, MU_XTM
 %%-------------------------------------------------------
@@ -16,9 +16,11 @@ load formatH5_roi
 %%---------------------------------------------------------------------------
 TotSlice=current_n;
 XRF=zeros(numThetan,nTau+1,numChannel);
-
+%X1=cell(numThetan,1);
+%X2=cell(numThetan,1);
 disp('Setup Geometry')
 for n=1:length(thetan)
+    n
     XRF3=zeros(nTau+1,TotSlice,numChannel);
     XRF_roi=zeros(nTau+1,TotSlice,NumElement);
     for slice=1:TotSlice
@@ -86,18 +88,18 @@ for n=1:length(thetan)
     formatH5_roi{length(dataset)-1}=XRF_roi;
     for ii=1:length(dataset)-1
         if(ii==1)
-            hdf5write(['h5data/YoungPhantom_256_4_',num2str(n),'.h5'],['/MAPS/',num2str(dataset{ii})],formatH5_roi{ii});
+            hdf5write(['YoungPhantom_256_4_',num2str(n),'.h5'],['/MAPS/',num2str(dataset{ii})],formatH5_roi{ii});
         else
-            hdf5write(['h5data/YoungPhantom_256_4_',num2str(n),'.h5'],['/MAPS/',num2str(dataset{ii})],formatH5_roi{ii},'WriteMode', 'append');
+           hdf5write(['YoungPhantom_256_4_',num2str(n),'.h5'],['/MAPS/',num2str(dataset{ii})],formatH5_roi{ii},'WriteMode', 'append');
         end
     end
-    hdf5write(['h5data/YoungPhantom_256_4_',num2str(n),'.h5'],'/MAPS/mca_arr',formatH5_roi{end},'WriteMode', 'append');
-    
-    
+    hdf5write(['YoungPhantom_256_4_',num2str(n),'.h5'],'/MAPS/mca_arr',formatH5_roi{end},'WriteMode', 'append');
+   % X1{n}=XRF3;
+%X2{n}=XRF_roi;
+
+%save -v7.3 X1 X1
+%save -v7.3 X2 X2
 end
-
-
-
 
 
 

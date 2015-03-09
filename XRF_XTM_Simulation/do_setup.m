@@ -21,12 +21,12 @@ grad_type = 'adj';  % 'adj' = adjoint/exact
 %--------------------------------------------
 % Initialize arrays for discretizations
 Tomo_startup;
-NoSelfAbsorption=0;
+NoSelfAbsorption=1;
 onlyXRF=0;
-N=9;%[17 9];%5 3];%[17 9 5 3];%
+N=3;%[17 9];%5 3];%[17 9 5 3];%
 NF = [0*N; 0*N; 0*N];
 nm=length(N);
-numThetan=4;
+numThetan=12;
 W_level=cell(nm,1);
 xrf_level=cell(nm,1);
 xtm_level=cell(nm,1);
@@ -38,7 +38,7 @@ SigmaT=cell(nm,1);
 m_level=zeros(nm,2);
 nTau_level= zeros(nm,1);
 bounds = 1;  % no bound constraints
-Joint=0; % 0: XRF; -1: XTM; 1: Joint inversion
+Joint=1; % 0: XRF; -1: XTM; 1: Joint inversion
 LogScale=1; %% determine if the XTM is solved taking log first or not
 Beta=10^8;
 %----------------------------------------------------------------------
@@ -48,7 +48,7 @@ plotSpec = 0; % Do you want to see the spectra? If so plotSpec = 1
 plotTravel=0; % If plot the intersection of beam with object
 plotUnit=0;
 plotElement=0;
-plotResult=1;
+plotResult=0;
 for level=1:nm
     current_n=N(level);
     XRF_XTM_Tensor;
@@ -70,9 +70,9 @@ nTol=N(1)^2*NumElement;
 %---------------------------------------------
 % Specify initial guess for optimization.
 rng('default');
-load x_new;
+%load x_new;
 %  ww=WS;ww(:,:,2:3)=ww(:,:,2:3)+0.1*randn(m(1),m(2),2);
-x0= 10^(-1)*rand(nTol,1);%WS(:)+10^(-2)*rand(nTol,1);%+WS(:);%ww(:);%;%zeros(size(WS(:)));%
+x0= WS(:)+10^(-1)*rand(nTol,1);%WS(:)+10^(-2)*rand(nTol,1);%+WS(:);%ww(:);%;%zeros(size(WS(:)));%
 xinitial=x0;
 err0=norm(x0-WS(:));
 v0=x0;

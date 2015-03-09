@@ -138,8 +138,6 @@ while (~conv);
     
     Cauchy=0;
     %---------------------------------------------------------%    
-    xTest{nit+1} = x_new;
-    save xTest xTest
     if (alpha == 0 & alpha0 ~= 0 | ierror == 3);
         fprintf('Error in Line Search\n');
         fprintf('    ierror = %3i\n',    ierror);
@@ -160,7 +158,7 @@ while (~conv);
     %#######################
     nf  = nf  + nf1;
     nit = nit +   1;
-    ASchange(nit)=norm(-ipivot+ipivotOld,1);
+%    ASchange(nit)=norm(-ipivot+ipivotOld,1);
 %     save ASchange ASchange
     %---------------------------------------------------------
     % update active set, if appropriate

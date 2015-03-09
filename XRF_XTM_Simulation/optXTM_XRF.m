@@ -6,6 +6,7 @@ global fctn_f err0 fiter nit maxiter
 
 %%%----------------------------Initialize dependent variables
 do_setup;
+return;
 level=1;
 current_n = N(level);
 W= W_level{level};
@@ -40,9 +41,9 @@ end
 %-----------------------------------------------------------------------
 % fctn_J=@(W)sfun_Tensor_Joint_Jacobian(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 % feval(fctn_J,x0);
-tic;
-feval(fctn,x0);
-toc;
+% tic;
+% feval(fctn,x0);
+% toc;
 % nTol=current_n^2*NumElement;
 % rng('default');
 % x0=10^(-1)*rand(nTol,1);
@@ -59,8 +60,8 @@ up=1e6*ones(size(x0));
 % [xstar,f,g,ierror] = tnbcm (x0,fctn,low,up,maxiter);
 % options = optimset('Display','iter','TolFun',1e-8);
 % xstar = lsqnonlin(fctn,x0,[],[],options);
+maxiter=500;
 if(bounds)
-maxiter=1000;
 [xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
 else
 [xstar,f,g,ierror] = tn (x0,fctn);
@@ -77,10 +78,19 @@ if(Joint==1)
 convFac_J=(fiter(end)/fiter(1))^(1/(nit+1));
 t_J=cputime-e;
 errTol_J=norm(xstar-ws)/norm(err0);
+if(NoSelfAbsorption)
+    xs20Jp_12no=xstar;
+    save xs20Jp_12no xs20Jp_12no
+else
+xs20Jp_12=xstar;
+save xs20Jp_12 xs20Jp_12
+end
 elseif(Joint==0)
   convFac_XRF=(fiter(end)/fiter(1))^(1/(nit+1));
   t_XRF=cputime-e;
 errTol_XRF=norm(xstar-ws)/norm(err0);
+xs20Xp_12=xstar;
+save xs20Xp_12 xs20Xp_12
 end
 % if(DiscreteScale)
 %     AbsErr=norm(xtemp(:)-W(:))

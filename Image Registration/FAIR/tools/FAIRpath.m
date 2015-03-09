@@ -1,1 +1,1 @@
-function value=FAIRpath; value='/Users/Wendydi/GitHub/TaoGit/Image Registration/FAIR';
+function value=FAIRpath; value='/nfs2/wendydi/Documents/MATLAB/Tao/Image Registration/FAIR';

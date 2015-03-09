@@ -1,6 +1,7 @@
 %----- Define Geometry for a given grid, thetan and experimental equipment
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
-thetan=linspace(0,180,numThetan);%mod(thetan+360,360);% Projection Angles, has to be positive.
+thetan=linspace(0,180,30);%mod(thetan+360,360);% Projection Angles, has to be positive.
+thetan=thetan(1:numThetan);
 %%---------------------------------------------------------------------------
 ID=cell(numThetan,nTau+1);
 LD=cell(numThetan,nTau+1);
@@ -8,6 +9,7 @@ LA=cell(numThetan,nTau+1,m(1),m(2),NumSSDlet);
 LI=cell(numThetan,nTau+1,m(1),m(2),NumSSDlet);
 for n=1:numThetan
     theta=thetan(n)/180*pi;
+fprintf(1,'====== Angle Number  %d of %d: %d\n',n,numThetan,thetan(n));
     TransMatrix=[cos(theta) sin(theta);-sin(theta) cos(theta)];
     DetKnot=DetKnot0*TransMatrix;
     SourceKnot=SourceKnot0*TransMatrix;
