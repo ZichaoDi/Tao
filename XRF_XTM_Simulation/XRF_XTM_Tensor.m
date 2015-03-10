@@ -192,5 +192,5 @@ end
 SigMa_XRF=1./diag(cov(SigMa_XRF'));%1./sum(SigMa_XRF,2);%
 SigMa_XRF((sub2ind([nTau+1,numThetan],EmptyBeam(2,:),EmptyBeam(1,:))))=0;
 SigMa_XTM((sub2ind([nTau+1,numThetan],EmptyBeam(2,:),EmptyBeam(1,:))))=0;
- SigMa_XRF=ones(size(SigMa_XRF));
- SigMa_XTM=ones(size(SigMa_XTM));
+%  SigMa_XRF=ones(size(SigMa_XRF));
+%  SigMa_XTM=ones(size(SigMa_XTM));

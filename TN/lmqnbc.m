@@ -206,7 +206,7 @@ while (~conv);
     xnorm = norm(x,'inf');
     %--------------------------------- Error
     ErrIter(nit)=norm(x-W0);
-    ErrDis{nit}=reshape(x-W0,current_n, current_n);
+    ErrDis{nit}=reshape(x-W0,current_n, current_n,NumElement);
     save ErrDis ErrDis
 %     figure(9);
 %     for iPlot=1:NumElement

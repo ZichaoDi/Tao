@@ -5,7 +5,7 @@ global SigMa_XTM SigMa_XRF
 global fctn_f err0 fiter nit maxiter xinitial
 
 %%%----------------------------Initialize dependent variables
-% do_setup;
+ do_setup;
 level=1;
 current_n = N(level);
 W= W_level{level};
@@ -53,7 +53,7 @@ rng('default');
 % if(Joint==-1)
 % W0=sum(reshape(W,current_n,current_n,NumElement).*repmat(MUe,[current_n,current_n,1]),3);
 % W0=W0(:);
- x0=W0(:)+10^(-1)*rand(nTol/NumElement,1);%sum(reshape(x0,current_n,current_n,NumElement).*repmat(MUe,[current_n,current_n,1]),3);
+%  x0=W0(:)+10^(-1)*rand(nTol/NumElement,1);%sum(reshape(x0,current_n,current_n,NumElement).*repmat(MUe,[current_n,current_n,1]),3);
 xinitial=x0;
 % end
 

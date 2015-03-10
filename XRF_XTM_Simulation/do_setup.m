@@ -23,10 +23,10 @@ grad_type = 'adj';  % 'adj' = adjoint/exact
 Tomo_startup;
 NoSelfAbsorption=0;
 onlyXRF=0;
-N=65;%[65 33 17];% 17 9];%[129 65  9 5];% 
+N=3;%[65 33 17];% 17 9];%[129 65  9 5];% 
 NF = [0*N; 0*N; 0*N];
 nm=length(N);
-numThetan=30;
+numThetan=4;
 W_level=cell(nm,1);
 xrf_level=cell(nm,1);
 xtm_level=cell(nm,1);
@@ -38,9 +38,9 @@ SigmaT=cell(nm,1);
 m_level=zeros(nm,2);
 nTau_level= zeros(nm,1);
 bounds = 1;  % no bound constraints
-Joint=-1; % 0: XRF; -1: XTM; 1: Joint inversion
+Joint=1; % 0: XRF; -1: XTM; 1: Joint inversion
 LogScale=1; %% determine if the XTM is solved taking log first or not
-Beta=10^8;
+Beta=10^0;
 %----------------------------------------------------------------------
 % Compute the dependent-variable arrays
 PlotObject=0;
@@ -79,11 +79,11 @@ plotResult=0;
 %%------------------------------ Use same finest data for each level
 for level=1:nm
     current_n=N(level);
-%     XRF_XTM_Tensor;
-    XTM_Tensor;
+    XRF_XTM_Tensor;
+%     XTM_Tensor;
     W_level{level}=W;
     if(level==1)
-        WS=MU;%W;
+        WS=W;%MU;%
     end
     xtm_level{level}=DisR;
     
@@ -93,9 +93,9 @@ for level=1:nm
     m_level(level,:)=m;
     SigmaT{level}=SigMa_XTM;
 %-----------------------------------------
-%     xrf_level{level}=XRF;
-%     SI_level{level}=SelfInd;
-%     SigmaR{level}=SigMa_XRF;
+    xrf_level{level}=XRF;
+    SI_level{level}=SelfInd;
+    SigmaR{level}=SigMa_XRF;
 end
 
 nTol=N(1)^2*NumElement;
@@ -105,8 +105,8 @@ rng('default');
 % load x_new;
 % x0 = WS(:)+10^(-2)*rand(nTol,1);%+WS(:);%ww(:);%;%zeros(size(WS(:)));%
 W0=WS(:);
-x0=10^(-1)*rand(nTol/NumElement,1);%sum(reshape(x0,current_n,current_n,NumElement).*repmat(MUe,[current_n,current_n,1]),3);
-x0=x0(:);
+% x0=W0+10^(-1)*rand(nTol/NumElement,1);%sum(reshape(x0,current_n,current_n,NumElement).*repmat(MUe,[current_n,current_n,1]),3);
+x0=10^(-1)*rand(nTol,1);
 xinitial=x0;
-err0=norm(x0-WS(:));
+err0=norm(x0-W(:));
 v0=x0;

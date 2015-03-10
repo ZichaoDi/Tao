@@ -26,7 +26,7 @@ center=[0 0];
 %%%========================== the grids of object
 xc = getNodalGrid(omega,[m(2) m(1)]);
 %%%========================== assign weight matrix for each element in each pixel
-Z=[ 8 14 20 29 30];%[19 31 26  46 50];%[ 8 14 20 29 79 30 46 59];%[29 30 46 49 57 74 79];%% 42 29 26 ];%% reference sample: Pb La Pd Mo Cu Fe Ca
+ Z=[ 8 14 20 29 30];%[19 31 26  46 50];%[ 8 14 20 29 79 30 46 59];%[29 30 46 49 57 74 79];%% 42 29 26 ];%% reference sample: Pb La Pd Mo Cu Fe Ca
 if(onlyXRF)
     Z=[8 30 20 16];
     if (xrf_roi)

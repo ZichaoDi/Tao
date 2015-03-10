@@ -20,31 +20,34 @@ close all
 % load PeriodicTable
 % load xs20_12Jp
 % load xs20_12Xp;%pNoSelf
-load Phantom10;
-w=Phantom10;
+load Phantom3;
+w=Phantom3;
 load PeriodicTable
-load xs10_6J
-load xs10_6X;%pNoSelf
+load xs3_4J
+load xs3_4X;%pNoSelf
+load xs3_4T;
 Z=[19 31 26];%  46 50];%
 NumElement=length(Z);
 rng('default')
 w0=0.1*rand(size(w));
  e0=sum(abs(w0-w),3);
-w2=reshape(xs10_6J,10,10,NumElement);%w+0.06*rand(size(w));
+w2=reshape(xs3_4J,3,3,NumElement);%w+0.06*rand(size(w));
  e2=sum(abs(w2-w),3);
-w1=reshape(xs10_6X,10,10,NumElement);%w+0.01*rand(size(w));
+w1=reshape(xs3_4X,3,3,NumElement);%w+0.01*rand(size(w));
 e1=sum(abs(w1-w),3);
+w3=reshape(xs3_4T,3,3,NumElement);%w+0.01*rand(size(w));
+e3=sum(abs(w3-w),3);
 clims=[0,max(w(:))];
 
 for i=1:NumElement+1,
     if(i~=NumElement+1)
-        subplot(4,NumElement+1,i),imagesc(w(:,:,i),clims);
+        subplot(5,NumElement+1,i),imagesc(w(:,:,i),clims);
         if(i==1)
             ylabel('True Solution','FontSize',11,'FontWeight','bold')
         end
         title(Element{Z(i)},'FontSize',18,'FontWeight','bold');
     else
-        subplot(4,NumElement+1,NumElement+1),imagesc(zeros(size(w,1),size(w,2)),clims);
+        subplot(5,NumElement+1,NumElement+1),imagesc(zeros(size(w,1),size(w,2)),clims);
         title('Error','FontSize',18,'FontWeight','bold');
     end
     colormap(jet),axis image xy,
@@ -53,12 +56,12 @@ for i=1:NumElement+1,
 end
 for i=1:NumElement+1,
     if(i~=NumElement+1)
-        subplot(4,NumElement+1,NumElement+1+i),imagesc(w0(:,:,i),clims);
+        subplot(5,NumElement+1,NumElement+1+i),imagesc(w0(:,:,i),clims);
         if(i==1)
             ylabel('Initial Guess','FontSize',11,'FontWeight','bold')
         end
     else
-        subplot(4,NumElement+1,2*(NumElement+1)),imagesc(e0,clims);
+        subplot(5,NumElement+1,2*(NumElement+1)),imagesc(e0,clims);
     end
     colormap(jet),axis image xy,
     set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',[],'YTick',[]);
@@ -66,12 +69,12 @@ end
 for i=1:NumElement+1,
     if(i~=NumElement+1)
         
-        subplot(4,NumElement+1,2*(NumElement+1)+i),imagesc(w1(:,:,i),clims);
+        subplot(5,NumElement+1,2*(NumElement+1)+i),imagesc(w1(:,:,i),clims);
         if(i==1)
-            ylabel('AFT','FontSize',11,'FontWeight','bold')
+            ylabel('XRF','FontSize',11,'FontWeight','bold')
         end
     else
-        subplot(4,NumElement+1,3*(NumElement+1)),imagesc(e1,clims);
+        subplot(5,NumElement+1,3*(NumElement+1)),imagesc(e1,clims);
     end
     colormap(jet),axis image xy,
     set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',[],'YTick',[]);
@@ -79,7 +82,7 @@ end
 for i=1:NumElement+1,
     if(i~=NumElement+1)
         
-        subplot(4,NumElement+1,3*(NumElement+1)+i),imagesc(w2(:,:,i),clims);
+        subplot(5,NumElement+1,3*(NumElement+1)+i),imagesc(w2(:,:,i),clims);
         if(i==1)
             ylabel('JFT','FontSize',11,'FontWeight','bold')
         end
@@ -88,4 +91,17 @@ for i=1:NumElement+1,
     end
     colormap(jet),axis image xy,
     set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',[],'YTick',[]);
+    
+    if(i~=NumElement+1)
+        
+        subplot(5,NumElement+1,4*(NumElement+1)+i),imagesc(w3(:,:,i),clims);
+        if(i==1)
+            ylabel('XRT','FontSize',11,'FontWeight','bold')
+        end
+    else
+        subplot(5,NumElement+1,5*(NumElement+1)),imagesc(e3,clims);
+    end
+    colormap(jet),axis image xy,
+    set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',[],'YTick',[]);
+    
 end
