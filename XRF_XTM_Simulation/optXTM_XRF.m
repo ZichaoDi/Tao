@@ -6,7 +6,6 @@ global fctn_f err0 fiter nit maxiter
 
 %%%----------------------------Initialize dependent variables
 do_setup;
-return;
 level=1;
 current_n = N(level);
 W= W_level{level};

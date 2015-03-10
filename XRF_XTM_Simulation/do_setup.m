@@ -21,9 +21,9 @@ grad_type = 'adj';  % 'adj' = adjoint/exact
 %--------------------------------------------
 % Initialize arrays for discretizations
 Tomo_startup;
-NoSelfAbsorption=1;
+NoSelfAbsorption=0;
 onlyXRF=0;
-N=3;%[17 9];%5 3];%[17 9 5 3];%
+N=20;%[17 9];%5 3];%[17 9 5 3];%
 NF = [0*N; 0*N; 0*N];
 nm=length(N);
 numThetan=12;

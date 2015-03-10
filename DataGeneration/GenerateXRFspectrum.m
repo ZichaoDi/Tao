@@ -7,9 +7,11 @@ more off;
 current_n=size(Phantom3_Young,1);
 xrf_roi=0;
 NumElement=4;
-numThetan=10;
+numThetan=18;
 DefineGeometry;
 DefineObject_Gaussian; % Produce W, MU_XTM
+save GeoInfo
+return;
 %%-------------------------------------------------------
 dataset={'channel_names', 'channel_units','scaler_names', 'scaler_units', 'scalers','XRF_roi','mca_arr'};
 load formatH5_roi
@@ -88,12 +90,12 @@ for n=1:length(thetan)
     formatH5_roi{length(dataset)-1}=XRF_roi;
     for ii=1:length(dataset)-1
         if(ii==1)
-            hdf5write(['YoungPhantom_256_4_',num2str(n),'.h5'],['/MAPS/',num2str(dataset{ii})],formatH5_roi{ii});
+            hdf5write(['YoungPhantom_256_4_',num2str(n+2),'.h5'],['/MAPS/',num2str(dataset{ii})],formatH5_roi{ii});
         else
-           hdf5write(['YoungPhantom_256_4_',num2str(n),'.h5'],['/MAPS/',num2str(dataset{ii})],formatH5_roi{ii},'WriteMode', 'append');
+           hdf5write(['YoungPhantom_256_4_',num2str(n+2),'.h5'],['/MAPS/',num2str(dataset{ii})],formatH5_roi{ii},'WriteMode', 'append');
         end
     end
-    hdf5write(['YoungPhantom_256_4_',num2str(n),'.h5'],'/MAPS/mca_arr',formatH5_roi{end},'WriteMode', 'append');
+    hdf5write(['YoungPhantom_256_4_',num2str(n+2),'.h5'],'/MAPS/mca_arr',formatH5_roi{end},'WriteMode', 'append');
    % X1{n}=XRF3;
 %X2{n}=XRF_roi;
 
