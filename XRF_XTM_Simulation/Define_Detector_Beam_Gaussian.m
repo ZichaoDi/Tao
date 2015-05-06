@@ -7,7 +7,7 @@ m=[current_n current_n]; %Numerical Resolution
 % subm=1;
 % m=subm.*[3 3];
 alpha=atan((omega(4)-omega(3))/(omega(2)-omega(1)));
-dTau=(omega(2)-omega(1))/N(1);%%% width of the each discrete beam
+dTau=(omega(2)-omega(1))/(N(1));%%% width of the each discrete beam
 Tau=sqrt((omega(2)-omega(1))^2+(omega(4)-omega(3))^2);
 % if(current_n==N(1))
 nTau=ceil(Tau/dTau)+1;%m(1)+1;% % number of discrete beam%nTau;%
@@ -33,7 +33,7 @@ load DetChannel
 numChannel=length(DetChannel);
 else
 %----------------------------------------------------------------
-numChannel=5;
+numChannel=2;
 DetScaleXRF=numChannel;
 DetChannel=linspace(0,DetScaleXRF,numChannel)';
 end
@@ -42,6 +42,6 @@ NumSSDlet=5;
 SSDlet=[linspace(SSD0(2,1),SSD0(1,1),NumSSDlet)',...
             linspace(SSD0(2,2),SSD0(1,2),NumSSDlet)' ];
 % Acquire2Daps;
-thetan=linspace(0,180,numThetan);%mod(thetan+360,360);%[1 60];%[1:40:180];% Projection Angles, has to be positive.
+thetan=[0 60];%linspace(0,180,numThetan);%mod(thetan+360,360);%[1 60];%[1:40:180];% Projection Angles, has to be positive.
 subTheta=1:length(thetan);
 thetan=thetan(subTheta);

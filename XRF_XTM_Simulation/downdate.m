@@ -13,7 +13,7 @@ if(res_prob==3) %% vh: numThetan X nTau+1 X numChannel
         end
     end
 else
-    NumElement=1;
+%     NumElement=1;
     vh=reshape(vh,N(j),N(j),NumElement);
     vH=zeros(N(j+1),N(j+1),NumElement);
     vh_b=zeros(N(j)+2,N(j)+2,NumElement);vh_b(2:N(j)+1,2:N(j)+1,:)=vh;
@@ -30,3 +30,5 @@ else
         vH=vH(:)/2;
     end
 end
+
+

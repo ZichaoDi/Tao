@@ -5,14 +5,12 @@ global SigMa_XTM SigMa_XRF
 global fctn_f err0 fiter nit maxiter xinitial
 
 %%%----------------------------Initialize dependent variables
- do_setup;
+do_setup;
 level=1;
 current_n = N(level);
 W= W_level{level};
-XRF=xrf_level{level};
-load dr2;
-load dr;
-DisR=xtm_level{level};
+XRF=xrf_level{1};
+DisR=xtm_level{1};
 %%---- smooth data
 % DisR=BlurGaussian(DisR);
 % for i_theta=1:size(DisR,2)
@@ -23,7 +21,7 @@ L=L_level{level};
 GlobalInd=GI_level{level};
 SelfInd=SI_level{level};
 m=m_level(level,:);
-nTau=nTau_level(level);
+nTau=nTau_level(1);
 SigMa_XTM=SigmaT{level};
 SigMa_XRF=SigmaR{level};
 if(NoSelfAbsorption)
@@ -35,27 +33,24 @@ end
 %%%============== Rescale MU_e to make unity contribution
 penalty=0;
 if(Joint==-1)
-%     fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,L,thetan,m,nTau,NumElement);
-    fctn=@(MU)sfun_XTM_com(DisR,MU,I0,L,thetan,m,nTau);
+    fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,L,thetan,m,nTau,NumElement);
+%     fctn=@(MU)sfun_XTM_tensor(DisR,MU,I0,L,m,nTau);
 elseif(Joint==1)
     fctn=@(W)sfun_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 %     fctn_f=@(W)func_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
+%     fctn_J=@(W)sfun_Tensor_Joint_Jacobian(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
+%     fctn_X=@(W)sfun_Tensor(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
+%     fctn_T=@(W)sfun_XTM(W,DisR,MU_e,I0,L,thetan,m,nTau,NumElement);
 else
     fctn=@(W)sfun_Tensor(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
-    fctn_par=@(W)sfun_Tensor_par(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
-    fctn1=@(W)sfun_AdiMat(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
+%     fctn_par=@(W)sfun_Tensor_par(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
+%     fctn1=@(W)sfun_AdiMat(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
 end
+
 %-----------------------------------------------------------------------
-% fctn_J=@(W)sfun_Tensor_Joint_Jacobian(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 nTol=current_n^2*NumElement;
-rng('default');
-% x0=W0(:)+10^(-2)*rand(nTol,1);
-% if(Joint==-1)
-% W0=sum(reshape(W,current_n,current_n,NumElement).*repmat(MUe,[current_n,current_n,1]),3);
-% W0=W0(:);
-%  x0=W0(:)+10^(-1)*rand(nTol/NumElement,1);%sum(reshape(x0,current_n,current_n,NumElement).*repmat(MUe,[current_n,current_n,1]),3);
+
 xinitial=x0;
-% end
 
 err0=norm(x0-W0);
 e=cputime;
@@ -68,10 +63,10 @@ up=1e6*ones(size(x0));
 % [xstar,f,g,ierror] = tnbcm (x0,fctn,low,up,maxiter);
 % options = optimset('Display','iter','TolFun',1e-8);
 % xstar = lsqnonlin(fctn,x0,[],[],options);
-maxiter=500;
+maxiter=300;
 if(bounds)
 [xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
-% [xstar] = GaussNewtonArmijo(fctn,x0);
+% [xstar,f,g,histout,costdata] = gaussn(x0,fctn,1e-18,maxiter);
 else
 [xstar,f,g,ierror] = tn (x0,fctn);
 end

@@ -1,4 +1,4 @@
-function f=func_Tensor_AdiMat(W,xrfData,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau)
+function f=func_Tensor_AdiMat(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau)
 global NumSSDlet numChannel NoSelfAbsorption mtol
 f=0;
 W=reshape(W,mtol,NumElement);
@@ -37,8 +37,7 @@ for n=1:length(thetan)
                 end
                 XRF_v=XRF_v+L(n,i,v)*(InTens*reshape(OutTens_d,1,NumElement).*W(v,:))*M;
             end
-%             sum_Tau
-            sum_Tau=sum_Tau+(xrfData{n,i}-XRF_v)*(xrfData{n,i}-XRF_v)';
+            sum_Tau=sum_Tau+(reshape(XRF(n,i,:),1,2)-XRF_v)*(reshape(XRF(n,i,:),1,2)-XRF_v)';
         end
     end
     f=f+sum_Tau;

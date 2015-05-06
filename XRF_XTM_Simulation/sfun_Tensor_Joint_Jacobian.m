@@ -1,12 +1,13 @@
-function [f,g]=sfun_Tensor_Joint_Jacobian(W,XRF,xtmData,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0)
+function [f,g,f_XRF,f_XTM]=sfun_Tensor_Joint_Jacobian(W,XRF,xtmData,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0)
 global NumSSDlet numChannel NoSelfAbsorption XTMscale
 global SigMa_XTM SigMa_XRF
 global LogScale Beta EmptyBeam
 f=0;
+f_XRF=0;
+f_XTM=0;
 mtol=prod(m);
 W=reshape(W,mtol,NumElement);
 L=reshape(L,length(thetan),nTau+1,mtol);
-Beta=1e0;
 %%%%% =================== Attenuation Matrix at beam energy
 MUe=reshape(MU_e(:,1,1),1,1,NumElement);
 MUe_XTM=reshape(MU_e(:,1,1),1,1,NumElement).*XTMscale;
@@ -30,9 +31,9 @@ for n=1:length(thetan)
     OutTens=ones(nTau+1,mtol,NumElement);
     OutTens_d=ones(nTau+1,mtol,NumSSDlet,NumElement);
     TempSub=zeros(nTau+1,mtol,NumElement,numChannel);
+    XRF_v=zeros(nTau+1,numChannel);
     for i=1:nTau+1
         JacobSub1=zeros(mtol,NumElement,numChannel);
-        XRF_v=zeros(nTau+1,numChannel);
         counted_v=[];
         index=GlobalInd{n,i};
         if(~isempty(index))
@@ -63,7 +64,7 @@ for n=1:length(thetan)
                         OutTens(i,sub_v,:)=sum(OutTens_d(i,sub_v,:,:),3)/NumSSDlet;
                     end
                 end
-               XRF_v(i,:)=XRF_v(i,:)+L(n,i,v)*(InTens(i,v)*reshape(OutTens(i,v,:),1,NumElement).*W(v,:))*M;
+                XRF_v(i,:)=XRF_v(i,:)+L(n,i,v)*(InTens(i,v)*reshape(OutTens(i,v,:),1,NumElement).*W(v,:))*M;
                 if(~isempty(v5))
                     TempSub(i,v,:,:)=TempSub(i,v,:,:)+1*reshape(-bsxfun(@times,reshape(L(n,i,v5),1,length(v5)).*InTens(i,v5),SelfInd{n,i,v}{6}')*(W(v5,:).*reshape(OutTens(i,v5,:),length(v5),NumElement)*M)...
                         +L(n,i,v)*InTens(i,v)*bsxfun(@times,squeeze(OutTens(i,v,:)),M),1,1,NumElement,numChannel); % part 3
@@ -78,15 +79,17 @@ for n=1:length(thetan)
             if(LogScale)
                 count=(nTau+1)*(n-1)+i;
                 Rdis=eX'*(MU_XTM.*Lsub)*eY; %% Discrete case
+                f_XTM=f_XTM+SigMa_XTM(count)*(Rdis-Mt(i))^2;
                 f=f+Beta*SigMa_XTM(count)*(Rdis-Mt(i))^2;
                 g=g+reshape(2*Beta*SigMa_XTM(count)*(Rdis-Mt(i)).*repmat(full(Lsub),[1,1,NumElement]).*repmat(MUe_XTM,[m(1),m(2),1]),mtol,NumElement);
-                JacobSub2=2*Beta*SigMa_XTM(count)*repmat(full(Lsub),[1,1,NumElement]).*repmat(MUe_XTM,[m(1),m(2),1]);
+                JacobSub2=2*SigMa_XTM(count)*repmat(full(Lsub),[1,1,NumElement]).*repmat(MUe_XTM,[m(1),m(2),1]);
             else
                 count=(nTau+1)*(n-1)+i;
                 Rdis=I0*exp(-eX'*(MU_XTM.*Lsub)*eY);
+                f_XTM=f_XTM+SigMa_XTM(count)*(Rdis-Mt(i))^2;
                 f=f+Beta*SigMa_XTM(count)*(Rdis-Mt(i))^2;
                 g=g-reshape(2*Beta*SigMa_XTM(count)*Rdis*(Rdis-Mt(i)).*repmat(full(Lsub),[1,1,NumElement]).*repmat(MUe_XTM,[m(1),m(2),1]),mtol,NumElement);
-                JacobSub2=-2*Beta*SigMa_XTM(count)*Rdis*repmat(full(Lsub),[1,1,NumElement]).*repmat(MUe_XTM,[m(1),m(2),1]);
+                JacobSub2=-2*SigMa_XTM(count)*Rdis*repmat(full(Lsub),[1,1,NumElement]).*repmat(MUe_XTM,[m(1),m(2),1]);
             end
             Jacob2=[Jacob2;JacobSub2(:)'];
             if(NoSelfAbsorption)
@@ -124,6 +127,7 @@ for n=1:length(thetan)
     end
     
     count=(nTau+1)*(n-1)+1:(nTau+1)*n;
+    f_XRF=f_XRF+sum(SigMa_XRF(count).*sum((XRF_v-squeeze(XRF(n,:,:))).^2,2),1);
     f=f+sum(SigMa_XRF(count).*sum((XRF_v-squeeze(XRF(n,:,:))).^2,2),1);
     g=g+2*reshape(sum(sum(bsxfun(@times,TempSub,repmat(SigMa_XRF(count),[1 1 1 numChannel]).*reshape((XRF_v-squeeze(XRF(n,:,:))),nTau+1,1,1,numChannel)),1),4),mtol,NumElement);
 end
@@ -133,16 +137,21 @@ g=g(:);
 tol=eps;
 size(Jacob1)
 size(Jacob2)
-% [~,idx]=rref(Jacob1,eps);
-J1=rank(Jacob1) %length(idx)  %
-% k1=cond(Jacob1);
-[U1,S1,V1]=svd(Jacob1);
-% [~,idx]=rref(Jacob2,eps);
-J2=rank(Jacob2) %length(idx) %
-% k2=cond(Jacob2);
-% [U2,S2,V2]=svd(Jacob2);
-% [U,S,V]=svd([Jacob1;Jacob2]);
-% [~,idx]=rref([Jacob1;Jacob2],eps);
-J3=rank([Jacob1;Jacob2]) %sprank(Jacob1'+Jacob2) %length(idx) %
-% fprintf('Cond1=%d, Rank1=%d, Cond2=%d, Rank2=%d, cond=%d, minS=%d, rank=%d \n',k1,J1,k2,J2,cond([Jacob1;Jacob2]),min(diag(S)),J3);
-%%=====================================================================
+J1=rank(Jacob1,tol)
+J2=rank(Jacob2,tol)
+J3=rank([Jacob1;Jacob2],tol)
+format short
+AX=Jacob1
+AT=Jacob2
+AJ=[Jacob1;Beta*Jacob2]
+save('J3_over.mat','AX','AT','AJ')
+
+
+
+
+
+
+
+
+
+

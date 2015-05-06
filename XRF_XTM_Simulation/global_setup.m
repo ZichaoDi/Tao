@@ -29,7 +29,7 @@ if(level==1 | init_level==1)
 elseif(level~=1 & init_level == 0)
     %     if(level~=1 & init_level == 0)
         
-    [Fv2 ,Gv2 ,shift_yH, shift_yTH] = sfun(current_v);
+    [Fv2 ,Gv2 ,JJ2, shift_yH, shift_yTH] = sfun(current_v);
     if(level==2)
     LevelScale(level-1)=1;%abs(Fv2/Fv);
     else
@@ -45,7 +45,7 @@ elseif(level~=1 & init_level == 0)
         XRF=XRF-shift_y+shift_yH;
         xrf_level{level}=XRF;
     elseif(Joint==-1)
-        DisR=DisR-shift_yT'+shift_yTH';
+%        DisR=DisR-shift_yT'+shift_yTH';
         xtm_level{level}=DisR;
     end
 end

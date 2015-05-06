@@ -10,7 +10,7 @@
 %%=======================================================================
 global x y m omega dz AbsorbScale MU_e Z
 global XTMscale NumLines NumElement 
-global whichElement slice onlyXRF MUe
+global MUe N
 
 load PeriodicTable
 AbsorbScale=1e-0;
@@ -26,36 +26,24 @@ center=[0 0];
 %%%========================== the grids of object
 xc = getNodalGrid(omega,[m(2) m(1)]);
 %%%========================== assign weight matrix for each element in each pixel
- Z=[ 8 14 20 29 30];%[19 31 26  46 50];%[ 8 14 20 29 79 30 46 59];%[29 30 46 49 57 74 79];%% 42 29 26 ];%% reference sample: Pb La Pd Mo Cu Fe Ca
-if(onlyXRF)
-    Z=[8 30 20 16];
-    if (xrf_roi)
-        NumElement=1;
-        data=Phantom3_Young(:,:,:,whichElement+1);
-        W=data(1:current_n,1:current_n,slice);
-    else
-        NumElement=4;
-        W=zeros(current_n,current_n,NumElement);
-        for i=1:NumElement
-            data=Phantom3_Young(:,:,:,i+1);
-            W(:,:,i)=data(1:current_n,1:current_n,slice);
-        end
-    end
-else    
- CreateElement; %load Phantom5; W=Phantom5; NumElement=size(W,3);%% shepp-logan phantom
-%     CreateCircle; %% sample with circles 
+% %  Z=[20 29 79 30 46 59];%[ 8 14 20 29 30];%[ 8 14 20 29 79 30 46 59];%[29 30 46 49 57 74 79];%% 42 29 26 ];%% reference sample: Pb La Pd Mo Cu Fe Ca   
+  Z=[19 31 26];%  46 50];%[30 74 79];%% Glass Rod
+  
+  CreateElement; %load Phantom5; W=Phantom5; NumElement=size(W,3);%% shepp-logan phantom
+% %     CreateCircle; %% sample with circles 
     %------------------------- a sample to test the different impact from heavy and light elements
     % SvenSample;
     %----------------------------
     % load W_sample10
     % W=W_sample10;
     %---------------------------
-%     NumElement=2;
-%     W=zeros(m(1),m(2),NumElement);
-%     for tsub=1:1;%NumElement
+ NumElement=length(Z);
+
+%     W=rand(m(1),m(2),NumElement);
+% W=zeros(m(1),m(2),NumElement);
+%     for tsub=1:NumElement
 %         W(:,:,tsub)=tsub*2e-1;
 %     end
-end
 
 %%%%%%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 % ComChoices=nchoosek(1:6,3);
