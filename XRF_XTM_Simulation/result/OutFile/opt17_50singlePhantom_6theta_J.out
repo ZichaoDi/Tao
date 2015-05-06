@@ -1,0 +1,22 @@
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2013 The MathWorks, Inc.
+                    R2013a (8.1.0.604) 64-bit (glnxa64)
+                             February 15, 2013
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+>> >> >> >> >> >> >> >> X-ray simulation startup file...
+====== With Self Absorption, Transmission Detector Resolution is 72
+====== Fluorescence Detector Resolution is 25
+====== Angle Number  1 of 6: 0
+====== Angle Number  2 of 6: 36
+====== Angle Number  3 of 6: 72
+====== Angle Number  4 of 6: 108
+====== Angle Number  5 of 6: 144
+====== Angle Number  6 of 6: 180
+>> >> >> >> >> >> ===================== 50
+  it     nf     cg           f             f_xrf             f_xtm            |g|        alpha        error
+   0      1      0    2.89834467e+05   2.5e+05     1.0e+00      1.236e+01

@@ -102,10 +102,12 @@ if(Joint==1)
 convFac_J=(fiter(end)/fiter(1))^(1/(nit+1));
 t_J=cputime-e;
 errTol_J=norm(xstar-ws)/norm(err0);
+save('xs10_6J_GI.mat','xstar');
 elseif(Joint==0)
   convFac_XRF=(fiter(end)/fiter(1))^(1/(nit+1));
   t_XRF=cputime-e;
 errTol_XRF=norm(xstar-ws)/norm(err0);
+save('xs10_6X_GI.mat','xstar');
 end
 % if(DiscreteScale)
 %     AbsErr=norm(xtemp(:)-W(:))

@@ -1,13 +1,10 @@
 %----- Define Geometry for a given grid, thetan and experimental equipment
-Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
-thetan=linspace(0,180,20);%mod(thetan+360,360);% Projection Angles, has to be positive.
-thetan=thetan(3:end);
+global BeforeEmit 
 %%---------------------------------------------------------------------------
-ID=cell(numThetan,nTau+1);
-LD=cell(numThetan,nTau+1);
-LA=cell(numThetan,nTau+1,m(1),m(2),NumSSDlet);
-LI=cell(numThetan,nTau+1,m(1),m(2),NumSSDlet);
-for n=1:numThetan
+ID=cell(nTau+1);
+LD=cell(nTau+1);
+LA=cell(nTau+1,m(1),m(2),NumSSDlet);
+LI=cell(nTau+1,m(1),m(2),NumSSDlet);
     theta=thetan(n)/180*pi;
 fprintf(1,'====== Angle Number  %d of %d: %d\n',n,numThetan,thetan(n));
     TransMatrix=[cos(theta) sin(theta);-sin(theta) cos(theta)];
@@ -37,8 +34,8 @@ fprintf(1,'====== Angle Number  %d of %d: %d\n',n,numThetan,thetan(n));
         
         %=================================================================
         [index,Lvec]=IntersectionSet(SourceKnot(i,:),DetKnot(i,:),xbox,ybox,theta);
-        ID{n,i}=index;
-        LD{n,i}=Lvec;
+        ID{i}=index;
+        LD{i}=Lvec;
         %%%%%%%%================================================================
         for j=1:size(index,1)
             CurrentCellCenter=[(index(j,1)-1/2)*dz(1)-abs(omega(1)),(index(j,2)-1/2)*dz(2)-abs(omega(3))];
@@ -65,15 +62,14 @@ fprintf(1,'====== Angle Number  %d of %d: %d\n',n,numThetan,thetan(n));
                 [index_after,otherInd]=setdiff(index_after,index(j,:),'rows');
                 Lvec_after=Lvec_after(otherInd');
                 LinearInd=sub2ind(m,index_after(:,2),index_after(:,1));
-                LA{n,i,index(j,2),index(j,1),SSDi}=Lvec_after;
-                LI{n,i,index(j,2),index(j,1),SSDi}=LinearInd;
+                LA{i,index(j,2),index(j,1),SSDi}=Lvec_after;
+                LI{i,index(j,2),index(j,1),SSDi}=LinearInd;
                 
                 
             end %% End loop for existing fluorescence energy from current pixel
             %% ====================================================================
         end
     end
-end
 
 
 

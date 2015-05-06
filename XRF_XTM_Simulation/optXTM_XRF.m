@@ -1,7 +1,7 @@
 
 global low up penalty
 global W0 current_n
-global SigMa_XTM SigMa_XRF
+global SigMa_XTM SigMa_XRF Beta TempBeta
 global fctn_f err0 fiter nit maxiter
 
 %%%----------------------------Initialize dependent variables
@@ -40,9 +40,12 @@ end
 %-----------------------------------------------------------------------
 % fctn_J=@(W)sfun_Tensor_Joint_Jacobian(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 % feval(fctn_J,x0);
-% tic;
-% feval(fctn,x0);
-% toc;
+    Beta=1;
+    TempBeta=1;
+ tic;
+ feval(fctn,x0);
+elapsedTime=toc;
+return;
 % nTol=current_n^2*NumElement;
 % rng('default');
 % x0=10^(-1)*rand(nTol,1);
@@ -59,11 +62,19 @@ up=1e6*ones(size(x0));
 % [xstar,f,g,ierror] = tnbcm (x0,fctn,low,up,maxiter);
 % options = optimset('Display','iter','TolFun',1e-8);
 % xstar = lsqnonlin(fctn,x0,[],[],options);
-maxiter=500;
+maxiter=300;
+beta=[ 0 1e8 1 ];
+beta2=[1  1   0];
+for betai=3;%1:length(beta)
+    Beta=beta(betai);
+    TempBeta=beta2(betai);
+    fprintf('#######==============Beta= %f, TempBeta = %f \n',Beta,TempBeta);
 if(bounds)
 [xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
 else
 [xstar,f,g,ierror] = tn (x0,fctn);
+end
+save(['xs',num2str(N(1)),'_',num2str(numThetan),'J_noise',num2str(Beta),num2str(TempBeta),'.mat'],'xstar');
 end
 %%%====================================================== Report Result
 
@@ -81,15 +92,18 @@ if(NoSelfAbsorption)
     xs20Jp_12no=xstar;
     save xs20Jp_12no xs20Jp_12no
 else
-xs20Jp_12=xstar;
-save xs20Jp_12 xs20Jp_12
+% save(['xs',num2str(N(1)),'_',num2str(numThetan),'J_beta1e7.mat'],'xstar');
 end
 elseif(Joint==0)
   convFac_XRF=(fiter(end)/fiter(1))^(1/(nit+1));
   t_XRF=cputime-e;
 errTol_XRF=norm(xstar-ws)/norm(err0);
-xs20Xp_12=xstar;
-save xs20Xp_12 xs20Xp_12
+save(['xs',num2str(N(1)),'_',num2str(numThetan),'XRFp_BI.mat'],'xstar');
+elseif(Joint==-1)
+ convFac_XRF=(fiter(end)/fiter(1))^(1/(nit+1));
+  t_XRF=cputime-e;
+errTol_XRF=norm(xstar-ws)/norm(err0);
+save(['xs',num2str(N(1)),'_',num2str(numThetan),'XRTp_BI.mat'],'xstar');  
 end
 % if(DiscreteScale)
 %     AbsErr=norm(xtemp(:)-W(:))

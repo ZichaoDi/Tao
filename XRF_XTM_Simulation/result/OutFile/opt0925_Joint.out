@@ -1,0 +1,438 @@
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2013 The MathWorks, Inc.
+                    R2013a (8.1.0.604) 64-bit (glnxa64)
+                             February 15, 2013
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+X-ray simulation startup file...
+>> >> >> >> >> >> >> >> >> >> X-ray simulation startup file...
+Element     AtomicNumber    Line     FluorescenceEnergy     Intensity
+    Mo           42          0          17.44               1322056574220.01
+=====================================================
+    Cu           29          0           8.04               307309887563.40
+=====================================================
+    Fe           26          0           6.40               180442917631.86
+=====================================================
+    Ca           20          0           3.69               36098687912.16
+=====================================================
+    In           49          0          24.14               2145592194690.98
+=====================================================
+====== Transmission Detector Resolution is 73
+====== Fluorescence Detector Resolution is 8
+====== Angle Number  1 of 18: 1
+====== Angle Number  2 of 18: 1.152941e+01
+====== Angle Number  3 of 18: 2.205882e+01
+====== Angle Number  4 of 18: 3.258824e+01
+====== Angle Number  5 of 18: 4.311765e+01
+====== Angle Number  6 of 18: 5.364706e+01
+====== Angle Number  7 of 18: 6.417647e+01
+====== Angle Number  8 of 18: 7.470588e+01
+====== Angle Number  9 of 18: 8.523529e+01
+====== Angle Number  10 of 18: 9.576471e+01
+====== Angle Number  11 of 18: 1.062941e+02
+====== Angle Number  12 of 18: 1.168235e+02
+====== Angle Number  13 of 18: 1.273529e+02
+====== Angle Number  14 of 18: 1.378824e+02
+====== Angle Number  15 of 18: 1.484118e+02
+====== Angle Number  16 of 18: 1.589412e+02
+====== Angle Number  17 of 18: 1.694706e+02
+====== Angle Number  18 of 18: 180
+>> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >>   it     nf     cg           f             |g|
+   0      1      0    7.48824191e+05   5.2e+03
+Armijo satisfied, trial= 1
+   1      2      2    3.98737635e+04   2.9e+03
+ans =
+    0.7108
+Armijo satisfied, trial= 1
+   2      3      5    3.75460841e+04   8.6e+02
+ans =
+    0.7030
+   3      5     20    3.75460841e+04   8.6e+02
+ans =
+    0.7030
+Armijo satisfied, trial= 1
+   4      6     22    5.52826452e+03   9.1e+02
+ans =
+    0.6343
+Armijo satisfied, trial= 1
+   5      7     35    3.75740077e+03   2.8e+02
+ans =
+    0.5127
+Armijo satisfied, trial= 1
+   6      8     37    2.59822203e+03   4.4e+02
+ans =
+    0.4891
+Armijo satisfied, trial= 1
+   7      9     39    1.98791442e+03   3.8e+02
+ans =
+    0.4813
+Armijo satisfied, trial= 1
+   8     10     41    2.75089230e+02   3.5e+02
+ans =
+    0.4746
+Armijo satisfied, trial= 1
+   9     11     50    8.89246197e+01   4.2e+01
+ans =
+    0.4665
+Armijo satisfied, trial= 1
+  10     12     58    2.93857962e+01   5.8e+01
+ans =
+    0.4597
+Armijo satisfied, trial= 1
+  11     13     60    1.54630435e+01   1.9e+01
+ans =
+    0.4610
+Armijo satisfied, trial= 1
+  12     14     74    1.08856819e+01   1.7e+01
+ans =
+    0.4459
+Armijo satisfied, trial= 1
+  13     15     77    9.82396075e+00   1.8e+01
+ans =
+    0.4374
+Armijo satisfied, trial= 1
+  14     16     80    8.07407605e+00   6.6e+00
+ans =
+    0.4320
+Armijo satisfied, trial= 1
+  15     17     87    6.63748652e+00   1.0e+01
+ans =
+    0.4236
+Armijo satisfied, trial= 1
+  16     18     90    5.39764425e+00   6.3e+00
+ans =
+    0.4197
+Armijo satisfied, trial= 1
+  17     19     98    4.73906450e+00   2.3e+00
+ans =
+    0.4102
+Armijo satisfied, trial= 1
+  18     20    100    4.31859751e+00   2.7e+00
+ans =
+    0.4041
+Armijo satisfied, trial= 1
+  19     21    102    3.88646760e+00   3.1e+00
+ans =
+    0.4012
+  20     23    113    3.88646760e+00   3.1e+00
+ans =
+    0.4012
+Armijo satisfied, trial= 1
+  21     24    125    3.32555190e+00   5.9e+01
+ans =
+    0.3725
+  22     26    128    3.32555190e+00   5.9e+01
+ans =
+    0.3725
+Armijo satisfied, trial= 1
+  23     27    133    2.74336763e+00   2.5e+01
+ans =
+    0.3800
+Armijo satisfied, trial= 1
+  24     28    150    1.64326090e+00   1.1e+01
+ans =
+    0.3419
+Armijo satisfied, trial= 1
+  25     29    169    1.11624859e+00   4.2e+00
+ans =
+    0.3224
+Armijo satisfied, trial= 1
+  26     30    172    9.72568457e-01   5.1e+00
+ans =
+    0.3202
+Armijo satisfied, trial= 1
+  27     31    192    6.93568585e-01   4.0e+00
+ans =
+    0.3025
+Armijo satisfied, trial= 1
+  28     32    194    6.14973371e-01   4.1e+00
+ans =
+    0.3013
+Armijo satisfied, trial= 1
+  29     33    214    4.28785625e-01   1.0e+00
+ans =
+    0.2934
+Armijo satisfied, trial= 1
+  30     34    231    3.24389341e-01   4.7e-01
+ans =
+    0.2858
+Armijo satisfied, trial= 1
+  31     35    245    2.86108128e-01   1.3e+00
+ans =
+    0.2766
+Armijo satisfied, trial= 1
+  32     36    247    2.52085932e-01   1.5e+00
+ans =
+    0.2742
+Armijo satisfied, trial= 1
+  33     37    271    2.33838039e-01   2.8e+00
+ans =
+    0.2638
+Armijo satisfied, trial= 1
+  34     38    273    2.32592758e-01   2.9e+00
+ans =
+    0.2598
+Armijo satisfied, trial= 1
+  35     39    281    1.62464916e-01   6.5e-01
+ans =
+    0.2579
+Armijo satisfied, trial= 1
+  36     40    288    1.13695803e-01   7.4e-01
+ans =
+    0.2587
+Armijo satisfied, trial= 1
+  37     41    302    1.06032231e-01   1.8e+00
+ans =
+    0.2551
+  38     43    304    1.06032231e-01   1.8e+00
+ans =
+    0.2551
+Armijo satisfied, trial= 1
+  39     44    307    9.10275104e-02   1.5e+00
+ans =
+    0.2561
+Armijo satisfied, trial= 1
+  40     45    317    7.68853180e-02   3.0e-01
+ans =
+    0.2522
+Armijo satisfied, trial= 1
+  41     46    332    5.78468817e-02   7.3e-01
+ans =
+    0.2494
+Armijo satisfied, trial= 1
+  42     47    344    5.08788018e-02   2.7e-01
+ans =
+    0.2462
+Armijo satisfied, trial= 1
+  43     48    346    4.84242761e-02   3.1e-01
+ans =
+    0.2458
+Armijo satisfied, trial= 1
+  44     49    365    4.21088523e-02   4.9e-01
+ans =
+    0.2427
+Armijo satisfied, trial= 1
+  45     50    382    3.14003958e-02   1.2e-01
+ans =
+    0.2418
+Armijo satisfied, trial= 1
+  46     51    408    3.11385252e-02   1.7e-01
+ans =
+    0.2401
+Armijo satisfied, trial= 1
+  47     52    410    3.10398624e-02   1.8e-01
+ans =
+    0.2395
+Armijo satisfied, trial= 1
+  48     53    424    2.22958944e-02   5.4e-02
+ans =
+    0.2396
+Armijo satisfied, trial= 1
+  49     54    446    2.11202046e-02   1.1e-01
+ans =
+    0.2392
+Armijo satisfied, trial= 1
+  50     55    449    2.10096693e-02   7.5e-02
+ans =
+    0.2390
+Armijo satisfied, trial= 1
+  51     56    453    1.93460805e-02   8.5e-02
+ans =
+    0.2390
+Armijo satisfied, trial= 1
+  52     57    459    1.86085166e-02   1.1e-01
+ans =
+    0.2390
+  53     59    477    1.86085166e-02   1.1e-01
+ans =
+    0.2390
+Armijo satisfied, trial= 1
+  54     60    517    1.68485219e-02   8.7e-02
+ans =
+    0.2385
+Armijo satisfied, trial= 1
+  55     61    520    1.64228760e-02   7.5e-02
+ans =
+    0.2384
+Armijo satisfied, trial= 1
+  56     62    524    1.51227956e-02   5.0e-02
+ans =
+    0.2384
+Armijo satisfied, trial= 1
+  57     63    557    1.47783031e-02   9.1e-02
+ans =
+    0.2384
+  58     65    560    1.47783031e-02   9.1e-02
+ans =
+    0.2384
+  59     67    565    1.24536487e-02   3.5e-02
+ans =
+    0.2383
+Armijo satisfied, trial= 1
+  60     68    583    1.14703948e-02   2.4e-02
+ans =
+    0.2383
+Armijo satisfied, trial= 1
+  61     69    604    1.05010469e-02   4.0e-02
+ans =
+    0.2382
+Armijo satisfied, trial= 1
+  62     70    615    1.02244299e-02   5.3e-02
+ans =
+    0.2381
+Armijo satisfied, trial= 1
+  63     71    626    9.71549089e-03   3.6e-02
+ans =
+    0.2380
+Armijo satisfied, trial= 1
+  64     72    638    9.23267627e-03   3.0e-02
+ans =
+    0.2380
+Armijo satisfied, trial= 1
+  65     73    652    8.66628874e-03   3.9e-02
+ans =
+    0.2379
+Armijo satisfied, trial= 1
+  66     74    665    8.07572097e-03   2.8e-02
+ans =
+    0.2378
+Armijo satisfied, trial= 1
+  67     75    678    7.66581022e-03   5.7e-02
+ans =
+    0.2377
+Armijo satisfied, trial= 1
+  68     76    681    7.53240393e-03   2.9e-02
+ans =
+    0.2377
+Armijo satisfied, trial= 1
+  69     77    687    7.32656041e-03   1.9e-02
+ans =
+    0.2377
+Armijo satisfied, trial= 1
+  70     78    704    6.73996665e-03   3.1e-02
+ans =
+    0.2377
+Armijo satisfied, trial= 1
+  71     79    720    6.32712223e-03   3.5e-02
+ans =
+    0.2376
+Armijo satisfied, trial= 1
+  72     80    746    6.03528701e-03   6.8e-02
+ans =
+    0.2375
+Armijo satisfied, trial= 1
+  73     81    757    5.73272590e-03   3.9e-02
+ans =
+    0.2375
+Armijo satisfied, trial= 1
+  74     82    764    5.54969009e-03   1.8e-02
+ans =
+    0.2375
+  75     84    790    5.54969009e-03   1.8e-02
+ans =
+    0.2375
+Armijo satisfied, trial= 1
+  76     85    812    4.98572128e-03   1.6e-02
+ans =
+    0.2374
+Armijo satisfied, trial= 1
+  77     86    825    4.78798768e-03   2.3e-02
+ans =
+    0.2373
+Armijo satisfied, trial= 1
+  78     87    838    4.63792035e-03   4.4e-02
+ans =
+    0.2373
+Armijo satisfied, trial= 1
+  79     88    841    4.58468137e-03   2.0e-02
+ans =
+    0.2373
+Armijo satisfied, trial= 1
+  80     89    866    4.18218170e-03   6.7e-02
+ans =
+    0.2372
+Armijo satisfied, trial= 1
+  81     90    875    4.04829780e-03   3.4e-02
+ans =
+    0.2371
+Armijo satisfied, trial= 1
+  82     91    902    3.92772384e-03   8.7e-02
+ans =
+    0.2371
+Armijo satisfied, trial= 1
+  83     92    905    3.87693848e-03   6.1e-02
+ans =
+    0.2371
+Armijo satisfied, trial= 1
+  84     93    909    3.67409648e-03   9.9e-03
+ans =
+    0.2371
+Armijo satisfied, trial= 1
+  85     94    942    3.52026835e-03   4.5e-02
+ans =
+    0.2370
+Armijo satisfied, trial= 1
+  86     95    949    3.49040049e-03   4.3e-02
+ans =
+    0.2370
+Armijo satisfied, trial= 1
+  87     96    952    3.37565165e-03   1.4e-02
+ans =
+    0.2370
+Armijo satisfied, trial= 1
+  88     97    982    3.30546916e-03   5.9e-02
+ans =
+    0.2369
+  89     99    985    3.30546916e-03   5.9e-02
+ans =
+    0.2369
+  90    101    989    3.02807270e-03   1.2e-02
+ans =
+    0.2369
+Armijo satisfied, trial= 1
+  91    102   1004    2.93541516e-03   1.1e-02
+ans =
+    0.2369
+Armijo satisfied, trial= 1
+  92    103   1018    2.79187529e-03   1.3e-02
+ans =
+    0.2369
+Armijo satisfied, trial= 1
+  93    104   1031    2.68607199e-03   1.6e-02
+ans =
+    0.2368
+Armijo satisfied, trial= 1
+  94    105   1043    2.56599998e-03   9.6e-03
+ans =
+    0.2368
+Armijo satisfied, trial= 1
+  95    106   1055    2.50121044e-03   6.9e-03
+ans =
+    0.2368
+Armijo satisfied, trial= 1
+  96    107   1068    2.39688223e-03   5.1e-03
+ans =
+    0.2368
+Armijo satisfied, trial= 1
+  97    108   1080    2.30640552e-03   7.6e-03
+ans =
+    0.2368
+Armijo satisfied, trial= 1
+  98    109   1104    2.14975120e-03   5.4e-03
+ans =
+    0.2367
+Armijo satisfied, trial= 1
+  99    110   1117    2.11074296e-03   8.8e-03
+ans =
+    0.2367
+Armijo satisfied, trial= 1
+ 100    111   1131    2.05484848e-03   1.1e-02
+ans =
+    0.2367
+LMQNBC: termination 5
+>> >> >> >> >> >> >> >> >> >> >> >> Time elapsed is 114996.620000, residule is 2.366898e-01
+>> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> >> 

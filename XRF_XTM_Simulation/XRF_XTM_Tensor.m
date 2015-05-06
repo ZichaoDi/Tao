@@ -170,7 +170,8 @@ for n=1:numThetan
         end
         [~,~,subm,subn]=size(L(n,i,:,:));
         Rdis(i)=I0*exp(-eX'*(MU_XTM.*reshape(L(n,i,:,:),subm,subn))*eY); %% Discrete case
-        XRF(n,i,:)=xrfSub;%+0.1*rand(size(xrfSub));%reshape(DisXRF(subTheta(n),i,:),1,numChannel);%
+
+        XRF(n,i,:)=xrfSub+0.1*rand(size(xrfSub));%reshape(DisXRF(subTheta(n),i,:),1,numChannel);%
         SigMa_XRF((nTau+1)*(n-1)+i,:)=xrfSub;
         if(plotSpec)
             figure(finalfig)

@@ -1,7 +1,7 @@
 % Define detector and beam
 global m Tol x y omega  dz
 global DetChannel numChannel nTau DetKnot0 SourceKnot0 NumSSDlet
-Tol=1e0; %%the threshod to gurantee the beam will cover the whole object
+Tol=1e-5; %%the threshod to gurantee the beam will cover the whole object
 omega=[-2     2    -2     2].*Tol;
 m=[current_n current_n]; %Numerical Resolution
 %%%%%======================================

@@ -52,7 +52,11 @@ end;
 %---------------------------------------------------------
 % compute initial function value and related information
 %---------------------------------------------------------
-[f, g] = feval (sfun, x);
+if(Joint==1)
+[f,g, f_xrf, f_xtm] = feval (sfun, x);
+else
+  [f,g] = feval (sfun, x);
+end
 g0=g;
 nf     = 1;
 nit    = 0;
@@ -72,8 +76,8 @@ end;
 ipivotOld=ipivot;
 g = ztime (g, ipivot);
 gnorm = norm(g,'inf');
-fprintf(1,'%4i   %4i   %4i   % .8e   %.1e     %.1e      %.3e\n', ...
-    nit, nf, ncg, f, gnorm, 1, err0);
+fprintf(1,'%4i   %4i   %4i   % .8e   % .8e   % .8e    %.1e     %.1e      %.3e\n', ...
+    nit, nf, ncg, f,  f_xrf, f_xtm,gnorm, 1, err0);
 %---------------------------------------------------------
 % check if the initial point is a local minimum.
 %---------------------------------------------------------
