@@ -1,8 +1,8 @@
 function [f,g,f_XRF,f_XTM]=sfun_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0)
 global NumSSDlet numChannel NoSelfAbsorption XTMscale
 global  SigMa_XTM SigMa_XRF
-global LogScale Beta TempBeta 
-% load WeightMatrix EmptyBeam Tol
+global LogScale Beta TempBeta
+% load WeightMatrix
 f=0;
 f_XRF=0;
 f_XTM=0;

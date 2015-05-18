@@ -1,14 +1,12 @@
 function [f,g]=sfun_XTM(W,M,MU_e,I0,L,thetan,m,nTau,NumElement)
-global SigMa_XTM LogScale
-global Tik penalty XTMscale Tol
+global SigMa_XTM LogScale 
+global Tik penalty XTMscale 
 %%===== Reconstruction discrete objective
 %%===== L: intersection length matrix
 %%===== M: Radon transform with t beam lines and theta angles
 %%===== f: sum_i ||e^T(L_i.*I)e-M_i||^2, i=1..theta
 W1=reshape(W,m(1),m(2),NumElement);
-beta=1;
 lambda=1e-3;
-L=L./Tol;
 %%%%% =================== Attenuation Matrix at beam energy
 
 MUe=reshape(MU_e(:,1,1),1,1,NumElement).*XTMscale;
@@ -32,8 +30,8 @@ for n=1:length(thetan)
             count=(nTau+1)*(n-1)+i;
             if(~isempty(find(Lsub,1)))
                 Rdis=eX'*(MU.*Lsub)*eY;
-                sum_Tau=sum_Tau+beta*SigMa_XTM(count)*(Rdis-Mt(i))^2;
-                g=g+2*beta*SigMa_XTM(count)*(Rdis-Mt(i)).*repmat(Lsub,[1,1,NumElement]).*repmat(MUe,[m(1),m(2),1]);
+                sum_Tau=sum_Tau+1*SigMa_XTM(count)*(Rdis-Mt(i))^2;
+                g=g+2*1*SigMa_XTM(count)*(Rdis-Mt(i)).*repmat(Lsub,[1,1,NumElement]).*repmat(MUe,[m(1),m(2),1]);
             end
         end
     else
@@ -43,8 +41,8 @@ for n=1:length(thetan)
             count=(nTau+1)*(n-1)+i;
             if(~isempty(find(Lsub,1)))
                 Rdis=I0*exp(-eX'*(MU.*Lsub)*eY);%% Discrete case
-                sum_Tau=sum_Tau+beta*SigMa_XTM(count)*(Rdis-Mt(i))^2;
-                g=g-2*beta*SigMa_XTM(count)*Rdis*(Rdis-Mt(i)).*repmat(Lsub,[1,1,NumElement]).*repmat(MUe,[m(1),m(2),1]);
+                sum_Tau=sum_Tau+1*SigMa_XTM(count)*(Rdis-Mt(i))^2;
+                g=g-2*1*SigMa_XTM(count)*Rdis*(Rdis-Mt(i)).*repmat(Lsub,[1,1,NumElement]).*repmat(MUe,[m(1),m(2),1]);
             end
         end
     end

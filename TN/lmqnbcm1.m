@@ -60,10 +60,10 @@ itertest(1)=nf+ncg;
 % multipliers are components of the gradient.
 % Then form the projected gradient.
 %---------------------------------------------------------
-ind = find((ipivot ~= 2) & (ipivot.*g>0));
-if (~isempty(ind));
-    ipivot(ind) = zeros(length(ind),1);
-end;
+% ind = find((ipivot ~= 2) & (ipivot.*g>0));
+% if (~isempty(ind));
+%     ipivot(ind) = zeros(length(ind),1);
+% end;
 ipivotOld=ipivot;
 gnorm = norm(g,'inf');
 fprintf(1,'%4i   %4i   %4i   % .8e   %.1e     %.1e      %.3e\n', ...
@@ -72,6 +72,7 @@ fprintf(1,'%4i   %4i   %4i   % .8e   %.1e     %.1e      %.3e\n', ...
 % check if the initial point is a local minimum.
 %---------------------------------------------------------
 ftest = 1 + abs(f);
+eig_val{1} = [];
 if (gnorm < .01*sqrt(eps)*ftest);
     disp('LMQNBC: termination 2')
     xstar = x;
@@ -91,7 +92,7 @@ difnew = 0;
 epsred = .05;
 fkeep  = f;
 d      = ones(n,1);
-eig_val{1} = [];
+
 %---------------------------------------------------------
 % ..........main iterative loop..........
 %---------------------------------------------------------

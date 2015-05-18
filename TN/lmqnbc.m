@@ -11,7 +11,7 @@ global sk yk sr yr yksk yrsr
 global NF N current_n  fiter itertest
 global ptest gv ipivot nit
 global i_cauchy W0  m NumElement
-global maxiter err0 Joint 
+global maxiter Joint 
 %---------------------------------------------------------
 % check that initial x is feasible and that the bounds
 % are consistent
@@ -52,11 +52,7 @@ end;
 %---------------------------------------------------------
 % compute initial function value and related information
 %---------------------------------------------------------
-if(Joint==1)
-[f,g, f_xrf, f_xtm] = feval (sfun, x);
-else
-  [f,g] = feval (sfun, x);
-end
+[f, g] = feval (sfun, x);
 g0=g;
 nf     = 1;
 nit    = 0;
@@ -76,8 +72,8 @@ end;
 ipivotOld=ipivot;
 g = ztime (g, ipivot);
 gnorm = norm(g,'inf');
-fprintf(1,'%4i   %4i   %4i   % .8e   % .8e   % .8e    %.1e     %.1e      %.3e\n', ...
-    nit, nf, ncg, f,  f_xrf, f_xtm,gnorm, 1, err0);
+fprintf(1,'%4i   %4i   %4i   % .8e   %.1e     %.1e      %.3e\n', ...
+    nit, nf, ncg, f, gnorm, 1, norm(W0-x));
 %---------------------------------------------------------
 % check if the initial point is a local minimum.
 %---------------------------------------------------------
@@ -162,7 +158,7 @@ while (~conv);
     %#######################
     nf  = nf  + nf1;
     nit = nit +   1;
-%    ASchange(nit)=norm(-ipivot+ipivotOld,1);
+    ASchange(nit)=norm(-ipivot+ipivotOld,1);
 %     save ASchange ASchange
     %---------------------------------------------------------
     % update active set, if appropriate
@@ -210,10 +206,11 @@ while (~conv);
     xnorm = norm(x,'inf');
     %--------------------------------- Error
     ErrIter(nit)=norm(x-W0);
-%     ErrDis=reshape(x-W0,current_n, current_n, NumElement);
+    ErrDis{nit}=reshape(x-W0,current_n, current_n,NumElement);
+    save ErrDis ErrDis
 %     figure(9);
 %     for iPlot=1:NumElement
-%     subplot(2,2,iPlot),surf(ErrDis(:,:,iPlot));
+%     subplot(1,5,iPlot),surf(ErrDis(:,:,iPlot));
 %     end
 %     drawnow;
 if(Joint==1)

@@ -1,20 +1,22 @@
 function doplot(it,v,W_level)
-global xinitial current_n NumElement Z Element
+global xinitial current_n NumElement Z Element WS
 %--------------------------------------------------------------
 % Plot results of soap-film minimal surface
 %--------------------------------------------------------------
 m = [current_n current_n];
-ws=reshape(W_level{1},prod(m)*NumElement,1);
+%reshape(W_level{1},prod(m)*NumElement,1);
+NumElement=1;
 xstar=v;
+W0=WS(:);
 %--------------------------------------------------------------
 % set up boundary conditions
 %--------------------------------------------------------------
  figure(24);
-    clims=[0 max(ws)];
+    clims=[0 max(W0(:))];
     for i=1:NumElement
         subplot(4,NumElement,i);
         
-        errCom=reshape(xinitial(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-ws(prod(m)*i-prod(m)+1:prod(m)*i
+        errCom=reshape(xinitial(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-W0(prod(m)*i-prod(m)+1:prod(m)*i
         imagesc(errCom,clims);colormap jet
         if(i==1)
             ylabel('Initial Guess','fontsize',12)
@@ -25,7 +27,7 @@ xstar=v;
     for i=1:NumElement
         subplot(4,NumElement,i+1*NumElement);
         
-        errCom=reshape(xstar(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-ws(prod(m)*i-prod(m)+1:prod(m)*i
+        errCom=reshape(xstar(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-W0(prod(m)*i-prod(m)+1:prod(m)*i
         imagesc(errCom,clims);colormap jet
         if(i==1)
             ylabel('Final Soluction','fontsize',12)
@@ -35,7 +37,7 @@ xstar=v;
     for i=1:NumElement
         subplot(4,NumElement,i+2*NumElement);
         
-        errCom=reshape(ws(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));
+        errCom=reshape(W0(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));
         imagesc(errCom,clims);colormap jet
         if(i==1)
             ylabel('True Soluction','fontsize',12)
@@ -46,7 +48,7 @@ xstar=v;
 %         end
     end
     for i=1:NumElement; subplot(4,NumElement,i+3*NumElement);
-        plot(1:prod(m),sort(xinitial(prod(m)*i-prod(m)+1:prod(m)*i)),'ro',1:prod(m),sort(xstar(prod(m)*i-prod(m)+1:prod(m)*i)),'bs',1:prod(m),sort(ws(prod(m)*i-prod(m)+1:prod(m)*i)),'g*')
+        plot(1:prod(m),sort(xinitial(prod(m)*i-prod(m)+1:prod(m)*i)),'ro',1:prod(m),sort(xstar(prod(m)*i-prod(m)+1:prod(m)*i)),'bs',1:prod(m),sort(W0(prod(m)*i-prod(m)+1:prod(m)*i)),'g*')
         xlim([0 prod(m)]);
         if(i==1)
             hleg=legend('initial','final','optimal','FontSize',6, 'Box', 'off');

@@ -20,6 +20,7 @@ path(path,'../TN');
 path(path,'../MGOPT');
 % path(path,[pwd, slash, 'data']);
 addpath_recurse('./data');
+addpath_recurse('./result');
 addpath_recurse('../SimplerCode');
 if(ismac)
 addpath_recurse('/Users/Wendydi/Documents/MATLAB/APSdata');

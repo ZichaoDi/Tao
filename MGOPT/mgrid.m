@@ -4,11 +4,11 @@ function [v, varargout] = mgrid(v0,fnl,res_prob,step_bnd)
 %--------------------------------------------------
 % Usage: v = mgrid(v0,fnl,res_prob)
 %--------------------------------------------------
-global current_fnl
+global current_fnl WS
 global N current_n
-global bounds v_low v_up
+global bounds v_low v_up LevelScale
 global GRAPH_N_OLD GRAPH_INDEX_OLD 
-global Hess_norm_H  x_level% norm of coarse-grid Hessian 
+global Hess_norm_H  x_level % norm of coarse-grid Hessian 
 %----------------------------------------------------------------------
 % DECIDE WHETHER TO PRINT ASSESSMENT TEST RESULTS
 % AND WHETHER TO PAUSE AFTER PRINTING TESTS
@@ -79,7 +79,7 @@ if (current_n <= nmin);
     %--------------------------------------------------
     % solve (exactly) problem on coarsest grid
     %--------------------------------------------------
-    nit_solve = 10;
+    nit_solve = 1;
     if (step_bnd == 0);
         if (bounds);
             
@@ -96,7 +96,7 @@ else
     %--------------------------------------------------
     % "relax" on current grid
     %--------------------------------------------------
-    nit_solve=1;
+    nit_solve=10;
     if (step_bnd == 0);
         if (bounds);
             nit = nit_solve; [v,F,G,ierror,eig_val]  = tnbcm(v0,myfun,v_low,v_up,nit);
@@ -118,7 +118,7 @@ else
     %--------------------------------------------------
     % Form new "rhs" vector
     %--------------------------------------------------
-    current_v   = downdate(v,3);
+    current_v   = downdate(v,0);
 
     if (bounds);
             [v_low_1,v_up_1] = set_bounds(j+1,res_prob);
@@ -127,7 +127,6 @@ else
     
     [Fv  ,Gv ,shift_y, shift_yT] = sfun(v); 
     [Fvmg,Gvmg] = sfun_mg(v);
-    
     %%%%#######################################
     dGv         = downdate(Gv,1);
     fnl2        = downdate(fnl,1);
@@ -190,7 +189,10 @@ else
     init_level=0;
     global_setup;
     %--------------------------------------------------
-    tau         = Gv2 - dGv;
+%     figure(17);
+%     plot(1:length(Gv2),Gv2,'r.-',1:length(dGv),LevelScale*dGv,'go-')
+%     Gv2'*current_v/Fv2
+    tau         = Gv2 - LevelScale(j-1)*dGv;
     fnl2        = fnl2 + tau;
     %--------------------------------------------------
     % Bound step on next-coarser grid
@@ -217,7 +219,20 @@ else
     [e2, pred]  = mgrid(current_v,fnl2,1,step_bnd1);
     j           = j-1;
     current_n   = N(j);
-    e           = update(e2-current_v,1);
+    e           = update(e2-current_v,1)/LevelScale(j);
+    %##################################################################
+    plotStep=1;
+    if(plotStep)
+    if (current_n==N(1))
+    figure(15);subplot(1,2,1),imagesc(reshape(e2,N(j+1),N(j+1)));
+    subplot(1,2,2),imagesc(reshape(current_v,N(j+1),N(j+1)));
+    ttH=linspace(0,1,length(e2));
+    tt = linspace(0,1,length(v))';
+    figure(16); subplot(2,2,[1 2]),plot(tt,WS(:)-v,'b.-',tt,e,'ro-'); title('Step (blue), Direction (red)');%,tt,interp1q(ttH',e2-current_v,tt),'gs-'
+    subplot(2,2,3),plot(tt,WS(:)-v,'b.-'),subplot(2,2,4),plot(tt,e,'ro-')
+    end
+    end
+    %%###################################################################
     init_level=1;
     global_setup;
     if (Hess_norm_H > 0)
@@ -270,10 +285,6 @@ else
     GRAPH_N_OLD = current_n;
     GRAPH_INDEX_OLD = GRAPH_INDEX_OLD+1;
     %--------------------------------------------------
-    testd_beforeCut=e'*Gvmg;
-    if(testd_beforeCut>=0)
-        disp('not a descent direction')
-    end
     if (bounds);
             [v_low,v_up] = set_bounds(j,res_prob);
             ipivot = crash (v,v_low,v_up);
@@ -302,6 +313,8 @@ else
         if(bounds)
             [v, ~, ~, ~, alpha, ~, dfdp] = ...
                 lin_mg (e, v, Fvmg, alpha0, Gvmg, myfun,v_low,v_up);
+        alpha0
+        alpha
         else
             [v, ~, ~, ~, alpha, ~, dfdp] = ...
                 lin2 (e, v, Fvmg, alpha0, Gvmg, myfun);
@@ -340,19 +353,17 @@ else
     %--------------------------------------------------
     disp(T)
     if (step_bnd == 0);
-        if (bounds);
-
-            nit = 1; [v,F,G,ierror]  = tnbcm(v,myfun,v_low,v_up,nit);
-            
+        nit_solve=100;
+        if (bounds);           
+            [v,F,G,ierror]  = tnbcm(v,myfun,v_low,v_up,nit_solve);           
         else
-            nit = 1; [v,F,G,ierror]  = tnm  (v,myfun,nit);
+           [v,F,G,ierror]  = tnm  (v,myfun,nit_solve);
         end;
     else
         [low1,up1] = get_bnd (v,step_bnd);
-        nit = 1; [v,F,G,ierror]  = tnbcm(v,myfun,low1,up1,nit);
+      [v,F,G,ierror]  = tnbcm(v,myfun,low1,up1,nit_solve);
     end;
         x_level{level}=v;
-    save x_level x_level
 end
 
 %%%%%%%%%%%%%%%##############################################

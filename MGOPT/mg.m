@@ -9,7 +9,7 @@
 global current_n
 global NF N        % NF counts # of function evals on each grid
 global GRAPH_N_OLD GRAPH_INDEX_OLD
-global problem_name it
+global problem_name it WS
 %----------------------------------------------------------------------
 % SETUP FOR MULTIGRID
 %----------------------------------------------------------------------
@@ -58,6 +58,8 @@ v = mgrid(v0,fnl,0,step_bnd);
 
 doplot(it,v, W_level);
 report_results(N);
+MGiter=0;for i=1:size(NF,2),MGiter=MGiter+sum(NF(2:3,i),1)/(4^(i-1));end
+ErrMg(it,1:2)=[MGiter,norm(v-WS(:))];
 more on;
 %----------------------------------------------------------------------
 % UPDATE MULTIGRID GRAPH

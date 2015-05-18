@@ -1,21 +1,27 @@
 
 global low up penalty
 global W0 current_n
-global SigMa_XTM SigMa_XRF Beta TempBeta
-global fctn_f err0 fiter nit maxiter
+global SigMa_XTM SigMa_XRF
+global fctn_f err0 fiter nit maxiter xinitial
 
 %%%----------------------------Initialize dependent variables
 do_setup;
 level=1;
 current_n = N(level);
 W= W_level{level};
-XRF=xrf_level{level};
-DisR=xtm_level{level};
+XRF=xrf_level{1};
+DisR=xtm_level{1};
+%%---- smooth data
+% DisR=BlurGaussian(DisR);
+% for i_theta=1:size(DisR,2)
+% DisR(:,i_theta)=smooth(DisR(:,i_theta));
+% end
+%%--------------------------------
 L=L_level{level};
 GlobalInd=GI_level{level};
 SelfInd=SI_level{level};
 m=m_level(level,:);
-nTau=nTau_level(level);
+nTau=nTau_level(1);
 SigMa_XTM=SigmaT{level};
 SigMa_XRF=SigmaR{level};
 if(NoSelfAbsorption)
@@ -24,34 +30,29 @@ else
     fprintf(1,'====== With Self Absorption, Transmission Detector Resolution is %d\n',nTau);
 end
 %%%----------------------------------------------------------------------
-W0=W(:);
 %%%============== Rescale MU_e to make unity contribution
 penalty=0;
 if(Joint==-1)
     fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,L,thetan,m,nTau,NumElement);
+%     fctn=@(MU)sfun_XTM_tensor(DisR,MU,I0,L,m,nTau);
 elseif(Joint==1)
     fctn=@(W)sfun_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 %     fctn_f=@(W)func_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
+%     fctn_J=@(W)sfun_Tensor_Joint_Jacobian(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
+%     fctn_X=@(W)sfun_Tensor(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
+%     fctn_T=@(W)sfun_XTM(W,DisR,MU_e,I0,L,thetan,m,nTau,NumElement);
 else
     fctn=@(W)sfun_Tensor(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
-    fctn_par=@(W)sfun_Tensor_par(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
-    fctn1=@(W)sfun_AdiMat(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
+%     fctn_par=@(W)sfun_Tensor_par(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
+%     fctn1=@(W)sfun_AdiMat(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
 end
+
 %-----------------------------------------------------------------------
-% fctn_J=@(W)sfun_Tensor_Joint_Jacobian(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
-% feval(fctn_J,x0);
-    Beta=1;
-    TempBeta=1;
- tic;
- feval(fctn,x0);
-elapsedTime=toc;
-return;
-% nTol=current_n^2*NumElement;
-% rng('default');
-% x0=10^(-1)*rand(nTol,1);
-%-----------------------------------------------------------------------
+nTol=current_n^2*NumElement;
+
+xinitial=x0;
+
 err0=norm(x0-W0);
-ws=W(:);
 e=cputime;
 low=0*ones(size(x0));
 up=1e6*ones(size(x0));
@@ -63,18 +64,11 @@ up=1e6*ones(size(x0));
 % options = optimset('Display','iter','TolFun',1e-8);
 % xstar = lsqnonlin(fctn,x0,[],[],options);
 maxiter=300;
-beta=[ 0 1e8 1 ];
-beta2=[1  1   0];
-for betai=3;%1:length(beta)
-    Beta=beta(betai);
-    TempBeta=beta2(betai);
-    fprintf('#######==============Beta= %f, TempBeta = %f \n',Beta,TempBeta);
 if(bounds)
 [xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
+% [xstar,f,g,histout,costdata] = gaussn(x0,fctn,1e-18,maxiter);
 else
 [xstar,f,g,ierror] = tn (x0,fctn);
-end
-save(['xs',num2str(N(1)),'_',num2str(numThetan),'J_noise',num2str(Beta),num2str(TempBeta),'.mat'],'xstar');
 end
 %%%====================================================== Report Result
 
@@ -83,27 +77,15 @@ end
 % end
 % figure('name','Elemental Residule')
 % semilogy(1:NumElement,err,'r.-');
-
+doplot(1,xstar, W_level);
 if(Joint==1)
 convFac_J=(fiter(end)/fiter(1))^(1/(nit+1));
 t_J=cputime-e;
 errTol_J=norm(xstar-ws)/norm(err0);
-if(NoSelfAbsorption)
-    xs20Jp_12no=xstar;
-    save xs20Jp_12no xs20Jp_12no
-else
-% save(['xs',num2str(N(1)),'_',num2str(numThetan),'J_beta1e7.mat'],'xstar');
-end
 elseif(Joint==0)
   convFac_XRF=(fiter(end)/fiter(1))^(1/(nit+1));
   t_XRF=cputime-e;
 errTol_XRF=norm(xstar-ws)/norm(err0);
-save(['xs',num2str(N(1)),'_',num2str(numThetan),'XRFp_BI.mat'],'xstar');
-elseif(Joint==-1)
- convFac_XRF=(fiter(end)/fiter(1))^(1/(nit+1));
-  t_XRF=cputime-e;
-errTol_XRF=norm(xstar-ws)/norm(err0);
-save(['xs',num2str(N(1)),'_',num2str(numThetan),'XRTp_BI.mat'],'xstar');  
 end
 % if(DiscreteScale)
 %     AbsErr=norm(xtemp(:)-W(:))

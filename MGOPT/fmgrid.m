@@ -53,7 +53,6 @@ else
   v0_d      = downdate(v0,res_prob);
   j         = j+1;
   current_n = N(j);
-
   v_d       = fmgrid(v0_d,fnl_d,res_prob);
 
   j         = j-1;

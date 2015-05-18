@@ -13,23 +13,23 @@ maxCycle=1;
 x_level=cell(length(N),1);
 while(cycle<=maxCycle)
 
-for it=0;%-6:4
+for it=8;%-6:4
 Beta=10^(it);    
 
-for level=1:length(N)-1
-    current_n=N(level);
-    maxiter=1;
-    if(cycle>1 & current_n==N(1))
-    x0=xstar;
-    end
-    fprintf('===================== %d\n',current_n)
-    optXTM_XRF_Tensor;
-    xs{level}=xstar;
-    g_level{level}=g;
-    if(current_n~=N(end))
-        x0=downdate(xstar,1);
-    end
-end
+% for level=1:length(N)-1
+%     current_n=N(level);
+%     maxiter=1;
+%     if(cycle>1 & current_n==N(1))
+%     x0=xstar;
+%     end
+%     fprintf('===================== %d\n',current_n)
+%     optXTM_XRF_Tensor;
+%     xs{level}=xstar;
+%     g_level{level}=g;
+%     if(current_n~=N(end))
+%         x0=downdate(xstar,1);
+%     end
+% end
 for level=length(N):-1:1
     current_n=N(level);
     if(current_n==N(end))

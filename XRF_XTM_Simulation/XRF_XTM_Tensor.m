@@ -183,6 +183,7 @@ for n=1:numThetan
     end
     DisR(:,n)=Rdis';
 end
+
 if(LogScale)
     % SigMa_XTM=1./diag(cov(-log(DisR'./I0)));
     % SigMa_XTM=inv(cov(-log(DisR'./I0)));
