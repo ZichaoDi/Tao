@@ -14,7 +14,6 @@ S2=[C3(1)-r2,C3(1)+r2,C3(2)-r2, C3(2)+r2];
 poly1=[C2(1) C2(2)-r1; C2(1)+r1 C2(2);C2(1) C2(2)+r1;C2(1)-r1 C2(2)];
 
 mLocal=[Dis Dis]-1;
-NumElement=5;
 W=zeros(mLocal(1)+1,mLocal(2)+1,NumElement);
 X = reshape(getNodalGrid(omegaLocal,mLocal),prod(mLocal+1),2);
 p1=find(inCircle(X,repmat([C1,r1],prod(mLocal+1),1)));
@@ -43,6 +42,7 @@ W(sub2ind([mLocal(1)+1,mLocal(2)+1,NumElement],indx1,indy1,5*ones(size(indx1))))
 % W_sample10=W;
 % save W_sample10 W_sample10
 clims=[0 max(W(:))];
+plotElement=1;
 if(plotElement)
     figure('name','Sample');
     for i=1:5

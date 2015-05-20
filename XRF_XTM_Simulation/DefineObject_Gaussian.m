@@ -29,15 +29,20 @@ xc = getNodalGrid(omega,[m(2) m(1)]);
 % %  Z=[20 29 79 30 46 59];%[ 8 14 20 29 30];%[ 8 14 20 29 79 30 46 59];%[29 30 46 49 57 74 79];%% 42 29 26 ];%% reference sample: Pb La Pd Mo Cu Fe Ca   
   Z=[19 31 26];%  46 50];%[30 74 79];%% Glass Rod
   
-  CreateElement; %load Phantom5; W=Phantom5; NumElement=size(W,3);%% shepp-logan phantom
-% %     CreateCircle; %% sample with circles 
+  % CreateElement; 
+    if(current_n==N(1))
+  load Phantom9; W=Phantom9; NumElement=size(W,3);%% shepp-logan phantom
+    else
+      W=rand(m(1),m(2),NumElement);
+    end
+   % CreateCircle; %% sample with circles 
     %------------------------- a sample to test the different impact from heavy and light elements
     % SvenSample;
     %----------------------------
     % load W_sample10
     % W=W_sample10;
     %---------------------------
- NumElement=length(Z);
+ % NumElement=length(Z);
 
 %     W=rand(m(1),m(2),NumElement);
 % W=zeros(m(1),m(2),NumElement);

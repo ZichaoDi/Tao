@@ -11,7 +11,7 @@ end
 if(ismac)
 addpath('/Users/Wendydi/Documents/MATLAB/Di_MATLABtool');
 else
-addpath('/homes/wendydi/Documents/MATLAB/Di_MATLABtool');
+addpath('/homes/wendydi/Documents/Research/Di_MATLABtool');
 end
 
 PWD = pwd;
@@ -26,7 +26,7 @@ if(ismac)
 addpath_recurse('/Users/Wendydi/Documents/MATLAB/APSdata');
 addpath_recurse('/Users/Wendydi/Documents/MATLAB/Di_MATLABtool');
 else
-addpath_recurse('/homes/wendydi/Documents/MATLAB/Di_MATLABtool');
+addpath_recurse('/homes/wendydi/Documents/Research/Di_MATLABtool');
 end
  ADiMat_startup;
 
