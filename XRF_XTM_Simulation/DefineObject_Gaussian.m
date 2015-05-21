@@ -9,7 +9,7 @@
 %%%         MU: Attenuation matrix of O
 %%=======================================================================
 global x y m omega dz AbsorbScale MU_e Z
-global XTMscale NumLines NumElement 
+global XTMscale NumLines NumElement
 global MUe N
 
 load PeriodicTable
@@ -26,29 +26,25 @@ center=[0 0];
 %%%========================== the grids of object
 xc = getNodalGrid(omega,[m(2) m(1)]);
 %%%========================== assign weight matrix for each element in each pixel
-% %  Z=[20 29 79 30 46 59];%[ 8 14 20 29 30];%[ 8 14 20 29 79 30 46 59];%[29 30 46 49 57 74 79];%% 42 29 26 ];%% reference sample: Pb La Pd Mo Cu Fe Ca   
-  Z=[19 31 26];%  46 50];%[30 74 79];%% Glass Rod
-  
-  % CreateElement; 
-    if(current_n==N(1))
-  load Phantom9; W=Phantom9; NumElement=size(W,3);%% shepp-logan phantom
-    else
-      W=rand(m(1),m(2),NumElement);
-    end
-   % CreateCircle; %% sample with circles 
-    %------------------------- a sample to test the different impact from heavy and light elements
-    % SvenSample;
-    %----------------------------
-    % load W_sample10
-    % W=W_sample10;
-    %---------------------------
- % NumElement=length(Z);
+% %  Z=[20 29 79 30 46 59];%[ 8 14 20 29 30];%[ 8 14 20 29 79 30 46 59];%[29 30 46 49 57 74 79];%% 42 29 26 ];%% reference sample: Pb La Pd Mo Cu Fe Ca
+%   Z=[19 31 26  46 50]; multi-model synthetic samples
+Z=[14 19 28 29 30 74];% Glass Rod
+
+% CreateElement; %load Phantom5; W=Phantom5; NumElement=size(W,3);%% shepp-logan phantom
+% CreateCircle; %% sample with circles
+%------------------------- a sample to test the different impact from heavy and light elements
+% SvenSample;
+%----------------------------
+% load W_sample10
+% W=W_sample10;
+%---------------------------
+NumElement=length(Z);
 
 %     W=rand(m(1),m(2),NumElement);
-% W=zeros(m(1),m(2),NumElement);
-%     for tsub=1:NumElement
-%         W(:,:,tsub)=tsub*2e-1;
-%     end
+W=zeros(m(1),m(2),NumElement);
+    for tsub=1:NumElement
+        W(:,:,tsub)=tsub*2e-1;
+    end
 
 %%%%%%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 % ComChoices=nchoosek(1:6,3);
@@ -76,6 +72,7 @@ MU=reshape(smooth(reshape(yy',prod(m),1)),m(1),m(2));
 %%===================
 XTMscale=1e0;
 MU_XTM=MU.*XTMscale;
+MU_XTM=ir';
 
 %%%%% =================== Attenuation Matrix at flourescence energy (Corrected Attenuation)
 MU_after=cell(NumElement,1);
