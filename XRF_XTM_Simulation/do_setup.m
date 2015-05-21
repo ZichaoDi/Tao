@@ -7,7 +7,7 @@
 global N numThetan NF
 global bounds LogScale Joint
 global grad_type err0 WS Beta W0
-global onlyXRF NoSelfAbsorption
+global NoSelfAbsorption
 global W_level xrf_level xtm_level L_level GI_level SI_level SigmaR SigmaT m_level nTau_level
 global NumElement xinitial current_n
 %--------------------------------------------------
@@ -21,12 +21,18 @@ grad_type = 'adj';  % 'adj' = adjoint/exact
 %--------------------------------------------
 % Initialize arrays for discretizations
 Tomo_startup;
+%%-----------------------------------------------
+load ./data/DogaSeeds/DownSampledSeeds111.mat
+data=data_H;
+% data=h5read('~/Documents/MATLAB/APSdata/xfm_Doga/xfm_data_elements.h5','/exchange/data');
+% data=squeeze(sum(data,2));
+slice=1;
+%%-----------------------------------------------
 NoSelfAbsorption=0;
-onlyXRF=0;
-N=[9 5 3];% 17 9];%[129 65  9 5];% 
+N=size(ir,1);% 17 9];%[129 65  9 5];% 
 NF = [0*N; 0*N; 0*N];
 nm=length(N);
-numThetan=2;
+numThetan=size(data,2);
 W_level=cell(nm,1);
 xrf_level=cell(nm,1);
 xtm_level=cell(nm,1);
@@ -40,7 +46,7 @@ nTau_level= zeros(nm,1);
 bounds = 1;  % no bound constraints
 Joint=-1; % 0: XRF; -1: XTM; 1: Joint inversion
 LogScale=1; %% determine if the XTM is solved taking log first or not
-Beta=10^8;
+Beta=10^0;
 %----------------------------------------------------------------------
 % Compute the dependent-variable arrays
 PlotObject=0;
@@ -78,8 +84,8 @@ plotResult=0;
 % end
 %%------------------------------ Use same finest data for each level
 for level=1:nm
-      current_n=N(level);
-%     XRF_XTM_Tensor;
+            current_n=N(level);
+%      XRF_XTM_Tensor;
     XTM_Tensor;
     W_level{level}=W;
     if(level==1)
@@ -103,7 +109,7 @@ nTol=N(1)^2;
 % Specify initial guess for optimization.
 rng('default');
 % load x_new;
-x0 =10^(-1)*rand(nTol,1)+WS(:);%ww(:);%;%zeros(size(WS(:)));%
+x0 = ir(:)+10^(-1)*rand(nTol,1);%reshape(iR(:,:,slice),[size(iR,1)*size(iR,2),1]);%10^(-1)*rand(nTol,1)+WS(:);%ww(:);%;%zeros(size(WS(:)));%
 W0=WS(:);
 % x0=1e-1*rand(nTol/NumElement,1);%sum(reshape(x0,current_n,current_n,NumElement).*repmat(MUe,[current_n,current_n,1]),3);
 xinitial=x0;

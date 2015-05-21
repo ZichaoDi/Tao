@@ -2,10 +2,10 @@
 global low up penalty
 global W0 current_n
 global SigMa_XTM SigMa_XRF
-global fctn_f err0 fiter nit maxiter xinitial
+global NumElement err0 fiter nit maxiter xinitial
 
 %%%----------------------------Initialize dependent variables
-do_setup;
+%  do_setup;
 level=1;
 current_n = N(level);
 W= W_level{level};
@@ -33,8 +33,9 @@ end
 %%%============== Rescale MU_e to make unity contribution
 penalty=0;
 if(Joint==-1)
-    fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,L,thetan,m,nTau,NumElement);
-%     fctn=@(MU)sfun_XTM_tensor(DisR,MU,I0,L,m,nTau);
+%     fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,L,thetan,m,nTau,NumElement); %% on W
+     fctn=@(MU)sfun_XTM_tensor(DisR,MU,I0,L,m,nTau); NumElement=1;%% on attenuation coefficients \miu
+     NumElement=1;
 elseif(Joint==1)
     fctn=@(W)sfun_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 %     fctn_f=@(W)func_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
@@ -48,27 +49,22 @@ else
 end
 
 %-----------------------------------------------------------------------
-nTol=current_n^2*NumElement;
+ x0 = ones(N^2,1);%reshape(iR(:,:,slice),[size(iR,1)*size(iR,2),1]);%10^(-1)*rand(nTol,1)+WS(:);%ww(:);%;%zeros(size(WS(:)));%
 
 xinitial=x0;
-
 err0=norm(x0-W0);
 e=cputime;
 low=0*ones(size(x0));
-up=1e6*ones(size(x0));
+up=inf*ones(size(x0));
 % %%========================================================================
-%  options = optimset('Algorithm','interior-point','Display','iter','MaxFunEvals',10000);%,'DerivativeCheck','off','Diagnostics','off','GradObj','off','Display','iter','AlwaysHonorConstraints','none','TolCon',1e-10,'TolX',1e-16,'TolFun',1e-15);%
-%  [xstar,fval] = fmincon(fctn,x0,[],[],[],[],zeros(size(x0)),[],[],options);
-%  return;
 % [xstar,f,g,ierror] = tnbcm (x0,fctn,low,up,maxiter);
-% options = optimset('Display','iter','TolFun',1e-8);
-% xstar = lsqnonlin(fctn,x0,[],[],options);
-maxiter=300;
+maxiter=10;
+bounds=1;
 if(bounds)
-[xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
-% [xstar,f,g,histout,costdata] = gaussn(x0,fctn,1e-18,maxiter);
+ [xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
 else
-[xstar,f,g,ierror] = tn (x0,fctn);
+%  [xstar,f,g,histout,costdata] = gaussn(x0,fctn,1e-18,maxiter);
+ [xstar,f,g,ierror] = tn (x0,fctn);
 end
 %%%====================================================== Report Result
 
@@ -97,6 +93,7 @@ end
 % end
 
 % figureObject(reshape(x0,m(1),m(2),NumElement),Z,m,NumElement,MU_e,1);
+
 if(plotResult)
     figure('name','Elemental Residule');
      clims=[0 max(ws)];
@@ -116,7 +113,7 @@ if(plotResult)
         subplot(4,NumElement,i+1*NumElement);
         
         errCom=reshape(xstar(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-ws(prod(m)*i-prod(m)+1:prod(m)*i
-        imagesc(errCom,clims);colormap jet
+        imagesc(reshape(xstar,N,N));colormap jet
         if(i==1)
             ylabel('Final Soluction','fontsize',12)
         end
@@ -127,7 +124,7 @@ if(plotResult)
         subplot(4,NumElement,i+2*NumElement);
         
         errCom=reshape(ws(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));
-        imagesc(errCom,clims);colormap jet
+        imagesc(errCom);colormap jet
         if(i==1)
             ylabel('True Soluction','fontsize',12)
         end

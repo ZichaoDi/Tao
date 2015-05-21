@@ -3,9 +3,10 @@ global plotSpecSingle BeforeEmit
 global LogScale EmptyBeam
 plotSpecSingle=0;
 more off;
+%%-----------------------------------------------
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
 DefineObject_Gaussian; % Produce W, MU_XTM
-%%%%%%%==============================================================
+%%==============================================================
 Energy=BindingEnergy;
 mtol=prod(m);
 eX=ones(m(1),1);
@@ -22,13 +23,29 @@ for n=1:numThetan
     TransMatrix=[cos(theta) sin(theta);-sin(theta) cos(theta)];
     DetKnot=DetKnot0*TransMatrix;
     SourceKnot=SourceKnot0*TransMatrix;
-    
-    Rdis=I0*ones(nTau+1,1);
+    Rdis=0*I0*ones(nTau+1,1);
     for i=1:nTau+1 %%%%%%%%%================================================================
         % Initialize
         xbox=[omega(1) omega(1) omega(2) omega(2) omega(1)];
         ybox=[omega(3) omega(4) omega(4) omega(3) omega(3)];
         BeforeEmit=1;
+        %============================= Plot Grid and Current Light Beam
+        if(plotSpec & i==1)
+            finalfig=figure('name',sprintf('XRF at beam %d with angle %d',i,thetan(n)));
+            subplot(1,2,1);
+            plotGrid(xc,omega,[m(2) m(1)]);
+            hold on;
+           plot(DetKnot(:,1),DetKnot(:,2),'k+-',SourceKnot(:,1),SourceKnot(:,2),'m+-','LineWidth',0.5)
+            axis equal
+            set(gcf,'Units','normalized')
+            set(gca,'Units','normalized')
+            ax = axis;
+            ap = get(gca,'Position');
+            xp = ([SourceKnot(i,1),DetKnot(i,1)]-ax(1))/(ax(2)-ax(1))*ap(3)+ap(1);
+            yp = ([SourceKnot(i,2),DetKnot(i,2)]-ax(3))/(ax(4)-ax(3))*ap(4)+ap(2);
+            ah=annotation('arrow',xp,yp,'Color','r','LineStyle','--');
+        end
+        %=================================================================
         %=================================================================
         [index,Lvec,linearInd]=IntersectionSet(SourceKnot(i,:),DetKnot(i,:),xbox,ybox,theta);
         %%%%%%%%================================================================
@@ -43,11 +60,15 @@ for n=1:numThetan
                 
             end
             [~,~,subm,subn]=size(L(n,i,:,:));
-            Rdis(i)=I0*exp(-eX'*(MU_XTM.*reshape(L(n,i,:,:),subm,subn))*eY); %% Discrete case
+            Rdis(i)=eX'*(MU_XTM.*reshape(L(n,i,:,:),subm,subn))*eY;%%I0*exp(-eX'*(MU_XTM.*reshape(L(n,i,:,:),subm,subn))*eY); %% Discrete case
         end
     end
     DisR(:,n)=Rdis';
 end
+%  DisR_real=reshape(XRF(:,slice,5,:),nTau+1,numThetan);
+%%==============================================================
+DisR_real=DisR;
+  DisR=data;%DisR_real;
 if(LogScale)
     SigMa_XTM=1./(-log(DisR(:)./I0));
 else
