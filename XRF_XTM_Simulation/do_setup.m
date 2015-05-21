@@ -22,7 +22,7 @@ grad_type = 'adj';  % 'adj' = adjoint/exact
 % Initialize arrays for discretizations
 Tomo_startup;
 %%-----------------------------------------------
-load ./data/DogaSeeds/DownSampledSeeds111.mat
+load ./data/ApsDataExtract/DogaSeeds/DownSampledSeeds111.mat
 data=data_H;
 % data=h5read('~/Documents/MATLAB/APSdata/xfm_Doga/xfm_data_elements.h5','/exchange/data');
 % data=squeeze(sum(data,2));

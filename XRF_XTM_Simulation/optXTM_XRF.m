@@ -5,7 +5,7 @@ global SigMa_XTM SigMa_XRF
 global NumElement err0 fiter nit maxiter xinitial
 
 %%%----------------------------Initialize dependent variables
-%  do_setup;
+  do_setup;
 level=1;
 current_n = N(level);
 W= W_level{level};
