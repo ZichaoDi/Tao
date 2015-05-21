@@ -9,7 +9,7 @@ import tomopy
 import scipy.io as sio
 import numpy as np
 
-mat_contents=sio.loadmat('/Users/Wendydi/Tao/XRF_XTM_Simulation/data/2xfm1211_14/3dSet1741.mat')
+mat_contents=sio.loadmat('/homes/wendydi/Documents/Research/Tao/XRF_XTM_Simulation/data/2xfm1211_14/3dSet1741.mat')
 thetan=mat_contents['thetan']
 """
 XTM=mat_contents['XTM']
@@ -30,5 +30,5 @@ for e in range(0,n_elements):
     XF=np.transpose(np.squeeze(XRF[:,:,e,:]),axes=(2,1,0))
     rec_XRF[:,:,:,e] = tomopy.recon(XF,thetan, algorithm='art')
     
-matfile='/Users/Wendydi/Tao/XRF_XTM_Simulation/data/2xfm1211_14/tomoRecon1741_XRF.mat'
+matfile='/homes/wendydi/Documents/Research/Tao/XRF_XTM_Simulation/data/2xfm1211_14/tomoRecon1741_XRF.mat'
 sio.savemat(matfile, mdict={'out': rec_XRF}, oned_as='row')
