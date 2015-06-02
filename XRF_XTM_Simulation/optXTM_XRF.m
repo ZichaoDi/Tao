@@ -5,7 +5,7 @@ global SigMa_XTM SigMa_XRF
 global NumElement err0 fiter nit maxiter xinitial
 
 %%%----------------------------Initialize dependent variables
-  do_setup;
+%do_setup;
 level=1;
 current_n = N(level);
 W= W_level{level};
@@ -32,10 +32,13 @@ end
 %%%----------------------------------------------------------------------
 %%%============== Rescale MU_e to make unity contribution
 penalty=0;
+xs_ele=[];
+for ele=1;%:length(slice)
+  
 if(Joint==-1)
-%     fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,L,thetan,m,nTau,NumElement); %% on W
-     fctn=@(MU)sfun_XTM_tensor(DisR,MU,I0,L,m,nTau); NumElement=1;%% on attenuation coefficients \miu
-     NumElement=1;
+     fctn=@(W)sfun_XTM(W,squeeze(sum(data(:,ele,:),2)),MU_e,I0,L,thetan,m,nTau,NumElement); %% on W
+%     fctn=@(MU)sfun_XTM_tensor(DisR,MU,I0,L,m,nTau); NumElement=1;%% on attenuation coefficients \miu
+%     NumElement=1;
 elseif(Joint==1)
     fctn=@(W)sfun_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 %     fctn_f=@(W)func_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
@@ -49,7 +52,12 @@ else
 end
 
 %-----------------------------------------------------------------------
- x0 = ones(N^2,1);%reshape(iR(:,:,slice),[size(iR,1)*size(iR,2),1]);%10^(-1)*rand(nTol,1)+WS(:);%ww(:);%;%zeros(size(WS(:)));%
+x0=[];
+for ii=1:length(slice),
+x0(:,:,ii) =flipud(flipud( iR(:,:,slice(ii)))');
+end
+x0=x0(:);%*1e-2+rand(size(x0(:)));%reshape(iR(:,:,slice),[size(iR,1)*size(iR,2),1]);%10^(-1)*rand(nTol,1)+WS(:);%ww(:);%;%
+%x0=rand(size(WS(:)));%
 
 xinitial=x0;
 err0=norm(x0-W0);
@@ -65,6 +73,9 @@ if(bounds)
 else
 %  [xstar,f,g,histout,costdata] = gaussn(x0,fctn,1e-18,maxiter);
  [xstar,f,g,ierror] = tn (x0,fctn);
+%save xstar xstar
+end
+xs_ele(:,ele)=xstar;
 end
 %%%====================================================== Report Result
 

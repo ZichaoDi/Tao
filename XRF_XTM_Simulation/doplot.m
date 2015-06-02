@@ -5,7 +5,6 @@ global xinitial current_n NumElement Z Element WS
 %--------------------------------------------------------------
 m = [current_n current_n];
 %reshape(W_level{1},prod(m)*NumElement,1);
-NumElement=1;
 xstar=v;
 W0=WS(:);
 %--------------------------------------------------------------
@@ -30,7 +29,7 @@ W0=WS(:);
         errCom=reshape(xstar(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-W0(prod(m)*i-prod(m)+1:prod(m)*i
         imagesc(errCom,clims);colormap jet
         if(i==1)
-            ylabel('Final Soluction','fontsize',12)
+            ylabel('Final Solution','fontsize',12)
         end
     end
     
@@ -40,7 +39,7 @@ W0=WS(:);
         errCom=reshape(W0(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));
         imagesc(errCom,clims);colormap jet
         if(i==1)
-            ylabel('True Soluction','fontsize',12)
+            ylabel('True Solution','fontsize',12)
         end
 %         if(i==NumElement)
 %         hp4 = get(subplot(4,NumElement,i+2*NumElement),'Position');

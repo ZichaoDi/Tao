@@ -1,6 +1,6 @@
 function [conv, flast1, ipivot1] = cnvtst (alpha, pnorm, xnorm, ...
 		 dif, ftest, gnorm, gtp, f, flast, g, ipivot, accrcy)
-global lambdaind 
+global lambdaind releps
 %---------------------------------------------------------
 % test for convergence
 %---------------------------------------------------------
@@ -31,7 +31,7 @@ rtleps = accrcy + eps;
    conv = (alpha*pnorm < toleps*(1 + xnorm) ...
            & abs(dif) < rtleps*ftest        ...
            & gnorm < accrcy^(1/3)*ftest) ...
-            | gnorm < .01*sqrt(accrcy)*ftest;
+            | gnorm < releps^2*sqrt(accrcy)*ftest;
 % end;
 flast1  = flast;
 ipivot1 = ipivot;

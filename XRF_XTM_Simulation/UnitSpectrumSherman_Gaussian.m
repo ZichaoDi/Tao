@@ -24,7 +24,7 @@ load AtomicWeight
 load(['xRayLib',num2str(E0),'.mat'])
 Line=1:36;%[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
 shell=0;  %% Shell type
-BindingEnergy=zeros(NumElement*length(Line),1);
+BindingEnergy=zeros(NumElement,length(Line));
 M=zeros(NumElement,numChannel);
 i=1;
 T=1;
@@ -55,7 +55,7 @@ while(i<=NumElement)
         %                 CS_TotalBeam(i,1)=calllib('libxrl','CS_Total',Z(i),E0);
         %         CS_FluoLine(i,j)=calllib('libxrl','CS_FluorLine',Z(i),-Line(j),E0);
         intensity=I0*CS_FluoLine(Z(i),Line(j));%
-        BindingEnergy(length(Line)*(i-1)+j)=new_energy;
+        BindingEnergy(i,j)=new_energy;
         [~,adj]=min(abs(repmat(new_energy,size(DetChannel))-DetChannel));
         PurePeak(adj)=PurePeak(adj)+intensity;    
         j=j+1;
@@ -63,7 +63,11 @@ while(i<=NumElement)
     % fprintf('    %s           %d          %i          %5.2f               %5.2f\n', Element{Z(i)}, Z(i),-Line(j), new_energy, intensity);
     
     %%%%=============================== Start Gaussian Convolution
+    if(DecomposedElement)
+    M(i)=sum(PurePeak);
+else
     M(i,:)=ifft(fft(PurePeak).*G);
+end
     if(plotUnit)
         cmap=colormap(lines);
         cmap = cmap(1:NumElement,:);
@@ -93,6 +97,4 @@ M=M.*ScaleM;
 if(TakeLog)
     M=abs(M);%1e-300;
 end
-
-
 

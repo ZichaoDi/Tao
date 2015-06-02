@@ -68,7 +68,7 @@ end
 %  DisR_real=reshape(XRF(:,slice,5,:),nTau+1,numThetan);
 %%==============================================================
 DisR_real=DisR;
-  DisR=data;%DisR_real;
+%  DisR=data;%DisR_real;
 if(LogScale)
     SigMa_XTM=1./(-log(DisR(:)./I0));
 else

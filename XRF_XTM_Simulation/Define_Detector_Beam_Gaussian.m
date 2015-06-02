@@ -1,6 +1,6 @@
 % Define detector and beam 
 global m Tol thetan nTau_level N
-global DetChannel numChannel nTau DetKnot0 SourceKnot0 NumSSDlet 
+global  DecomposedElement DetChannel numChannel nTau DetKnot0 SourceKnot0 NumSSDlet 
 Tol=1e-3; %%the threshod to gurantee the beam will cover the whole object
 omega=[-2     2    -2     2].*Tol;
 % Tol=1e-2;
@@ -33,7 +33,10 @@ SSD0=[detE0-[0,Tol]; SourceE0-[0,Tol]];
 
 load DetChannel
 numChannel=length(DetChannel);
-
+if (DecomposedElement)
+numChannel=NumElement;
+DetChannel=[0:numChannel]';
+end
 %----------------------------------------------------------------
 % numChannel=2;
 % DetScaleXRF=numChannel;
@@ -44,7 +47,7 @@ NumSSDlet=5;
 SSDlet=[linspace(SSD0(2,1),SSD0(1,1),NumSSDlet)',...
             linspace(SSD0(2,2),SSD0(1,2),NumSSDlet)' ];
 % Acquire2Daps;
-thetan=linspace(-180,180,numThetan);
+thetan=linspace(0,360,numThetan);
 thetan=mod(thetan+360,360);%[0 60];%[1 60];%[1:40:180];% Projection Angles, has to be positive.
 % subTheta=1:length(thetan);
 % thetan=thetan(subTheta);

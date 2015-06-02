@@ -9,7 +9,7 @@ global bounds LogScale Joint
 global grad_type err0 WS Beta W0
 global NoSelfAbsorption
 global W_level xrf_level xtm_level L_level GI_level SI_level SigmaR SigmaT m_level nTau_level
-global NumElement xinitial current_n
+global DecomposedElement NumElement xinitial current_n
 %--------------------------------------------------
 % Select technique for gradient calculation.
 %
@@ -22,17 +22,24 @@ grad_type = 'adj';  % 'adj' = adjoint/exact
 % Initialize arrays for discretizations
 Tomo_startup;
 %%-----------------------------------------------
-load ./data/ApsDataExtract/DogaSeeds/DownSampledSeeds111.mat
-data=data_H;
+load ./data/ApsDataExtract/DogaSeeds/DownSampleSeeds28_elements.mat
+data=[];
+slice=[8,9,14,17];
+ang_rate=30;
+for ele=1:length(slice)
+data(:,ele,:)=sum(data_H(:,slice(ele),1:ang_rate:end),2);
+end
+
+DecomposedElement=1;
 % data=h5read('~/Documents/MATLAB/APSdata/xfm_Doga/xfm_data_elements.h5','/exchange/data');
 % data=squeeze(sum(data,2));
-slice=1;
+% slice=1;
 %%-----------------------------------------------
 NoSelfAbsorption=0;
-N=size(ir,1);% 17 9];%[129 65  9 5];% 
+N=size(iR,1);%(floor(sqrt(size(data,1)^2/2));% 17 9];%[129 65  9 5];% 
 NF = [0*N; 0*N; 0*N];
 nm=length(N);
-numThetan=size(data,2);
+numThetan=size(data,3);
 W_level=cell(nm,1);
 xrf_level=cell(nm,1);
 xtm_level=cell(nm,1);
@@ -44,7 +51,7 @@ SigmaT=cell(nm,1);
 m_level=zeros(nm,2);
 nTau_level= zeros(nm,1);
 bounds = 1;  % no bound constraints
-Joint=-1; % 0: XRF; -1: XTM; 1: Joint inversion
+Joint=1; % 0: XRF; -1: XTM; 1: Joint inversion
 LogScale=1; %% determine if the XTM is solved taking log first or not
 Beta=10^0;
 %----------------------------------------------------------------------
@@ -85,11 +92,14 @@ plotResult=0;
 %%------------------------------ Use same finest data for each level
 for level=1:nm
             current_n=N(level);
-%      XRF_XTM_Tensor;
+   if(Joint==-1)
     XTM_Tensor;
+else
+    XRF_XTM_Tensor;
+end
     W_level{level}=W;
     if(level==1)
-        WS=MU;%W;% 
+        WS=  W;% MU;%
     end
     xtm_level{level}=DisR;
     
@@ -99,17 +109,19 @@ for level=1:nm
     m_level(level,:)=m;
     SigmaT{level}=SigMa_XTM;
 %-----------------------------------------
-%     xrf_level{level}=XRF;
-%     SI_level{level}=SelfInd;
-%     SigmaR{level}=SigMa_XRF;
+if(Joint~=-1)  
+xrf_level{level}=XRF;
+     SI_level{level}=SelfInd;
+     SigmaR{level}=SigMa_XRF;
 end
-
-nTol=N(1)^2;
+end
+% NumElement=1;
+nTol=N(1)^2*NumElement;
 %---------------------------------------------
 % Specify initial guess for optimization.
 rng('default');
 % load x_new;
-x0 = ir(:)+10^(-1)*rand(nTol,1);%reshape(iR(:,:,slice),[size(iR,1)*size(iR,2),1]);%10^(-1)*rand(nTol,1)+WS(:);%ww(:);%;%zeros(size(WS(:)));%
+x0 = 10^(-1)*rand(nTol,1);%reshape(iR(:,:,slice),[size(iR,1)*size(iR,2),1]);%10^(-1)*rand(nTol,1)+WS(:);%ww(:);%;%zeros(size(WS(:)));%
 W0=WS(:);
 % x0=1e-1*rand(nTol/NumElement,1);%sum(reshape(x0,current_n,current_n,NumElement).*repmat(MUe,[current_n,current_n,1]),3);
 xinitial=x0;

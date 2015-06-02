@@ -7,15 +7,16 @@ function [xstar, f, g, ierror] = ...
 % this routine) with a diagonal scaling (routine ndia3).
 % For further details, see routine tnbc.
 %---------------------------------------------------------
-global sk yk sr yr yksk yrsr
+global sk yk sr yr yksk yrsr releps
 global NF N current_n  fiter itertest
 global ptest gv ipivot nit
-global i_cauchy W0  m NumElement
+global i_cauchy m NumElement
 global maxiter Joint 
 %---------------------------------------------------------
 % check that initial x is feasible and that the bounds
 % are consistent
 %---------------------------------------------------------
+xOld=x;
 [f, g] = feval (sfun, x);
 oldf   = f;
 fiter(1)=oldf;
@@ -73,12 +74,13 @@ ipivotOld=ipivot;
 g = ztime (g, ipivot);
 gnorm = norm(g,'inf');
 fprintf(1,'%4i   %4i   %4i   % .8e   %.1e     %.1e      %.3e\n', ...
-    nit, nf, ncg, f, gnorm, 1, norm(W0-x));
+    nit, nf, ncg, f, gnorm, 1, norm(xOld-x));
 %---------------------------------------------------------
 % check if the initial point is a local minimum.
 %---------------------------------------------------------
 ftest = 1 + abs(f);
-if (gnorm < .01*sqrt(eps)*ftest);
+releps=1e-3;
+if (gnorm < releps*sqrt(eps)*ftest);
     disp('LMQNBC: termination 2')
     xstar = x;
     NF(1,nind) = NF(1,nind) + nit;
@@ -104,8 +106,6 @@ d      = ones(n,1);
 % compute the search direction
 %---------------------------------------------------------
 argvec = [accrcy gnorm xnorm];
-%%%%%%%%%%%%%%%%%%%%%##############################
-% x_tran = x'
 %%%%%%%%%%%%%%%%%%%%%##############################
 [p, gtp, ncg1, d, eig_val] = ...
     modlnp (d, x, g, maxit, upd1, ireset, bounds, ipivot, argvec, sfun);
@@ -151,6 +151,7 @@ while (~conv);
         %         pause;
     end;
     %#######################
+    xOld=x;
     x   = x_new;
     f   = f_new;
     g   = g_new;
@@ -205,9 +206,10 @@ while (~conv);
     ftest = 1 + abs(f);
     xnorm = norm(x,'inf');
     %--------------------------------- Error
-    ErrIter(nit)=norm(x-W0);
-    ErrDis{nit}=reshape(x-W0,current_n, current_n,NumElement);
-    save ErrDis ErrDis
+%    ErrIter(nit)=norm(x-xOld);
+%    ErrDis{nit}=reshape(x-xOld,current_n, current_n,NumElement);
+%    save ErrDis ErrDis
+
 %     figure(9);
 %     for iPlot=1:NumElement
 %     subplot(1,5,iPlot),surf(ErrDis(:,:,iPlot));
@@ -215,10 +217,10 @@ while (~conv);
 %     drawnow;
 if(Joint==1)
     fprintf(1,'%4i   %4i   %4i   % .8e   % .8e    % .8e    %.1e     %.1e      %.3e\n', ...
-        nit, nf, ncg, f, f_xrf, f_xtm, gnorm, alpha, norm(x-W0));
+        nit, nf, ncg, f, f_xrf, f_xtm, gnorm, alpha, norm(x-xOld));
 else
     fprintf(1,'%4i   %4i   %4i   % .8e   %.1e     %.1e      %.3e\n', ...
-        nit, nf, ncg, f, gnorm, alpha, norm(x-W0));
+        nit, nf, ncg, f, gnorm, alpha, norm(x-xOld));
 end
     %---------------------------------------------------------
     % test for convergence

@@ -24,7 +24,7 @@ g=zeros(m(1),m(2),NumElement);
 for n=1:length(thetan)
     sum_Tau=0;
     if(LogScale)
-        Mt=-log(M(:,n)./I0);
+        Mt=M(:,n)./1.5e4;%-log(M(:,n)./I0);
         for i=1:nTau+1
             Lsub=reshape(L(n,i,:),m(1),m(2));
             count=(nTau+1)*(n-1)+i;

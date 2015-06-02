@@ -28,8 +28,7 @@ xc = getNodalGrid(omega,[m(2) m(1)]);
 %%%========================== assign weight matrix for each element in each pixel
 % %  Z=[20 29 79 30 46 59];%[ 8 14 20 29 30];%[ 8 14 20 29 79 30 46 59];%[29 30 46 49 57 74 79];%% 42 29 26 ];%% reference sample: Pb La Pd Mo Cu Fe Ca
 %   Z=[19 31 26  46 50]; multi-model synthetic samples
-Z=[14 19 28 29 30 74];% Glass Rod
-
+Z=[19 20 26 30];% Seeds; [14 19 28 29 30 74];% Glass Rod
 % CreateElement; %load Phantom5; W=Phantom5; NumElement=size(W,3);%% shepp-logan phantom
 % CreateCircle; %% sample with circles
 %------------------------- a sample to test the different impact from heavy and light elements
@@ -72,7 +71,7 @@ MU=reshape(smooth(reshape(yy',prod(m),1)),m(1),m(2));
 %%===================
 XTMscale=1e0;
 MU_XTM=MU.*XTMscale;
-MU_XTM=ir';
+% MU_XTM=ir';
 
 %%%%% =================== Attenuation Matrix at flourescence energy (Corrected Attenuation)
 MU_after=cell(NumElement,1);
