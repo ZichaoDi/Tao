@@ -27,6 +27,7 @@ addpath_recurse('/Users/Wendydi/Documents/MATLAB/APSdata');
 addpath_recurse('/Users/Wendydi/Documents/MATLAB/Di_MATLABtool');
 else
 addpath_recurse('/homes/wendydi/Documents/Research/Di_MATLABtool');
+addpath_recurse('/homes/wendydi/Documents/Research/APSdata');
 end
  ADiMat_startup;
 

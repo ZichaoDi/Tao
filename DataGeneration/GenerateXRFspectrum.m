@@ -1,25 +1,30 @@
 %%%Simulate XRF of a given object with predifined detector and beam
 close all;
-load Phantom3_Young
+% load Phantom3_Young
 %Phantom3_Young=Phantom3_Young(100:120,100:120,100:120,:);
+slice=[8 9 13 14 17];
+load('../XRF_XTM_Simulation/data/ApsDataExtract/DogaSeeds/DownSampleSeeds111_elements.mat')
+data=iR(:,:,slice);
 onlyXRF=1;
 more off;
-current_n=size(Phantom3_Young,1);
+current_n=size(data,1);
 xrf_roi=0;
-NumElement=4;
+NumElement=length(slice);
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
-thetan=linspace(0,180,21);%mod(thetan+360,360);% Projection Angles, has to be positive.
+thetan=linspace(0,360,100);%mod(thetan+360,360);% Projection Angles, has to be positive.
 %thetan=thetan(15:end);
 numThetan=length(thetan);
 DefineObject_Gaussian; % Produce W, MU_XTM
+xrf_raw=[];
 for n=1:numThetan
 DefineGeometry;
 n
-%%-------------------------------------------------------
+%{%-------------------------------------------------------
 dataset={'channel_names', 'channel_units','scaler_names', 'scaler_units', 'scalers','XRF_roi','mca_arr'};
 load formatH5_roi
+%}
 %%---------------------------------------------------------------------------
-TotSlice=current_n;
+TotSlice=1;%current_n;
 disp('Setup Geometry')
 XRF=zeros(nTau+1,numChannel);
     XRF3=zeros(nTau+1,TotSlice,numChannel);
@@ -27,7 +32,7 @@ XRF=zeros(nTau+1,numChannel);
     for slice=1:TotSlice
         W=zeros(m(1),m(2),NumElement);
         for NE=1:NumElement
-            data=Phantom3_Young(:,:,:,NE+1);
+            % data=Phantom3_Young(:,:,:,NE+1);
             W(:,:,NE)=data(:,:,slice);
         end
         
@@ -84,6 +89,8 @@ end
         end
         XRF3(:,slice,:)=reshape(XRF(:,:),[nTau+1,1,numChannel]);
     end
+xrf_raw(n,:,:)=XRF;
+%{
     formatH5_roi{length(dataset)}=XRF3;
     formatH5_roi{length(dataset)-1}=XRF_roi;
     for ii=1:length(dataset)-1
@@ -94,8 +101,10 @@ end
         end
     end
     hdf5write(['YoungPhantom_256_4_',num2str(n),'.h5'],'/MAPS/mca_arr',formatH5_roi{end},'WriteMode', 'append');
+%}
 end
 
+save('simulatedSeed_5eles.mat','xrf_raw');
 
 
 

@@ -11,20 +11,26 @@ import numpy as np
 
 # mat_contents=sio.loadmat('/homes/wendydi/Documents/Research/Tao/XRF_XTM_Simulation/data/2xfm1211_14/3dSet1741.mat')
 # thetan=mat_contents['thetan']
-mat_contents=sio.loadmat('/homes/wendydi/Documents/Research/Tao/XRF_XTM_Simulation/data/ApsDataExtract/DogaSeeds/DownSampleSeeds111_elements.mat')
+mat_contents=sio.loadmat('/homes/wendydi/Documents/Research/Tao/XRF_XTM_Simulation/data/ApsDataExtract/DogaSeeds/DownSampleSeeds56_elements.mat')
 
 XTM=mat_contents['data_H']
-thetan = tomopy.angles(XTM.shape[2]/2,0,180)
-XTM=XTM[:,7:8,:len(thetan)/2]
+factor=2
+thetan = tomopy.angles(XTM.shape[2]/factor,0,360/factor)
+XTM=XTM[:,:,:len(thetan)/factor]
 XTM=np.transpose(XTM,(2,1,0))
 rec_XTM = tomopy.recon(XTM,thetan, algorithm='gridrec')
 
-import pylab
+import matplotlib.pyplot as plt
 # pylab.imshow(np.reshape(rec_XTM,(rec_XTM.shape[1],rec_XTM.shape[1])),cmap='gray')
-pylab.imshow(rec_XTM[0])
-pylab.show()
-# matfile='/Users/Wendydi/Tao/XRF_XTM_Simulation/data/2xfm1211_14/tomoRecon1741.mat'
-# sio.savemat(matfile, mdict={'out': rec_XTM}, oned_as='row')
+slice = np.array([7, 8, 13, 16])
+for i in range(0,4):
+    plt.subplot(2,2,i+1)
+    plt.imshow(rec_XTM[slice[i]])
+
+plt.show()
+
+matfile='/homes/wendydi/Documents/Research/Tao/XRF_XTM_Simulation/data/ApsDataExtract/DogaSeeds/tomoRecon56_half.mat'
+sio.savemat(matfile, mdict={'out': rec_XTM}, oned_as='row')
 """
 XRF=mat_contents['XRF']
 n_elements = XRF.shape[2]

@@ -42,7 +42,7 @@ NumElement=length(Z);
 %     W=rand(m(1),m(2),NumElement);
 W=zeros(m(1),m(2),NumElement);
     for tsub=1:NumElement
-        W(:,:,tsub)=tsub*2e-1;
+        W(:,:,tsub)=abs(iR(:,:,slice(tsub)));%tsub*2e-1;
     end
 
 %%%%%%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

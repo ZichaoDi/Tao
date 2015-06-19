@@ -22,14 +22,16 @@ grad_type = 'adj';  % 'adj' = adjoint/exact
 % Initialize arrays for discretizations
 Tomo_startup;
 %%-----------------------------------------------
-load ./data/ApsDataExtract/DogaSeeds/DownSampleSeeds28_elements.mat
+load ./data/ApsDataExtract/DogaSeeds/DownSampleSeeds56_elements.mat
+load tomoRecon56_half
+iR=permute(out,[2 3 1]);
 data=[];
 slice=[8,9,14,17];
-ang_rate=30;
+ang_rate=300;
 for ele=1:length(slice)
 data(:,ele,:)=sum(data_H(:,slice(ele),1:ang_rate:end),2);
 end
-
+data=data(:,:,1:floor(size(data,3)/2));
 DecomposedElement=1;
 % data=h5read('~/Documents/MATLAB/APSdata/xfm_Doga/xfm_data_elements.h5','/exchange/data');
 % data=squeeze(sum(data,2));
@@ -121,9 +123,11 @@ nTol=N(1)^2*NumElement;
 % Specify initial guess for optimization.
 rng('default');
 % load x_new;
-x0 = 10^(-1)*rand(nTol,1);%reshape(iR(:,:,slice),[size(iR,1)*size(iR,2),1]);%10^(-1)*rand(nTol,1)+WS(:);%ww(:);%;%zeros(size(WS(:)));%
 W0=WS(:);
 % x0=1e-1*rand(nTol/NumElement,1);%sum(reshape(x0,current_n,current_n,NumElement).*repmat(MUe,[current_n,current_n,1]),3);
+%{
 xinitial=x0;
+x0 = 10^(-1)*rand(nTol,1);%reshape(iR(:,:,slice),[size(iR,1)*size(iR,2),1]);%10^(-1)*rand(nTol,1)+WS(:);%ww(:);%;%zeros(size(WS(:)));%
 err0=norm(x0-WS(:));
 v0=x0;
+%}

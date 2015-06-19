@@ -64,7 +64,7 @@ while(i<=NumElement)
     % fprintf('    %s           %d          %i          %5.2f               %5.2f\n', Element{Z(i)}, Z(i),-Line(j), new_energy, intensity);
     
     %%%%=============================== Start Gaussian Convolution
-    M(i,:)=PurePeak;%ifft(fft(PurePeak).*G);
+    M(i,:)=ifft(fft(PurePeak).*G);% PurePeak;
     if(plotUnit)
         cmap=colormap(lines);
         cmap = cmap(1:NumElement,:);

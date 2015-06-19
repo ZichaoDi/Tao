@@ -34,7 +34,7 @@ SSD0=[detE0-[0,Tol]; SourceE0-[0,Tol]];
 load DetChannel
 numChannel=length(DetChannel);
 if (DecomposedElement)
-numChannel=NumElement;
+numChannel=length(slice);
 DetChannel=[0:numChannel]';
 end
 %----------------------------------------------------------------
@@ -47,7 +47,7 @@ NumSSDlet=5;
 SSDlet=[linspace(SSD0(2,1),SSD0(1,1),NumSSDlet)',...
             linspace(SSD0(2,2),SSD0(1,2),NumSSDlet)' ];
 % Acquire2Daps;
-thetan=linspace(0,360,numThetan);
+thetan=linspace(0,180,numThetan);
 thetan=mod(thetan+360,360);%[0 60];%[1 60];%[1:40:180];% Projection Angles, has to be positive.
 % subTheta=1:length(thetan);
 % thetan=thetan(subTheta);

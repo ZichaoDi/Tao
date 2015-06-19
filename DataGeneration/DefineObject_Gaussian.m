@@ -4,7 +4,7 @@ global NumElement
 load PeriodicTable
 ScaleM=1e-5;
 %%%========================== assign weight matrix for each element in each pixel
-Z=[8 30 20 16];% reference sample: Pb La Pd Mo Cu Fe Ca
+Z=[19 20 25 26 30];%[8 30 20 16];% reference sample: Pb La Pd Mo Cu Fe Ca
 Z=Z(1:NumElement);
 UnitSpectrumSherman_Gaussian; %% Produce BindingEnergy M
 %%=======================================================================
@@ -17,5 +17,4 @@ for i=1: NumLines
     end
 end
 %%%%%================== Attenuation Matrix at beam energy
-
 

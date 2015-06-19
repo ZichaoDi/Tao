@@ -5,7 +5,7 @@ global SigMa_XTM SigMa_XRF
 global NumElement err0 fiter nit maxiter xinitial
 
 %%%----------------------------Initialize dependent variables
-%do_setup;
+do_setup;
 level=1;
 current_n = N(level);
 W= W_level{level};
@@ -56,8 +56,9 @@ x0=[];
 for ii=1:length(slice),
 x0(:,:,ii) =flipud(flipud( iR(:,:,slice(ii)))');
 end
-x0=x0(:);%*1e-2+rand(size(x0(:)));%reshape(iR(:,:,slice),[size(iR,1)*size(iR,2),1]);%10^(-1)*rand(nTol,1)+WS(:);%ww(:);%;%
-%x0=rand(size(WS(:)));%
+x0=x0(:);%+4e0*rand(size(WS(:)));
+%x0=x0(:);%*1e-2+rand(size(x0(:)));%reshape(iR(:,:,slice),[size(iR,1)*size(iR,2),1]);%10^(-1)*rand(nTol,1)+WS(:);%ww(:);%;%
+%x0=400*rand(size(WS(:)));%
 
 xinitial=x0;
 err0=norm(x0-W0);
@@ -66,21 +67,23 @@ low=0*ones(size(x0));
 up=inf*ones(size(x0));
 % %%========================================================================
 % [xstar,f,g,ierror] = tnbcm (x0,fctn,low,up,maxiter);
-maxiter=10;
-bounds=1;
+maxiter=30;
+bounds=0;
 if(bounds)
  [xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
 else
-%  [xstar,f,g,histout,costdata] = gaussn(x0,fctn,1e-18,maxiter);
- [xstar,f,g,ierror] = tn (x0,fctn);
-%save xstar xstar
+ [xstar,f,g,histout,costdata] = gaussn(x0,fctn,1e-18,maxiter);
+%  [xstar,f,g,ierror] = tn (x0,fctn);
+
 end
+
+ save(['xs',num2str(N(1)),'_',num2str(maxiter),'_gn.mat'],'x0','xstar');
 xs_ele(:,ele)=xstar;
 end
 %%%====================================================== Report Result
 
 % for i=1:NumElement
-%     err(i)=norm(xstar(prod(m)*i-(prod(m)-1):prod(m)*i)-ws(prod(m)*i-(prod(m)-1):prod(m)*i))/norm(xinitial(prod(m)*i-(prod(m)-1):prod(m)*i)-ws(prod(m)*i-(prod(m)-1):prod(m)*i));
+%     err(i)=norm(xstar(prod(m)*i-(prod(m)-1):prod(m)*i)-WS(prod(m)*i-(prod(m)-1):prod(m)*i))/norm(xinitial(prod(m)*i-(prod(m)-1):prod(m)*i)-WS(prod(m)*i-(prod(m)-1):prod(m)*i));
 % end
 % figure('name','Elemental Residule')
 % semilogy(1:NumElement,err,'r.-');
@@ -88,11 +91,11 @@ doplot(1,xstar, W_level);
 if(Joint==1)
 convFac_J=(fiter(end)/fiter(1))^(1/(nit+1));
 t_J=cputime-e;
-errTol_J=norm(xstar-ws)/norm(err0);
+errTol_J=norm(xstar-WS(:))/norm(err0);
 elseif(Joint==0)
   convFac_XRF=(fiter(end)/fiter(1))^(1/(nit+1));
   t_XRF=cputime-e;
-errTol_XRF=norm(xstar-ws)/norm(err0);
+errTol_XRF=norm(xstar-WS(:))/norm(err0);
 end
 % if(DiscreteScale)
 %     AbsErr=norm(xtemp(:)-W(:))
@@ -107,11 +110,11 @@ end
 
 if(plotResult)
     figure('name','Elemental Residule');
-     clims=[0 max(ws)];
+     clims=[0 max(WS(:))];
     for i=1:NumElement
         subplot(4,NumElement,i);
         
-        errCom=reshape(xinitial(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-ws(prod(m)*i-prod(m)+1:prod(m)*i
+        errCom=reshape(xinitial(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-WS(prod(m)*i-prod(m)+1:prod(m)*i
         imagesc(errCom,clims);colormap jet
         if(i==1)
             ylabel('Initial Guess','fontsize',12)
@@ -123,7 +126,7 @@ if(plotResult)
     for i=1:NumElement
         subplot(4,NumElement,i+1*NumElement);
         
-        errCom=reshape(xstar(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-ws(prod(m)*i-prod(m)+1:prod(m)*i
+        errCom=reshape(xstar(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-WS(prod(m)*i-prod(m)+1:prod(m)*i
         imagesc(reshape(xstar,N,N));colormap jet
         if(i==1)
             ylabel('Final Soluction','fontsize',12)
@@ -134,7 +137,7 @@ if(plotResult)
     for i=1:NumElement
         subplot(4,NumElement,i+2*NumElement);
         
-        errCom=reshape(ws(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));
+        errCom=reshape(WS(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));
         imagesc(errCom);colormap jet
         if(i==1)
             ylabel('True Soluction','fontsize',12)
@@ -146,7 +149,7 @@ if(plotResult)
         set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',[],'YTick',[])
     end
     for i=1:NumElement; subplot(4,NumElement,i+3*NumElement);
-        plot(1:prod(m),sort(xinitial(prod(m)*i-prod(m)+1:prod(m)*i)),'ro',1:prod(m),sort(xstar(prod(m)*i-prod(m)+1:prod(m)*i)),'bs',1:prod(m),sort(ws(prod(m)*i-prod(m)+1:prod(m)*i)),'g*')
+        plot(1:prod(m),sort(xinitial(prod(m)*i-prod(m)+1:prod(m)*i)),'ro',1:prod(m),sort(xstar(prod(m)*i-prod(m)+1:prod(m)*i)),'bs',1:prod(m),sort(WS(prod(m)*i-prod(m)+1:prod(m)*i)),'g*')
         xlim([0 prod(m)]);
         if(i==1)
             hleg=legend('initial','final','optimal','FontSize',6, 'Box', 'off');

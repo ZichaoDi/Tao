@@ -25,20 +25,13 @@ L=zeros(numThetan,nTau+1,m(1),m(2));
 GlobalInd=cell(numThetan,nTau+1);
 LocalInd=cell(numThetan,nTau+1,m(1),m(2),NumSSDlet);
 L_after=cell(numThetan,nTau+1,m(1),m(2),NumSSDlet);
-SelfInd=cell(numThetan,nTau+1,mtol);
-
-for im=1:numThetan
-    for jm=1:nTau+1
-        for iv=1:mtol
-            SelfInd{im,jm,iv}=cell(8,1);
-            for d=1:NumSSDlet
-                SelfInd{im,jm,iv}{7}{d}=[];
-                SelfInd{im,jm,iv}{8}{d}=[];
-            end
-        end
-    end
+AS=cell(8,1);
+AS{7}=cell(1,NumSSDlet);
+for d=1:NumSSDlet
+AS{7}{d}=[];
 end
-
+AS{8}=AS{7};
+SelfInd=repmat({AS},[numThetan,nTau+1,mtol]);
 EmptyBeam=[];
 RMlocal=zeros(m(1),m(2),numChannel); %% assign all the contributions from seperate beam to each pixel
 fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel);
@@ -183,6 +176,7 @@ for n=1:numThetan
     end
     DisR(:,n)=Rdis';
 end
+%  save(['Simulated',num2str(N(1)),'_',num2str(numThetan), '.mat'],'DisR','XRF');
 XRF=permute(data(:,:,:),[3 1 2]);
 DisR=squeeze(sum(data,2));
 if(LogScale)

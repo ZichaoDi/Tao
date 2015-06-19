@@ -64,7 +64,7 @@ while(i<=NumElement)
     
     %%%%=============================== Start Gaussian Convolution
     if(DecomposedElement)
-    M(i)=sum(PurePeak);
+    M(i,i)=sum(PurePeak);
 else
     M(i,:)=ifft(fft(PurePeak).*G);
 end
