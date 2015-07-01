@@ -10,19 +10,19 @@
 % KA_LINE:0 KB:1 LA:2 LB:3
 global TakeLog I0 M Element
 
-E0=10;
+E0=20;
 E2I=1/3e8/6.62e-34*1e-15;
 I0=E0*E2I;
 NumElement=length(Z);
 NA=6.02e23;%Avogadro's number
-% if(ismac)
-%     loadlibrary('/opt/local/lib/libxrl.dylib','/opt/local/include/xraylib/xraylib.h');
-% else
-%     loadlibrary('/homes/wendydi/Documents/lib/libxrl.so','/homes/wendydi/Documents/include/xraylib/xraylib.h');
-% end
+if(ismac)
+     loadlibrary('/opt/local/lib/libxrl.dylib','/opt/local/include/xraylib/xraylib.h');
+ else
+     loadlibrary('/homes/wendydi/Documents/lib/libxrl.so','/homes/wendydi/Documents/include/xraylib/xraylib.h');
+ end
 load AtomicWeight
 load(['xRayLib',num2str(E0),'.mat'])
-Line=1:36;%[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
+Line=0:3;%[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
 shell=0;  %% Shell type
 BindingEnergy=zeros(NumElement,length(Line));
 M=zeros(NumElement,numChannel);
@@ -45,16 +45,16 @@ while(i<=NumElement)
     na(i)=density*NA/A(Z(i))*Z(i)*1e-24;
     j=1;
     while (j<=length(Line))
-        %         LineEnergy(i,j)=calllib('libxrl','LineEnergy',Z(i),-Line(j));
-        new_energy=LineEnergy(Z(i),Line(j));%
+                 LineEnergy(i,j)=calllib('libxrl','LineEnergy',Z(i),Line(j));
+        new_energy=LineEnergy(i,j);%LineEnergy(Z(i),Line(j));%
         %         mu=na(i)*calllib('libxrl','CS_Total',Z(i),E0);
         %         Jump=calllib('libxrl','JumpFactor',Z(i),shell);
         %         w=calllib('libxrl','FluorYield',Z(i),shell);
         %         c=1; %%% weight fraction, 1: single element, ~1: compound
         %         intensity=I0*c*w*(1-1/Jump)*mu*T;
         %                 CS_TotalBeam(i,1)=calllib('libxrl','CS_Total',Z(i),E0);
-        %         CS_FluoLine(i,j)=calllib('libxrl','CS_FluorLine',Z(i),-Line(j),E0);
-        intensity=I0*CS_FluoLine(Z(i),Line(j));%
+                 CS_FluoLine(i,j)=calllib('libxrl','CS_FluorLine',Z(i),Line(j),E0);
+        intensity=I0*CS_FluoLine(i,j);%CS_FluoLine(Z(i),Line(j));%
         BindingEnergy(i,j)=new_energy;
         [~,adj]=min(abs(repmat(new_energy,size(DetChannel))-DetChannel));
         PurePeak(adj)=PurePeak(adj)+intensity;    

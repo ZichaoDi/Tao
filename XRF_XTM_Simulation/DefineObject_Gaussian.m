@@ -10,11 +10,11 @@
 %%=======================================================================
 global x y m omega dz AbsorbScale MU_e Z
 global XTMscale NumLines NumElement
-global MUe N
+global MUe N 
 
 load PeriodicTable
 AbsorbScale=1e-0;
-ScaleM=1e-5;
+ScaleM=1.5e-4;
 %%%%%======================================
 DisY=m(1)+1;
 DisX=m(2)+1;
@@ -28,7 +28,8 @@ xc = getNodalGrid(omega,[m(2) m(1)]);
 %%%========================== assign weight matrix for each element in each pixel
 % %  Z=[20 29 79 30 46 59];%[ 8 14 20 29 30];%[ 8 14 20 29 79 30 46 59];%[29 30 46 49 57 74 79];%% 42 29 26 ];%% reference sample: Pb La Pd Mo Cu Fe Ca
 %   Z=[19 31 26  46 50]; multi-model synthetic samples
-Z=[19 20 26 30];% Seeds; [14 19 28 29 30 74];% Glass Rod
+% Z=[19 20 26 30];% Seeds; [14 19 28 29 30 74];% Glass Rod
+Z=[14 16 17 19 20 22 23 24 25 26 28 29 30 31 80 33 34 35 92 37 38 39 40];% Complete Seed
 % CreateElement; %load Phantom5; W=Phantom5; NumElement=size(W,3);%% shepp-logan phantom
 % CreateCircle; %% sample with circles
 %------------------------- a sample to test the different impact from heavy and light elements
@@ -42,21 +43,20 @@ NumElement=length(Z);
 %     W=rand(m(1),m(2),NumElement);
 W=zeros(m(1),m(2),NumElement);
     for tsub=1:NumElement
-        W(:,:,tsub)=abs(iR(:,:,slice(tsub)));%tsub*2e-1;
+        W(:,:,tsub)=4e-4*abs(flipud(permute(iR(:,:,slice(tsub)),[2 1 3])));%tsub*2e-1;
     end
-
 %%%%%%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 % ComChoices=nchoosek(1:6,3);
 % Z=Z(ComChoices(1,:));
-Z=Z(1:NumElement);
+% Z=Z(1:NumElement);
 UnitSpectrumSherman_Gaussian; %% Produce BindingEnergy M
 %%=======================================================================
 NumLines=NumElement;
 MU_e=zeros(NumElement,1,1+NumLines);
 for i=1: NumLines
-    MU_e(i,1,1)=na(i)*CS_TotalBeam(Z(i),1);%calllib('libxrl','CS_Total',Z(i),E0);
+    MU_e(i,1,1)=calllib('libxrl','CS_Total',Z(i),E0);% na(i)*CS_TotalBeam(Z(i),1);%
     for j=1:NumElement
-        MU_e(i,1,j+1)=na(i)*CS_Total(Z(i),1,Z(j));%calllib('libxrl','CS_Total',Z(i),BindingEnergy(j));   only consider K_alpha line
+        MU_e(i,1,j+1)=na(i)*calllib('libxrl','CS_Total',Z(i),BindingEnergy(j));%CS_Total(Z(i),1,Z(j));%   only consider K_alpha line
     end
 end
 %%%%%================== Attenuation Matrix at beam energy
@@ -66,8 +66,10 @@ MUe=reshape(MU_e(:,1,1),1,1,NumElement);
 MU=sum(W.*repmat(MUe,[m(1),m(2),1]),3);
 %%=======smooth data
 % MU=BlurGaussian(MU);
+%{
 yy=reshape(smooth(MU(:)),m(1),m(2));
 MU=reshape(smooth(reshape(yy',prod(m),1)),m(1),m(2));
+%}
 %%===================
 XTMscale=1e0;
 MU_XTM=MU.*XTMscale;

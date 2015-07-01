@@ -43,14 +43,18 @@ for n=1:numThetan
     DetKnot=DetKnot0*TransMatrix;
     SourceKnot=SourceKnot0*TransMatrix;
     SSDknot=SSDlet*TransMatrix;
-    %%%%%============================================================
-    %         fig=figure('name','grids & beam line');
-    %         plotGrid(xc,omega,[m(2) m(1)]); hold on;
-    %         for i=1:nTau+1
-    %             fig3=plot([SourceKnot(i,1),DetKnot(i,1)],[SourceKnot(i,2),DetKnot(i,2)],'r.-');hold on;
-    %         end
-    %         pause;
-    %%%%%%%===============================================
+    %{ 
+    % ============================================================
+             fig=figure('name',['grids & beam line at Angle',num2str(theta)]);
+             % plotGrid(xc,omega,[m(2) m(1)]); hold on;
+             for i=1:nTau+1
+                 fig3=plot([SourceKnot(i,1),DetKnot(i,1)],[SourceKnot(i,2),DetKnot(i,2)],'r.-');hold on;
+             end
+             imagesc((x(1:end-1)+x(2:end))/2,(y(1:end-1)+y(2:end))/2,sum(W,3))
+             pause(1);
+    % ===================================================
+    %} 
+    
     Rdis=zeros(nTau+1,1);
     for i=1:nTau+1 %%%%%%%%%================================================================
         % Initialize
@@ -65,7 +69,8 @@ for n=1:numThetan
             plotGrid(xc,omega,[m(2) m(1)]);
             hold on;
             plot(DetKnot(:,1),DetKnot(:,2),'k+-',SourceKnot(:,1),SourceKnot(:,2),'m+-',SSDknot(:,1),SSDknot(:,2),'g+-','LineWidth',0.5)
-            axis equal
+            axis equal 
+            imagesc((x(1:end-1)+x(2:end))/2,(y(1:end-1)+y(2:end))/2,sum(W,3))
             set(gcf,'Units','normalized')
             set(gca,'Units','normalized')
             ax = axis;
@@ -73,6 +78,7 @@ for n=1:numThetan
             xp = ([SourceKnot(i,1),DetKnot(i,1)]-ax(1))/(ax(2)-ax(1))*ap(3)+ap(1);
             yp = ([SourceKnot(i,2),DetKnot(i,2)]-ax(3))/(ax(4)-ax(3))*ap(4)+ap(2);
             ah=annotation('arrow',xp,yp,'Color','r','LineStyle','--');
+            pause(0.2);
         end
         %=================================================================
         [index,Lvec,linearInd]=IntersectionSet(SourceKnot(i,:),DetKnot(i,:),xbox,ybox,theta);
@@ -163,9 +169,9 @@ for n=1:numThetan
         end
         [~,~,subm,subn]=size(L(n,i,:,:));
         Rdis(i)=I0*exp(-eX'*(MU_XTM.*reshape(L(n,i,:,:),subm,subn))*eY); %% Discrete case
-
         XRF(n,i,:)=xrfSub;%+0.1*rand(size(xrfSub));%reshape(DisXRF(subTheta(n),i,:),1,numChannel);%
         SigMa_XRF((nTau+1)*(n-1)+i,:)=xrfSub;
+        %{
         if(plotSpec)
             figure(finalfig)
             subplot(1,2,2);
@@ -173,12 +179,17 @@ for n=1:numThetan
             xlabel('Energy Channel','fontsize',12); ylabel('Intensity','fontsize',12)
             pause;
         end
+        %}
     end
     DisR(:,n)=Rdis';
 end
-%  save(['Simulated',num2str(N(1)),'_',num2str(numThetan), '.mat'],'DisR','XRF');
-XRF=permute(data(:,:,:),[3 1 2]);
-DisR=squeeze(sum(data,2));
+
+ XRF_Simulated=XRF;
+ DisR_Simulated=DisR;
+ XRF=permute(data(:,:,:),[3 1 2]);
+ DisR=squeeze(sum(data,2));
+ save(['Simulated',num2str(N(1)),'_',num2str(numThetan),'_',num2str(NumElement),'_',num2str(numChannel), '.mat'],'DisR_Simulated','XRF','XRF_Simulated','DisR');
+
 if(LogScale)
     % SigMa_XTM=1./diag(cov(-log(DisR'./I0)));
     % SigMa_XTM=inv(cov(-log(DisR'./I0)));
@@ -191,3 +202,5 @@ SigMa_XRF((sub2ind([nTau+1,numThetan],EmptyBeam(2,:),EmptyBeam(1,:))))=0;
 SigMa_XTM((sub2ind([nTau+1,numThetan],EmptyBeam(2,:),EmptyBeam(1,:))))=0;
  SigMa_XRF=ones(size(SigMa_XRF));
  SigMa_XTM=ones(size(SigMa_XTM));
+
+

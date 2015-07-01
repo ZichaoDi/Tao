@@ -11,7 +11,7 @@ import numpy as np
 
 # mat_contents=sio.loadmat('/homes/wendydi/Documents/Research/Tao/XRF_XTM_Simulation/data/2xfm1211_14/3dSet1741.mat')
 # thetan=mat_contents['thetan']
-mat_contents=sio.loadmat('/homes/wendydi/Documents/Research/Tao/XRF_XTM_Simulation/data/ApsDataExtract/DogaSeeds/DownSampleSeeds56_elements.mat')
+mat_contents=sio.loadmat('/homes/wendydi/Documents/Research/Tao/XRF_XTM_Simulation/data/ApsDataExtract/DogaSeeds/DownSampleSeeds28_elements.mat')
 
 XTM=mat_contents['data_H']
 factor=2
@@ -19,17 +19,19 @@ thetan = tomopy.angles(XTM.shape[2]/factor,0,360/factor)
 XTM=XTM[:,:,:len(thetan)/factor]
 XTM=np.transpose(XTM,(2,1,0))
 rec_XTM = tomopy.recon(XTM,thetan, algorithm='gridrec')
-
+# time.sleep(5.5)    # pause 5.5 seconds
+print("something")
 import matplotlib.pyplot as plt
 # pylab.imshow(np.reshape(rec_XTM,(rec_XTM.shape[1],rec_XTM.shape[1])),cmap='gray')
 slice = np.array([7, 8, 13, 16])
+
 for i in range(0,4):
     plt.subplot(2,2,i+1)
     plt.imshow(rec_XTM[slice[i]])
 
 plt.show()
 
-matfile='/homes/wendydi/Documents/Research/Tao/XRF_XTM_Simulation/data/ApsDataExtract/DogaSeeds/tomoRecon56_half.mat'
+matfile='/homes/wendydi/Documents/Research/Tao/XRF_XTM_Simulation/data/ApsDataExtract/DogaSeeds/tomoRecon28_half.mat'
 sio.savemat(matfile, mdict={'out': rec_XTM}, oned_as='row')
 """
 XRF=mat_contents['XRF']

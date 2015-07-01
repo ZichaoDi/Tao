@@ -22,16 +22,17 @@ grad_type = 'adj';  % 'adj' = adjoint/exact
 % Initialize arrays for discretizations
 Tomo_startup;
 %%-----------------------------------------------
-load ./data/ApsDataExtract/DogaSeeds/DownSampleSeeds56_elements.mat
-load tomoRecon56_half
-iR=permute(out,[2 3 1]);
+load ./data/ApsDataExtract/DogaSeeds/DownSampleSeeds28_elements.mat
+% load tomoRecon28_half
+%  iR=permute(out,[2 3 1]);
 data=[];
-slice=[8,9,14,17];
-ang_rate=300;
+slice=5:27;% [8,9,14,17];
+ang_rate=700;
 for ele=1:length(slice)
-data(:,ele,:)=sum(data_H(:,slice(ele),1:ang_rate:end),2);
+%data(:,ele,:)=sum(data_H(:,slice(ele),1:ang_rate:end),2);
+data(:,ele,:)=sum(data_H(:,slice(ele),[1,33]),2);
 end
-data=data(:,:,1:floor(size(data,3)/2));
+% data=data(:,:,1:floor(size(data,3)/2));
 DecomposedElement=1;
 % data=h5read('~/Documents/MATLAB/APSdata/xfm_Doga/xfm_data_elements.h5','/exchange/data');
 % data=squeeze(sum(data,2));
@@ -53,7 +54,7 @@ SigmaT=cell(nm,1);
 m_level=zeros(nm,2);
 nTau_level= zeros(nm,1);
 bounds = 1;  % no bound constraints
-Joint=1; % 0: XRF; -1: XTM; 1: Joint inversion
+Joint=0; % 0: XRF; -1: XTM; 1: Joint inversion
 LogScale=1; %% determine if the XTM is solved taking log first or not
 Beta=10^0;
 %----------------------------------------------------------------------
