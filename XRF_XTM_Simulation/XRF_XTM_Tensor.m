@@ -21,7 +21,7 @@ XRF=zeros(numThetan,nTau+1,numChannel);%cell(numThetan,nTau+1);%
 SigMa_XRF=zeros(numThetan*(nTau+1),numChannel);
 DisR=zeros(nTau+1,numThetan);
 Ltol=cell(numThetan,nTau+1);
-L=zeros(numThetan,nTau+1,m(1),m(2));
+L=sparse(numThetan*(nTau+1)*prod(m),1);
 GlobalInd=cell(numThetan,nTau+1);
 LocalInd=cell(numThetan,nTau+1,m(1),m(2),NumSSDlet);
 L_after=cell(numThetan,nTau+1,m(1),m(2),NumSSDlet);
@@ -55,7 +55,7 @@ for n=1:numThetan
     % ===================================================
     %} 
     
-    Rdis=zeros(nTau+1,1);
+    Rdis=I0*ones(nTau+1,1);
     for i=1:nTau+1 %%%%%%%%%================================================================
         % Initialize
         xbox=[omega(1) omega(1) omega(2) omega(2) omega(1)];
@@ -92,7 +92,7 @@ for n=1:numThetan
         for j=1:size(index,1)
             CurrentCellCenter=[(index(j,1)-1/2)*dz(1)-abs(omega(1)),(index(j,2)-1/2)*dz(2)-abs(omega(3))];
             currentInd=sub2ind(m,index(j,2),index(j,1));
-            L(n,i,index(j,2),index(j,1))=Lvec(j);
+            L(sub2ind([numThetan,nTau+1,m],n,i,index(j,2),index(j,1)))=Lvec(j);
             if(j==1)
                 I_incident=1;
                 temp_sum=0;
@@ -167,8 +167,8 @@ for n=1:numThetan
             RMlocal(index(j,2),index(j,1),:)=RMlocal(index(j,2),index(j,1),:)+temp;
             xrfSub=xrfSub+RM{index(j,2),index(j,1)};
         end
-        [~,~,subm,subn]=size(L(n,i,:,:));
-        Rdis(i)=I0*exp(-eX'*(MU_XTM.*reshape(L(n,i,:,:),subm,subn))*eY); %% Discrete case
+        [tempA,tempB]=meshgrid(1:m(1),1:m(2));
+        Rdis(i)=I0*exp(-eX'*(MU_XTM.*reshape(L(sub2ind([numThetan,nTau+1,prod(m)],n*ones(1,prod(m)),i*ones(1,prod(m)),1:prod(m))),m))*eY); %% Discrete case
         XRF(n,i,:)=xrfSub;%+0.1*rand(size(xrfSub));%reshape(DisXRF(subTheta(n),i,:),1,numChannel);%
         SigMa_XRF((nTau+1)*(n-1)+i,:)=xrfSub;
         %{
@@ -186,9 +186,9 @@ end
 
  XRF_Simulated=XRF;
  DisR_Simulated=DisR;
- XRF=permute(data(:,:,:),[3 1 2]);
- DisR=squeeze(sum(data,2));
- save(['Simulated',num2str(N(1)),'_',num2str(numThetan),'_',num2str(NumElement),'_',num2str(numChannel), '.mat'],'DisR_Simulated','XRF','XRF_Simulated','DisR');
+ XRF=permute(data(:,:,:),[2 3 1]);
+ DisR=squeeze(sum(data_h(end,:,:),1))';
+ save(['Simulated_1',num2str(N(1)),'_',num2str(numThetan),'_',num2str(NumElement),'_',num2str(numChannel), 'GlassRod.mat'],'DisR_Simulated','XRF','XRF_Simulated','DisR');
 
 if(LogScale)
     % SigMa_XTM=1./diag(cov(-log(DisR'./I0)));

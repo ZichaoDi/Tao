@@ -37,12 +37,11 @@ for ele=1;%:length(slice)
   
 if(Joint==-1)
      fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,L,thetan,m,nTau,NumElement); %% on W
-% fctn=@(MU)sfun_XTM_tensor(DisR,MU,I0,L,m,nTau);% NumElement=1;%% on attenuation coefficients \miu
+     %fctn=@(MU)sfun_XTM_tensor(DisR,MU,I0,L,m,nTau);% NumElement=1;%% on attenuation coefficients \miu
 elseif(Joint==1)
     fctn=@(W)sfun_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 %     fctn_f=@(W)func_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 %     fctn_J=@(W)sfun_Tensor_Joint_Jacobian(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
-%     fctn_X=@(W)sfun_Tensor(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
 else
     fctn=@(W)sfun_Tensor(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
 %     fctn_par=@(W)sfun_Tensor_par(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
@@ -50,6 +49,9 @@ else
 end
 
 %-----------------------------------------------------------------------
+rng('default')
+x0=WS(:); %+0.04*rand(size(WS(:)));%
+%{
 x0=[];
 for ii=1:length(slice),
 x0(:,:,ii) =flipud(flipud( iR(:,:,slice(ii)))');
@@ -57,8 +59,6 @@ end
 x0=x0(:)+1e0*rand(size(WS(:)));
 x0(find(x0<0))=0;
 %x0=x0(:);%*1e-2+rand(size(x0(:)));%reshape(iR(:,:,slice),[size(iR,1)*size(iR,2),1]);%10^(-1)*rand(nTol,1)+WS(:);%ww(:);%;%
-%x0=400*rand(size(WS(:)));%
-%{
 load xs18_300_13TN_full
 x0=xstar;
 %}
@@ -69,16 +69,16 @@ low=0*ones(size(x0));
 up=inf*ones(size(x0));
 % %%========================================================================
 % [xstar,f,g,ierror] = tnbcm (x0,fctn,low,up,maxiter);
-maxiter=300;
+maxiter=20;
 bounds=1;
 if(bounds)
  [xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
- save(['xs',num2str(N(1)),'_',num2str(maxiter),'_',num2str(numThetan),'TN_simulated.mat'],'x0','xstar');
+  save(['xs_Joint',num2str(N(1)),'_',num2str(maxiter),'_',num2str(numThetan),'TNBC_glassrod.mat'],'x0','xstar');
 else
- [xstar,f,g,histout,costdata] = gaussn(x0,fctn,1e-18,maxiter);
- save(['xs',num2str(N(1)),'_',num2str(maxiter),'_',num2str(numThetan),'GN.mat'],'x0','xstar');
-%  [xstar,f,g,ierror] = tn (x0,fctn);
-
+%  [xstar,f,g,histout,costdata] = gaussn(x0,fctn,1e-18,maxiter);
+%  save(['xs',num2str(N(1)),'_',num2str(maxiter),'_',num2str(numThetan),'GN.mat'],'x0','xstar');
+ [xstar,f,g,ierror] = tn (x0,fctn);
+ save(['xs_Joint',num2str(N(1)),'_',num2str(maxiter),'_',num2str(numThetan),'tn_glassrod.mat'],'x0','xstar');
 end
 
 xs_ele(:,ele)=xstar;

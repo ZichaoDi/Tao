@@ -13,7 +13,8 @@ eX=ones(m(1),1);
 eY=ones(m(2),1);
 DisR=zeros(nTau+1,numThetan);
 Ltol=cell(numThetan,nTau+1);
-L=zeros(numThetan,nTau+1,m(1),m(2));
+L=sparse(numThetan*(nTau+1),prod(m));
+% L=zeros(numThetan,nTau+1,m(1),m(2));
 GlobalInd=cell(numThetan,nTau+1);
 fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel);
 EmptyBeam=[];
@@ -23,7 +24,7 @@ for n=1:numThetan
     TransMatrix=[cos(theta) sin(theta);-sin(theta) cos(theta)];
     DetKnot=DetKnot0*TransMatrix;
     SourceKnot=SourceKnot0*TransMatrix;
-    Rdis=0*I0*ones(nTau+1,1);
+    Rdis=1*I0*ones(nTau+1,1);
     for i=1:nTau+1 %%%%%%%%%================================================================
         % Initialize
         xbox=[omega(1) omega(1) omega(2) omega(2) omega(1)];
@@ -56,11 +57,10 @@ for n=1:numThetan
             for j=1:size(index,1)
                 CurrentCellCenter=[(index(j,1)-1/2)*dz(1)-abs(omega(1)),(index(j,2)-1/2)*dz(2)-abs(omega(3))];
                 currentInd=sub2ind(m,index(j,2),index(j,1));
-                L(n,i,index(j,2),index(j,1))=Lvec(j);
-                
+                %  L(n,i,index(j,2),index(j,1))=Lvec(j);
+                L(sub2ind([numThetan,nTau+1],n,i),sub2ind(m,index(j,2),index(j,1)))=Lvec(j);
             end
-            [~,~,subm,subn]=size(L(n,i,:,:));
-            Rdis(i)=eX'*(MU_XTM.*reshape(L(n,i,:,:),subm,subn))*eY;%%I0*exp(-eX'*(MU_XTM.*reshape(L(n,i,:,:),subm,subn))*eY); %% Discrete case
+            Rdis(i)=I0*exp(-eX'*(MU_XTM.*reshape(L(sub2ind([numThetan,nTau+1],n,i),:),m))*eY);%%I0*exp(-eX'*(MU_XTM.*reshape(L(n,i,:,:),subm,subn))*eY); %% Discrete case
         end
     end
     DisR(:,n)=Rdis';
@@ -68,10 +68,10 @@ end
 %  DisR_real=reshape(XRF(:,slice,5,:),nTau+1,numThetan);
 %%==============================================================
 DisR_real=DisR;
-%  DisR=data;%DisR_real;
+DisR=squeeze(data)';%data;%DisR_real;
 if(LogScale)
-    SigMa_XTM=1./(-log(DisR(:)./I0));
+    SigMa_XTM=1./(-log(DisR(:)));
 else
     SigMa_XTM=1./DisR(:);
 end
-SigMa_XTM=ones(size(SigMa_XTM));
+% SigMa_XTM=ones(size(SigMa_XTM));

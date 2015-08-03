@@ -1,5 +1,5 @@
 function [f,g]=sfun_XTM(W,M,MU_e,I0,L,thetan,m,nTau,NumElement)
-global SigMa_XTM LogScale 
+global SigMa_XTM LogScale numThetan 
 global Tik penalty XTMscale 
 %%===== Reconstruction discrete objective
 %%===== L: intersection length matrix
@@ -24,9 +24,9 @@ g=zeros(m(1),m(2),NumElement);
 for n=1:length(thetan)
     sum_Tau=0;
     if(LogScale)
-        Mt=-log(M(:,n)./I0);%M(:,n)./1.5e4;%
+        Mt=-log(M(:,n)).*1e-7;%M(:,n)./1e7;% 
         for i=1:nTau+1
-            Lsub=reshape(L(n,i,:),m(1),m(2));
+            Lsub=full(reshape(L(sub2ind([numThetan,nTau+1],n,i),:),m(1),m(2)));
             count=(nTau+1)*(n-1)+i;
             if(~isempty(find(Lsub,1)))
                 Rdis=eX'*(MU.*Lsub)*eY;

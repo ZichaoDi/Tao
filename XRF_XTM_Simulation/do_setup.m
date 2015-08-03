@@ -22,27 +22,30 @@ grad_type = 'adj';  % 'adj' = adjoint/exact
 % Initialize arrays for discretizations
 Tomo_startup;
 %%-----------------------------------------------
-load ./data/ApsDataExtract/DogaSeeds/DownSampleSeeds28_elements.mat
+% load ./data/ApsDataExtract/DogaSeeds/DownSampleSeeds28_elements.mat
+load ~/Documents/Research/APSdata/GlassRod/2dSlice/Slice1
+load ~/Documents/Research/APSdata/GlassRod/2dSlice/rec_XTM_59
+% iR=imread('~/Documents/Research/APSdata/GlassRod/Au_L_3/Au_L_0000.tif');
 % load tomoRecon28_half
-%  iR=permute(out,[2 3 1]);
-data=[];
-slice=5:27;% [8,9,14,17];
-ang_rate=700;
+slice = [25 10 32 30 3 34]; %GlassRod%  5:27;% Seeds
+iR=out(slice(1:5),:,:); 
+data_h=[];
+ang_rate=1;
+tau_rate=30;
 for ele=1:length(slice)
-%data(:,ele,:)=sum(data_H(:,slice(ele),1:ang_rate:end),2);
-data(:,ele,:)=sum(data_H(:,slice(ele),[1,33]),2);
+data_h(ele,:,:)=sum(data(slice(ele),1:ang_rate:end,1:tau_rate:end),1);
 end
-% data=data(:,:,1:floor(size(data,3)/2));
+slice=slice(1:5); %transimission data
+data=data_h(1:5,:,:);
 DecomposedElement=1;
 % data=h5read('~/Documents/MATLAB/APSdata/xfm_Doga/xfm_data_elements.h5','/exchange/data');
 % data=squeeze(sum(data,2));
-% slice=1;
 %%-----------------------------------------------
 NoSelfAbsorption=0;
-N=size(iR,1);%(floor(sqrt(size(data,1)^2/2));% 17 9];%[129 65  9 5];% 
+N=size(iR,2);%(floor(sqrt(size(data,1)^2/2));% 17 9];%[129 65  9 5];% 
 NF = [0*N; 0*N; 0*N];
 nm=length(N);
-numThetan=size(data,3);
+numThetan=size(data,2);
 W_level=cell(nm,1);
 xrf_level=cell(nm,1);
 xtm_level=cell(nm,1);
@@ -54,9 +57,9 @@ SigmaT=cell(nm,1);
 m_level=zeros(nm,2);
 nTau_level= zeros(nm,1);
 bounds = 1;  % no bound constraints
-Joint=0; % 0: XRF; -1: XTM; 1: Joint inversion
+Joint=1; % 0: XRF; -1: XTM; 1: Joint inversion
 LogScale=1; %% determine if the XTM is solved taking log first or not
-Beta=10^0;
+Beta=10^8;
 %----------------------------------------------------------------------
 % Compute the dependent-variable arrays
 PlotObject=0;

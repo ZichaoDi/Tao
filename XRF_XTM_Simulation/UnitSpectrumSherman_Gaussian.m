@@ -18,7 +18,7 @@ NA=6.02e23;%Avogadro's number
 if(ismac)
      loadlibrary('/opt/local/lib/libxrl.dylib','/opt/local/include/xraylib/xraylib.h');
  else
-     loadlibrary('/homes/wendydi/Documents/lib/libxrl.so','/homes/wendydi/Documents/include/xraylib/xraylib.h');
+     loadlibrary('/homes/wendydi/local/xraylib/lib/libxrl.so','/homes/wendydi/local/xraylib/include/xraylib/xraylib.h');
  end
 load AtomicWeight
 load(['xRayLib',num2str(E0),'.mat'])

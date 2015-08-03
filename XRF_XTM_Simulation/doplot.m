@@ -16,7 +16,7 @@ W0=WS(:);
         subplot(4,NumElement,i);
         
         errCom=reshape(xinitial(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-W0(prod(m)*i-prod(m)+1:prod(m)*i
-        imagesc(errCom,clims);colormap jet
+        imagesc(errCom);colormap jet
         if(i==1)
             ylabel('Initial Guess','fontsize',12)
         end
@@ -27,7 +27,7 @@ W0=WS(:);
         subplot(4,NumElement,i+1*NumElement);
         
         errCom=reshape(xstar(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-W0(prod(m)*i-prod(m)+1:prod(m)*i
-        imagesc(errCom,clims);colormap jet
+        imagesc(errCom);colormap jet
         if(i==1)
             ylabel('Final Solution','fontsize',12)
         end
@@ -37,7 +37,7 @@ W0=WS(:);
         subplot(4,NumElement,i+2*NumElement);
         
         errCom=reshape(W0(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));
-        imagesc(errCom,clims);colormap jet
+        imagesc(errCom);colormap jet
         if(i==1)
             ylabel('True Solution','fontsize',12)
         end

@@ -4,7 +4,7 @@ global  SigMa_XRF
 
 mtol=prod(m);
 W=reshape(W,mtol,NumElement);
-L=reshape(L,length(thetan),nTau+1,mtol);
+% L=reshape(L,length(thetan),nTau+1,mtol);
 %%%%% ====================================================================
 f=zeros(numThetan,1);
 g=zeros(numThetan,mtol,NumElement);
@@ -40,11 +40,15 @@ for n=1:numThetan
                     if(~isempty(SelfInd{n,i,sub_v}{2}) & ~NoSelfAbsorption)
                         for d=1:NumSSDlet
                             if(~isempty(SelfInd{n,i,sub_v}{2}{d}))
+                                PA=-sum(sum(bsxfun(@times,W(SelfInd{n,i,sub_v}{2}{d},:),reshape(SelfInd{n,i,sub_v}{4}{d},length(SelfInd{n,i,sub_v}{2}{d}),NumElement,NumElement)),1),2);
+TaylorOrder=[0:1];  
+                              % TaylorApprox=sum(PA.^TaylorOrder./factorial(TaylorOrder));
                                 OutTens_d(i,sub_v,d,:)=exp(-sum(sum(bsxfun(@times,W(SelfInd{n,i,sub_v}{2}{d},:),reshape(SelfInd{n,i,sub_v}{4}{d},length(SelfInd{n,i,sub_v}{2}{d}),NumElement,NumElement)),1),2));
+                              %  squeeze(TaylorApprox)-squeeze(OutTens_d(i,sub_v,d,:))                               
                                 for d_sub=1:length(SelfInd{n,i,sub_v}{2}{d})
                                     v_self=SelfInd{n,i,sub_v}{2}{d}(d_sub);
                                     TempSub(i,v_self,:,:)=TempSub(i,v_self,:,:)-...
-                                        reshape(L(n,i,sub_v)*InTens(i,sub_v)/NumSSDlet...
+                                        reshape(L(sub2ind([numThetan,nTau+1,prod(m)],n,i,sub_v))*InTens(i,sub_v)/NumSSDlet...
                                         *bsxfun(@times,reshape(OutTens_d(i,sub_v,d,:),1,NumElement).*W(sub_v,:),reshape(SelfInd{n,i,v_self}{8}{d}(:,:,sub_v==SelfInd{n,i,v_self}{7}{d}),NumElement,NumElement))*M,[1 1 NumElement numChannel]);
                                 end
                             end
@@ -52,13 +56,13 @@ for n=1:numThetan
                         OutTens(i,sub_v,:)=sum(OutTens_d(i,sub_v,:,:),3)/NumSSDlet;
                     end
                 end
-                XRF_v(i,:)=XRF_v(i,:)+L(n,i,v)*(InTens(i,v)*reshape(OutTens(i,v,:),1,NumElement).*W(v,:))*M;
+                XRF_v(i,:)=XRF_v(i,:)+L(sub2ind([numThetan,nTau+1,prod(m)],n,i,v))*(InTens(i,v)*reshape(OutTens(i,v,:),1,NumElement).*W(v,:))*M;
                 
                 if(~isempty(v5))
-                    TempSub(i,v,:,:)=TempSub(i,v,:,:)+1*reshape(-bsxfun(@times,reshape(L(n,i,v5),1,length(v5)).*InTens(i,v5),SelfInd{n,i,v}{6}')*(W(v5,:).*reshape(OutTens(i,v5,:),length(v5),NumElement)*M)...
-                        +L(n,i,v)*InTens(i,v)*bsxfun(@times,squeeze(OutTens(i,v,:)),M),1,1,NumElement,numChannel); % part 3
+                    TempSub(i,v,:,:)=TempSub(i,v,:,:)+1*reshape(-bsxfun(@times,reshape(L(sub2ind([numThetan,nTau+1,prod(m)],n*ones(size(v5)),i*ones(size(v5)),v5)),1,length(v5)).*InTens(i,v5),SelfInd{n,i,v}{6}')*(W(v5,:).*reshape(OutTens(i,v5,:),length(v5),NumElement)*M)...
+                        +L(sub2ind([numThetan,nTau+1,prod(m)],n,i,v))*InTens(i,v)*bsxfun(@times,squeeze(OutTens(i,v,:)),M),1,1,NumElement,numChannel); % part 3
                 else
-                    TempSub(i,v,:,:)=TempSub(i,v,:,:)+1*reshape(L(n,i,v)*InTens(i,v)*bsxfun(@times,squeeze(OutTens(i,v,:)),M),1,1,NumElement,numChannel); % part 3
+                    TempSub(i,v,:,:)=TempSub(i,v,:,:)+1*reshape(full(L(sub2ind([numThetan,nTau+1,prod(m)],n,i,v)))*InTens(i,v)*bsxfun(@times,squeeze(OutTens(i,v,:)),M),1,1,NumElement,numChannel); % part 3
                 end
                 
             end

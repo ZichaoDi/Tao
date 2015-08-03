@@ -6,7 +6,7 @@ function [xstar, f, g, ierror] = ...
 %---------------------------------------------------------
 global hyk ykhyk hyr yksr ykhyr yrhyr sk yk sr yr ...
     hg gsk yksk yrsr
-global NF N current_n   fiter itertest
+global NF N current_n maxiter  fiter itertest
 global gv ptest
 %---------------------------------------------------------
 % set up
@@ -132,13 +132,16 @@ while (~conv);
     %---------------------------------------------------------
     % convergence test
     %---------------------------------------------------------
-%     conv = (alpha*pnorm < toleps*(1 + xnorm) ...
-%         & abs(difnew) < rtleps*ftest     ...
-%         & gnorm < accrcy^(1/3)*ftest)    ...
-%         | gnorm < .01*sqrt(accrcy)*ftest;
+    conv = (alpha*pnorm < toleps*(1 + xnorm) ...
+          & abs(difnew) < rtleps*ftest     ...
+          & gnorm < accrcy^(1/3)*ftest)    ...
+          | gnorm < .01*sqrt(accrcy)*ftest;
     %+++++++++++++++++++++++++++++++++++++++++++++++++++
-    conv = (gnorm < 1d-2*ftest);
+    % conv = (gnorm < 1d-2*ftest);
     %+++++++++++++++++++++++++++++++++++++++++++++++++++
+    if(nit>maxiter)
+       conv = 1;
+    end
     if (conv);
         ierror = 0;
         xstar = x;
