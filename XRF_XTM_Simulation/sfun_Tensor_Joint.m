@@ -1,5 +1,5 @@
 function [f,g,f_XRF,f_XTM]=sfun_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0)
-global NumSSDlet numChannel NoSelfAbsorption XTMscale
+global NumSSDlet numChannel numThetan NoSelfAbsorption XTMscale
 global  SigMa_XTM SigMa_XRF
 global LogScale Beta TempBeta
 % load WeightMatrix
@@ -19,9 +19,9 @@ eX=ones(m(1),1);
 eY=ones(m(2),1);
 %%%%% ====================================================================
 g=zeros(mtol,NumElement);
-for n=1:length(thetan)
+for n=1:numThetan
     if(LogScale)
-        Mt=-log(M(:,n)).*1e-7;%M(:,n)./1e7;% 
+        Mt=-log(DisR(:,n)).*1e-7;%DisR(:,n)./1e7;% 
     else
         Mt=DisR(:,n);
     end
@@ -78,7 +78,7 @@ for n=1:length(thetan)
                 end
                 
             end
-            Lsub=full(reshape(L(sub2ind[numThetan,nTau+1,prod(m)],n*ones(prod(m),1),i*ones(prod(m),1),:),m(1),m(2)));
+            Lsub=full(reshape(L(sub2ind([numThetan,nTau+1,prod(m)],n*ones(1,prod(m)),i*ones(1,prod(m)),1:prod(m))),m(1),m(2)));
             if(LogScale)
                 count=(nTau+1)*(n-1)+i;
                 Rdis=eX'*(MU_XTM.*Lsub)*eY; %% Discrete case

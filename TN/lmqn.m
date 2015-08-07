@@ -7,13 +7,17 @@ function [xstar, f, g, ierror] = ...
 global hyk ykhyk hyr yksr ykhyr yrhyr sk yk sr yr ...
     hg gsk yksk yrsr
 global NF N current_n maxiter  fiter itertest
-global gv ptest
+global gv ptest Joint
 %---------------------------------------------------------
 % set up
 %---------------------------------------------------------
 format compact
 format short e
-fprintf(1,'  it     nf     cg           f             |g|\n')
+if(Joint==1)
+fprintf(1,'  it     nf     cg           f             f_xrf             f_xtm            |g|        alpha        error\n');
+else
+fprintf(1,'  it     nf     cg           f            |g|      alpha        error\n');
+end
 upd1 = 1;
 ncg  = 0;
 nind = find(N==current_n);
@@ -27,15 +31,25 @@ end;
 %---------------------------------------------------------
 % compute initial function value and related information
 %---------------------------------------------------------
+xOld=x;
+if(Joint==1)
+[f, g,f_xrf,f_xtm] = feval (sfun, x);
+else
 [f, g] = feval (sfun, x);
+end
 oldf   = f;
 fiter(1)=oldf;
 gnorm  = norm(g,'inf');
 nf     = 1;
 nit    = 0;
 itertest(1)=nf+ncg;
-fprintf(1,'%4i   %4i   %4i   % .8e   %.1e\n', ...
-    nit, nf, ncg, f, gnorm)
+if(Joint==1)
+fprintf(1,'%4i   %4i   %4i   % .8e   % .8e    % .8e    %.1e   %.1e      %.3e\n', ...
+    nit, nf, ncg, f, f_xrf, f_xtm, gnorm, 1, norm(x-xOld));
+else
+fprintf(1,'%4i   %4i   %4i   % .8e   %.1e     %.1e      %.3e\n', ...
+    nit, nf, ncg, f, gnorm, 1, norm(xOld-x));
+end
 %---------------------------------------------------------
 % check for small gradient at the starting point.
 %---------------------------------------------------------
@@ -86,7 +100,12 @@ while (~conv);
     pe     = pnorm + eps;
     spe    = stepmx/pe;
     alpha0 = step1 (f, gtp, spe);
+    xOld=x;
+    if(Joint==1)
+    [x, f, g, nf1, ierror, alpha,f_xrf,f_xtm] = lin1 (p, x, f, alpha0, g, sfun);
+    else
     [x, f, g, nf1, ierror, alpha] = lin1 (p, x, f, alpha0, g, sfun);
+    end
     %%%=============================================================
     nf = nf + nf1;
     %---------------------------------------------------------
@@ -94,8 +113,13 @@ while (~conv);
     gnorm = norm(g,'inf');
     gv=g;
     ptest=p;
-    fprintf(1,'%4i   %4i   %4i   % .8e   %.1e\n', ...
-        nit, nf, ncg, f, gnorm)
+    if(Joint==1)
+        fprintf(1,'%4i   %4i   %4i   % .8e   % .8e    % .8e    %.1e     %.1e      %.3e\n', ...
+        nit, nf, ncg, f, f_xrf, f_xtm, gnorm, alpha, norm(x-xOld));
+    else
+        fprintf(1,'%4i   %4i   %4i   % .8e   %.1e     %.1e      %.3e\n', ...
+        nit, nf, ncg, f, gnorm, alpha, norm(x-xOld));
+    end
     if (ierror == 3);
         if isempty(ncg); ncg = 0; end;
         xstar = x;

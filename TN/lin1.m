@@ -1,5 +1,6 @@
-function [xnew, fnew, gnew, nf1, ierror, alpha1, varargout] = ...
+function [xnew, fnew, gnew, nf1, ierror, alpha1,f_xrf,f_xtm, varargout] = ...
     lin1 (p, x, f, alpha, g, sfun)
+global Joint
 %---------------------------------------------------------
 % line search (naive)
 %---------------------------------------------------------
@@ -24,7 +25,13 @@ q0=p'*g;
 for itcnt = 1:maxit;
     xt = x + alpha1.*p;
     %%%%%%%%%%%#############################################################
-    [ft, gt] = feval (sfun, xt);
+    if(Joint==1)
+    [ft, gt,f_xrf,f_xtm] = feval (sfun,xt);
+    else
+    [ft, gt] = feval (sfun,xt);
+    f_xrf=ft;
+    f_xtm=ft;
+    end
     Armijo =ft<f+1e-4*alpha1*q0;
     Wolfe = abs(p'*gt)<0.25*abs(q0);
     if (ft < f);

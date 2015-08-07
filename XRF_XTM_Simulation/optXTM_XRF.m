@@ -69,8 +69,8 @@ low=0*ones(size(x0));
 up=inf*ones(size(x0));
 % %%========================================================================
 % [xstar,f,g,ierror] = tnbcm (x0,fctn,low,up,maxiter);
-maxiter=20;
-bounds=1;
+maxiter=100;
+bounds=0;
 if(bounds)
  [xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
   save(['xs_Joint',num2str(N(1)),'_',num2str(maxiter),'_',num2str(numThetan),'TNBC_glassrod.mat'],'x0','xstar');
@@ -78,7 +78,7 @@ else
 %  [xstar,f,g,histout,costdata] = gaussn(x0,fctn,1e-18,maxiter);
 %  save(['xs',num2str(N(1)),'_',num2str(maxiter),'_',num2str(numThetan),'GN.mat'],'x0','xstar');
  [xstar,f,g,ierror] = tn (x0,fctn);
- save(['xs_Joint',num2str(N(1)),'_',num2str(maxiter),'_',num2str(numThetan),'tn_glassrod.mat'],'x0','xstar');
+ save(['xs_Joint_real',num2str(N(1)),'_',num2str(maxiter),'_',num2str(numThetan),'tn_glassrod.mat'],'x0','xstar');
 end
 
 xs_ele(:,ele)=xstar;
