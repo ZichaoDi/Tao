@@ -5,7 +5,6 @@ global fig2  fig5 finalfig EmptyBeam
 global LogScale Tol
 plotSpecSingle=0;
 more off;
-% load slice1_50;
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
 DefineObject_Gaussian; % Produce W, MU_XTM
 %%%%%%%==============================================================
@@ -171,7 +170,7 @@ for n=1:numThetan
         [~,~,subm,subn]=size(L(n,i,:,:));
         Rdis(i)=I0*exp(-eX'*(MU_XTM.*reshape(L(n,i,:,:),subm,subn))*eY); %% Discrete case
 
-        XRF(n,i,:)=xrfSub+0.1*rand(size(xrfSub));%reshape(DisXRF(subTheta(n),i,:),1,numChannel);%
+        XRF(n,i,:)=xrfSub;%+0.1*rand(size(xrfSub));%reshape(DisXRF(subTheta(n),i,:),1,numChannel);%
         SigMa_XRF((nTau+1)*(n-1)+i,:)=xrfSub;
         if(plotSpec)
             figure(finalfig)
@@ -183,6 +182,7 @@ for n=1:numThetan
     end
     DisR(:,n)=Rdis';
 end
+% save(['SimulatedXRF_XRT_Golosio',num2str(nTau+1),'_',num2str(numThetan),'.mat'],'DisR','XRF','M');
 if(LogScale)
     % SigMa_XTM=1./diag(cov(-log(DisR'./I0)));
     % SigMa_XTM=inv(cov(-log(DisR'./I0)));

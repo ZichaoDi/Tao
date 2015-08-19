@@ -26,7 +26,8 @@ center=[0 0];
 %%%========================== the grids of object
 xc = getNodalGrid(omega,[m(2) m(1)]);
 %%%========================== assign weight matrix for each element in each pixel
-Z=[19 31 26  46 50];%[ 8 14 20 29 79 30 46 59];%[29 30 46 49 57 74 79];%% 42 29 26 ];%% reference sample: Pb La Pd Mo Cu Fe Ca
+ Z=[6 8 14 20 26];%Golosio's sample;%[29 30 46 49 57 74 79];%% 42 29 26 ];%% reference sample: Pb La Pd Mo Cu Fe Ca
+% Z=[6 8 10 12 14];
 if(onlyXRF)
     Z=[8 30 20 16];
     if (xrf_roi)
@@ -44,21 +45,20 @@ if(onlyXRF)
 else    
 %   CreateElement; %
 % load Phantom35; W=Phantom35; 
-NumElement=size(W,3);%% shepp-logan phantom
-%    CreateCircle; %% sample with circles 
-    %------------------------- a sample to test the different impact from heavy and light elements
+% NumElement=size(W,3);%% shepp-logan phantom
+CreateCircle; %% Golosio's sample 
+%------------------------- a sample to test the different impact from heavy and light elements
     % SvenSample;
     %----------------------------
     % load W_sample10
     % W=W_sample10;
-    %---------------------------
+%---------------------------
 %     NumElement=2;
 %     W=zeros(m(1),m(2),NumElement);
 %     for tsub=1:1;%NumElement
 %         W(:,:,tsub)=tsub*2e-1;
 %     end
 end
-% NumElement=2;
 %%%%%%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 % ComChoices=nchoosek(1:6,3);
 % Z=Z(ComChoices(1,:));

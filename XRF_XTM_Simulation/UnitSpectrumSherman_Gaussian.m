@@ -22,7 +22,7 @@ NA=6.02e23;%Avogadro's number
 % end
 load AtomicWeight
 load(['xRayLib',num2str(E0),'.mat'])
-Line=1:36;%[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
+Line=1:3;%[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
 shell=0;  %% Shell type
 BindingEnergy=zeros(NumElement*length(Line),1);
 M=zeros(NumElement,numChannel);
@@ -67,8 +67,8 @@ while(i<=NumElement)
     if(plotUnit)
         cmap=colormap(lines);
         cmap = cmap(1:NumElement,:);
-%         semilogy(DetChannel,abs(M(i,:)),'color',cmap(i,1:3),'LineStyle','-.','LineWidth',1.5);
-        plot(DetChannel,abs(M(i,:)),'color',cmap(i,1:3),'LineStyle','-.','LineWidth',1.5);
+         semilogy(DetChannel,abs(M(i,:)),'color',cmap(i,1:3),'LineStyle','-.','LineWidth',1.5);
+%        plot(DetChannel,abs(M(i,:)),'color',cmap(i,1:3),'LineStyle','-.','LineWidth',1.5);
         Legend{i}=sprintf('%s',Element{Z(i)});
         legend(Legend)
         title('Gaussian spectrum for each element')

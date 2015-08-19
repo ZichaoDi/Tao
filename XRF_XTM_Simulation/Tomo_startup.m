@@ -3,29 +3,32 @@ more on;
 format compact;
 warning off;
 
+mcsDir='/homes/wendydi/Documents/Research';
+macDir='/Users/Wendydi/Documents/MATLAB';
 if (ispc)
   slash = '\';
 else
   slash = '/';
 end
 if(ismac)
-addpath('/Users/Wendydi/Documents/MATLAB/Di_MATLABtool');
+addpath([macDir,slash,'Di_MATLABtool']);
 else
-addpath('/homes/wendydi/Documents/MATLAB/Di_MATLABtool');
+addpath([mcsDir,slash,'Di_MATLABtool']);
 end
 
 PWD = pwd;
-path(path,[pwd, slash, 'result']);
+addpath_recurse([pwd, slash, 'result']);
 path(path,'../TN');
 path(path,'../MGOPT');
 % path(path,[pwd, slash, 'data']);
 addpath_recurse('./data');
 addpath_recurse('../SimplerCode');
 if(ismac)
-addpath_recurse('/Users/Wendydi/Documents/MATLAB/APSdata');
-addpath_recurse('/Users/Wendydi/Documents/MATLAB/Di_MATLABtool');
+addpath_recurse([macDir,slash,'APSdata']);
+addpath_recurse([macDir,slash,'Di_MATLABtool']);
 else
-addpath_recurse('/homes/wendydi/Documents/MATLAB/Di_MATLABtool');
+addpath_recurse([mcsDir,slash,'Di_MATLABtool']);
+addpath_recurse([mcsDir,slash,'optdi/Reconstruction/Writing/multimodal/version1/GenerateFig']);
 end
  ADiMat_startup;
 

@@ -1,9 +1,6 @@
 %---------------------------------------------------------------
 % Set up a problem for optimization [multigrid or regular].
 %---------------------------------------------------------------
-% W,xrfData,xtmData,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0
-%
-
 global N numThetan NF
 global bounds LogScale Joint
 global grad_type err0 WS Beta W0
@@ -12,7 +9,6 @@ global W_level xrf_level xtm_level L_level GI_level SI_level SigmaR SigmaT m_lev
 global NumElement xinitial current_n
 %--------------------------------------------------
 % Select technique for gradient calculation.
-%
 
 grad_type = 'adj';  % 'adj' = adjoint/exact
 % 'fdr' = finite-difference [real]
@@ -23,10 +19,12 @@ grad_type = 'adj';  % 'adj' = adjoint/exact
 Tomo_startup;
 NoSelfAbsorption=0;
 onlyXRF=0;
-N=[33 17 9 5 3];% 17 9];%[129 65  9 5];% 
+N=5;% [33 17 9 5 3];% 17 9];%[129 65  9 5];% 
 NF = [0*N; 0*N; 0*N];
 nm=length(N);
-numThetan=2;
+numThetan=30; % number of scanning angles/projections
+numChannel=500;% number of energy channels on xrf detector
+angleScale=2; %1: half angle; 2: full angle
 W_level=cell(nm,1);
 xrf_level=cell(nm,1);
 xtm_level=cell(nm,1);
@@ -77,11 +75,10 @@ plotResult=0;
 % %     SigmaR{level}=SigMa_XRF;
 % end
 %%------------------------------ Use same finest data for each level
-        load Phantom33;
 for level=1:nm
 
 if(level==1)
-    W=Phantom33;
+    % W=Phantom33;
 else
 W=downdate(W(:),1);
 W=reshape(W,N(level),N(level),NumElement);
@@ -109,11 +106,4 @@ end
 nTol=N(1)^2*NumElement;
 %---------------------------------------------
 % Specify initial guess for optimization.
-rng('default');
-% load x_new;
-x0 =10^(-1)*rand(nTol,1)+WS(:);%ww(:);%;%zeros(size(WS(:)));%
-W0=WS(:);
-% x0=1e-1*rand(nTol/NumElement,1);%sum(reshape(x0,current_n,current_n,NumElement).*repmat(MUe,[current_n,current_n,1]),3);
-xinitial=x0;
-err0=norm(x0-WS(:));
-v0=x0;
+% xinitial=x0;

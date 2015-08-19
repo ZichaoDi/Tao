@@ -1,9 +1,12 @@
 close all
 colMap={'hot','gray','bone','pink','copper'};
-Ele={'Mo','Cu','Fe','Ca','In'};
+Ele=Element;%%{'Mo','Cu','Fe','Ca','In'};
+W2=xr;
+W3=xj;
+rowNo=4;
 uplim=max([max(W(:)),max(W2(:)),max(W3(:))]);%,max(W1(:))
 for i=1:NumElement
-subplot(3,NumElement,i)
+subplot(rowNo,NumElement,i)
 
 imagesc(W(:,:,i));
 colormap(colMap{i})
@@ -33,10 +36,10 @@ end
 % end
 
 for i=1:NumElement
-subplot(3,NumElement,1*NumElement+i)
+subplot(rowNo,NumElement,1*NumElement+i)
 imagesc(W2(:,:,i));
 colormap(colMap{i})
-set(gca,'xtickLabel',[],'ytickLabel',[],'clim',[0 uplim]);
+set(gca,'xtickLabel',[],'ytickLabel',[]);%,'clim',[0 uplim]);
 axis square, box on;
 if(i==1)
     ylabel('SRT')
@@ -45,10 +48,10 @@ freezeColors
 end
 
 for i=1:NumElement
-subplot(3,NumElement,2*NumElement+i)
+subplot(rowNo,NumElement,2*NumElement+i)
 imagesc(W3(:,:,i));
 colormap(colMap{i})
-set(gca,'xtickLabel',[],'ytickLabel',[],'clim',[0 uplim]);
+set(gca,'xtickLabel',[],'ytickLabel',[]);%,'clim',[0 uplim]);
 
 axis square, box on;
 if(i==1)
@@ -57,4 +60,4 @@ end
 freezeColors
 end
 % saveas(gca,['/Users/Wendydi/Dropbox/TaoFusion/presentation/images/ResultCom50_partial.png']) 
-print('-depsc','-tiff','-r300','./result/ResultCom50_partial');
+% print('-depsc','-tiff','-r300','./result/ResultCom50_partial');
