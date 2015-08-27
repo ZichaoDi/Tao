@@ -19,12 +19,12 @@ grad_type = 'adj';  % 'adj' = adjoint/exact
 Tomo_startup;
 NoSelfAbsorption=0;
 onlyXRF=0;
-N=5;% [33 17 9 5 3];% 17 9];%[129 65  9 5];% 
+N=20;% [33 17 9 5 3];% 17 9];%[129 65  9 5];% 
 NF = [0*N; 0*N; 0*N];
 nm=length(N);
-numThetan=30; % number of scanning angles/projections
+numThetan=12; % number of scanning angles/projections
 numChannel=500;% number of energy channels on xrf detector
-angleScale=2; %1: half angle; 2: full angle
+angleScale=1; %1: half angle; 2: full angle
 W_level=cell(nm,1);
 xrf_level=cell(nm,1);
 xtm_level=cell(nm,1);

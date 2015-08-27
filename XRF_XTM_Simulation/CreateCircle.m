@@ -40,6 +40,7 @@ W(sub2ind([mLocal(1)+1,mLocal(2)+1,NumElement],indx1,indy1,3*ones(size(indx1))))
 W(sub2ind([mLocal(1)+1,mLocal(2)+1,NumElement],indx1,indy1,4*ones(size(indx1))))=1.05;
 W(sub2ind([mLocal(1)+1,mLocal(2)+1,NumElement],indx1,indy1,5*ones(size(indx1))))=1.05;
 clims=[0 max(W(:))];
+EleOri=[19 31 26 46 50];
 if(plotElement)
     figure('name','Sample');
     for i=1:5

@@ -43,7 +43,7 @@ end
 %-----------------------------------------------------------------------
 W0=W(:);
 rng('default');
-x0=W0+10^(0)*rand(nTol,1);
+x0=10^(-1)*rand(nTol,1);
 err0=norm(x0-W0);
 e=cputime;
 low=0*ones(size(x0));
@@ -54,7 +54,7 @@ up=1e6*ones(size(x0));
 % options = optimset('Display','iter','TolFun',1e-8);
 % xstar = lsqnonlin(fctn,x0,[],[],options);
 % %%======================================================================
-maxiter=100;
+maxiter=300;
 beta=[ 0 1e8 1 ];
 beta2=[1  1   0];
 for betai=1:length(beta)
