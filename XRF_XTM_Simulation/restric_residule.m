@@ -15,3 +15,4 @@ for i=1:m
         BB(i,2*i+1)=1;
    end
 end
+BB=BB./2;

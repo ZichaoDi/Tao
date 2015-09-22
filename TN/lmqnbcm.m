@@ -168,7 +168,7 @@ while (~conv);
     end;
     nf  = nf  + nf1;
     nit = nit +   1;
-    %---------------------------------------------------------
+     %---------------------------------------------------------
     % update active set, if appropriate
     %---------------------------------------------------------
     newcon = 0;
@@ -179,7 +179,7 @@ while (~conv);
         dipiv = norm(ipivot-ipivot0);
         if (dipiv > 0); ierror = 0; end;
     end;
-    if (ierror == 3);
+   if (ierror == 3);
         xstar = x;
         NF(1,nind) = NF(1,nind) + nit;
         NF(2,nind) = NF(2,nind) + nf;

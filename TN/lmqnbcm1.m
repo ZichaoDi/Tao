@@ -10,7 +10,7 @@ function [xstar, f, g, ierror, eig_val] = ...
 global sk yk sr yr yksk yrsr
 global NF N current_n  fiter itertest
 global gv ipivot nit
-global i_cauchy W0  m NumElement
+global i_cauchy W0 WS synthetic m NumElement
 global Joint 
 %---------------------------------------------------------
 % check that initial x is feasible and that the bounds
@@ -140,6 +140,11 @@ while (~conv);
         %         pause;
     end;
     %#######################
+    if(synthetic & current_n==N(1))
+        xOld=WS(:);
+    else
+        xOld= x;
+    end
     x   = x_new;
     f   = f_new;
     g   = g_new;
@@ -147,6 +152,18 @@ while (~conv);
     %#######################
     nf  = nf  + nf1;
     nit = nit +   1;
+    %---------------------------------------------------------
+    % update active set, if appropriate
+    %---------------------------------------------------------
+    newcon = 0;
+    if (abs(alpha-spe) <= 10*eps);
+        ipivot0 = ipivot;
+        newcon = 1;
+        [ipivot, flast] = modz (x, p, ipivot, low, up, flast, f, alpha);
+        dipiv = norm(ipivot-ipivot0);
+        if (dipiv > 0); ierror = 0; end;
+    end;
+ 
     ASchange(nit)=norm(-ipivot+ipivotOld,1);
     if (ierror == 3);
         disp('LMQNBC: termination 3')
@@ -184,7 +201,7 @@ while (~conv);
     %--------------------------------- Error
     ErrIter(nit)=norm(x-W0);
     fprintf(1,'%4i   %4i   %4i   % .8e   %.1e     %.1e      %.3e\n', ...
-        nit, nf, ncg, f, gnorm, alpha, norm(x-W0));
+        nit, nf, ncg, f, gnorm, alpha, norm(x-xOld));
     %---------------------------------------------------------
     % test for convergence
     %---------------------------------------------------------
@@ -287,7 +304,7 @@ while (~conv);
     argvec = [accrcy gnorm xnorm];
     
     [p, gtp, ncg1, d, eig_val{nit+1}] = ...
-        modlnp (d, x, g, 10, upd1, ireset, bounds, ipivot, argvec, sfun);
+        modlnp (d, x, g, maxit, upd1, ireset, bounds, ipivot, argvec, sfun);
     ncg = ncg + ncg1;
     % %---------------------------------------------------------
     % update LMQN preconditioner

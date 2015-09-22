@@ -11,10 +11,9 @@ f_XRF=0;
 f_XTM=0;
 mtol=prod(m);
 W=reshape(W,mtol,NumElement);
-Beta=1e0;
 %%%%% =================== Attenuation Matrix at beam energy
 MUe=reshape(MU_e(:,1,1),1,1,NumElement);
-
+L=reshape(full(L),numThetan,nTau+1,m(1),m(2));
 MUe_XTM=reshape(MU_e(:,1,1),1,1,NumElement).*XTMscale;
 MU_XTM=sum(reshape(W,m(1),m(2),NumElement).*repmat(MUe,[m(1),m(2),1]),3).*XTMscale;
 %%%%% ====================================================================

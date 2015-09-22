@@ -14,7 +14,7 @@ global problem_name it WS
 % SETUP FOR MULTIGRID
 %----------------------------------------------------------------------
 more off;
-do_setup;
+% do_setup;
 
 NF   = [0*N; 0*N; 0*N];
 it   = 1;
@@ -55,11 +55,14 @@ hold on;
 %----------------------------------------------------------------------
 step_bnd  = 0;
 v = mgrid(v0,fnl,0,step_bnd);
-
+f0=sfun(v0);
+ResMg=[];
 doplot(it,v, W_level);
 report_results(N);
 MGiter=0;for i=1:size(NF,2),MGiter=MGiter+sum(NF(2:3,i),1)/(4^(i-1));end
-ErrMg(it,1:2)=[MGiter,norm(v-WS(:))];
+f=sfun(v);
+ResMg(1,1:3)=[1,f0,norm(v0-WS(:))];
+ResMg(it+1,1:3)=[MGiter,f, norm(v-WS(:))];
 more on;
 %----------------------------------------------------------------------
 % UPDATE MULTIGRID GRAPH

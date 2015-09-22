@@ -42,7 +42,6 @@ W(sub2ind([mLocal(1)+1,mLocal(2)+1,NumElement],indx1,indy1,5*ones(size(indx1))))
 % W_sample10=W;
 % save W_sample10 W_sample10
 clims=[0 max(W(:))];
-plotElement=1;
 if(plotElement)
     figure('name','Sample');
     for i=1:5

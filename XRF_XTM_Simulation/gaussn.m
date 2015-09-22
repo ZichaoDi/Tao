@@ -66,6 +66,7 @@ while(norm(gc) > tol & itc <= maxit)
     %%%-----------------------------------------------------------------
 %     if(itc>2)
 %     figure(15),plot(ee(:,itc-1)./ee(:,itc-2));%plot((WS(:)-xold)./(xt-xold),'ro-')
+figure(9);surf(reshape(ee(:,itc-1),N(1),N(1)));drawnow;
 %     end
 %     figure(16),subplot(1,3,1),plot(1:current_n^2,WS(:)-xold,'b.-',1:current_n^2,xt-xold,'ro-');
 %     subplot(1,3,2),imagesc(reshape(WS(:)-xold,current_n,current_n));

@@ -3,12 +3,6 @@
 global plotSpecSingle BeforeEmit plotTravel SSDlet NoSelfAbsorption
 global fig2  fig5 finalfig eX eY
 global SigMa_XTM SigMa_XRF LogScale
-plotTravel=0; % If plot the intersection of beam with object
-plotSpec = 0; % Do you want to see the spectra? If so plotSpec = 1
-plotUnit=0;
-plotSpecSingle=0;
-NoSelfAbsorption=0;
-Tomo_startup;
 more off;
 % load slice1_50;
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet

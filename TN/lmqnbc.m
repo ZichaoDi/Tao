@@ -8,15 +8,19 @@ function [xstar, f, g, ierror] = ...
 % For further details, see routine tnbc.
 %---------------------------------------------------------
 global sk yk sr yr yksk yrsr releps
-global NF N current_n  fiter itertest
+global NF N current_n  fiter itertest WS
 global ptest gv ipivot nit
 global i_cauchy m NumElement
-global maxiter Joint 
+global maxiter Joint synthetic 
 %---------------------------------------------------------
 % check that initial x is feasible and that the bounds
 % are consistent
 %---------------------------------------------------------
-xOld=x;
+if(synthetic)
+    xOld=WS(:);
+else
+    xOld=x;
+end
 [f, g] = feval (sfun, x);
 oldf   = f;
 fiter(1)=oldf;
@@ -141,10 +145,10 @@ while (~conv);
         else
         [x_new, f_new, g_new, nf1, ierror, alpha,ipivot,newcon,flast] = lin_proj (p, x, f, g, alpha0, sfun, low, up,ipivot,flast,newcon); 
         end
+
     else
         [x_new, f_new, g_new, nf1, ierror, alpha] = lin1 (p, x, f, alpha0, g, sfun);
     end
-    
     Cauchy=0;
     %---------------------------------------------------------%    
     if (alpha == 0 & alpha0 ~= 0 | ierror == 3);
@@ -160,7 +164,9 @@ while (~conv);
         %         pause;
     end;
     %#######################
-    xOld=x;
+    if(~synthetic)
+        xOld=x;
+    end
     x   = x_new;
     f   = f_new;
     g   = g_new;
@@ -169,17 +175,16 @@ while (~conv);
     nf  = nf  + nf1;
     nit = nit +   1;
     ASchange(nit)=norm(-ipivot+ipivotOld,1);
-%     save ASchange ASchange
     %---------------------------------------------------------
     % update active set, if appropriate
     %---------------------------------------------------------
-    %     newcon = 0;
-    %     if (abs(alpha-spe) <= 10*eps);% | alpha==1
-    %         disp('update ipivot due to tiny step length')
-    %         newcon = 1;
-    %         ierror = 0;
-    %         [ipivot, flast] = modz (x, p, ipivot, low, up, flast, f, alpha);
-    %     end;
+    newcon = 0;
+    if (abs(alpha-spe) <= 10*eps)
+        % disp('update ipivot due to tiny step length')
+        newcon = 1;
+        ierror = 0;
+        [ipivot, flast] = modz (x, p, ipivot, low, up, flast, f, alpha);
+    end;
     
     if (ierror == 3);
         disp('LMQNBC: termination 3')
@@ -215,11 +220,17 @@ while (~conv);
     ftest = 1 + abs(f);
     xnorm = norm(x,'inf');
     %--------------------------------- Error
-%    ErrIter(nit)=norm(x-xOld);
+    ErrIter(nit)=norm(x-xOld);
 %    ErrDis{nit}=reshape(x-xOld,current_n, current_n,NumElement);
 %    save ErrDis ErrDis
-
-%     figure(9);
+    if(mod(nit-1,10)==0)
+     figure(9);
+     subplot(2,2,1), surf(reshape(x-xOld,N(1),N(1))),title('2D Error')
+     subplot(2,2,2), plot(x-xOld,'r.-'); title('Vectorized Error')
+     subplot(2,2,3),imagesc(reshape(p,N(1),N(1))); title('current search direction')
+     subplot(2,2,4),imagesc(reshape(xOld-x,N(1),N(1))); title('step to solution')
+     drawnow;
+    end
 %     for iPlot=1:NumElement
 %     subplot(1,5,iPlot),surf(ErrDis(:,:,iPlot));
 %     end
@@ -237,7 +248,7 @@ end
     [conv, flast, ipivot] = cnvtst (alpha, pnorm, xnorm, ...
         difnew, ftest, gnorm, gtp, f, flast, g, ...
         ipivot, accrcy);
-%     if ((nit>=2 & abs(ErrIter(nit)-ErrIter(nit-1))<eps)|nit>=maxiter);
+    %  if ((nit>=2 & abs(ErrIter(nit)-ErrIter(nit-1))<eps)|nit>=maxiter);
     if(nit>=maxiter)
         conv = 1;
     end;
@@ -246,10 +257,10 @@ end
 %     figure(10);plot(1:length(x),g,'r-',BindInd,g(BindInd),'ro',1:length(x),ipivot,'g.-',1:length(x),p,'m*');
 %     pause;
     plotAS=0;
-    if((mod(nit,10)==0 | conv | nit==1) & Joint~=-1 & plotAS==1) %
+    if((mod(nit,10)==0 | conv | nit==1)  & plotAS==1) %
         %     if(conv& Joint~=-1 & plotAS)
-        load BindInd
-        figure(10);plot(1:length(x),g,'r.-',1:length(BindInd),g(BindInd),'ro',1:length(x),ipivot,'g.-',1:length(x),p,'m*');
+        % load BindInd
+        % figure(10);plot(1:length(x),g,'r.-',1:length(BindInd),g(BindInd),'ro',1:length(x),ipivot,'g.-',1:length(x),p,'m*');
         addAS=length(find(-ipivot+ipivotOld==1));
         dropAS=length(find(-ipivot+ipivotOld==-1));
         figure(19);plot(1:nit,ASchange,'r.-');
@@ -337,7 +348,7 @@ end
     argvec = [accrcy gnorm xnorm];
     
     [p, gtp, ncg1, d] = ...
-        modlnp (d, x, g, 10, upd1, ireset, bounds, ipivot, argvec, sfun);
+        modlnp (d, x, g, maxit, upd1, ireset, bounds, ipivot, argvec, sfun);
     
     %------------ Start reduction of the dimension of Hp=-g;
 %     free_ind=find(ipivot==0);

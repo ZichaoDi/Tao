@@ -11,7 +11,7 @@ global GRAPH_N_OLD GRAPH_INDEX_OLD
 % SETUP FOR FULL MULTIGRID
 %----------------------------------------------------------------------
 more off;
-do_setup;
+% do_setup;
 
 NF   = [0*N; 0*N; 0*N];
 it   = 1;

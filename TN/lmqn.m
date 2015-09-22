@@ -7,7 +7,7 @@ function [xstar, f, g, ierror] = ...
 global hyk ykhyk hyr yksr ykhyr yrhyr sk yk sr yr ...
     hg gsk yksk yrsr
 global NF N current_n maxiter  fiter itertest
-global gv ptest Joint
+global gv ptest Joint synthetic WS
 %---------------------------------------------------------
 % set up
 %---------------------------------------------------------
@@ -100,7 +100,11 @@ while (~conv);
     pe     = pnorm + eps;
     spe    = stepmx/pe;
     alpha0 = step1 (f, gtp, spe);
-    xOld=x;
+    if(synthetic)
+        xOld=WS(:);
+    else
+        xOld=x;
+    end
     if(Joint==1)
     [x, f, g, nf1, ierror, alpha,f_xrf,f_xtm] = lin1 (p, x, f, alpha0, g, sfun);
     else
@@ -120,6 +124,12 @@ while (~conv);
         fprintf(1,'%4i   %4i   %4i   % .8e   %.1e     %.1e      %.3e\n', ...
         nit, nf, ncg, f, gnorm, alpha, norm(x-xOld));
     end
+    if(mod(nit,5)==0)
+        figure(9)
+        surf(reshape(abs(xOld-x),N(1),N(1)));
+        drawnow;
+    end
+
     if (ierror == 3);
         if isempty(ncg); ncg = 0; end;
         xstar = x;

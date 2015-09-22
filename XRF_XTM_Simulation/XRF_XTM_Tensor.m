@@ -183,12 +183,13 @@ for n=1:numThetan
     end
     DisR(:,n)=Rdis';
 end
-
+ if(~synthetic)
  XRF_Simulated=XRF;
  DisR_Simulated=DisR;
- XRF=permute(data(:,:,:),[2 3 1]);
- DisR=squeeze(sum(data_h(end,:,:),1))';
-%  save(['Simulated_1',num2str(N(1)),'_',num2str(numThetan),'_',num2str(NumElement),'_',num2str(numChannel), 'GlassRod.mat'],'DisR_Simulated','XRF','XRF_Simulated','DisR');
+ XRF=permute(data_xrf(:,:,:),[2 3 1]);
+ DisR=squeeze(sum(data_xrt(:,:,:),1))';
+ end
+% save(['Simulated_1',num2str(N(1)),'_',num2str(numThetan),'_',num2str(NumElement),'_',num2str(numChannel), 'Seed.mat'],'DisR_Simulated','XRF','XRF_Simulated','DisR');
 
 if(LogScale)
     % SigMa_XTM=1./diag(cov(-log(DisR'./I0)));

@@ -48,7 +48,6 @@ accrcy = 100*eps;
 %---------------------------------------------------------
 [xstar, f, g, ierror, eig_val] = ...
   lmqnm (x, sfun, maxiter, maxit, maxfun, stepmx, accrcy);
-
 if (nargout == 5)
   varargout{1} = eig_val;
 end

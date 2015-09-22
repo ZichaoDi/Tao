@@ -1,6 +1,6 @@
 %%%Simulate XRT of a given object with predifined detector and beam
-global plotSpecSingle BeforeEmit
-global LogScale EmptyBeam
+global plotSpecSingle BeforeEmit N level
+global LogScale EmptyBeam synthetic 
 plotSpecSingle=0;
 more off;
 %%-----------------------------------------------
@@ -12,20 +12,26 @@ mtol=prod(m);
 eX=ones(m(1),1);
 eY=ones(m(2),1);
 DisR=zeros(nTau+1,numThetan);
-Ltol=cell(numThetan,nTau+1);
-L=sparse(numThetan*(nTau+1),prod(m));
+% if(level==1)
+     L=sparse(numThetan*(nTau+1),prod(m));
+% else
+%     L_H=sparse(numThetan*(nTau+1),prod(m));
+% end
 % L=zeros(numThetan,nTau+1,m(1),m(2));
 GlobalInd=cell(numThetan,nTau+1);
 fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel);
 EmptyBeam=[];
 for n=1:numThetan
     theta=thetan(n)/180*pi;
-    fprintf(1,'====== Angle Number  %d of %d: %d\n',n,numThetan,thetan(n));
+    if(mod(10,n)==0)
+        fprintf(1,'====== Angle Number  %d of %d: %d\n',n,numThetan,thetan(n));
+    end
     TransMatrix=[cos(theta) sin(theta);-sin(theta) cos(theta)];
     DetKnot=DetKnot0*TransMatrix;
     SourceKnot=SourceKnot0*TransMatrix;
     Rdis=1*I0*ones(nTau+1,1);
     for i=1:nTau+1 %%%%%%%%%================================================================
+       % if(level==1)
         % Initialize
         xbox=[omega(1) omega(1) omega(2) omega(2) omega(1)];
         ybox=[omega(3) omega(4) omega(4) omega(3) omega(3)];
@@ -54,24 +60,30 @@ for n=1:numThetan
         
         if(~isempty(index))
             EmptyBeam=[EmptyBeam,(n-1)*numThetan+i];
-            for j=1:size(index,1)
-                CurrentCellCenter=[(index(j,1)-1/2)*dz(1)-abs(omega(1)),(index(j,2)-1/2)*dz(2)-abs(omega(3))];
-                currentInd=sub2ind(m,index(j,2),index(j,1));
-                %  L(n,i,index(j,2),index(j,1))=Lvec(j);
-                L(sub2ind([numThetan,nTau+1],n,i),sub2ind(m,index(j,2),index(j,1)))=Lvec(j);
-            end
+            currentInd=sub2ind(m,index(:,2),index(:,1));
+            L(sub2ind([numThetan,nTau+1],n,i),currentInd)=Lvec;
             Rdis(i)=I0*exp(-eX'*(MU_XTM.*reshape(L(sub2ind([numThetan,nTau+1],n,i),:),m))*eY);%%I0*exp(-eX'*(MU_XTM.*reshape(L(n,i,:,:),subm,subn))*eY); %% Discrete case
         end
+       % else
+       %     L_H(sub2ind([numThetan,nTau+1],n,i),:)= ...
+       %     downdate_L(L(sub2ind([numThetan,nTau+1],n,i),:),level);
+       % end
     end
-    DisR(:,n)=Rdis';
+   %  if(level==1)
+         DisR(:,n)=Rdis';
+   %  end
 end
-%  DisR_real=reshape(XRF(:,slice,5,:),nTau+1,numThetan);
+% if(level>1)
+% L=L_H;
+% end
 %%==============================================================
-DisR_real=DisR;
-DisR=squeeze(data)';%data;%DisR_real;
+if(~synthetic)
+DisR_Simulated=DisR;
+DisR=squeeze(data_xrt)';
+end
 if(LogScale)
     SigMa_XTM=1./(-log(DisR(:)));
 else
     SigMa_XTM=1./DisR(:);
 end
-% SigMa_XTM=ones(size(SigMa_XTM));
+SigMa_XTM=ones(size(SigMa_XTM));

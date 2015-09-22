@@ -34,7 +34,8 @@ doplot(it,v,W_level);
 report_results(N);
 MGiter=0;
 for i=1:size(NF,2),MGiter=MGiter+sum(NF(2:3,i),1)/(4^(i-1));end
-ErrMg(it,1:2)=[MGiter,norm(v-WS(:))];
+f=sfun(v);
+ResMg(it+1,1:3)=[MGiter,f,norm(v-WS(:))];
 more on;
 %----------------------------------------------------------------------
 figure(findobj('Tag', 'multigrid_graph'));

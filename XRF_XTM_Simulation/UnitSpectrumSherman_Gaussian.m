@@ -8,11 +8,15 @@
 % mu=n_a*CrossSection
 % K_shell:0 L1:1 L2:2 L3:3 M1:4 M2:5 M3:6 M4:7 M5:8
 % KA_LINE:0 KB:1 LA:2 LB:3
-global TakeLog I0 M Element
+global TakeLog I0 M Element synthetic
 
 E0=20;
 E2I=1/3e8/6.62e-34*1e-15;
-I0=E0*E2I;
+if(synthetic)
+    I0=E0*E2I;
+else
+    I0=3900;
+end
 NumElement=length(Z);
 NA=6.02e23;%Avogadro's number
 if(ismac)

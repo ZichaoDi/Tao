@@ -27,7 +27,6 @@ if(alpha1<=1)
         Armijo =ft<f+1e-4*trialAlpha(trial)*q0;
 %         Wolfe = abs(p'*gt)<0.25*abs(q0);%
         if (Armijo );%& Wolfe);
-            fprintf('Armijo and Wolfe satisfied, trial= %d\n',trial);
             ierror = 0;
             iproj  = 1;
             x   = xt;
@@ -35,6 +34,7 @@ if(alpha1<=1)
             g   = gt;
             alpha1=trialAlpha(trial);
             itcnt=trial;
+            fprintf('Armijo satisfied, alpha = %d\n',alpha1);
             break;
         end;
     end
@@ -56,7 +56,9 @@ if(iproj==0)
     end;
     itcnt=itcnt+trialLength;
 end
-if (ierror == 3); alpha1 = 0; end;
+if (ierror == 3); alpha1 = 0; 
+fprintf('line search failed \n')
+end;
 nf1 = itcnt;
 
 if (nargout == 7)

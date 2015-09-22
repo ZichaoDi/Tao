@@ -1,7 +1,7 @@
 function [f,g,f_XRF,f_XTM]=sfun_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0)
 global NumSSDlet numChannel numThetan NoSelfAbsorption XTMscale
 global  SigMa_XTM SigMa_XRF
-global LogScale Beta TempBeta
+global LogScale Beta TempBeta 
 % load WeightMatrix
 f=0;
 TempBeta=1;
@@ -9,7 +9,7 @@ f_XRF=0;
 f_XTM=0;
 mtol=prod(m);
 W=reshape(W,mtol,NumElement);
-% L=reshape(L,length(thetan),nTau+1,mtol);
+L=reshape(full(L),numThetan,nTau+1,m(1),m(2));
 %%%%% =================== Attenuation Matrix at beam energy
 MUe=reshape(MU_e(:,1,1),1,1,NumElement);
 MUe_XTM=reshape(MU_e(:,1,1),1,1,NumElement).*XTMscale;
@@ -21,7 +21,7 @@ eY=ones(m(2),1);
 g=zeros(mtol,NumElement);
 for n=1:numThetan
     if(LogScale)
-        Mt=-log(DisR(:,n)).*1e-7;%DisR(:,n)./1e7;% 
+        Mt=-log(DisR(:,n)./I0); 
     else
         Mt=DisR(:,n);
     end

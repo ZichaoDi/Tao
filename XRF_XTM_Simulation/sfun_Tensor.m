@@ -4,7 +4,8 @@ global  SigMa_XRF
 
 mtol=prod(m);
 W=reshape(W,mtol,NumElement);
-% L=reshape(L,length(thetan),nTau+1,mtol);
+I0_s=1e0;
+xrfData=xrfData*I0_s;
 %%%%% ====================================================================
 f=zeros(numThetan,1);
 g=zeros(numThetan,mtol,NumElement);
@@ -40,11 +41,7 @@ for n=1:numThetan
                     if(~isempty(SelfInd{n,i,sub_v}{2}) & ~NoSelfAbsorption)
                         for d=1:NumSSDlet
                             if(~isempty(SelfInd{n,i,sub_v}{2}{d}))
-                                PA=-sum(sum(bsxfun(@times,W(SelfInd{n,i,sub_v}{2}{d},:),reshape(SelfInd{n,i,sub_v}{4}{d},length(SelfInd{n,i,sub_v}{2}{d}),NumElement,NumElement)),1),2);
-TaylorOrder=[0:1];  
-                              % TaylorApprox=sum(PA.^TaylorOrder./factorial(TaylorOrder));
                                 OutTens_d(i,sub_v,d,:)=exp(-sum(sum(bsxfun(@times,W(SelfInd{n,i,sub_v}{2}{d},:),reshape(SelfInd{n,i,sub_v}{4}{d},length(SelfInd{n,i,sub_v}{2}{d}),NumElement,NumElement)),1),2));
-                              %  squeeze(TaylorApprox)-squeeze(OutTens_d(i,sub_v,d,:))                               
                                 for d_sub=1:length(SelfInd{n,i,sub_v}{2}{d})
                                     v_self=SelfInd{n,i,sub_v}{2}{d}(d_sub);
                                     TempSub(i,v_self,:,:)=TempSub(i,v_self,:,:)-...

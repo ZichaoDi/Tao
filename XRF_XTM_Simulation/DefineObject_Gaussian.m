@@ -10,7 +10,7 @@
 %%=======================================================================
 global x y m omega dz AbsorbScale MU_e Z
 global XTMscale NumLines NumElement
-global MUe N 
+global MUe N synthetic 
 
 load PeriodicTable
 AbsorbScale=1e-0;
@@ -26,31 +26,25 @@ center=[0 0];
 %%%========================== the grids of object
 xc = getNodalGrid(omega,[m(2) m(1)]);
 %%%========================== assign weight matrix for each element in each pixel
-% %  Z=[20 29 79 30 46 59];%[ 8 14 20 29 30];%[ 8 14 20 29 79 30 46 59];%[29 30 46 49 57 74 79];%% 42 29 26 ];%% reference sample: Pb La Pd Mo Cu Fe Ca
-%   Z=[19 31 26  46 50]; multi-model synthetic samples
-Z=[14 29 30 74 79];% Glass Rod
-% Z=[14 16 17 19 20 22 23 24 25 26 28 29 30 31 80 33 34 35 92 37 38 39 40];% Complete Seed
-% CreateElement; %load Phantom5; W=Phantom5; NumElement=size(W,3);%% shepp-logan phantom
-% CreateCircle; %% sample with circles
-%------------------------- a sample to test the different impact from heavy and light elements
-% SvenSample;
-%----------------------------
-% load W_sample10
-% W=W_sample10;
+if(synthetic)
+Z = [6 8 14 20 26];% Golosio's Sample
+else
+% Z=[14 29 30 74 79];% Glass Rod
+Z=[14 16 17 19 20 22 23 24 25 26 28 29 30 31 80 33 34 35 92 37 38 39 40];% Complete Seed
+end
 %---------------------------
 NumElement=length(Z);
-
-% W=rand(m(1),m(2),NumElement);
-W=zeros(m(1),m(2),NumElement);
-    for tsub=1:NumElement
-        % W(:,:,tsub)=4e-4*abs(flipud(permute(iR(:,:,slice(tsub)),[2 1 3])));%tsub*2e-1;% Seed
-        W(:,:,tsub)=abs(fliplr(rot90(permute(iR(tsub,:,:),[2 3 1]))));%tsub*2e-1;% GlassRod
+W=ones(N(level),N(level),NumElement);
+if(level==1)
+    if(synthetic)
+    CreateCircle; %% Golosio's sample 
+    else
+         for tsub=1:NumElement
+          W(:,:,tsub)=abs(flipud(permute(iR_num(:,:,slice(tsub)),[2 1 3])));%tsub*2e-1;% Seed
+        % % W(:,:,tsub)=abs(fliplr(rot90(permute(iR(tsub,:,:),[2 3 1]))));%tsub*2e-1;% GlassRod
+         end
     end
-W(find(W(:)>0.1&W(:)<0.3))=0.8;
-%%%%%%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-% ComChoices=nchoosek(1:6,3);
-% Z=Z(ComChoices(1,:));
-% Z=Z(1:NumElement);
+end
 UnitSpectrumSherman_Gaussian; %% Produce BindingEnergy M
 %%=======================================================================
 NumLines=NumElement;
@@ -89,41 +83,3 @@ if(PlotObject)
 end
 
 %%=======================================================================
-% W(1,1,:)=[7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];
-% W(1,2,:)=[7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];
-%  W(1,3,:)=[7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];
-% W(2,1,:)= [7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];
-% W(2,2,:)=[7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];
-% W(2,3,:)=[7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];
-% W(3,1,:)=[7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];
-% W(3,2,:)=[7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];
-% W(3,3,:)=[7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];
-%%%========================================
-% W(1,1,:)=[1 1 1 0.5 ];
-% W(1,2,:)=[0 1 1 0.5];
-% W(1,3,:)=[1 1 1 0];
-% W(2,1,:)=[0 0.5 0.5 0.5];
-% W(2,2,:)=[0.7 0.3 0 0.5];
-% W(2,3,:)=[0.5 0.5 1 0];
-% W(3,1,:)=[0.8 0 0 0.2];
-% W(3,2,:)=[1 0 1 0.1];
-% W(3,3,:)=[0 0.1 1 0];
-%%%========================================
-% W(1,1,:)=[1 0 0 0 ];
-% W(1,2,:)=[0 1 0 0];
-% W(1,3,:)=[1 0 0 0];
-% W(1,4,:)=[1 0 0 0];
-% W(2,1,:)=[0 0 0 1];
-% W(2,2,:)=[0 0 1 0] ;
-% W(2,3,:)=[0 1 0 0];
-% W(2,4,:)=[0 1 0 0];
-
-% W(3,1,:)=[0 0 1 0] ;
-% W(3,2,:)= [1 0 0 0] ;
-% W(3,3,:)=[0 1 0 0];
-% W(3,4,:)=[0 1 0 0];
-% W(4,1,:)=[0 0 1 0] ;
-% W(4,2,:)= [1 0 0 0] ;
-% W(4,3,:)=[0 1 0 0];
-% W(4,4,:)=[0 1 0 0];
-%%%========================== locate element attenuation coefficient

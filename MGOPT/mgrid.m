@@ -5,7 +5,7 @@ function [v, varargout] = mgrid(v0,fnl,res_prob,step_bnd)
 % Usage: v = mgrid(v0,fnl,res_prob)
 %--------------------------------------------------
 global current_fnl WS
-global N current_n
+global N current_n NumElement
 global bounds v_low v_up LevelScale
 global GRAPH_N_OLD GRAPH_INDEX_OLD 
 global Hess_norm_H  x_level % norm of coarse-grid Hessian 
@@ -79,16 +79,18 @@ if (current_n <= nmin);
     %--------------------------------------------------
     % solve (exactly) problem on coarsest grid
     %--------------------------------------------------
-    nit_solve = 1;
+    nit_solve = 10;
     if (step_bnd == 0);
         if (bounds);
-            
             nit = nit_solve; [v,F,G,ierror]  = tnbcm(v0,myfun,v_low,v_up,nit);
         else
             nit = nit_solve; [v,F,G,ierror]  = tnm  (v0,myfun,nit);
         end;
     else
         [low1,up1] = get_bnd (v0,step_bnd);
+        figure(10);plot(1:length(v_low),v_low,'r.-',1:length(v_low),low1,'bo-'...
+                        ,1:length(v_up),v_up,'r.-',1:length(v_up),up1,'bo-')
+ 
         nit = nit_solve; [v,F,G,ierror]  = tnbcm(v0,myfun,low1,up1,nit);
     end
         x_level{level}=v;
@@ -96,7 +98,7 @@ else
     %--------------------------------------------------
     % "relax" on current grid
     %--------------------------------------------------
-    nit_solve=10;
+    nit_solve=1;
     if (step_bnd == 0);
         if (bounds);
             nit = nit_solve; [v,F,G,ierror,eig_val]  = tnbcm(v0,myfun,v_low,v_up,nit);
@@ -104,8 +106,8 @@ else
             nit = nit_solve; [v,F,G,ierror,eig_val]  = tnm  (v0,myfun,nit);
         end;
     else
-        [low1,up1] = get_bnd (v0,step_bnd);
-        nit = nit_solve; [v,F,G,ierror,eig_val]  = tnbcm(v0,myfun,low1,up1,nit);
+            [low1,up1] = get_bnd (v0,step_bnd);
+           nit = nit_solve; [v,F,G,ierror,eig_val]  = tnbcm(v0,myfun,low1,up1,nit);
     end;
 
     if (res_prob);
@@ -121,7 +123,7 @@ else
     current_v   = downdate(v,0);
 
     if (bounds);
-            [v_low_1,v_up_1] = set_bounds(j+1,res_prob);
+        [v_low_1,v_up_1] = set_bounds(j+1,res_prob);
         current_v = bound_project(current_v,v_low_1,v_up_1);
     end;
     
@@ -189,9 +191,10 @@ else
     init_level=0;
     global_setup;
     %--------------------------------------------------
-%     figure(17);
-%     plot(1:length(Gv2),Gv2,'r.-',1:length(dGv),LevelScale*dGv,'go-')
-%     Gv2'*current_v/Fv2
+    figure(17);
+    plot(1:length(Gv2),Gv2,'r.-',1:length(dGv),dGv,'go-',linspace(1,length(dGv),length(Gv)),Gv,'b.-')
+    legend('Gradient of Downdated Variable','Downdated Fine Gradient','Fine Gradient')
+    %--------------------------------------------------
     tau         = Gv2 - LevelScale(j-1)*dGv;
     fnl2        = fnl2 + tau;
     %--------------------------------------------------
@@ -219,17 +222,23 @@ else
     [e2, pred]  = mgrid(current_v,fnl2,1,step_bnd1);
     j           = j-1;
     current_n   = N(j);
-    e           = update(e2-current_v,1)/LevelScale(j);
+    e           = update(e2-current_v,1)*1/LevelScale(j);
     %##################################################################
     plotStep=1;
     if(plotStep)
     if (current_n==N(1))
-    figure(15);subplot(1,2,1),imagesc(reshape(e2,N(j+1),N(j+1)));
-    subplot(1,2,2),imagesc(reshape(current_v,N(j+1),N(j+1)));
+    figure(15);subplot(1,2,1),imagesc(sum(reshape(e2,N(j+1),N(j+1),NumElement),3));
+    title('Coarse-level Solution')
+    subplot(1,2,2),imagesc(sum(reshape(current_v,N(j+1),N(j+1),NumElement),3));
+    title('Coarse-leveal Initial')
     ttH=linspace(0,1,length(e2));
     tt = linspace(0,1,length(v))';
-    figure(16); subplot(2,2,[1 2]),plot(tt,WS(:)-v,'b.-',tt,e,'ro-'); title('Step (blue), Direction (red)');%,tt,interp1q(ttH',e2-current_v,tt),'gs-'
-    subplot(2,2,3),plot(tt,WS(:)-v,'b.-'),subplot(2,2,4),plot(tt,e,'ro-')
+    figure(16); subplot(2,3,1),imagesc(sum(reshape(WS(:)-v,N(1),N(1),NumElement),3)); title('step to solution');
+    subplot(2,3,2),imagesc(sum(reshape(e,N(1),N(1),NumElement),3)); 
+    title('updated search direction')
+    subplot(2,3,3),imagesc(reshape(e2-current_v,N(2),N(2)));title('coarse search direction')
+    subplot(2,3,4),plot(tt,WS(:)-v,'b.-'),subplot(2,3,5),plot(tt,e,'ro-')
+    subplot(2,3,6),plot(ttH,e2-current_v,'m*-')
     end
     end
     %%###################################################################
@@ -285,11 +294,14 @@ else
     GRAPH_N_OLD = current_n;
     GRAPH_INDEX_OLD = GRAPH_INDEX_OLD+1;
     %--------------------------------------------------
-    if (bounds);
-            [v_low,v_up] = set_bounds(j,res_prob);
-            ipivot = crash (v,v_low,v_up);
-            e(ipivot~=0)=0;
-    end;
+     if (bounds);
+             [v_low,v_up] = set_bounds(j,res_prob);
+    %         ipivot = crash (v,v_low,v_up);
+    %         e(ipivot~=0)=0;
+    %         if(~isempty(ipivot~=0))
+    %             fprintf('updated direction leads to out of bounds \n')
+    %         end
+     end;
     %--------------------------------------------------
     current_fnl = fnl;
     testd       = e'*Gvmg;
@@ -313,11 +325,9 @@ else
         if(bounds)
             [v, ~, ~, ~, alpha, ~, dfdp] = ...
                 lin_mg (e, v, Fvmg, alpha0, Gvmg, myfun,v_low,v_up);
-        alpha0
-        alpha
         else
-            [v, ~, ~, ~, alpha, ~, dfdp] = ...
-                lin2 (e, v, Fvmg, alpha0, Gvmg, myfun);
+           [v, ~, ~, ~, alpha, ~, dfdp] = ...
+               lin2 (e, v, Fvmg, alpha0, Gvmg, myfun);
         end
         dfdp = dfdp/npts;
         if (assess_print);
@@ -353,7 +363,7 @@ else
     %--------------------------------------------------
     disp(T)
     if (step_bnd == 0);
-        nit_solve=100;
+        nit_solve=1;
         if (bounds);           
             [v,F,G,ierror]  = tnbcm(v,myfun,v_low,v_up,nit_solve);           
         else

@@ -64,10 +64,10 @@ for n=1:length(thetan)
                                 temp_after=0;
                             end
                             
-                            %                             LinearInd1=sub2ind([NumElement,m(1),m(2),NumElement],repmat(1:NumElement,1,length(index_after(:,2))),repmat(index_after(:,2)',1,NumElement),...
-                            %                                 repmat(index_after(:,1)',1,NumElement),tsub*ones(1,NumElement*length(index_after(:,2))));
-                            %                             temp_d_sub=bsxfun(@times,reshape(MU_e(:,1,tsub+1),NumElement,1),Lvec_after');
-                            %                             temp_d(LinearInd1)=exp(-temp_after)*temp_d_sub(:);
+                            %  LinearInd1=sub2ind([NumElement,m(1),m(2),NumElement],repmat(1:NumElement,1,length(index_after(:,2))),repmat(index_after(:,2)',1,NumElement),...
+                            %  repmat(index_after(:,1)',1,NumElement),tsub*ones(1,NumElement*length(index_after(:,2))));
+                            %  temp_d_sub=bsxfun(@times,reshape(MU_e(:,1,tsub+1),NumElement,1),Lvec_after');
+                            %  temp_d(LinearInd1)=exp(-temp_after)*temp_d_sub(:);
                             for si=1:size(index_after,1)
                                 temp_d(:,index_after(si,2),index_after(si,1),tsub)=temp_d(:,index_after(si,2),index_after(si,1),tsub)+exp(-temp_after)*reshape(MU_e(:,1,tsub+1),NumElement,1).*Lvec_after(si);
                                 if(ismac)

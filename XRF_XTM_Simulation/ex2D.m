@@ -1,15 +1,19 @@
-%%%Simulate XRF of a given object with predifined detector and beam
-startup;
-close all;
-global plotTravel plotSpec plotWhole
-plotTravel=0; % If plot the intersection of beam with object
-plotSpec = 1; % Do you want to see the spectra? If so plotSpec = 1
-plotWhole =0;
-if plotSpec
-    fig1=[]; fig2=[]; fig3=[];
+do_setup;
+ Joint=1;
+optXTM_XRF;
+ Joint=0;
+ optXTM_XRF;
+ return;
+mg;
+for i=1:10;
+    mgit;
 end
-DefineObject; %% Produce W, MU
-Define_Detector_Beam; %% provide the beam source and Detectorlet
-UnitSpectrum; %% Produce BindingE M
-theta=1:10:90;% Projection Angles
-XRF=SimulateXRF(W,MU,BindingE,M,theta,DetChannel, numChannel, nTau, DetKnot0, SourceKnot0);
+save(['xs_mg',num2str(N(1)),'_',num2str(nTau+1),'_',num2str(numThetan),'TNBC_',sample,'.mat'],'v0','v');
+% profile on;
+% p = profile('info');
+% save myprofiledata9 p
+% clear p
+% load myprofiledata
+% profview(0,p)
+
+

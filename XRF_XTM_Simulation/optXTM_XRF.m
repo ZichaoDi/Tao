@@ -5,7 +5,8 @@ global SigMa_XTM SigMa_XRF
 global NumElement err0 fiter nit maxiter xinitial
 
 %%%----------------------------Initialize dependent variables
-do_setup;
+% do_setup;
+more off;
 level=1;
 current_n = N(level);
 W= W_level{level};
@@ -36,49 +37,46 @@ xs_ele=[];
 for ele=1;%:length(slice)
   
 if(Joint==-1)
-     fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,L,thetan,m,nTau,NumElement); %% on W
-     %fctn=@(MU)sfun_XTM_tensor(DisR,MU,I0,L,m,nTau);% NumElement=1;%% on attenuation coefficients \miu
+    mode='xrt';
+     if(ReconAttenu)
+     fctn=@(MU)sfun_XTM_tensor(DisR,MU,I0,L,m,nTau);% on attenuation coefficients miu
+     else
+     fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,L,thetan,m,nTau,NumElement);%on W
+     end
 elseif(Joint==1)
+    mode='joint';
     fctn=@(W)sfun_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 %     fctn_f=@(W)func_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 %     fctn_J=@(W)sfun_Tensor_Joint_Jacobian(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
 else
+    mode='xrf';
     fctn=@(W)sfun_Tensor(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
-%     fctn_par=@(W)sfun_Tensor_par(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
-%     fctn1=@(W)sfun_AdiMat(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
+    % fctn=@(W)sfun_XRF_full2(W,XRF,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau);
+    % fctn_par=@(W)sfun_Tensor_par(W,XRF,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau);
+
 end
 
 %-----------------------------------------------------------------------
-rng('default')
-x0=WS(:); %+0.04*rand(size(WS(:)));%
-%{
-x0=[];
-for ii=1:length(slice),
-x0(:,:,ii) =flipud(flipud( iR(:,:,slice(ii)))');
-end
-x0=x0(:)+1e0*rand(size(WS(:)));
-x0(find(x0<0))=0;
-%x0=x0(:);%*1e-2+rand(size(x0(:)));%reshape(iR(:,:,slice),[size(iR,1)*size(iR,2),1]);%10^(-1)*rand(nTol,1)+WS(:);%ww(:);%;%
-load xs18_300_13TN_full
-x0=xstar;
-%}
+x0=v0;
+% x0=WS(:)+rand(size(WS(:)))*1e-0;
 xinitial=x0;
 err0=norm(x0-W0);
 e=cputime;
 low=0*ones(size(x0));
 up=inf*ones(size(x0));
 % %%========================================================================
-% [xstar,f,g,ierror] = tnbcm (x0,fctn,low,up,maxiter);
-maxiter=100;
-bounds=0;
+maxiter=400;
 if(bounds)
- [xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
-  save(['xs_Joint',num2str(N(1)),'_',num2str(maxiter),'_',num2str(numThetan),'TNBC_glassrod.mat'],'x0','xstar');
+     [xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
+     save(['xs_',mode,num2str(N(1)),'_',num2str(maxiter),'_',num2str(nTau+1),'_',num2str(numThetan),'TNBC_',sample,'.mat'],'x0','xstar');
 else
-%  [xstar,f,g,histout,costdata] = gaussn(x0,fctn,1e-18,maxiter);
-%  save(['xs',num2str(N(1)),'_',num2str(maxiter),'_',num2str(numThetan),'GN.mat'],'x0','xstar');
- [xstar,f,g,ierror] = tn (x0,fctn);
- save(['xs_Joint_real',num2str(N(1)),'_',num2str(maxiter),'_',num2str(numThetan),'tn_glassrod.mat'],'x0','xstar');
+    if(strcmp(solver,'GN'))
+        [xstar,f,g,histout,costdata] = gaussn(x0,fctn,1e-18,maxiter);
+        save(['xs',num2str(N(1)),'_',num2str(maxiter),'_',num2str(numThetan),'GN.mat'],'x0','xstar');
+    elseif(strcmp(solver,'TN'))
+         [xstar,f,g,ierror] = tn (x0,fctn);
+         save(['xs_',mode,num2str(N(1)),'_',num2str(maxiter),'_',num2str(nTau+1),'_',num2str(numThetan),'TN_',sample,'.mat'],'x0','xstar');
+     end
 end
 
 xs_ele(:,ele)=xstar;
@@ -92,14 +90,14 @@ end
 % semilogy(1:NumElement,err,'r.-');
 doplot(1,xstar, W_level);
 if(Joint==1)
-convFac_J=(fiter(end)/fiter(1))^(1/(nit+1));
-t_J=cputime-e;
-errTol_J=norm(xstar-WS(:))/norm(err0);
+    convFac_J=(fiter(end)/fiter(1))^(1/(nit+1));
+    t_J=cputime-e;
+    errTol_J=norm(xstar-WS(:))/norm(err0);
 elseif(Joint==0)
-  convFac_XRF=(fiter(end)/fiter(1))^(1/(nit+1));
-  t_XRF=cputime-e;
-errTol_XRF=norm(xstar-WS(:))/norm(err0);
-end
+    convFac_XRF=(fiter(end)/fiter(1))^(1/(nit+1));
+      t_XRF=cputime-e;
+    errTol_XRF=norm(xstar-WS(:))/norm(err0);
+    end
 % if(DiscreteScale)
 %     AbsErr=norm(xtemp(:)-W(:))
 %     IniErr=norm(err0_1)
