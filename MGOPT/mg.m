@@ -15,7 +15,6 @@ global problem_name it WS
 %----------------------------------------------------------------------
 more off;
 % do_setup;
-
 NF   = [0*N; 0*N; 0*N];
 it   = 1;
 fnl  = 0*v0;
@@ -57,7 +56,7 @@ step_bnd  = 0;
 v = mgrid(v0,fnl,0,step_bnd);
 f0=sfun(v0);
 ResMg=[];
-doplot(it,v, W_level);
+% doplot(it,v, W_level);
 report_results(N);
 MGiter=0;for i=1:size(NF,2),MGiter=MGiter+sum(NF(2:3,i),1)/(4^(i-1));end
 f=sfun(v);

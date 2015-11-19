@@ -48,7 +48,7 @@ elseif(level~=1 & init_level == 0)
         XRF=XRF-shift_y+shift_yH;
         xrf_level{level}=XRF;
     elseif(Joint==-1)
-         DisR=DisR-shift_yT'+shift_yTH';
+        % DisR=DisR-shift_yT'+shift_yTH';
         xtm_level{level}=DisR;
     end
 end

@@ -30,11 +30,11 @@ more off;
 it = it + 1;
 step_bnd = 0;
 v  = mgrid(v,fnl,0,step_bnd);
-doplot(it,v,W_level);
+% doplot(it,v,W_level);
 report_results(N);
 MGiter=0;
 for i=1:size(NF,2),MGiter=MGiter+sum(NF(2:3,i),1)/(4^(i-1));end
-f=sfun(v);
+[f,g]=sfun(v);
 ResMg(it+1,1:3)=[MGiter,f,norm(v-WS(:))];
 more on;
 %----------------------------------------------------------------------

@@ -10,22 +10,20 @@ nh=nH*2-1;
     vH_b=zeros(nH+2,nH+2,NumElement);vH_b(2:nH+1,2:nH+1,:)=vH;
     vH=vH_b;
     vh=zeros(nh+2,nh+2,NumElement);
-    wm=1/4;
-    wl=1/8;
-    wd=1/16;
+    w=[1/4,1/8,1/16];
     for i=2:nH+1
         for nj=2:nH+1
-            vh(2*(i-1),2*(nj-1),:)=vH(i,nj,:)*wm;
+            vh(2*(i-1),2*(nj-1),:)=vH(i,nj,:)*w(1);
             
-            vh(2*(i-1)-1,2*(nj-1),:)=(vH(i-1,nj,:)+vH(i,nj,:))*wl;
-            vh(2*(i-1)+1,2*(nj-1),:)=(vH(i,nj,:)+vH(i+1,nj,:))*wl;
-            vh(2*(i-1),2*(nj-1)-1,:)=(vH(i,nj-1,:)+vH(i,nj,:))*wl;
-            vh(2*(i-1),2*(nj-1)+1,:)=(vH(i,nj,:)+vH(i,nj+1,:))*wl;
+            vh(2*(i-1)-1,2*(nj-1),:)=(vH(i-1,nj,:)+vH(i,nj,:))*w(2);
+            vh(2*(i-1)+1,2*(nj-1),:)=(vH(i,nj,:)+vH(i+1,nj,:))*w(2);
+            vh(2*(i-1),2*(nj-1)-1,:)=(vH(i,nj-1,:)+vH(i,nj,:))*w(2);
+            vh(2*(i-1),2*(nj-1)+1,:)=(vH(i,nj,:)+vH(i,nj+1,:))*w(2);
             
-            vh(2*(i-1)-1,2*(nj-1)-1,:)=(vH(i-1,nj,:)+vH(i,nj,:)+vH(i-1,nj-1,:)+vH(i,nj-1,:))*wd;
-            vh(2*(i-1)+1,2*(nj-1)+1,:)=(vH(i+1,nj,:)+vH(i,nj,:)+vH(i+1,nj+1,:)+vH(i,nj+1,:))*wd;
-            vh(2*(i-1)-1,2*(nj-1)+1,:)=(vH(i-1,nj,:)+vH(i,nj,:)+vH(i,nj+1,:)+vH(i-1,nj+1,:))*wd;
-            vh(2*(i-1)+1,2*(nj-1)-1,:)=(vH(i+1,nj,:)+vH(i,nj,:)+vH(i,nj-1,:)+vH(i+1,nj-1,:))*wd;
+            vh(2*(i-1)-1,2*(nj-1)-1,:)=(vH(i-1,nj,:)+vH(i,nj,:)+vH(i-1,nj-1,:)+vH(i,nj-1,:))*w(3);
+            vh(2*(i-1)+1,2*(nj-1)+1,:)=(vH(i+1,nj,:)+vH(i,nj,:)+vH(i+1,nj+1,:)+vH(i,nj+1,:))*w(3);
+            vh(2*(i-1)-1,2*(nj-1)+1,:)=(vH(i-1,nj,:)+vH(i,nj,:)+vH(i,nj+1,:)+vH(i-1,nj+1,:))*w(3);
+            vh(2*(i-1)+1,2*(nj-1)-1,:)=(vH(i+1,nj,:)+vH(i,nj,:)+vH(i,nj-1,:)+vH(i+1,nj-1,:))*w(3);
         end
     end
     

@@ -48,5 +48,6 @@ end
 stepmx = 10;
 accrcy = 100*eps;
 %---------------------------------------------------------
-[xstar, f, g, ierror] = ...
+[xstar, f, g, ierror,per_report] = ...
    lmqnbc (x, sfun, low, up, maxit, maxfun, stepmx, accrcy);
+   save per_report per_report

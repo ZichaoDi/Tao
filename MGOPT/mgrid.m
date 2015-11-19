@@ -79,7 +79,7 @@ if (current_n <= nmin);
     %--------------------------------------------------
     % solve (exactly) problem on coarsest grid
     %--------------------------------------------------
-    nit_solve = 10;
+    nit_solve = 20;
     if (step_bnd == 0);
         if (bounds);
             nit = nit_solve; [v,F,G,ierror]  = tnbcm(v0,myfun,v_low,v_up,nit);
@@ -190,10 +190,17 @@ else
     current_n   = N(j);
     init_level=0;
     global_setup;
-    %--------------------------------------------------
-    figure(17);
-    plot(1:length(Gv2),Gv2,'r.-',1:length(dGv),dGv,'go-',linspace(1,length(dGv),length(Gv)),Gv,'b.-')
-    legend('Gradient of Downdated Variable','Downdated Fine Gradient','Fine Gradient')
+    %%====================================================
+    if(current_n==N(2))
+        clims=[min(Gv),max(Gv)];
+        figure(11);subplot(2,2,1),imagesc(reshape(Gv,N(1),N(1)),clims); title('current fine-level gradient')
+        subplot(2,2,2),imagesc(reshape(dGv,N(2),N(2)),clims); title('Downdated Gradient')
+        subplot(2,2,3),imagesc(reshape(dGv-Gv2,N(2),N(2)),clims);title('Shift')
+        % plot(1:length(Gv2),Gv2,'r.-',1:length(dGv),dGv,'go-',linspace(1,length(dGv),length(Gv)),Gv,'b.-')
+        % legend('Gradient of Downdated Variable','Downdated Fine Gradient','Fine Gradient')
+        subplot(2,2,4);imagesc(reshape(Gv2,N(2),N(2)),clims); title('Gradient of Downdated Variables')
+    end
+    %%===================================================
     %--------------------------------------------------
     tau         = Gv2 - LevelScale(j-1)*dGv;
     fnl2        = fnl2 + tau;
@@ -223,23 +230,28 @@ else
     j           = j-1;
     current_n   = N(j);
     e           = update(e2-current_v,1)*1/LevelScale(j);
+    ee=e2-current_v;
+    save('ee.mat'); 
     %##################################################################
     plotStep=1;
     if(plotStep)
-    if (current_n==N(1))
-    figure(15);subplot(1,2,1),imagesc(sum(reshape(e2,N(j+1),N(j+1),NumElement),3));
-    title('Coarse-level Solution')
-    subplot(1,2,2),imagesc(sum(reshape(current_v,N(j+1),N(j+1),NumElement),3));
-    title('Coarse-leveal Initial')
-    ttH=linspace(0,1,length(e2));
-    tt = linspace(0,1,length(v))';
-    figure(16); subplot(2,3,1),imagesc(sum(reshape(WS(:)-v,N(1),N(1),NumElement),3)); title('step to solution');
-    subplot(2,3,2),imagesc(sum(reshape(e,N(1),N(1),NumElement),3)); 
-    title('updated search direction')
-    subplot(2,3,3),imagesc(reshape(e2-current_v,N(2),N(2)));title('coarse search direction')
-    subplot(2,3,4),plot(tt,WS(:)-v,'b.-'),subplot(2,3,5),plot(tt,e,'ro-')
-    subplot(2,3,6),plot(ttH,e2-current_v,'m*-')
-    end
+        if (current_n==N(1))
+            % clim_v=[min(v),max(v)];
+            figure(15);subplot(1,3,1),imagesc(sum(reshape(e2,N(j+1),N(j+1),NumElement),3));
+            title('Coarse-level Solution')
+            subplot(1,3,2),imagesc(sum(reshape(current_v,N(j+1),N(j+1),NumElement),3));
+            title('Coarse-leveal Initial')
+            subplot(1,3,3),imagesc(sum(reshape(v,N(j),N(j),NumElement),3))
+            title('Fine-level Current Solution')
+            ttH=linspace(0,1,length(e2));
+            tt = linspace(0,1,length(v))';
+            figure(16); subplot(2,3,1),imagesc(sum(reshape(WS(:)-v,N(1),N(1),NumElement),3)); title('step to solution');
+            subplot(2,3,2),imagesc(sum(reshape(e,N(1),N(1),NumElement),3)); 
+            title('updated search direction')
+            subplot(2,3,3),imagesc(reshape(e2-current_v,N(2),N(2)));title('coarse search direction')
+            subplot(2,3,4),plot(tt,WS(:)-v,'b.-'),subplot(2,3,5),plot(tt,e,'ro-')
+            subplot(2,3,6),plot(ttH,e2-current_v,'m*-')
+        end
     end
     %%###################################################################
     init_level=1;

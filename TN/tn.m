@@ -1,4 +1,4 @@
-function [xstar, f, g, ierror] = tn (x, sfun)
+function [xstar, f, g, ierror,per_nob] = tn (x, sfun)
 %---------------------------------------------------------
 % this routine solves:  minimize f(x)
 %
@@ -45,4 +45,5 @@ end
 stepmx = 10;
 accrcy = 100*eps;
 %---------------------------------------------------------
-[xstar, f, g, ierror] = lmqn (x, sfun, maxit, maxfun, stepmx, accrcy);
+[xstar, f, g, ierror, per_nob] = lmqn (x, sfun, maxit, maxfun, stepmx, accrcy);
+save per_nob per_nob

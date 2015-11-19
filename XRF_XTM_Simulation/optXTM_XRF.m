@@ -1,6 +1,6 @@
 
 global low up penalty
-global W0 current_n
+global W0 current_n L I0 m DisR 
 global SigMa_XTM SigMa_XRF
 global NumElement err0 fiter nit maxiter xinitial
 
@@ -39,7 +39,8 @@ for ele=1;%:length(slice)
 if(Joint==-1)
     mode='xrt';
      if(ReconAttenu)
-     fctn=@(MU)sfun_XTM_tensor(DisR,MU,I0,L,m,nTau);% on attenuation coefficients miu
+     % fctn=@(MU)sfun_XTM_tensor(DisR,MU,I0,L,m,nTau);% on attenuation coefficients miu;
+     fctn=@(MU)sfun_T(MU);% on attenuation coefficients miu;
      else
      fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,L,thetan,m,nTau,NumElement);%on W
      end
@@ -65,16 +66,17 @@ e=cputime;
 low=0*ones(size(x0));
 up=inf*ones(size(x0));
 % %%========================================================================
-maxiter=400;
+maxiter=100;
 if(bounds)
      [xstar,f,g,ierror] = tnbc (x0,fctn,low,up);
      save(['xs_',mode,num2str(N(1)),'_',num2str(maxiter),'_',num2str(nTau+1),'_',num2str(numThetan),'TNBC_',sample,'.mat'],'x0','xstar');
 else
     if(strcmp(solver,'GN'))
+        fctn
         [xstar,f,g,histout,costdata] = gaussn(x0,fctn,1e-18,maxiter);
         save(['xs',num2str(N(1)),'_',num2str(maxiter),'_',num2str(numThetan),'GN.mat'],'x0','xstar');
     elseif(strcmp(solver,'TN'))
-         [xstar,f,g,ierror] = tn (x0,fctn);
+         [xstar,f,g,ierror,per_nob] = tn (x0,fctn);
          save(['xs_',mode,num2str(N(1)),'_',num2str(maxiter),'_',num2str(nTau+1),'_',num2str(numThetan),'TN_',sample,'.mat'],'x0','xstar');
      end
 end

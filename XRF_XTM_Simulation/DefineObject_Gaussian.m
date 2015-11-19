@@ -62,10 +62,9 @@ MUe=reshape(MU_e(:,1,1),1,1,NumElement);
 MU=sum(W.*repmat(MUe,[m(1),m(2),1]),3);
 %%=======smooth data
 % MU=BlurGaussian(MU);
-%{
-yy=reshape(smooth(MU(:)),m(1),m(2));
-MU=reshape(smooth(reshape(yy',prod(m),1)),m(1),m(2));
-%}
+%%=======
+%yy=reshape(smooth(MU(:)),m(1),m(2));
+%MU=reshape(smooth(reshape(yy',prod(m),1)),m(1),m(2));
 %%===================
 XTMscale=1e0;
 MU_XTM=MU.*XTMscale;

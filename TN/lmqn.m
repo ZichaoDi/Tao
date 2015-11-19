@@ -1,4 +1,4 @@
-function [xstar, f, g, ierror] = ...
+function [xstar, f, g, ierror, per_nob] = ...
     lmqn (x, sfun, maxit, maxfun, stepmx, accrcy)
 %---------------------------------------------------------
 % truncated-newton method for unconstrained minimization
@@ -31,7 +31,11 @@ end;
 %---------------------------------------------------------
 % compute initial function value and related information
 %---------------------------------------------------------
-xOld=x;
+if(synthetic)
+    xOld=WS(:);
+else
+    xOld=x;
+end
 if(Joint==1)
 [f, g,f_xrf,f_xtm] = feval (sfun, x);
 else
@@ -50,6 +54,9 @@ else
 fprintf(1,'%4i   %4i   %4i   % .8e   %.1e     %.1e      %.3e\n', ...
     nit, nf, ncg, f, gnorm, 1, norm(xOld-x));
 end
+
+per_nob=[];
+per_nob(1,:)=[nit, nf, ncg, f, gnorm, 1, norm(x-xOld)];
 %---------------------------------------------------------
 % check for small gradient at the starting point.
 %---------------------------------------------------------
@@ -124,10 +131,17 @@ while (~conv);
         fprintf(1,'%4i   %4i   %4i   % .8e   %.1e     %.1e      %.3e\n', ...
         nit, nf, ncg, f, gnorm, alpha, norm(x-xOld));
     end
-    if(mod(nit,5)==0)
-        figure(9)
-        surf(reshape(abs(xOld-x),N(1),N(1)));
-        drawnow;
+    per_nob(nit+1,:)=[nit, nf, ncg, f, gnorm, alpha, norm(x-xOld)];
+    plotIter=0;
+    if(mod(nit-1,10)==0 & plotIter)
+     figure(9);
+     subplot(2,2,1), surf(reshape(x-xOld,N(1),N(1))),title('2D Error')
+     subplot(2,2,2), plot(x-xOld,'r.-'); title('Vectorized Error')
+     subplot(2,2,3),imagesc(reshape(p,N(1),N(1))); title('current search direction')
+     subplot(2,2,4),imagesc(reshape(xOld-x,N(1),N(1))); title('step to solution')
+     figure(10);semilogy(nit,f,'r.-');hold on;
+     % figure, plot(g,'r*-');
+     drawnow;
     end
 
     if (ierror == 3);

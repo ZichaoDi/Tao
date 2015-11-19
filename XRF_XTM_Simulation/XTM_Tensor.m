@@ -1,5 +1,5 @@
 %%%Simulate XRT of a given object with predifined detector and beam
-global plotSpecSingle BeforeEmit N level
+global plotSpecSingle BeforeEmit N 
 global LogScale EmptyBeam synthetic 
 plotSpecSingle=0;
 more off;
@@ -11,19 +11,21 @@ Energy=BindingEnergy;
 mtol=prod(m);
 eX=ones(m(1),1);
 eY=ones(m(2),1);
+if(level==1)
 DisR=zeros(nTau+1,numThetan);
-% if(level==1)
-     L=sparse(numThetan*(nTau+1),prod(m));
-% else
-%     L_H=sparse(numThetan*(nTau+1),prod(m));
-% end
-% L=zeros(numThetan,nTau+1,m(1),m(2));
+EmptyBeam=[];
+end
+if(level==1)
+   L=sparse(numThetan*(nTau+1),prod(m));
+else
+   L=sparse(numThetan*(nTau+1),prod(m));
+   % L_H=sparse(numThetan*(nTau+1),prod(m));
+end
 GlobalInd=cell(numThetan,nTau+1);
 fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel);
-EmptyBeam=[];
 for n=1:numThetan
     theta=thetan(n)/180*pi;
-    if(mod(10,n)==0)
+    if(mod(n,10)==0)
         fprintf(1,'====== Angle Number  %d of %d: %d\n',n,numThetan,thetan(n));
     end
     TransMatrix=[cos(theta) sin(theta);-sin(theta) cos(theta)];
@@ -31,13 +33,13 @@ for n=1:numThetan
     SourceKnot=SourceKnot0*TransMatrix;
     Rdis=1*I0*ones(nTau+1,1);
     for i=1:nTau+1 %%%%%%%%%================================================================
-       % if(level==1)
+        %if(level==1)
         % Initialize
         xbox=[omega(1) omega(1) omega(2) omega(2) omega(1)];
         ybox=[omega(3) omega(4) omega(4) omega(3) omega(3)];
         BeforeEmit=1;
         %============================= Plot Grid and Current Light Beam
-        if(plotSpec & i==1)
+        if(plotSpec);% & i==1)
             finalfig=figure('name',sprintf('XRF at beam %d with angle %d',i,thetan(n)));
             subplot(1,2,1);
             plotGrid(xc,omega,[m(2) m(1)]);
@@ -58,24 +60,24 @@ for n=1:numThetan
         %%%%%%%%================================================================
         GlobalInd{n,i}=index;
         
-        if(~isempty(index))
+        if(~isempty(index)& norm(Lvec)>0)
             EmptyBeam=[EmptyBeam,(n-1)*numThetan+i];
             currentInd=sub2ind(m,index(:,2),index(:,1));
             L(sub2ind([numThetan,nTau+1],n,i),currentInd)=Lvec;
             Rdis(i)=I0*exp(-eX'*(MU_XTM.*reshape(L(sub2ind([numThetan,nTau+1],n,i),:),m))*eY);%%I0*exp(-eX'*(MU_XTM.*reshape(L(n,i,:,:),subm,subn))*eY); %% Discrete case
         end
-       % else
-       %     L_H(sub2ind([numThetan,nTau+1],n,i),:)= ...
-       %     downdate_L(L(sub2ind([numThetan,nTau+1],n,i),:),level);
-       % end
+        % else
+        %     L_H(sub2ind([numThetan,nTau+1],n,i),:)= ...
+        %     L(sub2ind([numThetan,nTau+1],n,i),:)*IhH{level}';
+        % end
     end
-   %  if(level==1)
+     if(level==1)
          DisR(:,n)=Rdis';
-   %  end
+     end
 end
-% if(level>1)
-% L=L_H;
-% end
+if(level>1)
+L=L;%L_H;
+end
 %%==============================================================
 if(~synthetic)
 DisR_Simulated=DisR;

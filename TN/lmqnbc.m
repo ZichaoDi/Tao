@@ -1,4 +1,4 @@
-function [xstar, f, g, ierror] = ...
+function [xstar, f, g, ierror,per_report] = ...
     lmqnbc (x, sfun, low, up, maxit, maxfun, stepmx, accrcy)
 %---------------------------------------------------------
 % This is a bounds-constrained truncated-newton method.
@@ -88,6 +88,8 @@ else
 fprintf(1,'%4i   %4i   %4i   % .8e   %.1e     %.1e      %.3e\n', ...
     nit, nf, ncg, f, gnorm, 1, norm(xOld-x));
 end
+per_report=[];
+per_report(1,:)=[nit, nf, ncg, f, gnorm, 1, norm(xOld-x)];
 %---------------------------------------------------------
 % check if the initial point is a local minimum.
 %---------------------------------------------------------
@@ -242,6 +244,7 @@ else
     fprintf(1,'%4i   %4i   %4i   % .8e   %.1e     %.1e      %.3e\n', ...
         nit, nf, ncg, f, gnorm, alpha, norm(x-xOld));
 end
+per_report(nit+1,:)=[nit, nf, ncg, f, gnorm, 1, norm(xOld-x)];
     %---------------------------------------------------------
     % test for convergence
     %---------------------------------------------------------
