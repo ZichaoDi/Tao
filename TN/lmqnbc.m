@@ -76,8 +76,13 @@ end;
 ipivotOld=ipivot;
 g = ztime (g, ipivot);
 gnorm = norm(g,'inf');
+if(Joint==1)
 fprintf(1,'%4i   %4i   %4i   % .8e   % .8e   % .8e    %.1e     %.1e      %.3e\n', ...
     nit, nf, ncg, f,  f_xrf, f_xtm,gnorm, 1, err0);
+else
+    fprintf(1,'%4i   %4i   %4i   % .8e   %.1e     %.1e      %.3e\n', ...
+        nit, nf, ncg, f, gnorm, 1, err0);
+end
 %---------------------------------------------------------
 % check if the initial point is a local minimum.
 %---------------------------------------------------------

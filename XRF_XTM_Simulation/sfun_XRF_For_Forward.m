@@ -1,4 +1,5 @@
 function [f,g]=sfun_XRF_For_Forward(W,xrfData,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,LocalInd,L_after,thetan,m,nTau)
+%%=========XRF Objective Function with only the forward model part, and the self-absorption is implemented in a pixel-by-pixel for loop fashion
 global BeforeEmit  NumSSDlet NoSelfAbsorption
 f=0;
 W=reshape(W,m(1),m(2),NumElement);

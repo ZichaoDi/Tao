@@ -1,4 +1,6 @@
 function [f,g]=sfun_XRF_EM(W,xrfData,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,thetan,m,nTau)
+%%==== XRF objective function in a maximum-likelihood model
+%%==== Self-absorption is implemented in a pixel-pixel for loop fashion
 global BeforeEmit  SSDlet dz omega NumSSDlet NoSelfAbsorption testind
 f=0;
 W=reshape(W,m(1),m(2),NumElement);

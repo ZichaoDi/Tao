@@ -19,10 +19,10 @@ grad_type = 'adj';  % 'adj' = adjoint/exact
 Tomo_startup;
 NoSelfAbsorption=0;
 onlyXRF=0;
-N=20;% [33 17 9 5 3];% 17 9];%[129 65  9 5];% 
+N=10;% [33 17 9 5 3];% 17 9];%[129 65  9 5];% 
 NF = [0*N; 0*N; 0*N];
 nm=length(N);
-numThetan=12; % number of scanning angles/projections
+numThetan=5; % number of scanning angles/projections
 numChannel=500;% number of energy channels on xrf detector
 angleScale=1; %1: half angle; 2: full angle
 W_level=cell(nm,1);
@@ -36,7 +36,8 @@ SigmaT=cell(nm,1);
 m_level=zeros(nm,2);
 nTau_level= zeros(nm,1);
 bounds = 1;  % no bound constraints
-Joint=1; % 0: XRF; -1: XTM; 1: Joint inversion
+Joint=0; % 0: XRF; -1: XTM; 1: Joint inversion
+Alternate=1;
 LogScale=1; %% determine if the XTM is solved taking log first or not
 % Beta=10^8;
 %----------------------------------------------------------------------
@@ -46,7 +47,7 @@ plotSpec = 0; % Do you want to see the spectra? If so plotSpec = 1
 plotTravel=0; % If plot the intersection of beam with object
 plotUnit=0;
 plotElement=0;
-plotResult=0;
+plotResult=1;
 %%------------------------------ Downsample data from finest level
 % for level=1:nm
 %     current_n=N(level);
@@ -83,7 +84,7 @@ else
 W=downdate(W(:),1);
 W=reshape(W,N(level),N(level),NumElement);
 end
-            current_n=N(level);
+    current_n=N(level);
     XRF_XTM_Tensor;
 %     XTM_Tensor;
     W_level{level}=W;
