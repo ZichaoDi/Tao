@@ -3,11 +3,10 @@ function [ft,gt]=sfun_Tensor_Patrick(W,xrfData,M,NumElement,L,GlobalInd,SelfInd,
 %%==== Self-absorption is implemented in a tensor-product fashion
 %%==== Solve W when the W in exponential term is fixed from the previous iteration
 global NumSSDlet numChannel NoSelfAbsorption numThetan
-global SigMa_XRF Wold
-
+global SigMa_XRF Wold W0
 mtol=prod(m);
 W=reshape(W,mtol,NumElement);
-Wold=reshape(Wold,mtol,NumElement);
+Wold=reshape(W0,mtol,NumElement);
 L=reshape(L,numThetan,nTau+1,mtol);
 %%%%% ====================================================================
 f=zeros(numThetan,1);
