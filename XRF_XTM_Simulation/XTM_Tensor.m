@@ -23,20 +23,25 @@ else
 end
 GlobalInd=cell(numThetan,nTau+1);
 fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel);
+%no_drift=1;
+%no_angel=1;
+drift_angel=no_angel*0.2*rand(size(thetan));
 for n=1:numThetan
-    theta=thetan(n)/180*pi;
+    theta=thetan(n)/180*pi+drift_angel(n);
     if(mod(n,10)==0)
-        fprintf(1,'====== Angle Number  %d of %d: %d\n',n,numThetan,thetan(n));
+        fprintf(1,'====== Angel Number  %d of %d: %d\n',n,numThetan,thetan(n));
     end
     TransMatrix=[cos(theta) sin(theta);-sin(theta) cos(theta)];
-    DetKnot=DetKnot0*TransMatrix;
-    SourceKnot=SourceKnot0*TransMatrix;
+    driftx=no_drift*1e-3*mean(DetKnot0(:,1))*rand(size(DetKnot0(:,1)));
+    drifty=no_drift*1e-3*mean(DetKnot0(:,2))*rand(size(DetKnot0(:,2)));
+    DetKnot=DetKnot0*TransMatrix+[driftx,drifty];
+    SourceKnot=SourceKnot0*TransMatrix+[driftx,drifty];
     Rdis=1*I0*ones(nTau+1,1);
+    xbox=[omega(1) omega(1) omega(2) omega(2) omega(1)];
+    ybox=[omega(3) omega(4) omega(4) omega(3) omega(3)];
     for i=1:nTau+1 %%%%%%%%%================================================================
         %if(level==1)
         % Initialize
-        xbox=[omega(1) omega(1) omega(2) omega(2) omega(1)];
-        ybox=[omega(3) omega(4) omega(4) omega(3) omega(3)];
         BeforeEmit=1;
         %============================= Plot Grid and Current Light Beam
         if(plotSpec);% & i==1)
@@ -44,7 +49,7 @@ for n=1:numThetan
             subplot(1,2,1);
             plotGrid(xc,omega,[m(2) m(1)]);
             hold on;
-           plot(DetKnot(:,1),DetKnot(:,2),'k+-',SourceKnot(:,1),SourceKnot(:,2),'m+-','LineWidth',0.5)
+            plot(DetKnot(:,1),DetKnot(:,2),'k+-',SourceKnot(:,1),SourceKnot(:,2),'m+-','LineWidth',0.5)
             axis equal
             set(gcf,'Units','normalized')
             set(gca,'Units','normalized')
@@ -59,7 +64,6 @@ for n=1:numThetan
         [index,Lvec,linearInd]=IntersectionSet(SourceKnot(i,:),DetKnot(i,:),xbox,ybox,theta);
         %%%%%%%%================================================================
         GlobalInd{n,i}=index;
-        
         if(~isempty(index)& norm(Lvec)>0)
             EmptyBeam=[EmptyBeam,(n-1)*numThetan+i];
             currentInd=sub2ind(m,index(:,2),index(:,1));

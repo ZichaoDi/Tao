@@ -8,7 +8,7 @@ global  L  m nTau DisR N Lap
 %%===== DisR: Radon transform with t beam lines and theta angles
 %%===== f: sum_i ||e^T(L_i.*I)e-M_i||^2, i=1..theta
 j=find(m(1)==N);
-scale=1;%prod(m-1);
+scale=prod(m-1);
 DR=DisR';
 %%%====================================
 rng('default');

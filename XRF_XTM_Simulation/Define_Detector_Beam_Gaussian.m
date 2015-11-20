@@ -47,7 +47,7 @@ NumSSDlet=5;
 SSDlet=[linspace(SSD0(2,1),SSD0(1,1),NumSSDlet)',...
             linspace(SSD0(2,2),SSD0(1,2),NumSSDlet)' ];
 % Acquire2Daps;
-thetan=linspace(0+2,angleRange*180+2,numThetan);
+thetan=linspace(0,angleRange*180,numThetan);
 % thetan=thetan-90;
 thetan=mod(thetan+360,360);%[0 60];%[1 60];%[1:40:180];% Projection Angles, has to be positive.
 % subTheta=1:length(thetan);

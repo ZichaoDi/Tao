@@ -21,9 +21,9 @@ solver = 'TN'; % 'GN'= Gauss-Newton;
 Tomo_startup;
 %%-----------------------------------------------
 load ./data/ApsDataExtract/DogaSeeds/DownSampleSeeds221_elements.mat
-synthetic=0;
+synthetic=1;
 if(synthetic)
-    sample='golosio';
+    sample='checkerboard';
     data_H=ones(221,27,725);
 else
     sample='seed';
@@ -35,8 +35,8 @@ data = permute(data_H,[2,3,1]);
 % iR=imread('~/Documents/Research/APSdata/GlassRod/Au_L_3/Au_L_0000.tif');
 %%-----------------------------------------------
 data_h=[];
-ang_rate=20;
-tau_rate=3;
+ang_rate=5;
+tau_rate=1;
 for ele=1:size(data,1)
     data_h(ele,:,:)=sum(data(ele,1:ang_rate:end,1:tau_rate:end),1);
 end
@@ -48,7 +48,7 @@ DecomposedElement=1;
 % data=squeeze(sum(data,2));
 %%-----------------------------------------------
 NoSelfAbsorption=1;
-N= [65];% 
+N= [120];% 
 nh=N(1); 
 n_level=1;
 level=[1:n_level];
@@ -63,7 +63,7 @@ clear x_ir y_ir x_num y_num
 NF = [0*N; 0*N; 0*N];
 nm=length(N);
 numThetan=size(data_h,2);
-angleRange=2;
+angleRange=1;
 W_level=cell(nm,1);
 xrf_level=cell(nm,1);
 xtm_level=cell(nm,1);

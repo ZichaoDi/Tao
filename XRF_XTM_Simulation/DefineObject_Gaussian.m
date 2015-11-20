@@ -38,6 +38,7 @@ W=ones(N(level),N(level),NumElement);
 if(level==1)
     if(synthetic)
     CreateCircle; %% Golosio's sample 
+    W=repmat(checkerboard(N(1)/8),[1 1 NumElement]);
     else
          for tsub=1:NumElement
           W(:,:,tsub)=abs(flipud(permute(iR_num(:,:,slice(tsub)),[2 1 3])));%tsub*2e-1;% Seed
