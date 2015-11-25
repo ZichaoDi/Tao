@@ -19,10 +19,10 @@ grad_type = 'adj';  % 'adj' = adjoint/exact
 Tomo_startup;
 NoSelfAbsorption=0;
 onlyXRF=0;
-N=10;% [33 17 9 5 3];% 17 9];%[129 65  9 5];% 
+% N=10;% [33 17 9 5 3];% 17 9];%[129 65  9 5];% 
 NF = [0*N; 0*N; 0*N];
 nm=length(N);
-numThetan=5; % number of scanning angles/projections
+numThetan=10; % number of scanning angles/projections
 numChannel=500;% number of energy channels on xrf detector
 angleScale=1; %1: half angle; 2: full angle
 W_level=cell(nm,1);
@@ -77,20 +77,16 @@ plotResult=1;
 % end
 %%------------------------------ Use same finest data for each level
 for level=1:nm
-
-if(level==1)
-    % W=Phantom33;
-else
-W=downdate(W(:),1);
-W=reshape(W,N(level),N(level),NumElement);
-end
     current_n=N(level);
-    XRF_XTM_Tensor;
-%     XTM_Tensor;
-    W_level{level}=W;
     if(level==1)
+        XRF_XTM_Tensor;
         WS=W;%MU;% 
+    else
+        W=downdate(W(:),1);
+        W=reshape(W,N(level),N(level),NumElement);
     end
+    % XTM_Tensor;
+    W_level{level}=W;
     xtm_level{level}=DisR;
     
     L_level{level}=L;

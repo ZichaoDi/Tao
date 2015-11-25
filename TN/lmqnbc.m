@@ -8,7 +8,7 @@ function [xstar, f, g, ierror] = ...
 % For further details, see routine tnbc.
 %---------------------------------------------------------
 global sk yk sr yr yksk yrsr
-global NF N current_n  fiter itertest
+global NF N current_n  fiter itertest ErrIter
 global ptest gv ipivot nit
 global i_cauchy W0  m NumElement
 global maxiter err0 Joint 
@@ -32,9 +32,9 @@ end;
 % initialize variables, parameters, and constants
 %---------------------------------------------------------
 if(Joint==1)
-fprintf(1,'  it     nf     cg           f             f_xrf             f_xtm            |g|        alpha        error\n');
+fprintf(1,'  it     nf     cg       f         f_xrf        f_xtm       |g|       alpha      error\n');
 else
-fprintf(1,'  it     nf     cg           f            |g|      alpha        error\n');   
+fprintf(1,'  it     nf     cg       f            |g|        alpha          error\n');   
 end
 
 nind   = find(N==current_n);
@@ -53,17 +53,20 @@ end;
 % compute initial function value and related information
 %---------------------------------------------------------
 if(Joint==1)
-[f,g, f_xrf, f_xtm] = feval (sfun, x);
+    [f,g, f_xrf, f_xtm] = feval (sfun, x);
 else
-  [f,g] = feval (sfun, x);
+    [f,g] = feval (sfun, x);
 end
 g0=g;
 nf     = 1;
 nit    = 0;
 nitOld=nit;
 flast  = f;
+itertest=[];
+ErrIter=[];
 itertest(1)=nf+ncg;
-%---------------------------------------------------------
+ErrIter(1)=err0;
+%-------------------------------------------------------
 % Test if Lagrange multipliers are non-negative.
 % Because the constraints are only bounds, the Lagrange
 % multipliers are components of the gradient.
@@ -77,7 +80,7 @@ ipivotOld=ipivot;
 g = ztime (g, ipivot);
 gnorm = norm(g,'inf');
 if(Joint==1)
-fprintf(1,'%4i   %4i   %4i   % .8e   % .8e   % .8e    %.1e     %.1e      %.3e\n', ...
+fprintf(1,'%4i   %4i   %4i   %.3e   %.3e    %.3e    %.1e    %.1e   %.3e\n', ...
     nit, nf, ncg, f,  f_xrf, f_xtm,gnorm, 1, err0);
 else
     fprintf(1,'%4i   %4i   %4i   % .8e   %.1e     %.1e      %.3e\n', ...
@@ -214,7 +217,7 @@ while (~conv);
     ftest = 1 + abs(f);
     xnorm = norm(x,'inf');
     %--------------------------------- Error
-    ErrIter(nit)=norm(x-W0);
+    ErrIter(nit+1)=norm(x-W0);
 %     ErrDis=reshape(x-W0,current_n, current_n, NumElement);
 %     figure(9);
 %     for iPlot=1:NumElement
@@ -222,7 +225,7 @@ while (~conv);
 %     end
 %     drawnow;
 if(Joint==1)
-    fprintf(1,'%4i   %4i   %4i   % .8e   % .8e    % .8e    %.1e     %.1e      %.3e\n', ...
+    fprintf(1,'%4i   %4i   %4i   %.3e   %.3e    %.3e    %.1e    %.1e   %.3e\n', ...
         nit, nf, ncg, f, f_xrf, f_xtm, gnorm, alpha, norm(x-W0));
 else
     fprintf(1,'%4i   %4i   %4i   % .8e   %.1e     %.1e      %.3e\n', ...

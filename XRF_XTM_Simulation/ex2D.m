@@ -1,4 +1,14 @@
 %%%Simulate XRF of a given object with predifined detector and beam
+do_setup;
+optXRF;
+Joint=1;
+optXRF;
+Alternate=0;
+optXRF;
+Joint=0;
+optXRF;
+save('drawing.mat','icycle','err0','errOut_XRF','errOut_Joint','maxOut','ErrIter_XRF','ErrIter_Joint');
+return;
 startup;
 close all;
 global plotTravel plotSpec plotWhole

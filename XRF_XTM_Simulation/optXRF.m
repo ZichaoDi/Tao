@@ -2,6 +2,8 @@ global low up penalty
 global W0 current_n Wold
 global SigMa_XTM SigMa_XRF Beta TempBeta
 global fctn_f err0 fiter nit maxiter
+global InTens OutTens MU_XTM
+global itertest ErrIter
 %%%----------------------------Initialize dependent variables
 % do_setup;
 level=1;
@@ -26,37 +28,82 @@ W0=W(:);
 if(TakeLog)
     fctn=@(W)sfun_XRF_EM(W,XRF,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,thetan,m,nTau);
 elseif(Alternate)
-    fctn=@(W)sfun_Tensor_Patrick(W,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
-    fctn1=@(W)sfun_Tensor(W,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
+    if(Joint==0)
+        fctn=@(W)sfun_Tensor_Patrick(W,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
+        fctn1=@(W)sfun_Tensor(W,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
+    elseif(Joint==1)
+        TempBeta=1; Beta=1e11;
+        fctn=@(W)sfun_Joint_admm(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
+    end
 else
-    fctn=@(W)sfun_Tensor(W,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
+    if(Joint==0)
+        fctn=@(W)sfun_Tensor(W,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
+    elseif(Joint==1)
+        TempBeta=1; Beta=1e8;
+        fctn=@(W)sfun_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,m,nTau,I0);
+    end
 end
 rng('default');
 x0=W(:)+1*10^(0)*rand(prod(m)*size(M,1),1);
 xinitial=x0;
+err0=norm(W0-xinitial);
 NF = [0*N; 0*N; 0*N];
 e=cputime;
 low=0*ones(size(x0));
 up=1e6*ones(size(x0));
-maxiter=20;
-maxOut=1;
+maxiter=40;
+maxOut=5;
 icycle=1;
 x=x0;
-Wold=x0;
-while(icycle<=maxOut)
-    [x,f,g,ierror] = tnbc (x,fctn,low,up);
-    Wold=x;
-    if(icycle==maxOut | norm(x-W0)<1e-6)
-        xstar=x;
-        break;
+Wold=x;
+errOut=[];
+[InTens, OutTens]=Calculate_Attenuation(Wold,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
+tic;
+f=feval(fctn,x0);
+t1=toc;
+tic;
+f=feval(fctn1,x0);
+t2=toc;
+return;
+
+if(Alternate)
+    while(icycle<=maxOut)
+        [InTens, OutTens]=Calculate_Attenuation(Wold,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
+    %%%%% =================== Attenuation Matrix at beam energy
+        MU_XTM=sum(reshape(Wold,m(1),m(2),NumElement).*repmat(MUe,[m(1),m(2),1]),3).*XTMscale;
+        [x,f,g,ierror] = tnbc (x,fctn,low,up);
+        errOut(icycle)=norm(W0-x);
+        if(Joint==0)
+            errOut_XRF=errOut;
+            figure(10);hold on;h1=semilogy(0:icycle,[err0,errOut_XRF],'bo-');drawnow;
+        elseif(Joint==1)
+            errOut_Joint=errOut;
+            figure(10);hold on;h2=semilogy(0:icycle,[err0,errOut_Joint],'r.-');drawnow;
+        end
+
+        Wold=x;
+        if(icycle==maxOut | norm(x-W0)<1e-6)
+            xstar=x;
+            break;
+        end
+        icycle=icycle+1;
     end
-    icycle=icycle+1;
+else
+    maxiter=40;
+    [xstar,f,g,ierror]=tnbc(x,fctn,low,up);
+    if(Joint==0)
+        ErrIter_XRF=ErrIter;
+        figure(10);hold on; h3=semilogy(linspace(0,maxOut,length(ErrIter_XRF)), ErrIter_XRF,'ms-');
+    else
+        ErrIter_Joint=ErrIter;
+        figure(10);hold on; h4=semilogy(linspace(0,maxOut,length(ErrIter_Joint)), ErrIter_Joint,'g*-');
+    end
 end
 %%%%%%%%%%%%%%%%%%%%=======================================================
 err=norm(xstar-W0(:))/norm(xinitial-W0(:));
 t=cputime-e;
 fprintf('residule is %d, time elapsed is %d \n',err,t);
-save(['xs',num2str(N(1)),'_',num2str(numThetan),'Golosio',num2str(TempBeta),'_',num2str(Beta),'_BI.mat'],'xstar','x0');
+% save(['xs',num2str(N(1)),'_',num2str(numThetan),'Golosio',num2str(TempBeta),'_',num2str(Beta),'_BI.mat'],'xstar','x0');
 %%%%%%%%%%%%%%%%%%%%=======================================================
 if(plotResult)
     figure('name','Elemental Residule');
@@ -90,7 +137,7 @@ if(plotResult)
         errCom=reshape(W0(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));
         imagesc(errCom,clims);colormap jet
         if(i==1)
-            ylabel('True Soluction','fontsize',12)
+            ylabel('True Solution','fontsize',12)
         end
         if(i==NumElement)
             hp4 = get(subplot(4,NumElement,i+2*NumElement),'Position');
