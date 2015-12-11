@@ -28,12 +28,16 @@ W0=W(:);
 if(TakeLog)
     fctn=@(W)sfun_XRF_EM(W,XRF,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,thetan,m,nTau);
 elseif(Alternate)
+    Mrep=repmat(reshape(M,[1,1,1 NumElement numChannel]),[numThetan,nTau+1,mtol,1,1]);
+    Mrep_P=repmat(reshape(M,[1,1 NumElement numChannel]),[nTau+1,mtol,1,1]);
+
     if(Joint==0)
-        fctn=@(W)sfun_Tensor_Patrick(W,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
-        fctn1=@(W)sfun_Tensor(W,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
+        % fctn=@(W)sfun_Tensor_Patrick(W,XRF,Mrep_P,NumElement,L,GlobalInd,SelfInd,m,nTau);
+        fctn=@(DW)sfun_linearized(DW,XRF,Mrep,NumElement,L,m,nTau);
+         fctn1=@(W)sfun_Tensor(W,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
     elseif(Joint==1)
         TempBeta=1; Beta=1e11;
-        fctn=@(W)sfun_Joint_admm(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
+        fctn=@(W)sfun_Joint_admm(W,XRF,DisR,MU_e,Mrep_P,NumElement,L,GlobalInd,SelfInd,m,nTau);
     end
 else
     if(Joint==0)
@@ -44,34 +48,61 @@ else
     end
 end
 rng('default');
-x0=W(:)+1*10^(0)*rand(prod(m)*size(M,1),1);
+x0=0*W(:)+1*10^(0)*rand(prod(m)*size(M,1),1);
 xinitial=x0;
 err0=norm(W0-xinitial);
 NF = [0*N; 0*N; 0*N];
 e=cputime;
-low=0*ones(size(x0));
-up=1e6*ones(size(x0));
 maxiter=40;
-maxOut=5;
+maxOut=10;
 icycle=1;
 x=x0;
 Wold=x;
 errOut=[];
-[InTens, OutTens]=Calculate_Attenuation(Wold,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
-tic;
-f=feval(fctn,x0);
-t1=toc;
-tic;
-f=feval(fctn1,x0);
-t2=toc;
-return;
+%%%=============================== Linear system starts
+Wold_rep=repmat(reshape(Wold,1,1,mtol,NumElement),[numThetan,nTau+1,1,1]);
+WS_rep=repmat(reshape(WS,[1,1,mtol,NumElement]),[numThetan,nTau+1,1,1]);
+[InTens, OutTens, AttenuM, DW]=Calculate_Attenuation(Wold_rep,NumElement,L,GlobalInd,SelfInd,m,nTau);
+[InStar, OutStar, AttenuStar, DWstar]=Calculate_Attenuation(WS_rep,NumElement,L,GlobalInd,SelfInd,m,nTau);
+Attenu0=AttenuM;
+low=0*ones(size(DW(:)));
+up=1e6*ones(size(DW(:)));
+W0=DWstar(:);
+[xstar,f,g,ierror] = tnbc (DW(:),fctn,low,up);
+% save xstar xstar
+fprintf('new D error is %d \n',norm(xstar-DWstar(:)));
+active_set=find(xstar==0);
+fprintf(1,'iter      W-error      Attenuation Error\n')
+Wtemp= Wold_rep;
+while (icycle<=maxOut)
+    if(mod(icycle,10)==0)
+        fprintf('%d     %d      %d \n',icycle,norm(Wtemp(:)-WS_rep(:)),norm(AttenuM(:)-AttenuStar(:)));
+    end
+    W=reshape(xstar,numThetan,nTau+1,mtol,NumElement)./AttenuM;
+    W(active_set)=0;
+    Wtemp=W;
+    Attenu0=AttenuM;
+    [InTens, OutTens, AttenuM, DW]=Calculate_Attenuation(Wtemp,NumElement,L,GlobalInd,SelfInd,m,nTau);
+    active_att=find(AttenuM(:)<=1e-16);
+    figure(10);
+    % subplot(1,3,1),plot(W(:));subplot(1,3,2);plot(AttenuM(:));
+    % subplot(1,3,3);
+    % plot(active_att,0,'ro',active_set,0,'b*');pause;
+    icycle=icycle+1;
+end
 
+return;
+%%%==================================================
+low=0*ones(size(x0));
+up=1e6*ones(size(x0));
+x_admm=[];
 if(Alternate)
     while(icycle<=maxOut)
-        [InTens, OutTens]=Calculate_Attenuation(Wold,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
+        [InTens, OutTens]=Calculate_Attenuation(Wold,NumElement,L,GlobalInd,SelfInd,m,nTau);
     %%%%% =================== Attenuation Matrix at beam energy
         MU_XTM=sum(reshape(Wold,m(1),m(2),NumElement).*repmat(MUe,[m(1),m(2),1]),3).*XTMscale;
         [x,f,g,ierror] = tnbc (x,fctn,low,up);
+        x_admm(:,icycle)=x;
         errOut(icycle)=norm(W0-x);
         if(Joint==0)
             errOut_XRF=errOut;
@@ -88,8 +119,9 @@ if(Alternate)
         end
         icycle=icycle+1;
     end
+    save x_admm x_admm;
 else
-    maxiter=40;
+    maxiter=100;
     [xstar,f,g,ierror]=tnbc(x,fctn,low,up);
     if(Joint==0)
         ErrIter_XRF=ErrIter;

@@ -1,4 +1,4 @@
-Nlevel=[3 6 12 24 48 96];
+Nlevel=[3 6 12 24 5 10 20 40];
 fid = fopen('Time_full_admm.txt','a');
 for i=1:length(Nlevel)
     N=Nlevel(i);

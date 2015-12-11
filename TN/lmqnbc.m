@@ -218,26 +218,20 @@ while (~conv);
     xnorm = norm(x,'inf');
     %--------------------------------- Error
     ErrIter(nit+1)=norm(x-W0);
-%     ErrDis=reshape(x-W0,current_n, current_n, NumElement);
-%     figure(9);
-%     for iPlot=1:NumElement
-%     subplot(2,2,iPlot),surf(ErrDis(:,:,iPlot));
-%     end
-%     drawnow;
-if(Joint==1)
-    fprintf(1,'%4i   %4i   %4i   %.3e   %.3e    %.3e    %.1e    %.1e   %.3e\n', ...
+    if(Joint==1)
+        fprintf(1,'%4i   %4i   %4i   %.3e   %.3e    %.3e    %.1e    %.1e   %.3e\n', ...
         nit, nf, ncg, f, f_xrf, f_xtm, gnorm, alpha, norm(x-W0));
-else
-    fprintf(1,'%4i   %4i   %4i   % .8e   %.1e     %.1e      %.3e\n', ...
+    else
+        fprintf(1,'%4i   %4i   %4i   % .8e   %.1e     %.1e      %.3e\n', ...
         nit, nf, ncg, f, gnorm, alpha, norm(x-W0));
-end
+    end
     %---------------------------------------------------------
     % test for convergence
     %---------------------------------------------------------
     [conv, flast, ipivot] = cnvtst (alpha, pnorm, xnorm, ...
         difnew, ftest, gnorm, gtp, f, flast, g, ...
         ipivot, accrcy);
-%     if ((nit>=2 & abs(ErrIter(nit)-ErrIter(nit-1))<eps)|nit>=maxiter);
+    conv = gnorm<1e-10;
     if(nit>=maxiter)
         conv = 1;
     end;

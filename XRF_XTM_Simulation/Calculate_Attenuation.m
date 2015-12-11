@@ -1,16 +1,19 @@
-function [InTens, OutTens]=Calculate_Attenuation(W,xrfData,M,NumElement,L,GlobalInd,SelfInd,m,nTau)
+function [InTens, OutTens, AttenuM, DW]=Calculate_Attenuation(W_rep,NumElement,L,GlobalInd,SelfInd,m,nTau)
 %%==== Given elemental map W and pre-calculate the beam and fluorescent attenuation coefficients
 global NumSSDlet numChannel NoSelfAbsorption numThetan
-global SigMa_XRF W0
 mtol=prod(m);
-W=reshape(W,mtol,NumElement);
 L=reshape(L,numThetan,nTau+1,mtol);
 %%%%% ====================================================================
-    InTens=ones(numThetan,nTau+1,mtol);
-    OutTens=ones(numThetan,nTau+1,mtol,NumElement);
+InTens=ones(numThetan,nTau+1,mtol);
+OutTens=ones(numThetan,nTau+1,mtol,NumElement);
 for n=1:numThetan
     OutTens_d=ones(nTau+1,mtol,NumSSDlet,NumElement);
     for i=1:nTau+1
+        if(ndims(W_rep)==4)
+            W=reshape(W_rep(n,i,:,:),mtol,NumElement);
+        else
+            W=reshape(W_rep,mtol,NumElement);
+        end
         counted_v=zeros(mtol,1);
         index=GlobalInd{n,i};
         if(~isempty(index))
@@ -29,9 +32,9 @@ for n=1:numThetan
                     end
                 OutTens(n,i,v,:)=sum(OutTens_d(i,v,:,:),3)/NumSSDlet;
                 end
-                % XRF_v(i,:)=XRF_v(i,:)+L(n,i,v)*(InTens(i,v)*reshape(OutTens(i,v,:),1,NumElement).*W(v,:))*M;
-                % TempSub(i,v,:,:)=reshape(L(n,i,v)*InTens(i,v)*bsxfun(@times,squeeze(OutTens(i,v,:)),M),1,1,NumElement,numChannel); % part 3
             end
         end
     end
 end
+AttenuM=bsxfun(@times,InTens,OutTens);
+DW=bsxfun(@times,AttenuM,reshape(W,[1,1,mtol,NumElement]));

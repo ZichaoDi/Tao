@@ -43,10 +43,10 @@ if(onlyXRF)
         end
     end
 else    
-%   CreateElement; %
+CreateElement; %
 % load Phantom35; W=Phantom35; 
 % NumElement=size(W,3);%% shepp-logan phantom
-CreateCircle; %% Golosio's sample 
+% CreateCircle; %% Golosio's sample 
 %------------------------- a sample to test the different impact from heavy and light elements
     % SvenSample;
     %----------------------------

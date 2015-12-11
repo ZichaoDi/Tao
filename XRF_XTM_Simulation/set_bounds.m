@@ -1,6 +1,6 @@
 function [v_low,v_up] = set_bounds(j,res_prob);
-global NumElement N
+global NumElement N nTau numThetan
 
-
-v_low=0*ones(N(j)^2*NumElement,1);
-v_up=1e6*ones(N(j)^2*NumElement,1);
+ntot=N(j)^2*NumElement*(nTau+1)*numThetan;
+v_low=0*ones(ntot,1);
+v_up=1e6*ones(ntot,1);

@@ -2,46 +2,44 @@ function [f,g,f_XRF,f_XTM]=sfun_Joint_admm(W,xrfData,DisR,MU_e,M,NumElement,L,Gl
 %%==== XRF objective function in least square form
 %%==== Self-absorption is implemented in a tensor-product fashion
 %%==== Solve W when the W in exponential term is fixed from the previous iteration
-global NumSSDlet numChannel numThetan I0 
-global  SigMa_XTM SigMa_XRF W0 
+global NumSSDlet numChannel numThetan I0 W0 
 global InTens OutTens MU_XTM
 global LogScale Beta TempBeta NoSelfAbsorption XTMscale
 mtol=prod(m);
-W=reshape(W,mtol,NumElement);
+W=repmat(reshape(W,[1 mtol NumElement]),[nTau+1 1 1 numChannel]);
 L=reshape(L,numThetan,nTau+1,mtol);
 %%%%% =================== Attenuation Matrix at beam energy
 MUe=reshape(MU_e(:,1,1),1,NumElement);
 MUe_XTM=MUe*XTMscale;
-MU_XTM=sum(W.*repmat(MUe,[mtol,1]),2)'*XTMscale;
+MU_XTM=sum(bsxfun(@times,squeeze(W(1,:,:,1)),MUe),2)';
 %%%%% ====================================================================
-f_XRF=0;
-f_XTM=0;
+f_XRF=zeros(numThetan,1);
+f_XTM=zeros(numThetan,1);
 g=zeros(numThetan,mtol,NumElement);
+if(LogScale)
+    Mt=-log(DisR./I0);
+else
+    Mt=DisR;
+end
 for n=1:numThetan
-    if(LogScale)
-        Mt=-log(DisR(:,n)./I0);
-    else
-        Mt=DisR(:,n);
-    end
     %%====================================
     temp_v=L(n,:,:).*InTens(n,:,:);
-    TempSub=repmat(squeeze(temp_v),[1,1,NumElement numChannel]).*repmat(squeeze(OutTens(n,:,:,:)),[1,1,1,numChannel]).*repmat(reshape(M,[1,1 NumElement numChannel]),[nTau+1,mtol,1,1]); % part 3
-    XRF_v=sum(sum(squeeze(TempSub).*repmat(reshape(W,[1 mtol NumElement]),[nTau+1 1 1 numChannel]),2),3);
+    TempSub=bsxfun(@times,squeeze(bsxfun(@times,temp_v,OutTens(n,:,:,:))),M); % part 3
+    XRF_v=sum(sum(TempSub.*W,2),3);
     %%======================================        
     Lsub=squeeze(L(n,:,:));
     if(LogScale)
         Rdis=sum(repmat(MU_XTM,[nTau+1,1]).*Lsub,2); %% Discrete case
-        f_XTM=f_XTM+norm(Rdis-Mt)^2;
-        g_XTM(n,:,:)=reshape(sum(2*repmat(Rdis-Mt,[1,mtol,NumElement]).*repmat(full(Lsub),[1,1,NumElement]).*repmat(reshape(MUe_XTM,[1,1,NumElement]),[nTau+1,mtol,1]),1),1,mtol,NumElement);
-    else
-        Rdis=I0*exp(-sum(sum(repmat(reshape(MU_XTM,[1,m(1),m(2)]),[nTau+1,1,1]).*Lsub,2),3)); %% Discrete case
-        f_XTM=f_XTM+norm(Rdis-Mt)^2;
+        f_XTM(n)=norm(Rdis-Mt(:,n))^2;
+        g_XTM(n,:,:)=reshape(sum(2*bsxfun(@times,bsxfun(@times,Rdis-Mt(:,n),Lsub),reshape(MUe_XTM,[1,1,NumElement])),1),1,mtol,NumElement);
     end
     count=(nTau+1)*(n-1)+1:(nTau+1)*n;
-    f_XRF=f_XRF+sum(SigMa_XRF(count).*sum((squeeze(XRF_v)-squeeze(xrfData(n,:,:))).^2,2),1);
-    g_XRF(n,:,:)=2*reshape(sum(sum(bsxfun(@times,TempSub,repmat(SigMa_XRF(count),[1 1 1 numChannel]).* ...
+    f_XRF(n)=sum(sum((squeeze(XRF_v)-squeeze(xrfData(n,:,:))).^2,2),1);
+    g_XRF(n,:,:)=2*reshape(sum(sum(bsxfun(@times,TempSub, ...
         reshape((squeeze(XRF_v)-squeeze(xrfData(n,:,:))),nTau+1,1,1,numChannel)),1),4),1,mtol,NumElement);
 
 end
+f_XRF=sum(f_XRF);
+f_XTM=sum(f_XTM);
 f=TempBeta*f_XRF+Beta*f_XTM;
 g=reshape(sum(TempBeta*g_XRF+Beta*g_XTM,1),mtol*NumElement,1);
