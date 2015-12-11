@@ -12,7 +12,13 @@ global TakeLog I0 M Element
 
 E0=10;
 E2I=1/3e8/6.62e-34*1e-15;
-I0=E0*E2I;
+if(synthetic)
+    I0=E0*E2I;
+else
+    if(strcmp(sample,'Seed'))
+        I0=3900;
+    end
+end
 NumElement=length(Z);
 NA=6.02e23;%Avogadro's number
 % if(ismac)

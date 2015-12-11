@@ -28,19 +28,25 @@ W0=W(:);
 if(TakeLog)
     fctn=@(W)sfun_XRF_EM(W,XRF,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,thetan,m,nTau);
 elseif(Alternate)
-    Mrep=repmat(reshape(M,[1,1,1 NumElement numChannel]),[numThetan,nTau+1,mtol,1,1]);
-    Mrep_P=repmat(reshape(M,[1,1 NumElement numChannel]),[nTau+1,mtol,1,1]);
 
     if(Joint==0)
-        % fctn=@(W)sfun_Tensor_Patrick(W,XRF,Mrep_P,NumElement,L,GlobalInd,SelfInd,m,nTau);
-        fctn=@(DW)sfun_linearized(DW,XRF,Mrep,NumElement,L,m,nTau);
+        TempBeta=1; Beta=0;
+        if(linear_S)
+            Mrep=repmat(reshape(M,[1,1,1 NumElement numChannel]),[numThetan,nTau+1,mtol,1,1]);
+            fctn=@(DW)sfun_linearized(DW,XRF,Mrep,NumElement,L,m,nTau);
+        else
+            Mrep_P=repmat(reshape(M,[1,1 NumElement numChannel]),[nTau+1,mtol,1,1]);
+            fctn=@(W)sfun_Tensor_Patrick(W,XRF,Mrep_P,NumElement,L,GlobalInd,SelfInd,m,nTau);
+        end
          fctn1=@(W)sfun_Tensor(W,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
     elseif(Joint==1)
         TempBeta=1; Beta=1e11;
+        Mrep_P=repmat(reshape(M,[1,1 NumElement numChannel]),[nTau+1,mtol,1,1]);
         fctn=@(W)sfun_Joint_admm(W,XRF,DisR,MU_e,Mrep_P,NumElement,L,GlobalInd,SelfInd,m,nTau);
     end
 else
     if(Joint==0)
+        TempBeta=1; Beta=0;
         fctn=@(W)sfun_Tensor(W,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
     elseif(Joint==1)
         TempBeta=1; Beta=1e8;
@@ -53,13 +59,14 @@ xinitial=x0;
 err0=norm(W0-xinitial);
 NF = [0*N; 0*N; 0*N];
 e=cputime;
-maxiter=40;
-maxOut=10;
+maxiter=1;
+maxOut=1;
 icycle=1;
 x=x0;
 Wold=x;
 errOut=[];
 %%%=============================== Linear system starts
+if(linear_S)
 Wold_rep=repmat(reshape(Wold,1,1,mtol,NumElement),[numThetan,nTau+1,1,1]);
 WS_rep=repmat(reshape(WS,[1,1,mtol,NumElement]),[numThetan,nTau+1,1,1]);
 [InTens, OutTens, AttenuM, DW]=Calculate_Attenuation(Wold_rep,NumElement,L,GlobalInd,SelfInd,m,nTau);
@@ -90,8 +97,8 @@ while (icycle<=maxOut)
     % plot(active_att,0,'ro',active_set,0,'b*');pause;
     icycle=icycle+1;
 end
-
 return;
+end
 %%%==================================================
 low=0*ones(size(x0));
 up=1e6*ones(size(x0));
@@ -111,7 +118,6 @@ if(Alternate)
             errOut_Joint=errOut;
             figure(10);hold on;h2=semilogy(0:icycle,[err0,errOut_Joint],'r.-');drawnow;
         end
-
         Wold=x;
         if(icycle==maxOut | norm(x-W0)<1e-6)
             xstar=x;
@@ -119,10 +125,11 @@ if(Alternate)
         end
         icycle=icycle+1;
     end
-    save x_admm x_admm;
+    save(['xstar_',sample,'_',num2str(N(1)),'_',num2str(numThetan),'_',num2str(numel(num2str(TempBeta))),'_',num2str(numel(num2str(Beta))),'_alternate.mat'],'xstar');
 else
     maxiter=100;
     [xstar,f,g,ierror]=tnbc(x,fctn,low,up);
+    save(['xstar_',sample,'_',num2str(N(1)),'_',num2str(numThetan),'_',num2str(numel(num2str(TempBeta))),'_',num2str(numel(num2str(Beta))),'_full.mat'],'xstar');
     if(Joint==0)
         ErrIter_XRF=ErrIter;
         figure(10);hold on; h3=semilogy(linspace(0,maxOut,length(ErrIter_XRF)), ErrIter_XRF,'ms-');
@@ -135,7 +142,6 @@ end
 err=norm(xstar-W0(:))/norm(xinitial-W0(:));
 t=cputime-e;
 fprintf('residule is %d, time elapsed is %d \n',err,t);
-% save(['xs',num2str(N(1)),'_',num2str(numThetan),'Golosio',num2str(TempBeta),'_',num2str(Beta),'_BI.mat'],'xstar','x0');
 %%%%%%%%%%%%%%%%%%%%=======================================================
 if(plotResult)
     figure('name','Elemental Residule');

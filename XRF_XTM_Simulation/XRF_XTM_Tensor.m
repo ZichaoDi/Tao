@@ -182,16 +182,24 @@ for n=1:numThetan
     end
     DisR(:,n)=Rdis';
 end
-% save(['SimulatedXRF_XRT_Golosio',num2str(nTau+1),'_',num2str(numThetan),'.mat'],'DisR','XRF','M');
-if(LogScale)
-    % SigMa_XTM=1./diag(cov(-log(DisR'./I0)));
-    % SigMa_XTM=inv(cov(-log(DisR'./I0)));
-    SigMa_XTM=1./(-log(DisR(:)./I0));
-else
-    SigMa_XTM=1./DisR(:);
+%%%========== If not synthetic, assign real mearsurement data
+if(~synthetic)
+    XRF_Simulated=XRF;
+    DisR_Simulated=DisR;
+    XRF=permute(data_xrf(:,:,:),[2 3 1]);
+    DisR=squeeze(sum(data_xrt(:,:,:),1))';
 end
-SigMa_XRF=1./diag(cov(SigMa_XRF'));%1./sum(SigMa_XRF,2);%
-SigMa_XRF((sub2ind([nTau+1,numThetan],EmptyBeam(2,:),EmptyBeam(1,:))))=0;
-SigMa_XTM((sub2ind([nTau+1,numThetan],EmptyBeam(2,:),EmptyBeam(1,:))))=0;
- SigMa_XRF=ones(size(SigMa_XRF));
- SigMa_XTM=ones(size(SigMa_XTM));
+%%%=========== Assign weighting matrix as covariance of data
+if(Weighted)
+    if(LogScale)
+        SigMa_XTM=1./(-log(DisR(:)./I0));
+    else
+        SigMa_XTM=1./DisR(:);
+    end
+    SigMa_XRF=1./diag(cov(SigMa_XRF'));%1./sum(SigMa_XRF,2);%
+    SigMa_XRF((sub2ind([nTau+1,numThetan],EmptyBeam(2,:),EmptyBeam(1,:))))=0;
+    SigMa_XTM((sub2ind([nTau+1,numThetan],EmptyBeam(2,:),EmptyBeam(1,:))))=0;
+else
+    SigMa_XRF=ones(size(SigMa_XRF));
+    SigMa_XTM=ones(size(DisR(:)));
+end

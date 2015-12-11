@@ -25,44 +25,40 @@ dz=[(omega(2)-omega(1))/m(2) (omega(4)-omega(3))/m(1)];
 center=[0 0];
 %%%========================== the grids of object
 xc = getNodalGrid(omega,[m(2) m(1)]);
-%%%========================== assign weight matrix for each element in each pixel
- Z=[6 8 14 20 26];%Golosio's sample;%[29 30 46 49 57 74 79];%% 42 29 26 ];%% reference sample: Pb La Pd Mo Cu Fe Ca
-% Z=[6 8 10 12 14];
-if(onlyXRF)
-    Z=[8 30 20 16];
-    if (xrf_roi)
-        NumElement=1;
-        data=Phantom3_Young(:,:,:,whichElement+1);
-        W=data(1:current_n,1:current_n,slice);
+%%%=========== assign weight matrix for each element in each pixel
+if(synthetic)
+    if(strcmp(sample,'Golosio'))
+        Z = [6 8 14 20 26];% Golosio's Sample
+    elseif(strcmp(sample,'Phantom'))
+        Z = [19 31 26];
+    end
+else
+    if(strcmp(sample,'Rod'))
+        Z=[14 29 30 74 79];% Glass Rod
+    elseif(strcmp(sample,'Seed'))
+        Z=[14 16 17 19 20 22 23 24 25 26 28 29 30 31 80 33 34 35 92 37 38 39 40];% Complete Seed
+    end
+end
+%---------------------------
+NumElement=length(Z);
+W=ones(N(level),N(level),NumElement);
+if(level==1)
+    if(synthetic)
+        if(strcmp(sample,'Golosio'))
+            CreateCircle; 
+        elseif(strcmp(sample,'Phantom'))
+            CreateElement; 
+        end
     else
-        NumElement=4;
-        W=zeros(current_n,current_n,NumElement);
-        for i=1:NumElement
-            data=Phantom3_Young(:,:,:,i+1);
-            W(:,:,i)=data(1:current_n,1:current_n,slice);
+        for tsub=1:NumElement
+            if(strcmp(sample,'Seed'))
+                W(:,:,tsub)=abs(flipud(permute(iR_num(:,:,slice(tsub)),[2 1 3])));%tsub*2e-1;
+            elseif(strcmp(sample,'Rod'))
+                W(:,:,tsub)=abs(fliplr(rot90(permute(iR(tsub,:,:),[2 3 1]))));%tsub*2e-1;
+            end
         end
     end
-else    
-CreateElement; %
-% load Phantom35; W=Phantom35; 
-% NumElement=size(W,3);%% shepp-logan phantom
-% CreateCircle; %% Golosio's sample 
-%------------------------- a sample to test the different impact from heavy and light elements
-    % SvenSample;
-    %----------------------------
-    % load W_sample10
-    % W=W_sample10;
-%---------------------------
-%     NumElement=2;
-%     W=zeros(m(1),m(2),NumElement);
-%     for tsub=1:1;%NumElement
-%         W(:,:,tsub)=tsub*2e-1;
-%     end
 end
-%%%%%%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-% ComChoices=nchoosek(1:6,3);
-% Z=Z(ComChoices(1,:));
-Z=Z(1:NumElement);
 UnitSpectrumSherman_Gaussian; %% Produce BindingEnergy M
 %%=======================================================================
 NumLines=NumElement;
