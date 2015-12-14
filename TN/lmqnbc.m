@@ -34,7 +34,7 @@ end;
 if(Joint==1)
 fprintf(1,'  it     nf     cg       f         f_xrf        f_xtm       |g|       alpha      error\n');
 else
-fprintf(1,'  it     nf     cg       f            |g|        alpha          error\n');   
+fprintf(1,'  it     nf     cg       f          |g|        alpha          error\n');   
 end
 
 nind   = find(N==current_n);
@@ -83,7 +83,7 @@ if(Joint==1)
 fprintf(1,'%4i   %4i   %4i   %.3e   %.3e    %.3e    %.1e    %.1e   %.3e\n', ...
     nit, nf, ncg, f,  f_xrf, f_xtm,gnorm, 1, err0);
 else
-    fprintf(1,'%4i   %4i   %4i   % .8e   %.1e     %.1e      %.3e\n', ...
+    fprintf(1,'%4i   %4i   %4i   % .3e   %.1e     %.1e      %.3e\n', ...
         nit, nf, ncg, f, gnorm, 1, err0);
 end
 %---------------------------------------------------------
@@ -222,7 +222,7 @@ while (~conv);
         fprintf(1,'%4i   %4i   %4i   %.3e   %.3e    %.3e    %.1e    %.1e   %.3e\n', ...
         nit, nf, ncg, f, f_xrf, f_xtm, gnorm, alpha, norm(x-W0));
     else
-        fprintf(1,'%4i   %4i   %4i   % .8e   %.1e     %.1e      %.3e\n', ...
+        fprintf(1,'%4i   %4i   %4i   % .3e   %.1e     %.1e      %.3e\n', ...
         nit, nf, ncg, f, gnorm, alpha, norm(x-W0));
     end
     %---------------------------------------------------------

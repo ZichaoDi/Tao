@@ -24,7 +24,7 @@ if(synthetic)
 else
     sample='Seed';
 end
-N=20;% [33 17 9 5 3];% 17 9];%[129 65  9 5];% 
+N=20;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
 if(synthetic)
     numThetan=5; % number of scanning angles/projections
     numChannel=500;% number of energy channels on xrf detector
@@ -32,10 +32,10 @@ else
     if(strcmp(sample,'Seed'))
         load ./data/ApsDataExtract/DogaSeeds/DownSampleSeeds221_elements.mat
         data = permute(data_H,[2,3,1]);
-        slice = 5:27;  
+        slice = [8 9 14 17];% 5:27;
         data_h=[];
         ang_rate=30;
-        tau_rate=10;
+        tau_rate=5;
         for ele=1:size(data,1)
             data_h(ele,:,:)=sum(data(ele,1:ang_rate:end,1:tau_rate:end),1);
         end
@@ -53,14 +53,14 @@ else
         % load ~/Documents/Research/APSdata/GlassRod/2dSlice/Slice1
         % load ~/Documents/Research/APSdata/GlassRod/2dSlice/rec_XTM_59
         % iR=imread('~/Documents/Research/APSdata/GlassRod/Au_L_3/Au_L_0000.tif');
-        slice = [25 10 32 30 3 34]; %GlassRod% 
+        slice = [25 10 32 30 3 34]; %GlassRod%
     end
     numThetan=size(data_h,2);
 end
 %%-----------------------------------------------
 %%-----------------------------------------------
 NoSelfAbsorption=0;
-nh=N(1); 
+nh=N(1);
 n_level=1;
 level=[1:n_level];
 N=nh./(2.^(level-1))+(2.^(level-1)-1)./2.^(level-1);
@@ -78,9 +78,9 @@ SigmaT=cell(nm,1);
 m_level=zeros(nm,2);
 nTau_level= zeros(nm,1);
 bounds = 1;  % no bound constraints
-Joint=1; % 0: XRF; -1: XTM; 1: Joint inversion
+Joint=-1; % 0: XRF; -1: XTM; 1: Joint inversion
 ReconAttenu = 1; % 0: Recover W; 1: Recover miu
-Alternate=1;
+Alternate=0;
 LogScale=1; %% determine if the XTM is solved taking log first or not
 Weighted=0; %% 1 if use weighted least-square form
 linear_S=0;
@@ -95,7 +95,7 @@ plotResult=1;
 %%------------------------------ Downsample data from finest level
 % for level=1:nm
 %     current_n=N(level);
-%     
+%
 %     if(level==1)
 %         XTM_Tensor;
 %         WS=MU;%W;
@@ -111,7 +111,7 @@ plotResult=1;
 %         GI_level{level}=GlobalInd;
 %     end
 %     W_level{level}=W;
-%     
+%
 %     m_level(level,:)=m;
 %     SigmaT{level}=SigMa_XTM;
 %     %-----------------------------------------
@@ -122,28 +122,49 @@ plotResult=1;
 %%------------------------------ Use same finest data for each level
 for level=1:nm
     current_n=N(level);
-    if(level==1)
-        XRF_XTM_Tensor;
-        WS=W;%MU;% 
+    if(Joint==-1)
+        if(level==1)
+            XTM_Tensor;
+            Lap{level}=delsq(numgrid('S',N(level)+2));
+            L_level{level}=L;
+        else
+            IhH{level} = downdate_L(N, level);
+            Lap{level}=IhH{level}*Lap{level-1}*IhH{level}';
+            L_level{level}=L_level{level-1}*IhH{level}';
+        end
+        if(ReconAttenu)
+            NumElement=1;
+            if(level==1)
+                W_level{level}=MU;
+                WS= W_level{1};
+            else
+                W_level{level}=N(level)^2;
+            end
+        else
+            W_level{level}=W;
+            if(level==1)
+                WS= W;
+            end
+        end
     else
-        W=downdate(W(:),1);
-        W=reshape(W,N(level),N(level),NumElement);
+        XRF_XTM_Tensor;
+        W_level{level}=W;
+        if(level==1)
+            WS=W;
+        end
     end
-    % XTM_Tensor;
-    W_level{level}=W;
     xtm_level{level}=DisR;
-    
-    L_level{level}=L;
     GI_level{level}=GlobalInd;
     nTau_level(level)= nTau;
-    m_level(level,:)=m;
+    m_level(level,:)=[N(level),N(level)];
     SigmaT{level}=SigMa_XTM;
-%-----------------------------------------
-    xrf_level{level}=XRF;
-    SI_level{level}=SelfInd;
-    SigmaR{level}=SigMa_XRF;
+    %-----------------------------------------
+    if(Joint~=-1)
+        xrf_level{level}=XRF;
+        SI_level{level}=SelfInd;
+        SigmaR{level}=SigMa_XRF;
+    end
 end
-
 nTol=N(1)^2*NumElement;
 %---------------------------------------------
 % Specify initial guess for optimization.

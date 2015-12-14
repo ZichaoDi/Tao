@@ -51,53 +51,60 @@ else
     elseif(Joint==1)
         TempBeta=1; Beta=1e8;
         fctn=@(W)sfun_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,m,nTau,I0);
+    elseif(Joint==-1)
+        TempBeta=0; Beta=1;
+        if(ReconAttenu)
+            fctn=@(MU)sfun_XTM_tensor(DisR,MU,I0,L,m,nTau);% on attenuation coefficients miu;
+        else
+            fctn=@(W)sfun_XTM(W,DisR,MU_e,I0,L,thetan,m,nTau,NumElement);%on W
+        end
     end
 end
 rng('default');
-x0=0*W(:)+1*10^(0)*rand(prod(m)*size(M,1),1);
+x0=1*W(:)+1*10^(0)*rand(prod(m)*NumElement,1);
 xinitial=x0;
 err0=norm(W0-xinitial);
 NF = [0*N; 0*N; 0*N];
 e=cputime;
-maxiter=1;
-maxOut=1;
+maxiter=40;
+maxOut=10;
 icycle=1;
 x=x0;
 Wold=x;
 errOut=[];
 %%%=============================== Linear system starts
 if(linear_S)
-Wold_rep=repmat(reshape(Wold,1,1,mtol,NumElement),[numThetan,nTau+1,1,1]);
-WS_rep=repmat(reshape(WS,[1,1,mtol,NumElement]),[numThetan,nTau+1,1,1]);
-[InTens, OutTens, AttenuM, DW]=Calculate_Attenuation(Wold_rep,NumElement,L,GlobalInd,SelfInd,m,nTau);
-[InStar, OutStar, AttenuStar, DWstar]=Calculate_Attenuation(WS_rep,NumElement,L,GlobalInd,SelfInd,m,nTau);
-Attenu0=AttenuM;
-low=0*ones(size(DW(:)));
-up=1e6*ones(size(DW(:)));
-W0=DWstar(:);
-[xstar,f,g,ierror] = tnbc (DW(:),fctn,low,up);
-% save xstar xstar
-fprintf('new D error is %d \n',norm(xstar-DWstar(:)));
-active_set=find(xstar==0);
-fprintf(1,'iter      W-error      Attenuation Error\n')
-Wtemp= Wold_rep;
-while (icycle<=maxOut)
-    if(mod(icycle,10)==0)
-        fprintf('%d     %d      %d \n',icycle,norm(Wtemp(:)-WS_rep(:)),norm(AttenuM(:)-AttenuStar(:)));
-    end
-    W=reshape(xstar,numThetan,nTau+1,mtol,NumElement)./AttenuM;
-    W(active_set)=0;
-    Wtemp=W;
+    Wold_rep=repmat(reshape(Wold,1,1,mtol,NumElement),[numThetan,nTau+1,1,1]);
+    WS_rep=repmat(reshape(WS,[1,1,mtol,NumElement]),[numThetan,nTau+1,1,1]);
+    [InTens, OutTens, AttenuM, DW]=Calculate_Attenuation(Wold_rep,NumElement,L,GlobalInd,SelfInd,m,nTau);
+    [InStar, OutStar, AttenuStar, DWstar]=Calculate_Attenuation(WS_rep,NumElement,L,GlobalInd,SelfInd,m,nTau);
     Attenu0=AttenuM;
-    [InTens, OutTens, AttenuM, DW]=Calculate_Attenuation(Wtemp,NumElement,L,GlobalInd,SelfInd,m,nTau);
-    active_att=find(AttenuM(:)<=1e-16);
-    figure(10);
-    % subplot(1,3,1),plot(W(:));subplot(1,3,2);plot(AttenuM(:));
-    % subplot(1,3,3);
-    % plot(active_att,0,'ro',active_set,0,'b*');pause;
-    icycle=icycle+1;
-end
-return;
+    low=0*ones(size(DW(:)));
+    up=1e6*ones(size(DW(:)));
+    W0=DWstar(:);
+    [xstar,f,g,ierror] = tnbc (DW(:),fctn,low,up);
+    % save xstar xstar
+    fprintf('new D error is %d \n',norm(xstar-DWstar(:)));
+    active_set=find(xstar==0);
+    fprintf(1,'iter      W-error      Attenuation Error\n')
+    Wtemp= Wold_rep;
+    while (icycle<=maxOut)
+        if(mod(icycle,10)==0)
+            fprintf('%d     %d      %d \n',icycle,norm(Wtemp(:)-WS_rep(:)),norm(AttenuM(:)-AttenuStar(:)));
+        end
+        W=reshape(xstar,numThetan,nTau+1,mtol,NumElement)./AttenuM;
+        W(active_set)=0;
+        Wtemp=W;
+        Attenu0=AttenuM;
+        [InTens, OutTens, AttenuM, DW]=Calculate_Attenuation(Wtemp,NumElement,L,GlobalInd,SelfInd,m,nTau);
+        active_att=find(AttenuM(:)<=1e-16);
+        figure(10);
+        % subplot(1,3,1),plot(W(:));subplot(1,3,2);plot(AttenuM(:));
+        % subplot(1,3,3);
+        % plot(active_att,0,'ro',active_set,0,'b*');pause;
+        icycle=icycle+1;
+    end
+    return;
 end
 %%%==================================================
 low=0*ones(size(x0));
@@ -145,12 +152,12 @@ fprintf('residule is %d, time elapsed is %d \n',err,t);
 %%%%%%%%%%%%%%%%%%%%=======================================================
 if(plotResult)
     figure('name','Elemental Residule');
-     clims=[0 max(W0)];
+    clims=[0 max(W0)];
     for i=1:NumElement
         subplot(4,NumElement,i);
         
         errCom=reshape(xinitial(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-W0(prod(m)*i-prod(m)+1:prod(m)*i
-        imagesc(errCom,clims);colormap jet
+        imagesc(errCom);colormap jet
         if(i==1)
             ylabel('Initial Guess','fontsize',12)
         end
@@ -162,7 +169,7 @@ if(plotResult)
         subplot(4,NumElement,i+1*NumElement);
         
         errCom=reshape(xstar(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-W0(prod(m)*i-prod(m)+1:prod(m)*i
-        imagesc(errCom,clims);colormap jet
+        imagesc(errCom);colormap jet
         if(i==1)
             ylabel('Final Soluction','fontsize',12)
         end
@@ -173,7 +180,7 @@ if(plotResult)
         subplot(4,NumElement,i+2*NumElement);
         
         errCom=reshape(W0(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));
-        imagesc(errCom,clims);colormap jet
+        imagesc(errCom);colormap jet
         if(i==1)
             ylabel('True Solution','fontsize',12)
         end

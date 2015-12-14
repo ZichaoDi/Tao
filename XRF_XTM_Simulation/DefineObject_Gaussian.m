@@ -37,6 +37,7 @@ else
         Z=[14 29 30 74 79];% Glass Rod
     elseif(strcmp(sample,'Seed'))
         Z=[14 16 17 19 20 22 23 24 25 26 28 29 30 31 80 33 34 35 92 37 38 39 40];% Complete Seed
+        Z=Z(slice-4);
     end
 end
 %---------------------------

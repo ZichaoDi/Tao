@@ -66,8 +66,8 @@ for n=1:numThetan
         end
     end
     count=(nTau+1)*(n-1)+1:(nTau+1)*n;
-    f(n)=sum(SigMa_XRF(count).*sum((XRF_v-squeeze(xrfData(n,:,:))).^2,2),1);
-    g(n,:,:)=2*reshape(sum(sum(bsxfun(@times,TempSub,repmat(SigMa_XRF(count),[1 1 1 numChannel]).* ...
+    f(n)=sum(SigMa_XRF(count)'.*sum((XRF_v-squeeze(xrfData(n,:,:))).^2,2),1);
+    g(n,:,:)=2*reshape(sum(sum(bsxfun(@times,TempSub,repmat(SigMa_XRF(count)',[1 1 1 numChannel]).* ...
         reshape((XRF_v-squeeze(xrfData(n,:,:))),nTau+1,1,1,numChannel)),1),4),mtol,NumElement);
 end
 ft=sum(f);

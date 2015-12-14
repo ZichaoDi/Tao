@@ -94,9 +94,9 @@ for n=1:numThetan
         end
     end
     count=(nTau+1)*(n-1)+1:(nTau+1)*n;
-    f_XRF=f_XRF+sum(SigMa_XRF(count).*sum((XRF_v-squeeze(XRF(n,:,:))).^2,2),1);
-    f=f+TempBeta*sum(SigMa_XRF(count).*sum((XRF_v-squeeze(XRF(n,:,:))).^2,2),1);
-    g=g+TempBeta*2*reshape(sum(sum(bsxfun(@times,TempSub,repmat(SigMa_XRF(count),[1 1 1 numChannel]).*reshape((XRF_v-squeeze(XRF(n,:,:))),nTau+1,1,1,numChannel)),1),4),mtol,NumElement);
+    f_XRF=f_XRF+sum(SigMa_XRF(count)'.*sum((XRF_v-squeeze(XRF(n,:,:))).^2,2),1);
+    f=f+TempBeta*sum(SigMa_XRF(count)'.*sum((XRF_v-squeeze(XRF(n,:,:))).^2,2),1);
+    g=g+TempBeta*2*reshape(sum(sum(bsxfun(@times,TempSub,repmat(SigMa_XRF(count)',[1 1 1 numChannel]).*reshape((XRF_v-squeeze(XRF(n,:,:))),nTau+1,1,1,numChannel)),1),4),mtol,NumElement);
 %     clear InTens OutTens OutTens_d TempSub XRF_v
 %     f=f+sum(sum((cat(1,XRF_v{n,:})-cat(1,XRF{n,:})).*SigMa1',2),1);
 %     g=g+2*reshape(sum(sum(permute(TempSub,[4 1 2 3]).*repmat(SigMa1,[1,1,mtol,NumElement]),1),2),mtol,NumElement);
