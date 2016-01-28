@@ -1,3 +1,6 @@
+do_setup;
+optXRF;
+return;
 N=20;
 numThetan=25;
 xstar=exAlternate(N,numThetan);

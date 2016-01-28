@@ -1,4 +1,4 @@
-function [ft,gt]=sfun_Tensor(W,xrfData,M,NumElement,L,GlobalInd,SelfInd,m,nTau)
+function [ft,gt,Jacob1,Jacob2,Jacob3]=sfun_Tensor(W,xrfData,M,NumElement,L,GlobalInd,SelfInd,m,nTau)
 %%==== XRF objective function in least square form
 %%==== Self-absorption is implemented in a tensor-product fashion
 global NumSSDlet numChannel NoSelfAbsorption numThetan
@@ -10,6 +10,9 @@ L=reshape(L,numThetan,nTau+1,mtol);
 %%%%% ====================================================================
 f=zeros(numThetan,1);
 g=zeros(numThetan,mtol,NumElement);
+Jacob1=zeros(numThetan,nTau+1,mtol,NumElement,numChannel);
+Jacob2=zeros(numThetan,nTau+1,mtol,NumElement,numChannel);
+Jacob3=zeros(numThetan,nTau+1,mtol,NumElement,numChannel);
 for n=1:numThetan
     InTens=ones(nTau+1,mtol);
     OutTens=ones(nTau+1,mtol,NumElement);
@@ -46,7 +49,10 @@ for n=1:numThetan
                                     v_self=SelfInd{n,i,sub_v}{2}{d}(d_sub);
                                     TempSub(i,v_self,:,:)=TempSub(i,v_self,:,:)-...
                                         reshape(L(n,i,sub_v)*InTens(i,sub_v)/NumSSDlet...
-                                        *bsxfun(@times,reshape(OutTens_d(i,sub_v,d,:),1,NumElement).*W(sub_v,:),reshape(SelfInd{n,i,v_self}{8}{d}(:,:,sub_v==SelfInd{n,i,v_self}{7}{d}),NumElement,NumElement))*M,[1 1 NumElement numChannel]);
+                                        *bsxfun(@times,reshape(OutTens_d(i,sub_v,d,:),1,NumElement).*W(sub_v,:),reshape(SelfInd{n,i,v_self}{8}{d}(:,:,sub_v==SelfInd{n,i,v_self}{7}{d}),NumElement,NumElement))*M,[1 1 NumElement numChannel]);% line 2
+                                    Jacob1(n,i,v_self,:,:)=Jacob1(n,i,v_self,:,:)-...
+                                        reshape(L(n,i,sub_v)*InTens(i,sub_v)/NumSSDlet...
+                                        *bsxfun(@times,reshape(OutTens_d(i,sub_v,d,:),1,NumElement).*W(sub_v,:),reshape(SelfInd{n,i,v_self}{8}{d}(:,:,sub_v==SelfInd{n,i,v_self}{7}{d}),NumElement,NumElement))*M,[1,1 1 NumElement numChannel]);
                                 end
                             end
                         end
@@ -54,12 +60,15 @@ for n=1:numThetan
                     end
                 end
                 XRF_v(i,:)=XRF_v(i,:)+L(n,i,v)*(InTens(i,v)*reshape(OutTens(i,v,:),1,NumElement).*W(v,:))*M;
-                
                 if(~isempty(v5))
-                    TempSub(i,v,:,:)=TempSub(i,v,:,:)+1*reshape(-bsxfun(@times,reshape(L(n,i,v5),1,length(v5)).*InTens(i,v5),SelfInd{n,i,v}{6}')*(W(v5,:).*reshape(OutTens(i,v5,:),length(v5),NumElement)*M)...
-                        +L(n,i,v)*InTens(i,v)*bsxfun(@times,squeeze(OutTens(i,v,:)),M),1,1,NumElement,numChannel); % part 3
+                    TempSub(i,v,:,:)=TempSub(i,v,:,:)+1*reshape(-bsxfun(@times,reshape(L(n,i,v5),1,length(v5)).*InTens(i,v5),SelfInd{n,i,v}{6}')*(W(v5,:).*reshape(OutTens(i,v5,:),length(v5),NumElement)*M)... % line 1
+                    +L(n,i,v)*InTens(i,v)*bsxfun(@times,squeeze(OutTens(i,v,:)),M),1,1,NumElement,numChannel); % line 3
+                    Jacob2(n,i,v,:,:)=Jacob2(n,i,v,:,:)+1*reshape(-bsxfun(@times,reshape(L(n,i,v5),1,length(v5)).*InTens(i,v5),SelfInd{n,i,v}{6}')*(W(v5,:).*reshape(OutTens(i,v5,:),length(v5),NumElement)*M),1,1,1,NumElement,numChannel); % line 3
+                    Jacob3(n,i,v,:,:)=Jacob3(n,i,v,:,:)+1*reshape(L(n,i,v)*InTens(i,v)*bsxfun(@times,squeeze(OutTens(i,v,:)),M),1,1,1,NumElement,numChannel);
+
                 else
-                    TempSub(i,v,:,:)=TempSub(i,v,:,:)+1*reshape(L(n,i,v)*InTens(i,v)*bsxfun(@times,squeeze(OutTens(i,v,:)),M),1,1,NumElement,numChannel); % part 3
+                    TempSub(i,v,:,:)=TempSub(i,v,:,:)+1*reshape(L(n,i,v)*InTens(i,v)*bsxfun(@times,squeeze(OutTens(i,v,:)),M),1,1,NumElement,numChannel); % line 3
+                    Jacob3(n,i,v,:,:)=Jacob3(n,i,v,:,:)+1*reshape(L(n,i,v)*InTens(i,v)*bsxfun(@times,squeeze(OutTens(i,v,:)),M),1,1,1,NumElement,numChannel); 
                 end
                 
             end

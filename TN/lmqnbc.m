@@ -72,11 +72,11 @@ ErrIter(1)=err0;
 % multipliers are components of the gradient.
 % Then form the projected gradient.
 %---------------------------------------------------------
-ind = find((ipivot ~= 2) & (ipivot.*g>0));
-if (~isempty(ind));
-    ipivot(ind) = zeros(length(ind),1);
-end;
-ipivotOld=ipivot;
+% ind = find((ipivot ~= 2) & (ipivot.*g>0));
+% if (~isempty(ind));
+%     ipivot(ind) = zeros(length(ind),1);
+% end;
+% ipivotOld=ipivot;
 g = ztime (g, ipivot);
 gnorm = norm(g,'inf');
 if(Joint==1)
@@ -147,10 +147,22 @@ while (~conv);
     else
         [x_new, f_new, g_new, nf1, ierror, alpha] = lin1 (p, x, f, alpha0, g, sfun);
     end
-    
     Cauchy=0;
     %---------------------------------------------------------%    
-    if (alpha == 0 & alpha0 ~= 0 | ierror == 3);
+    if(alpha<=0)
+        % disp('Error in Initial Step')
+        %---------------------------------------------------------
+        % update active set, if appropriate
+        %---------------------------------------------------------
+        % newcon = 0;
+        % if (abs(alpha-spe) <= eps);% | alpha==1
+        %     % disp('update ipivot due to tiny step length')
+        %     newcon = 1;
+        %     ierror = 0;
+        %     [ipivot, flast] = modz (x, p, ipivot, low, up, flast, f, alpha);
+        % end;
+    end
+    if (alpha <= 0 & alpha0 ~= 0 | ierror == 3);
         fprintf('Error in Line Search\n');
         fprintf('    ierror = %3i\n',    ierror);
         fprintf('    alpha  = %12.6f\n', alpha);
@@ -172,16 +184,6 @@ while (~conv);
     nit = nit +   1;
 %    ASchange(nit)=norm(-ipivot+ipivotOld,1);
 %     save ASchange ASchange
-    %---------------------------------------------------------
-    % update active set, if appropriate
-    %---------------------------------------------------------
-    %     newcon = 0;
-    %     if (abs(alpha-spe) <= 10*eps);% | alpha==1
-    %         disp('update ipivot due to tiny step length')
-    %         newcon = 1;
-    %         ierror = 0;
-    %         [ipivot, flast] = modz (x, p, ipivot, low, up, flast, f, alpha);
-    %     end;
     
     if (ierror == 3);
         disp('LMQNBC: termination 3')
@@ -231,7 +233,6 @@ while (~conv);
     [conv, flast, ipivot] = cnvtst (alpha, pnorm, xnorm, ...
         difnew, ftest, gnorm, gtp, f, flast, g, ...
         ipivot, accrcy);
-    conv = gnorm<1e-10;
     if(nit>=maxiter)
         conv = 1;
     end;

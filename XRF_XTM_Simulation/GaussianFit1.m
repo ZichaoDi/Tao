@@ -1,14 +1,13 @@
 
 function [specP]=GaussianFit1(Energy,Intensity)
-global DetChannel numChannel plotSpecSingle
-num=length(Energy);
+global DetChannel numChannel plotSpecSingle NumElement
 
-p=zeros(num,1,numChannel);
+p=zeros(NumElement,1,numChannel);
 specP=zeros(numChannel,1);
 if(plotSpecSingle)
     figure('name','XRF elemental spectrum')
 end
-for i=1:num
+for i=1:NumElement
     
     if(Intensity(i)>1e-10)
         miu=Energy(i);

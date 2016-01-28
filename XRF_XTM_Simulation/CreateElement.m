@@ -15,11 +15,14 @@ end
 ExtraVal=[0.1 0.2 0.3];
 [i1,i2]=sort(val_i,'descend');
 subind=[1 2 4];
+subind=subind(1:NumElement);
 if(length(val)<4)
     subind=[1 2];
+    if(NumElement==1)
+        subind=1;
+    end
 end
 val=val(i2(subind));
-NumElement=3;
 W=zeros(m(1),m(2),NumElement);
 for i=1:length(subind)
     Ws=zeros(m(1),m(2));

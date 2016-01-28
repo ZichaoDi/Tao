@@ -13,8 +13,17 @@ global XTMscale NumLines NumElement
 global whichElement slice onlyXRF
 
 load PeriodicTable
-AbsorbScale=1e-0;
-ScaleM=1e-5;
+if(synthetic)
+    AbsorbScale=1;
+    ScaleM=1;
+else
+    AbsorbScale=1;
+    if(DecomposedElement)
+        ScaleM=4e1;
+    else
+        ScaleM=1e0;
+    end
+end
 %%%%%======================================
 DisY=m(1)+1;
 DisX=m(2)+1;
@@ -58,18 +67,10 @@ if(level==1)
                 W(:,:,tsub)=abs(fliplr(rot90(permute(iR(tsub,:,:),[2 3 1]))));%tsub*2e-1;
             end
         end
+        clear iR_num iR
     end
 end
 UnitSpectrumSherman_Gaussian; %% Produce BindingEnergy M
-%%=======================================================================
-NumLines=NumElement;
-MU_e=zeros(NumElement,1,1+NumLines);
-for i=1: NumLines
-    MU_e(i,1,1)=na(i)*CS_TotalBeam(Z(i),1);%calllib('libxrl','CS_Total',Z(i),E0);
-    for j=1:NumElement
-        MU_e(i,1,j+1)=na(i)*CS_Total(Z(i),1,Z(j));%calllib('libxrl','CS_Total',Z(i),BindingEnergy(j));   only consider K_alpha line
-    end
-end
 %%%%%================== Attenuation Matrix at beam energy
 MU_e=MU_e.*AbsorbScale; %% Discrete Scale
 %%%%% =================== Attenuation Matrix at beam energy

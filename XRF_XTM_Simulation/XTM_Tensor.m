@@ -12,8 +12,8 @@ mtol=prod(m);
 eX=ones(m(1),1);
 eY=ones(m(2),1);
 if(level==1)
-DisR=zeros(nTau+1,numThetan);
-EmptyBeam=[];
+    DisR=zeros(nTau+1,numThetan);
+    EmptyBeam=[];
 end
 if(level==1)
    L=sparse(numThetan*(nTau+1),prod(m));
@@ -24,12 +24,12 @@ end
 GlobalInd=cell(numThetan,nTau+1);
 fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel);
 pert_drift=0;
-pert_angel=0;
-drift_angel=pert_angel*0.2*rand(size(thetan));
+pert_angle=0;
+drift_angle=pert_angle*0.2*rand(size(thetan));
 for n=1:numThetan
-    theta=thetan(n)/180*pi+drift_angel(n);
+    theta=thetan(n)/180*pi+drift_angle(n);
     if(mod(n,10)==0)
-        fprintf(1,'====== Angel Number  %d of %d: %d\n',n,numThetan,thetan(n));
+        fprintf(1,'====== Angle Number  %d of %d: %d\n',n,numThetan,thetan(n));
     end
     TransMatrix=[cos(theta) sin(theta);-sin(theta) cos(theta)];
     driftx=pert_drift*1e-3*mean(DetKnot0(:,1))*rand(size(DetKnot0(:,1)));
@@ -84,8 +84,8 @@ L=L;%L_H;
 end
 %%==============================================================
 if(~synthetic)
-DisR_Simulated=DisR;
-DisR=squeeze(data_xrt)';
+    DisR_Simulated=DisR;
+    DisR=squeeze(data_xrt)';% reshape(dd,size(dd,1)/numThetan,numThetan);%
 end
 if(LogScale)
     SigMa_XTM=1./(-log(DisR(:)));

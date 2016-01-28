@@ -1,5 +1,5 @@
-function doplot(it,v,W_level)
-global xinitial current_n NumElement Z Element
+function doplot(it,v,W_level,xinitial)
+global current_n NumElement Z Element
 %--------------------------------------------------------------
 % Plot results of soap-film minimal surface
 %--------------------------------------------------------------
@@ -15,7 +15,10 @@ xstar=v;
         subplot(4,NumElement,i);
         
         errCom=reshape(xinitial(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-ws(prod(m)*i-prod(m)+1:prod(m)*i
-        imagesc(errCom,clims);colormap jet
+        imagesc(errCom);colormap jet
+        set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',...
+        [],'YTick',[]);
+        % colorbar;
         if(i==1)
             ylabel('Initial Guess','fontsize',12)
         end
@@ -26,7 +29,10 @@ xstar=v;
         subplot(4,NumElement,i+1*NumElement);
         
         errCom=reshape(xstar(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-ws(prod(m)*i-prod(m)+1:prod(m)*i
-        imagesc(errCom,clims);colormap jet
+        imagesc(errCom);colormap jet
+        set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',...
+[],'YTick',[]);
+        % colorbar;
         if(i==1)
             ylabel('Final Soluction','fontsize',12)
         end
@@ -36,7 +42,10 @@ xstar=v;
         subplot(4,NumElement,i+2*NumElement);
         
         errCom=reshape(ws(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));
-        imagesc(errCom,clims);colormap jet
+        imagesc(errCom);colormap jet
+        set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',...
+        [],'YTick',[]);
+        % colorbar;
         if(i==1)
             ylabel('True Soluction','fontsize',12)
         end
@@ -46,7 +55,9 @@ xstar=v;
 %         end
     end
     for i=1:NumElement; subplot(4,NumElement,i+3*NumElement);
-        plot(1:prod(m),sort(xinitial(prod(m)*i-prod(m)+1:prod(m)*i)),'ro',1:prod(m),sort(xstar(prod(m)*i-prod(m)+1:prod(m)*i)),'bs',1:prod(m),sort(ws(prod(m)*i-prod(m)+1:prod(m)*i)),'g*')
+        ind=prod(m)*i-prod(m)+1:prod(m)*i;
+        [~,sortInd]=sort(ws(ind));
+        plot(1:prod(m),xinitial(sortInd),'ro',1:prod(m),xstar(sortInd),'bs',1:prod(m),ws(sortInd),'g*')
         xlim([0 prod(m)]);
         if(i==1)
             hleg=legend('initial','final','optimal','FontSize',6, 'Box', 'off');
@@ -58,4 +69,4 @@ xstar=v;
     end
 %-------------------------------------------------------
 T = sprintf('MG %1i',it);
-title(T)
+% title(T)

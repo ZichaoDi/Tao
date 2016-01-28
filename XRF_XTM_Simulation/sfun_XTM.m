@@ -1,14 +1,15 @@
-function [f,g]=sfun_XTM(W,M,MU_e,I0,L,thetan,m,nTau,NumElement)
-global SigMa_XTM LogScale
+function [f,g]=sfun_XTM(W,M,MU_e,I0,L,m,nTau,NumElement)
+global SigMa_XTM LogScale numThetan
 global Tik penalty XTMscale Tol
 %%===== Reconstruction discrete objective
 %%===== L: intersection length matrix
 %%===== M: Radon transform with t beam lines and theta angles
 %%===== f: sum_i ||e^T(L_i.*I)e-M_i||^2, i=1..theta
+mtol=prod(m);
 W1=reshape(W,m(1),m(2),NumElement);
 beta=1;
 lambda=1e-3;
-L=L./Tol;
+L=reshape(full(L./Tol),numThetan,nTau+1,mtol);
 %%%%% =================== Attenuation Matrix at beam energy
 
 MUe=reshape(MU_e(:,1,1),1,1,NumElement).*XTMscale;
@@ -23,7 +24,7 @@ else
     f=0;
 end
 g=zeros(m(1),m(2),NumElement);
-for n=1:length(thetan)
+for n=1:numThetan
     sum_Tau=0;
     if(LogScale)
         Mt=-log(M(:,n)./I0);

@@ -25,8 +25,8 @@ for itcnt = 1:maxit;
     xt = x + alpha1.*p;
     %%%%%%%%%%%#############################################################
     [ft, gt] = feval (sfun, xt);
-    Armijo =ft<f+1e-4*alpha1*q0;
-    Wolfe = abs(p'*gt)<0.25*abs(q0);
+    % Armijo =ft<f+1e-4*alpha1*q0;
+    % Wolfe = abs(p'*gt)<0.25*abs(q0);
     if (ft < f);
 %     if(Armijo & Wolfe)
         ierror = 0;

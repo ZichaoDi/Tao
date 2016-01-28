@@ -1,18 +1,18 @@
 % Define detector and beam 
 global m Tol thetan
 global DetChannel numChannel nTau DetKnot0 SourceKnot0 NumSSDlet 
-Tol=1e-3; %%the threshod to gurantee the beam will cover the whole object
+Tol=1e-5; 
 omega=[-2     2    -2     2].*Tol;
 m=[current_n current_n]; %Numerical Resolution
 alpha=atan((omega(4)-omega(3))/(omega(2)-omega(1)));
-dTau=(omega(2)-omega(1))/N(1);%%% width of the each discrete beam
+dTau=(omega(2)-omega(1))/N(1);%%% width of each discrete beam
 Tau=sqrt((omega(2)-omega(1))^2+(omega(4)-omega(3))^2);
 if(synthetic)
-    nTau=ceil(Tau/dTau)+1;%m(1)+1;% % number of discrete beam%nTau;%
+    nTau=m(1)+1;%ceil(Tau/dTau)+1;% % number of discrete beam%nTau;%
 else
     nTau=size(data_h,3)-1;
 end
-tol1=eps^(1/2);
+tol1=eps^(1/2); % the threshod to gurantee the beam will cover the whole object
 %=============initiate transmission detector location
 detS0=[Tau/2*tan(alpha)+tol1*Tol, Tau/2+tol1*Tol]; 
 detE0=[Tau/2*tan(alpha)+tol1*Tol,-Tau/2-tol1*Tol];
@@ -35,6 +35,7 @@ else
     else %-- APS real fluorescence detector energy channel
         load DetChannel
         numChannel=length(DetChannel);
+        DetChannel=DetChannel;
     end
 end
 %%%=========== Define number of flying paths of fluorescence photons
@@ -42,4 +43,4 @@ NumSSDlet=5;
 SSDlet=[linspace(SSD0(2,1),SSD0(1,1),NumSSDlet)',...
             linspace(SSD0(2,2),SSD0(1,2),NumSSDlet)' ];
 %%%=========== Assign Projection Angles;
-thetan=linspace(0,angleScale*180,numThetan);% must be positive.
+thetan=linspace(363,abs(183*(angleScale)-363),numThetan);% must be positive.

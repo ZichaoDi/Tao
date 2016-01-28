@@ -1,14 +1,17 @@
-function [InTens, OutTens, AttenuM, DW]=Calculate_Attenuation(W_rep,NumElement,L,GlobalInd,SelfInd,m,nTau)
+function [InTens, OutTens, AttenuM, DW,f]=Calculate_Attenuation(W_rep,NumElement,L,GlobalInd,SelfInd,m,nTau,xrfData,M)
 %%==== Given elemental map W and pre-calculate the beam and fluorescent attenuation coefficients
 global NumSSDlet numChannel NoSelfAbsorption numThetan
 mtol=prod(m);
-L=reshape(L,numThetan,nTau+1,mtol);
+L=reshape(full(L),numThetan,nTau+1,mtol);
 %%%%% ====================================================================
+f=0;
 InTens=ones(numThetan,nTau+1,mtol);
 OutTens=ones(numThetan,nTau+1,mtol,NumElement);
 for n=1:numThetan
     OutTens_d=ones(nTau+1,mtol,NumSSDlet,NumElement);
+    sum_Tau=0;
     for i=1:nTau+1
+        XRF_v=zeros(1,numChannel);
         if(ndims(W_rep)==4)
             W=reshape(W_rep(n,i,:,:),mtol,NumElement);
         else
@@ -32,9 +35,12 @@ for n=1:numThetan
                     end
                 OutTens(n,i,v,:)=sum(OutTens_d(i,v,:,:),3)/NumSSDlet;
                 end
+                XRF_v=XRF_v+L(n,i,v)*(InTens(n,i,v)*reshape(OutTens(n,i,v,:),1,NumElement).*W(v,:))*M;
             end
+            sum_Tau=sum_Tau+(squeeze(xrfData(n,i,:))'-XRF_v)*(squeeze(xrfData(n,i,:))'-XRF_v)';
         end
     end
+    f=f+sum_Tau;
 end
 AttenuM=bsxfun(@times,InTens,OutTens);
 DW=bsxfun(@times,AttenuM,reshape(W,[1,1,mtol,NumElement]));

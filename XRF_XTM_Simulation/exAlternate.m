@@ -1,7 +1,13 @@
-function xstar=exAlternate(N,numThetan)
+function xstar=exAlternate(simulate)
 %%%Simulate XRF of a given object with predifined detector and beam
-do_setup;
-optXRF;
+if(simulate)
+    do_setup;
+else
+    do_setup;
+    optXRF;
+end
+%{
+return;
 save(['drawing2',num2str(N(1)),'_',num2str(numThetan),'.mat'],'errOut_Joint');
 Joint=0;
 optXRF;
@@ -28,3 +34,4 @@ Define_Detector_Beam; %% provide the beam source and Detectorlet
 UnitSpectrum; %% Produce BindingE M
 theta=1:10:90;% Projection Angles
 XRF=SimulateXRF(W,MU,BindingE,M,theta,DetChannel, numChannel, nTau, DetKnot0, SourceKnot0);
+%}

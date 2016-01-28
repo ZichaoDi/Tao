@@ -1,6 +1,7 @@
 %%%Simulate XRF of a given object with predifined detector and beam
-do_setup;
-optXRF;
+exAlternate(0);
+%{
+return;
 h_admm=[];for i=1:size(x_admm,2)-1, h_admm(:,i)=x_admm(:,i+1)-x_admm(:,i);end
 f1=[];for i=1:size(x_admm,2),f1(i)=feval(fctn,x_admm(:,i));end
 gg=[];for i=1:size(x_admm,2)-1;[~,gg(:,i)]=feval(fctn1,x_admm(:,i));end
@@ -34,3 +35,4 @@ Define_Detector_Beam; %% provide the beam source and Detectorlet
 UnitSpectrum; %% Produce BindingE M
 theta=1:10:90;% Projection Angles
 XRF=SimulateXRF(W,MU,BindingE,M,theta,DetChannel, numChannel, nTau, DetKnot0, SourceKnot0);
+%}
