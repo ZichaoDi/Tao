@@ -29,13 +29,17 @@ if(synthetic)
     DetScaleXRF=10;
     DetChannel=linspace(0,DetScaleXRF,numChannel)';
 else
+    load(['DetChannel_',sample,'.mat']); %-- APS real fluorescence detector energy channel
+    numChannel=length(DetChannel);
+    if(truncChannel)
+        truncInd=find(DetChannel> 5 & DetChannel <9);
+        DetChannel=DetChannel(truncInd);
+        numChannel=length(truncInd);
+    end
+    DetChannel_raw=DetChannel;
     if (DecomposedElement)
         numChannel=length(slice);
         DetChannel=[1:numChannel]';
-    else %-- APS real fluorescence detector energy channel
-        load DetChannel
-        numChannel=length(DetChannel);
-        DetChannel=DetChannel;
     end
 end
 %%%=========== Define number of flying paths of fluorescence photons
@@ -44,3 +48,6 @@ SSDlet=[linspace(SSD0(2,1),SSD0(1,1),NumSSDlet)',...
             linspace(SSD0(2,2),SSD0(1,2),NumSSDlet)' ];
 %%%=========== Assign Projection Angles;
 thetan=linspace(363,abs(183*(angleScale)-363),numThetan);% must be positive.
+if(strcmp(sample,'Rod'))
+    thetan=linspace(-180,180,numThetan)+360;% must be positive.
+end

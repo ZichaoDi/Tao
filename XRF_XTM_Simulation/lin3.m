@@ -1,5 +1,5 @@
-function [xnew, fnew, alpha] = ...
-    lin3 (p, x, f, alphamax, sfun)
+function [xnew, fnew, InNew, OutNew, AttNew, alpha] = ...
+    lin3 (p, x, f, alphamax, sfun,InTens, OutTens, AttenuM)
 %---------------------------------------------------------
 % line search (naive)
 %---------------------------------------------------------
@@ -8,15 +8,22 @@ function [xnew, fnew, alpha] = ...
 alpha  = alphamax;
 xnew   = x;
 fnew   = f;
-for itcnt = 1:20;
+InNew  = InTens;
+OutNew = OutTens;
+AttNew = AttenuM;
+maxiTrial=5;
+for itcnt = 1:maxiTrial;
     xt = x + alpha.*p;
-    [~,~,~,~,ft] = feval (sfun, xt);
+    [InTens, OutTens, AttenuM, DW,ft] = feval (sfun, xt);
     if (ft < f);
         ierror = 0;
         xnew   = xt;
         fnew   = ft;
+        InNew  = InTens;
+        OutNew = OutTens;
+        AttNew = AttenuM;
         break;
-    elseif(itcnt==20)
+    elseif(itcnt==maxiTrial)
         fprintf('no step taken\n')
         alpha=0;
     end;

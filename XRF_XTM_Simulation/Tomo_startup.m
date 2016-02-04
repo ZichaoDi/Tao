@@ -27,6 +27,7 @@ if(ismac)
 addpath_recurse([macDir,slash,'APSdata']);
 addpath_recurse([macDir,slash,'Di_MATLABtool']);
 else
+addpath_recurse([mcsDir,slash,'APSdata']);
 addpath_recurse([mcsDir,slash,'Di_MATLABtool']);
 addpath_recurse([mcsDir,slash,'optdi/Reconstruction/Writing/multimodal/version1/GenerateFig']);
 end

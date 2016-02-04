@@ -5,7 +5,6 @@ global fig2  fig5 finalfig EmptyBeam RealBeam
 global LogScale Tol
 plotSpecSingle=0;
 more off;
-% load slice1_50;
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
 DefineObject_Gaussian; % Produce W, MU_XTM
 %%%%%%%==============================================================
@@ -18,6 +17,7 @@ mtol=prod(m);
 eX=ones(m(1),1);
 eY=ones(m(2),1);
 XRF=zeros(numThetan,nTau+1,numChannel);%cell(numThetan,nTau+1);%
+XRF_raw=zeros(numThetan,nTau+1,length(DetChannel_raw));%cell(numThetan,nTau+1);%
 SigMa_XRF=zeros(numThetan*(nTau+1),numChannel);
 DisR=zeros(nTau+1,numThetan);
 Ltol=cell(numThetan,nTau+1);
@@ -32,10 +32,11 @@ AS{7}{d}=[];
 end
 AS{8}=AS{7};
 SelfInd=repmat({AS},[numThetan,nTau+1,mtol]);
+size(SelfInd)
 clear AS
 EmptyBeam=[];
 RealBeam=[];
-RMlocal=zeros(m(1),m(2),numChannel); %% assign all the contributions from seperate beam to each pixel
+% RMlocal=zeros(m(1),m(2),numChannel); %% assign all the contributions from seperate beam to each pixel
 fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel);
 
 for n=1:numThetan
@@ -93,6 +94,7 @@ for n=1:numThetan
         GlobalInd{n,i}=index;
         RM=cell(m(1),m(2));
         xrfSub=zeros(1,numChannel);
+        xrfSub_raw=zeros(1,length(DetChannel_raw));
         for j=1:size(index,1)
             CurrentCellCenter=[(index(j,1)-1/2)*dz(1)-abs(omega(1)),(index(j,2)-1/2)*dz(2)-abs(omega(3))];
             currentInd=sub2ind(m,index(j,2),index(j,1));
@@ -166,14 +168,20 @@ for n=1:numThetan
                 end %% End loop for existing fluorescence energy from current pixel
             %% ====================================================================
             RM{index(j,2),index(j,1)}=Lvec(j)*I_incident*(I_after.*Wsub)'*M;% fluorescence emitted from current pixel
-            temp=zeros(size(RMlocal(index(j,2),index(j,1),:)));
-            temp(1,1,:)=Lvec(j)*I_incident*(I_after.*Wsub)'*M;
-            RMlocal(index(j,2),index(j,1),:)=RMlocal(index(j,2),index(j,1),:)+temp;
+            % temp=zeros(size(RMlocal(index(j,2),index(j,1),:)));
+            % temp(1,1,:)=Lvec(j)*I_incident*(I_after.*Wsub)'*M;
+            % RMlocal(index(j,2),index(j,1),:)=RMlocal(index(j,2),index(j,1),:)+temp;
             xrfSub=xrfSub+RM{index(j,2),index(j,1)};
+            if(DecomposedElement)
+                RM_raw{index(j,2),index(j,1)}=Lvec(j)*I_incident*(I_after.*Wsub)'*M_raw;% fluorescence emitted from current pixel
+                xrfSub_raw=xrfSub_raw+RM_raw{index(j,2),index(j,1)};
+            end
         end
         Rdis(i)=I0*exp(-eX'*(MU_XTM.*reshape(L(sub2ind([numThetan,nTau+1,prod(m)],n*ones(1,prod(m)),i*ones(1,prod(m)),1:prod(m))),m))*eY); %% Discrete case
-        % xrfSub=GaussianFit1(BindingEnergy,xrfSub);
         XRF(n,i,:)=xrfSub;%+0.1*rand(size(xrfSub));%reshape(DisXRF(subTheta(n),i,:),1,numChannel);%
+        if(DecomposedElement)
+            XRF_raw(n,i,:)=xrfSub_raw;
+        end
         SigMa_XRF((nTau+1)*(n-1)+i,:)=xrfSub;
         clear xrfSub
         if(plotSpec)
@@ -190,9 +198,15 @@ end
 if(~synthetic)
     XRF_Simulated=XRF;
     DisR_Simulated=DisR;
-    XRF=permute(data_xrf(:,:,:),[2 3 1]);
+    if(DecomposedElement)
+        XRF=permute(data_xrf(:,:,:),[2 3 1]);
+        XRF_raw=permute(data_xrf_raw(truncInd,:,:),[2 3 1]);
+    else
+        XRF=permute(data_xrf(truncInd,:,:),[2 3 1]);
+    end
     DisR=squeeze(sum(data_xrt(:,:,:),1))';
-    % save(['Simulated_',num2str(N(1)),'_',num2str(numThetan),'_',num2str(NumElement),'_',num2str(numChannel), sample,'.mat'],'DisR_Simulated','XRF','XRF_Simulated','DisR');
+    save(['Simulated_',num2str(N(1)),'_',num2str(numThetan),'_',num2str(NumElement),'_',num2str(numChannel), sample,'.mat'],'DisR_Simulated','XRF','XRF_Simulated','DisR');
+    clear data_xrt data_xrf
 end
 
 if(Weighted)

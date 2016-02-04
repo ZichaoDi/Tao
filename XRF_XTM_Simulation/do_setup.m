@@ -18,32 +18,58 @@ grad_type = 'full-linear';  % 'adj' = adjoint/exact
 % Initialize arrays for discretizations
 Tomo_startup;
 %%===============Load Sample=====================
-synthetic=1;
+synthetic=0;
 if(synthetic)
     sample='Phantom';
 else
     sample='Seed';
+    % sample='Rod';
 end
-N=20;% 100;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
+N=70;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
 angleScale=2; %1: half angle; 2: full angle
 if(synthetic)
     numThetan=15; % number of scanning angles/projections
-    numChannel=3;% number of energy channels on xrf detector
+    numChannel=5;% number of energy channels on xrf detector
     DecomposedElement=0;
 else
     if(strcmp(sample,'Seed'))
         load ./data/ApsDataExtract/DogaSeeds/DownSampleSeeds441_elements.mat
-        load RawSpectra.mat
+        load RawSpectra_seed.mat
         if(angleScale==1)
             cutInd=floor(size(data_H,3)/2);
             data_H=data_H(:,:,1:cutInd);
             spectra=spectra(:,:,1:cutInd);
         end
         data = permute(data_H,[2,3,1]);
-        slice = [13 14 17];% 5:27;%   
+        slice =[13 14 17];%5:27;%      
         data_h=[];
         ang_rate=10;
-        tau_rate=3;
+        tau_rate=6;
+        for ele=1:size(data,1)
+            data_h(ele,:,:)=sum(data(ele,1:ang_rate:end,1:tau_rate:end),1);
+        end
+        if(ndims(data_h)==2)
+            data_h=reshape(data_h,size(data_h,1),1,size(data_h,2));
+        end
+        DecomposedElement=0;
+        truncChannel=1;% (DecomposedElement==0)*1;
+        data_xrt=data_h(3,:,:); %transimission data
+        data_xrf=data_h(slice,:,:);
+        data_xrf_raw=permute(spectra(1:tau_rate:end,:,1:ang_rate:end),[2 3 1]);
+        [x_ir,y_ir]=meshgrid(1:size(iR,1));
+        [x_num,y_num]=meshgrid(linspace(1,size(iR,1),N(1)));
+        iR_num=zeros(N(1),N(1),size(iR,3));
+        for ele=1:size(iR,3)
+            iR_num(:,:,ele)=interp2(x_ir,y_ir,iR(:,:,ele),x_num,y_num);
+        end
+    elseif(strcmp(sample,'Rod'))
+        load ~/Documents/Research/APSdata/GlassRod/2dSlice/Slice30
+        load ~/Documents/Research/APSdata/GlassRod/2dSlice/tomoRec_3
+        slice_tot = [3 4 25 30]; %GlassRod%
+        slice = [4 25 30];
+        data_h=[];
+        ang_rate=10;
+        tau_rate=45;
         for ele=1:size(data,1)
             data_h(ele,:,:)=sum(data(ele,1:ang_rate:end,1:tau_rate:end),1);
         end
@@ -51,11 +77,17 @@ else
             data_h=reshape(data_h,size(data_h,1),1,size(data_h,2));
         end
         DecomposedElement=1;
-        data_xrt=data_h(3,:,:); %transimission data
+        truncChannel=(DecomposedElement==0)*0;
+        data_xrt=data_h(28,:,:); %transimission data: V_dpc_cfg
+        data_xrf=[];
         if(DecomposedElement)
-            data_xrf=data_h(slice,:,:);
+            data_xrf(1,:,:)=data_h(slice_tot(1),:,:)+data_h(slice_tot(2),:,:);
+            data_xrf(2,:,:)=data_h(slice_tot(3),:,:);
+            data_xrf(3,:,:)=data_h(slice_tot(4),:,:);
         else
-            data_xrf=permute(spectra(1:tau_rate:end,:,1:ang_rate:end),[2 3 1]);
+            load(['data/ApsDataExtract/2xfm1211_14/2xfm_',num2str(172+1),'.mat'],'XRF','DetChannel');
+            data_xrf=permute(XRF(:,30,:),[3 2 1]);%permute(spectra(1:tau_rate:end,:,1:ang_rate:end),[2 3 1]);
+            clear XRF
         end
         [x_ir,y_ir]=meshgrid(1:size(iR,1));
         [x_num,y_num]=meshgrid(linspace(1,size(iR,1),N(1)));
@@ -63,13 +95,8 @@ else
         for ele=1:size(iR,3)
             iR_num(:,:,ele)=interp2(x_ir,y_ir,iR(:,:,ele),x_num,y_num);
         end
-        clear x_ir y_ir x_num y_num iR data spectra 
-    elseif(strcmp(sample,'Rod'))
-        % load ~/Documents/Research/APSdata/GlassRod/2dSlice/Slice1
-        % load ~/Documents/Research/APSdata/GlassRod/2dSlice/rec_XTM_59
-        % iR=imread('~/Documents/Research/APSdata/GlassRod/Au_L_3/Au_L_0000.tif');
-        slice = [25 10 32 30 3 34]; %GlassRod%
     end
+    clear x_ir y_ir x_num y_num iR data spectra 
     numThetan=size(data_h,2);
 end
 %%-----------------------------------------------

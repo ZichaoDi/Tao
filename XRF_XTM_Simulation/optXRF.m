@@ -4,12 +4,19 @@ global SigMa_XTM SigMa_XRF Beta TempBeta
 global err0 fiter nit maxiter
 global InTens OutTens MU_XTM
 global itertest ErrIter
+more off;
 %%%----------------------------Initialize dependent variables
 % do_setup;
 level=1;
 current_n = N(level);
 W= W_level{level};
 XRF=double(xrf_level{level});
+if(DecomposedElement==0)
+    XRF=double(XRF_raw);
+    DetChannel=DetChannel_raw;
+    numChannel=length(DetChannel);
+    M=M_raw;
+end
 DisR=xtm_level{level};
 L=L_level{level};
 GlobalInd=GI_level{level};
@@ -29,7 +36,7 @@ cmap=[min(W0),max(W0)];
 if(TakeLog)
     fctn=@(W)sfun_XRF_EM(W,XRF,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,thetan,m,nTau);
 elseif(Alternate)
-
+    fctn_f=@(W)Calculate_Attenuation(W,NumElement,L,GlobalInd,SelfInd,m,nTau,XRF,M);
     if(Joint==0)
         TempBeta=1; Beta=0;
         if(linear_S)
@@ -39,14 +46,13 @@ elseif(Alternate)
             Mrep_P=repmat(reshape(M,[1,1 NumElement numChannel]),[nTau+1,mtol,1,1]);
             fctn_half=@(W)sfun_half_linear(W,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
             fctn=@(W)sfun_full_linear(W,XRF,Mrep_P,NumElement,L,GlobalInd,SelfInd,m,nTau);
-            fctn_f=@(W)Calculate_Attenuation(W,NumElement,L,GlobalInd,SelfInd,m,nTau,XRF,M);
         end
 
     elseif(Joint==1)
-        TempBeta=1; Beta=1e8;
+        TempBeta=1; Beta=1e7;
         Mrep_P=repmat(reshape(M,[1,1 NumElement numChannel]),[nTau+1,mtol,1,1]);
         fctn=@(W)sfun_Joint_admm(W,XRF,DisR,MU_e,Mrep_P,NumElement,L,GlobalInd,SelfInd,m,nTau);
-        fctn_f=@(W)func_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
+        % fctn_f=@(W)func_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,thetan,m,nTau,I0);
     end
 else
     if(Joint==0)
@@ -92,81 +98,87 @@ x_admm=[];
 x_admm(:,1)=x0;
 err_obj=[];
 if(Alternate & linear_S==0)
-    maxOut=4;
+    maxOut=1;
     x=x0;
     % RealVec=[];
     % for ib=1:size(RealBeam,2),RealVec(ib)=RealBeam(2,ib)+(nTau+1)*(RealBeam(1,ib)-1);end
     fctn0=@(W)sfun_Tensor(W,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
+    fprintf(1, 'cycle       alpha         residual      error      sub-residual\n');
     while(icycle<=maxOut)
     %%%%% =================== Attenuation Matrix at beam energy
-        MU_XTM=sum(reshape(Wold,m(1),m(2),NumElement).*repmat(MUe,[m(1),m(2),1]),3).*XTMscale;
-        d=XRF(:);
-        Cmatrix=reshape(L,numThetan,nTau+1,mtol);
-        B=bsxfun(@times,bsxfun(@times,Cmatrix.*InTens,OutTens),reshape(M,1,1,1,NumElement,numChannel));
-        B=permute(B,[1,2,5,3,4]);
-        if(strcmp(grad_type,'full-linear'))
-            B=reshape(B,numThetan*(nTau+1)*numChannel,mtol*NumElement);
-            d=d;
-            plot_str='ko-';
-        else
-            [ftemp,gtemp,Jacob1,Jacob2,Jacob3]=feval(fctn0,Wold(:));
-            dF=reshape(permute(reshape(Jacob1,numThetan*(nTau+1),mtol*NumElement,numChannel),[1 3 2]),numThetan*(nTau+1)*numChannel,mtol*NumElement);
-            dA=reshape(permute(reshape(Jacob2,numThetan*(nTau+1),mtol*NumElement,numChannel),[1 3 2]),numThetan*(nTau+1)*numChannel,mtol*NumElement);
-            dW=reshape(permute(reshape(Jacob3,numThetan*(nTau+1),mtol*NumElement,numChannel),[1 3 2]),numThetan*(nTau+1)*numChannel,mtol*NumElement);
-            if(strcmp(grad_type,'half-linear'))
-                B=dW+dA;
-                plot_str='g*-';
-            elseif(strcmp(grad_type,'original'))
-                B=dW+dA+dF;
-                plot_str='r.-';
+        matrixVersion=0;
+        if(matrixVersion)
+            MU_XTM=sum(reshape(Wold,m(1),m(2),NumElement).*repmat(MUe,[m(1),m(2),1]),3).*XTMscale;
+            d=XRF(:);
+            if(strcmp(grad_type,'full-linear'))
+                Cmatrix=reshape(L,numThetan,nTau+1,mtol);
+                B=bsxfun(@times,bsxfun(@times,Cmatrix.*InTens,OutTens),reshape(M,1,1,1,NumElement,numChannel));
+                B=permute(B,[1,2,5,3,4]);
+                B=reshape(B,numThetan*(nTau+1)*numChannel,mtol*NumElement);
+                plot_str='ko-';
+            else
+                [ftemp,gtemp,Jacob1,Jacob2,Jacob3]=feval(fctn0,Wold(:));
+                dF=reshape(permute(reshape(Jacob1,numThetan*(nTau+1),mtol*NumElement,numChannel),[1 3 2]),numThetan*(nTau+1)*numChannel,mtol*NumElement);
+                dA=reshape(permute(reshape(Jacob2,numThetan*(nTau+1),mtol*NumElement,numChannel),[1 3 2]),numThetan*(nTau+1)*numChannel,mtol*NumElement);
+                dW=reshape(permute(reshape(Jacob3,numThetan*(nTau+1),mtol*NumElement,numChannel),[1 3 2]),numThetan*(nTau+1)*numChannel,mtol*NumElement);
+                if(strcmp(grad_type,'half-linear'))
+                    B=dW+dA;
+                    plot_str='g*-';
+                elseif(strcmp(grad_type,'original'))
+                    B=dW+dA+dF;
+                    plot_str='r.-';
+                end
+                d=d-dW*Wold(:)+B*Wold(:);
             end
-            d=d-dW*Wold(:)+B*Wold(:);
+            % RealVec=find(d~=0);
+            % B=B(RealVec,:);
+            % d=d(RealVec);
+            % x=solver_ART(B,x,d,2*size(B,1));%B(RealVec,:)\d(RealVec); algo='ART';
+            % [x,flag,relres,iter]=pcg(B'*B,B'*d,1e-6,size(B,2)); algo='pcg';
+            x=B\d; algo='backslash';
+            fctn_linear=@(x)linear(x,B'*B,B'*d);%B(RealVec,:),d(RealVec));
+            f=norm(B*x-d);
         end
-        RealVec=find(d~=0);
-        B=B(RealVec,:);
-        d=d(RealVec);
-        % x=solver_ART(B,x,d,2*size(B,1));%B(RealVec,:)\d(RealVec);
-        fctn_linear=@(x)linear(x,B'*B,B'*d);%B(RealVec,:),d(RealVec));
         maxiter=40;
-        [x,flag,relres,iter]=pcg(B'*B,B'*d,1e-6,size(B,2));
-        % x=B\d;
         if(bounds)
-            % [x,f,g,ierror] = tnbc (x,fctn,low,up);
+            [x,f,g,ierror] = tnbc (x,fctn,low,up); algo='TNbc';
+            % options = optimoptions('fmincon','Display','iter','GradObj','on','MaxIter',maxiter,'Algorithm','interior-point');% ,'Algorithm','Trust-Region-Reflective'
+            % x=fmincon(fctn,x,[],[],[],[],low,up,[],options); algo='fmincon';
         else
             [x,f,g,ierror] = tn (x,fctn);
         end
-        [x,fnew,alpha]=lin3(x-Wold(:),Wold(:),fold,1,fctn_f);
+        [x,fold,InTens, OutTens,AttenuM, alpha]=lin3(x-Wold(:),Wold(:),fold,1,fctn_f,InTens, OutTens, AttenuM);
         x_admm(:,icycle+1)=x;
         Wold=x;
         AttenuOld=AttenuStar;
-        [InTens, OutTens, AttenuM, DW,fold]=Calculate_Attenuation(Wold,NumElement,L,GlobalInd,SelfInd,m,nTau,XRF,M);
-        Wtemp{icycle}=B;
         err(icycle)=norm(W0-x);
         errAtt(icycle)=norm(AttenuM(:)-AttenuStar(:));
-        fprintf('step size = %d    relres = %d     error = %d \n', alpha, fnew, err(icycle));
+        fprintf(1,'%4i      %.2e       %.3e     %.3e    %.3e\n', icycle,alpha, fold, err(icycle),f);
         if(Joint==0)
             err_XRF=err;
+            plot_str='ko-';
             figure(10);h1=semilogy(0:icycle,[err0,err_XRF],plot_str);
+            text(icycle,err_XRF(icycle),['f = ',num2str(fold,'%2.2e')]);
             drawnow;hold on;%
             hAtt=semilogy(0:icycle,[errAtt0,errAtt],'b*-');
         elseif(Joint==1)
             err_Joint=err;
-            figure(10);h2=semilogy(0:icycle,[err0,err_Joint],'r.-');drawnow;hold on;
+            figure(10);h1=semilogy(0:icycle,[err0,err_Joint],'r.-');drawnow;hold on;
+            text(icycle,err_Joint(icycle),['f = ',num2str(fold,'%2.2e')]);
+            drawnow;hold on;%
+            hAtt=semilogy(0:icycle,[errAtt0,errAtt],'b*-');
         end
-        if(icycle>1| icycle==maxOut)
+        if(icycle>1| icycle==maxOut | fold<=1e-5)
             if(icycle==maxOut | norm(x-W0)<1e-6 );%| err(icycle)>=err(icycle-1))
                 xstar=x;
-                err_abj(1)=0;err_obj(2)=0;
-                % [err_obj(1),g]=feval(fctn0,x);
-                % err_obj(2)=norm(g);
                 break;
             end
         end
         icycle=icycle+1;
     end
     % h_plot=[h_plot,h1];
-    legend([h1;hAtt],'error-W','error-Attenuation');
     save(['xstar_',sample,'_',num2str(N(1)),'_',num2str(numThetan),'_',num2str(numel(num2str(TempBeta))),'_',num2str(numel(num2str(Beta))),'_alternate.mat'],'xstar','x0','W0');
+    % legend([h1;hAtt],'error-W','error-Attenuation');
 
 elseif(Alternate==0)
     maxiter=40;
@@ -187,9 +199,8 @@ elseif(Alternate==0)
 end
 %%%%%%%%%%%%%%%%%%%%=======================================================
 if(~ReconAttenu)
-    res=err_obj(2);
     t=cputime-e;
-    fprintf('residual = %d, |grad| = %d, time elapsed = %f \n',err_obj,t);
+    fprintf('time elapsed = %f \n',t);
 end
 %%%%%%%%%%%%%%%%%%%%=======================================================
 if(plotResult)

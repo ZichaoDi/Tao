@@ -1,4 +1,3 @@
-% function [O,MU,W]=DefineObject(Z,E0)
 %%=======================================================================
 %%% Input: Z: Atomic Numbers of Existing Elements in the object
 %%%        E0: Beam Energy
@@ -18,10 +17,10 @@ if(synthetic)
     ScaleM=1;
 else
     AbsorbScale=1;
-    if(DecomposedElement)
+    if(DecomposedElement & strcmp(sample,'Seed'))
         ScaleM=4e1;
     else
-        ScaleM=1e0;
+        ScaleM=5e3;
     end
 end
 %%%%%======================================
@@ -43,7 +42,7 @@ if(synthetic)
     end
 else
     if(strcmp(sample,'Rod'))
-        Z=[14 29 30 74 79];% Glass Rod
+        Z=[79 14 74];% Glass Rod
     elseif(strcmp(sample,'Seed'))
         Z=[14 16 17 19 20 22 23 24 25 26 28 29 30 31 80 33 34 35 92 37 38 39 40];% Complete Seed
         Z=Z(slice-4);
@@ -64,7 +63,7 @@ if(level==1)
             if(strcmp(sample,'Seed'))
                 W(:,:,tsub)=abs(flipud(permute(iR_num(:,:,slice(tsub)),[2 1 3])));%tsub*2e-1;
             elseif(strcmp(sample,'Rod'))
-                W(:,:,tsub)=abs(fliplr(rot90(permute(iR(tsub,:,:),[2 3 1]))));%tsub*2e-1;
+                W(:,:,tsub)=abs(flipud(permute(iR_num(:,:,tsub),[2 1 3])));%tsub*2e-1;
             end
         end
         clear iR_num iR
