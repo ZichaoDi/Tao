@@ -23,7 +23,6 @@ gnorm  = argvec(2);
 xnorm  = argvec(3);
 
 eig_val = [];
-
 if (maxit == 0);
   p    = -g;
   gtp  = p'*g;

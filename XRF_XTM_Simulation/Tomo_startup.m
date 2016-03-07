@@ -30,6 +30,9 @@ else
 addpath_recurse([mcsDir,slash,'APSdata']);
 addpath_recurse([mcsDir,slash,'Di_MATLABtool']);
 addpath_recurse([mcsDir,slash,'optdi/Reconstruction/Writing/multimodal/version1/GenerateFig']);
+% addpath([mcsDir,slash,'Di_MATLABtool/dip/common/dipimage']);
+% dip_initialise;
+% dipsetpref('imagefilepath' , '/images');
 end
  ADiMat_startup;
 

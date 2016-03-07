@@ -4,7 +4,7 @@ if(simulate)
     do_setup;
 else
     do_setup;
-    optXRF;
+    opt;
 end
 %{
 return;

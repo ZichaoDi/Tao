@@ -28,10 +28,21 @@ rtleps = accrcy + eps;
 %  ipivot(ind(imax)) = 0;
 %    flast = f;
 % else
-   conv = (alpha*pnorm < toleps*(1 + xnorm) ...
-           & abs(dif) < rtleps*ftest        ...
-           & gnorm < accrcy^(1/3)*ftest) ...
-            | gnorm < .01*sqrt(accrcy)*ftest;
+   stop1 = alpha*pnorm < toleps*(1 + xnorm);
+   stop2 = abs(dif) < rtleps*ftest;
+   stop3 = gnorm < accrcy^(1/3)*ftest;
+   stop4 = gnorm < .01*sqrt(accrcy)*ftest;
+   conv = ( stop1 ...
+           & stop2        ...
+           & stop3) ...
+          | stop4;
+   if(conv)
+       if(stop1 & stop2 & stop3)
+           disp('tighter stoppting')
+       else
+           disp('gnorm < eps * |f|')
+       end
+   end
 % end;
 flast1  = flast;
 ipivot1 = ipivot;

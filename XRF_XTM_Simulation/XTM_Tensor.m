@@ -44,9 +44,10 @@ for n=1:numThetan
         % Initialize
         BeforeEmit=1;
         %============================= Plot Grid and Current Light Beam
-        if(plotSpec);% & i==1)
+        plotDisBeam=0;
+        if(plotDisBeam)
             finalfig=figure('name',sprintf('XRF at beam %d with angle %d',i,thetan(n)));
-            subplot(1,2,1);
+            subplot(1,2,1)
             plotGrid(xc,omega,[m(2) m(1)]);
             hold on;
             plot(DetKnot(:,1),DetKnot(:,2),'k+-',SourceKnot(:,1),SourceKnot(:,2),'m+-','LineWidth',0.5)
@@ -70,11 +71,24 @@ for n=1:numThetan
             L(sub2ind([numThetan,nTau+1],n,i),currentInd)=Lvec;
             Rdis(i)=I0*exp(-eX'*(MU_XTM.*reshape(L(sub2ind([numThetan,nTau+1],n,i),:),m))*eY);%%I0*exp(-eX'*(MU_XTM.*reshape(L(n,i,:,:),subm,subn))*eY); %% Discrete case
         end
+
         % else
         %     L_H(sub2ind([numThetan,nTau+1],n,i),:)= ...
         %     L(sub2ind([numThetan,nTau+1],n,i),:)*IhH{level}';
         % end
     end
+        if(plotSpec)
+            finalfig=figure('name',sprintf('XRT with angle %d',thetan(n)));
+            subplot(1,2,1)
+            plotGrid(xc,omega,[m(2) m(1)]);
+            hold on;
+            plot(DetKnot(:,1),DetKnot(:,2),'k+-',SourceKnot(:,1),SourceKnot(:,2),'m+-','LineWidth',0.5)
+            imagesc((x(1:end-1)+x(2:end))/2,(y(1:end-1)+y(2:end))/2,MU)
+            subplot(1,2,2);
+            plot(1:nTau+1,Rdis,'r-')
+            xlabel('Detector Channel','fontsize',12); ylabel('Intensity','fontsize',12)
+            pause(1);
+        end
      if(level==1)
          DisR(:,n)=Rdis';
      end

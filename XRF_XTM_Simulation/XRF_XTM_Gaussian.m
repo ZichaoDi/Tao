@@ -1,5 +1,5 @@
 %%%Simulate XRF of a given object with predifined detector and beam
-% function XRF=SimulateXRF(W,MU,BindingEenergy,M,thetan,DetChannel, numChannel, nTau, DetKnot0, SourceKnot0);
+%%% Only save projection matrices
 global plotSpecSingle BeforeEmit plotTravel SSDlet NoSelfAbsorption
 global fig2  fig5 finalfig eX eY
 global SigMa_XTM SigMa_XRF LogScale

@@ -1,9 +1,11 @@
 function [index,Lvec,linearInd]=IntersectionSet(Source,Detector,xbox,ybox,theta)
 global x y omega m plotTravel BeforeEmit dz
 global  fig2 fig5 finalfig Tol
-[Ax, Ay] = polyxpoly([Source(1),Detector(1)],[Source(2),Detector(2)], xbox, ybox);
+% [Ax, Ay] = polyxpoly([Source(1),Detector(1)],[Source(2),Detector(2)], xbox, ybox);
+[intersects] = intersectLinePolygon([Source(1) Source(2) Detector(1)-Source(1) Detector(2)-Source(2)], [xbox',ybox']);
+Ax=intersects(:,1);Ay=intersects(:,2);
 if(isempty(Ax) | length(unique(Ax))==1 & length(unique(Ay))==1)
-    %fprintf('no intersection \n')
+    % fprintf('no intersection \n')
     index=[];
     Lvec=[];
     linearInd=[];

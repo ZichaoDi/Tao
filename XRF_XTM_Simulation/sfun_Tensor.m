@@ -2,7 +2,7 @@ function [ft,gt,Jacob1,Jacob2,Jacob3]=sfun_Tensor(W,xrfData,M,NumElement,L,Globa
 %%==== XRF objective function in least square form
 %%==== Self-absorption is implemented in a tensor-product fashion
 global NumSSDlet numChannel NoSelfAbsorption numThetan
-global SigMa_XRF
+global SigMa_XRF EM
 
 mtol=prod(m);
 W=reshape(W,mtol,NumElement);
@@ -20,7 +20,7 @@ for n=1:numThetan
     TempSub=zeros(nTau+1,mtol,NumElement,numChannel);
     XRF_v=zeros(nTau+1,numChannel);
     for i=1:nTau+1
-        counted_v=zeros(mtol,1);
+        counted_v=[];
         index=GlobalInd{n,i};
         if(~isempty(index))
             index_sub=sub2ind(m,index(:,2),index(:,1));
@@ -74,10 +74,17 @@ for n=1:numThetan
             end
         end
     end
-    count=(nTau+1)*(n-1)+1:(nTau+1)*n;
-    f(n)=sum(SigMa_XRF(count)'.*sum((XRF_v-squeeze(xrfData(n,:,:))).^2,2),1);
-    g(n,:,:)=2*reshape(sum(sum(bsxfun(@times,TempSub,repmat(SigMa_XRF(count)',[1 1 1 numChannel]).* ...
-        reshape((XRF_v-squeeze(xrfData(n,:,:))),nTau+1,1,1,numChannel)),1),4),mtol,NumElement);
+    if(EM)
+        XRF_v = XRF_v+1;
+        xrfData=xrfData+1;
+        f(n)=sum(sum(squeeze(xrfData(n,:,:)).*log(XRF_v)-XRF_v,1),2);
+        g(n,:,:)=2*reshape(sum(sum(bsxfun(@times,TempSub, ...
+                reshape((1-squeeze(xrfData(n,:,:))./XRF_v),nTau+1,1,1,numChannel)),1),4),mtol,NumElement);
+    else
+        f(n)=sum(sum((XRF_v-squeeze(xrfData(n,:,:))).^2,2),1);
+        g(n,:,:)=2*reshape(sum(sum(bsxfun(@times,TempSub, ...
+                reshape((XRF_v-squeeze(xrfData(n,:,:))),nTau+1,1,1,numChannel)),1),4),mtol,NumElement);
+    end
 end
 ft=sum(f);
 gt=reshape(sum(g,1),mtol*NumElement,1);

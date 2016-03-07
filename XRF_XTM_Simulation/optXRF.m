@@ -2,7 +2,7 @@ global low up penalty
 global W0 current_n Wold
 global SigMa_XTM SigMa_XRF Beta TempBeta
 global err0 fiter nit maxiter
-global InTens OutTens MU_XTM
+global ConstSub InTens OutTens MU_XTM
 global itertest ErrIter
 more off;
 %%%----------------------------Initialize dependent variables
@@ -10,12 +10,21 @@ more off;
 level=1;
 current_n = N(level);
 W= W_level{level};
-XRF=double(xrf_level{level});
-if(DecomposedElement==0)
-    XRF=double(XRF_raw);
-    DetChannel=DetChannel_raw;
-    numChannel=length(DetChannel);
-    M=M_raw;
+DecomposedElement=0;
+if(synthetic)
+    XRF=double(xrf_level{level});
+else
+    if(DecomposedElement)
+        XRF=double(xrf_level_decom{level});
+        DetChannel=DetChannel_decom;
+        numChannel=numChannel_decom;
+        M=M_decom*4e1;
+    else
+        XRF=double(xrf_level_raw{level});
+        DetChannel=DetChannel_raw;
+        numChannel=numChannel_raw;
+        M=M_raw;
+    end
 end
 DisR=xtm_level{level};
 L=L_level{level};
@@ -31,7 +40,7 @@ else
     fprintf(1,'====== With Self Absorption, Transmission Detector Resolution is %d\n',nTau);
 end
 %%%----------------------------------------------------------------------
-W0=WS(:);
+W0=W(:);
 cmap=[min(W0),max(W0)];
 if(TakeLog)
     fctn=@(W)sfun_XRF_EM(W,XRF,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,thetan,m,nTau);
@@ -43,9 +52,10 @@ elseif(Alternate)
             Mrep=repmat(reshape(M,[1,1,1 NumElement numChannel]),[numThetan,nTau+1,mtol,1,1]);
             fctn=@(DW)sfun_linearized(DW,XRF,Mrep,NumElement,L,m,nTau);
         else
-            Mrep_P=repmat(reshape(M,[1,1 NumElement numChannel]),[nTau+1,mtol,1,1]);
+            Mrep_P=repmat(reshape(M,[1,1,1 NumElement numChannel]),[numThetan,nTau+1,mtol,1,1]);
             fctn_half=@(W)sfun_half_linear(W,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
-            fctn=@(W)sfun_full_linear(W,XRF,Mrep_P,NumElement,L,GlobalInd,SelfInd,m,nTau);
+            L_rep=reshape(L,numThetan,nTau+1,mtol);
+            fctn=@(W)sfun_full_linear(W,XRF,NumElement,m,nTau);
         end
 
     elseif(Joint==1)
@@ -75,8 +85,7 @@ x0 = 0*W(:)+1*10^(1)*rand(prod(m)*NumElement,1);
 xinitial=x0;
 err0=norm(W0-xinitial);
 NF = [0*N; 0*N; 0*N];
-e=cputime;
-maxiter=40;
+tic;
 maxOut=3;
 icycle=1;
 x=x0;
@@ -88,8 +97,11 @@ Wtemp=[];
 outCycle=1;
 if(~ReconAttenu)
     [InTens, OutTens, AttenuM, DW,fold]=Calculate_Attenuation(Wold,NumElement,L,GlobalInd,SelfInd,m,nTau,XRF,M);
-    [InStar, OutStar, AttenuStar, DWstar,fstar]=Calculate_Attenuation(WS,NumElement,L,GlobalInd,SelfInd,m,nTau,XRF,M);
-    errAtt0=norm(AttenuM(:)-AttenuStar(:));
+    temp_v=L_rep.*InTens;
+    ConstSub=bsxfun(@times,bsxfun(@times,temp_v,OutTens),Mrep_P); % part 3
+    clear DW temp_v;
+    % [InStar, OutStar, AttenuStar, DWstar,fstar]=Calculate_Attenuation(W,NumElement,L,GlobalInd,SelfInd,m,nTau,XRF,M);
+    % errAtt0=norm(AttenuM(:)-AttenuStar(:));
 end
 %%%==================================================
 low=0*ones(size(x0));
@@ -148,11 +160,14 @@ if(Alternate & linear_S==0)
             [x,f,g,ierror] = tn (x,fctn);
         end
         [x,fold,InTens, OutTens,AttenuM, alpha]=lin3(x-Wold(:),Wold(:),fold,1,fctn_f,InTens, OutTens, AttenuM);
+        temp_v=L_rep.*InTens;
+        ConstSub=bsxfun(@times,bsxfun(@times,temp_v,OutTens),Mrep_P); % part 3
+        clear DW temp_v;
         x_admm(:,icycle+1)=x;
         Wold=x;
-        AttenuOld=AttenuStar;
+        % AttenuOld=AttenuStar;
         err(icycle)=norm(W0-x);
-        errAtt(icycle)=norm(AttenuM(:)-AttenuStar(:));
+        % errAtt(icycle)=norm(AttenuM(:)-AttenuStar(:));
         fprintf(1,'%4i      %.2e       %.3e     %.3e    %.3e\n', icycle,alpha, fold, err(icycle),f);
         if(Joint==0)
             err_XRF=err;
@@ -160,13 +175,13 @@ if(Alternate & linear_S==0)
             figure(10);h1=semilogy(0:icycle,[err0,err_XRF],plot_str);
             text(icycle,err_XRF(icycle),['f = ',num2str(fold,'%2.2e')]);
             drawnow;hold on;%
-            hAtt=semilogy(0:icycle,[errAtt0,errAtt],'b*-');
+            % hAtt=semilogy(0:icycle,[errAtt0,errAtt],'b*-');
         elseif(Joint==1)
             err_Joint=err;
             figure(10);h1=semilogy(0:icycle,[err0,err_Joint],'r.-');drawnow;hold on;
             text(icycle,err_Joint(icycle),['f = ',num2str(fold,'%2.2e')]);
             drawnow;hold on;%
-            hAtt=semilogy(0:icycle,[errAtt0,errAtt],'b*-');
+            % hAtt=semilogy(0:icycle,[errAtt0,errAtt],'b*-');
         end
         if(icycle>1| icycle==maxOut | fold<=1e-5)
             if(icycle==maxOut | norm(x-W0)<1e-6 );%| err(icycle)>=err(icycle-1))
@@ -177,11 +192,11 @@ if(Alternate & linear_S==0)
         icycle=icycle+1;
     end
     % h_plot=[h_plot,h1];
-    save(['xstar_',sample,'_',num2str(N(1)),'_',num2str(numThetan),'_',num2str(numel(num2str(TempBeta))),'_',num2str(numel(num2str(Beta))),'_alternate.mat'],'xstar','x0','W0');
+    save(['xstar_',sample,'_',num2str(N(1)),'_',num2str(numThetan),'_',num2str(numel(num2str(TempBeta))),'_',num2str(numel(num2str(Beta))),'_',num2str(numChannel),'alternate.mat'],'xstar','x0','W0');
     % legend([h1;hAtt],'error-W','error-Attenuation');
 
 elseif(Alternate==0)
-    maxiter=40;
+    maxiter=100;
     if(bounds)
         [xstar,f,g,ierror]=tnbc(x,fctn,low,up);
     else
@@ -192,14 +207,14 @@ elseif(Alternate==0)
         ErrIter_XRF=ErrIter;
         figure(10); h3=semilogy(linspace(0,maxOut,length(ErrIter_XRF)), ErrIter_XRF,'ms-');hold on;
         % legend([h;h1;h3],'error-W','Alternate-tn','Full-tn')
-    else
+    elseif(Joint==1)
         ErrIter_Joint=ErrIter;
         figure(10); h4=semilogy(linspace(0,maxOut,length(ErrIter_Joint)), ErrIter_Joint,'g*-');hold on;
     end
 end
 %%%%%%%%%%%%%%%%%%%%=======================================================
 if(~ReconAttenu)
-    t=cputime-e;
+    t=toc;
     fprintf('time elapsed = %f \n',t);
 end
 %%%%%%%%%%%%%%%%%%%%=======================================================
@@ -275,7 +290,7 @@ if(linear_S)
             [InTens, OutTens, AttenuM, DW,f]=Calculate_Attenuation(Wold,NumElement,L,GlobalInd,SelfInd,m,nTau,XRF,M);
             Wtemp{icycle,nAngle,nT}=Wold;
             errDW(im)=norm(xstar-squeeze(Dstar));
-            err(im)=norm(Wold(:)-WS(:));
+            err(im)=norm(Wold(:)-W(:));
             errAtt(im)=norm(AttenuM(:)-AttenuStar(:));
         end
         W1=repmat(reshape(xsT,1,1,mtol,NumElement),[numThetan,nTau+1,1,1])./AttenuStar;

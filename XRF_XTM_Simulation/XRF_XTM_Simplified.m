@@ -1,6 +1,6 @@
-%%%Simulate XRF of a given object with predifined detector and beam
-%%% Travelling of fluorescece photons is approximated as numerical disrectized paths in the range of solid angle
-global plotSpecSingle BeforeEmit plotTravel SSDlet
+%%% Simulate XRF of a given fixed object with rotating predifined detector and beam
+%%% Travelling of fluorescence photon is approximated as the area covered by solid angle 
+global plotSpecSingle BeforeEmit plotTravel SSDlet area_xrf
 global fig2  fig5 finalfig EmptyBeam RealBeam
 global LogScale Tol
 plotSpecSingle=0;
@@ -24,12 +24,8 @@ end
 DisR=zeros(nTau+1,numThetan);
 L=zeros(numThetan,nTau+1,m(1),m(2));%zeros(numThetan*(nTau+1)*prod(m),1);
 GlobalInd=cell(numThetan,nTau+1);
-AS=cell(8,1);
-AS{7}=cell(1,NumSSDlet);
-for d=1:NumSSDlet
-AS{7}{d}=[];
-end
-AS{8}=AS{7};
+area_xrf=zeros(numThetan,nTau+1,mtol);
+AS=cell(6,1);
 SelfInd=repmat({AS},[numThetan,nTau+1,mtol]);
 clear AS
 EmptyBeam=[];
@@ -78,7 +74,8 @@ for n=1:numThetan
             hold on;
             plot(DetKnot(:,1),DetKnot(:,2),'k+-',SourceKnot(:,1),SourceKnot(:,2),'m+-',SSDknot(:,1),SSDknot(:,2),'g+-','LineWidth',0.5)
             axis equal 
-            imagesc((x(1:end-1)+x(2:end))/2,(y(1:end-1)+y(2:end))/2,sum(W,3))
+            W_temp=W; W_temp(:,:,1)=1e-3*W(:,:,1);
+            imagesc(xc(:,1),xc(:,2),sum(W_temp,3))
             axis xy
             set(gcf,'Units','normalized')
             set(gca,'Units','normalized')
@@ -129,50 +126,14 @@ for n=1:numThetan
             %% ===========================================================
             Wsub=reshape(W(index(j,2),index(j,1),:),[NumElement,1]);
             %% Self-absorption
-            
-            BeforeEmit=0;
-            I_after=ones(NumElement,1);
-                I_after=0*I_after;
-                for SSDi=1:NumSSDlet
-                    temp_after=0;
-                    beta=angle(SSDknot(SSDi,1)-CurrentCellCenter(1)+(SSDknot(SSDi,2)-CurrentCellCenter(2))*sqrt(-1));
-                    if(beta>=0 & beta<=pi/2)
-                        xbox=[CurrentCellCenter(1) CurrentCellCenter(1) omega(2) omega(2) CurrentCellCenter(1)];
-                        ybox=[CurrentCellCenter(2) omega(4) omega(4) CurrentCellCenter(2) CurrentCellCenter(2)];
-                    elseif(beta >pi/2 & beta<=pi)
-                        xbox=[omega(1) omega(1) CurrentCellCenter(1) CurrentCellCenter(1) omega(1)];
-                        ybox=[ CurrentCellCenter(2) omega(4) omega(4) CurrentCellCenter(2) CurrentCellCenter(2)];
-                    elseif(beta >=-pi/2 & beta<0)
-                        xbox=[CurrentCellCenter(1) CurrentCellCenter(1) omega(2) omega(2) CurrentCellCenter(1)];
-                        ybox=[omega(3) CurrentCellCenter(2) CurrentCellCenter(2) omega(3) omega(3)];
-                    elseif(beta>=-pi & beta<-pi/2)
-                        xbox=[omega(1) omega(1) CurrentCellCenter(1) CurrentCellCenter(1) omega(1)];
-                        ybox=[omega(3) CurrentCellCenter(2) CurrentCellCenter(2) omega(3) omega(3)];
-                    end
-                    if(beta<0)
-                        beta=beta+2*pi;
-                    end
-                    [index_after,Lvec_after,linearInd_after]=IntersectionSet(CurrentCellCenter,SSDknot(SSDi,:),xbox,ybox,beta);
-                    [index_after,otherInd]=setdiff(index_after,index(j,:),'rows');
-                    Lvec_after=Lvec_after(otherInd');
-                    LinearInd=sub2ind(m,index_after(:,2),index_after(:,1));
-                    for tsub=1:NumElement
-                        if(~isempty(Lvec_after))
-                            temp_after=sum(Lvec_after.*reshape(MU_after(LinearInd,tsub),size(Lvec_after))); %% Attenuation of Flourescent energy emitted from current pixel
-                        else
-                            temp_after=0;
-                        end
-                        I_after(tsub)=I_after(tsub)+exp(-temp_after)/NumSSDlet;
-                    end %% End loop for each SSD detector let
-                    %%%part for gradient evaluation**************************************
-                    SelfInd{n,i,currentInd}{2}{SSDi}=LinearInd;
-                    SelfInd{n,i,currentInd}{4}{SSDi}=kron(squeeze(MU_e(:,1,2:end)),Lvec_after);
-                    for tt=1:length(otherInd)
-                        SelfInd{n,i,LinearInd(tt)}{7}{SSDi}=[SelfInd{n,i,LinearInd(tt)}{7}{SSDi},currentInd];
-                        SelfInd{n,i,LinearInd(tt)}{8}{SSDi}(:,:,length(SelfInd{n,i,LinearInd(tt)}{7}{SSDi}))=reshape(squeeze(MU_e(:,1,2:end)).*Lvec_after(tt),NumElement,NumElement,1);
-                    end
-                    %%%**************************************
-                end %% End loop for existing fluorescence energy from current pixel
+            in_after=find(inpolygon(xc(:,1),xc(:,2),[CurrentCellCenter(1) SSDknot(1,1) SSDknot(NumSSDlet,1)],[CurrentCellCenter(2) SSDknot(1,2) SSDknot(NumSSDlet,2)])); 
+            in_after=setdiff(in_after,currentInd); %% energy is not attenuated from the source point
+            % figure(19);plot(omega([1 2 2 1 1]),omega([3 3 4 4 3]),'r.-');
+            % hold on; fill([CurrentCellCenter(1) SSDknot(1,1) SSDknot(NumSSDlet,1)],[CurrentCellCenter(2) SSDknot(1,2) SSDknot(NumSSDlet,2)],'b.-');
+            % hold off;
+            area_xrf(n,i,currentInd)=prod(dz);%*length(in_after);prod(dz)*length(in_after);
+            SelfInd{n,i,currentInd}{2}=in_after;
+            I_after = exp(-sum(MU_after(in_after,:)',2)*area_xrf(n,i,currentInd));%% Attenuation of Flourescent energy emitted from current pixel
             %% ====================================================================
             if(synthetic)
                 xrfSub=xrfSub+Lvec(j)*I_incident*(I_after.*Wsub)'*M;% fluorescence emitted from current pixel
@@ -233,8 +194,6 @@ end
 
 SigMa_XRF=1;
 SigMa_XTM=1;
-
-
 
 
 
