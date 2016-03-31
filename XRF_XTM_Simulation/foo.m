@@ -1,4 +1,3 @@
-
 function gh=foo(fctn,x0);
 global testind
 z0 = x0;

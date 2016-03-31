@@ -4,7 +4,7 @@
 global N numThetan NF
 global bounds LogScale Joint
 global grad_type err0 
-global onlyXRF NoSelfAbsorption
+global onlyXRF NoSelfAbsorption pix_inner
 global W_level xrf_level_decom xrf_level_raw xtm_level L_level GI_level SI_level SigmaR SigmaT m_level nTau_level
 global NumElement xinitial current_n Tik penalty EM
 %--------------------------------------------------
@@ -20,16 +20,17 @@ Tomo_startup;
 %%===============Load Sample=====================
 synthetic=0;
 if(synthetic)
-    sample='circle'; % one element mainly testing self-absorption; 
+    % sample='circle'; % one element mainly testing self-absorption; 
+    sample = 'checkboard';
     % sample = 'Phantom';
 else
     % sample='Seed';
     sample='Rod';
 end
-N=30;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
+N=180;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
 angleScale=2; %1: half angle; 2: full angle
 if(synthetic)
-    numThetan=5; % number of scanning angles/projections
+    numThetan=70; % number of scanning angles/projections
     numChannel=5;% number of energy channels on xrf detector
     DecomposedElement=0;
 else
@@ -71,8 +72,8 @@ else
         slice_tot = [3 4 25 30]; %GlassRod%
         slice = [4 25 30];
         data_h=[];
-        ang_rate=3;
-        tau_rate=50;
+        ang_rate=1;
+        tau_rate=9;
         for ele=1:size(data,1)
             data_h(ele,:,:)=sum(data(ele,1:ang_rate:end,1:tau_rate:end),1);
         end
@@ -82,7 +83,7 @@ else
             data_h=reshape(data_h,size(data_h,1),1,size(data_h,2));
         end
         truncChannel=0;%(DecomposedElement==0)*0;
-        data_xrt=data_h(28,:,:); %transimission data: V_dpc_cfg
+        data_xrt=data_h(40,:,:);%data_h(43,:,:)-data_h(38,:,:); %transimission data: V_dpc_cfg
         data_xrf_decom=[];
         data_xrf_decom(1,:,:)=data_h(slice_tot(1),:,:)+data_h(slice_tot(2),:,:);
         data_xrf_decom(2,:,:)=data_h(slice_tot(3),:,:);
@@ -97,8 +98,10 @@ else
         xc=getCellCenteredGrid(omega,[m_h,m_h]);
         xc=reshape(xc,m_h^2,2);
         center = [1.4 -1.2 ; 0 0; 1.1 1.1].*Tol;
-        r = [ 1e-1 2 1e-1].*Tol;
-        w_ele=[19.3 1.33 19.3]; % units: g/cm^3
+        center = [2.9 -2.7 ; 0 0; 2.6 2.6].*Tol;
+        r = [ 1.7e-1 3.4 1.7e-1].*Tol;
+        w_ele=[19.3 2.33 19.3]; % units: g/cm^3
+        w_ele=w_ele.*[1 1 1]*2;
         iR_fill = zeros(m_h^2,3);
         for ele=1:3
             pix = (xc(:,1)-center(ele,1)).^2+(xc(:,2)-center(ele,2)).^2 <= r(ele)^2;
@@ -110,6 +113,7 @@ else
                 % rec=[[1.1e-5 1.1e-5+r(3)];[1.2e-5 -1.2e-5+r(3)];[1.1e-5 1.1e-5-r(3)];[1.2e-5 -1.2e-5-r(3)]];
                 % rec=[center(1,:);center(1,:)-[r(3)/2,0];center(3,:)-[r(3)/2,0];center(3,:)];
                 % pix_extra=isPointInPolygon(xc,rec); 
+                % pix = (xc(:,1)-center(ele,1)).^2+(xc(:,2)-center(ele,2)).^2 <= r(ele)^2 & (xc(:,1)-center(ele,1)).^2+(xc(:,2)-center(ele,2)).^2 >= (2*r(ele)/3)^2;
                 iR_fill(find(pix==1),2)=w_ele(2);%6e-3;
                 % iR_fill(find(pix_extra==1),2)=w_ele(2);%6e-3;
             elseif(ele==3)
@@ -117,11 +121,12 @@ else
             % iR_fill(find(pix==1),2)=w_ele(2)+1;%6e-3;%max(reshape(iR(:,:,2),m_h^2,1));
             end
         end
-        iR=reshape(iR_fill*1e0,[m_h,m_h,3]);
+        % iR=reshape(iR_fill*1e0,[m_h,m_h,3]);
         Si=0;
-        if(Si)
-            data_xrf_decom=data_xrf_decom(2,:,:);
-            iR=iR(:,:,2);
+        W_element=0;
+        if(W_element)
+            data_xrf_decom=data_xrf_decom(3,:,:);
+            iR=iR(:,:,3);
         end
         iR= iR*1;%*10^(scale);
         clear iR_2;
@@ -160,8 +165,8 @@ nTau_level= zeros(nm,1);
 %%=============================
 NoSelfAbsorption=0; % 0: include self-absorption in the XRF inversion
 bounds = 1;  % no bound constraints
-Joint=0; % 0: XRF; -1: XTM; 1: Joint inversion
-ReconAttenu = 1*(Joint==-1); % 0: Recover W; 1: Recover miu
+Joint=1; % 0: XRF; -1: XTM; 1: Joint inversion
+ReconAttenu = 0*(Joint==-1); % 0: Recover W; 1: Recover miu
 Alternate=1*(Joint~=-1);
 EM=1;
 linear_S=0*Alternate;
@@ -231,7 +236,12 @@ for level=1:nm
         W_level{level}=W;
         L_level{level}=L;
     end
-    xtm_level{level}=DisR;
+    if(ReconAttenu)
+        xtm_level_true{level}=DisR_true;
+        xtm_level_pert{level}=DisR_pert;
+    else
+        xtm_level_true{level}=DisR;
+    end
     GI_level{level}=GlobalInd;
     nTau_level(level)= nTau;
     m_level(level,:)=[N(level),N(level)];
@@ -248,7 +258,7 @@ for level=1:nm
         SigmaR{level}=SigMa_XRF;
     end
 end
-clear L W DisR GlobalInd SigMa_XTM SelfInd XRF XRF_decom XRF_raw SigMa_XRF data_h;
+clear L L_pert L_true W DisR_true DisR_pert GlobalInd SigMa_XTM SelfInd XRF XRF_decom XRF_raw SigMa_XRF data_h;
 %%%================= First-order derivative regularization
 penalty=0;
 if(penalty)
@@ -259,13 +269,31 @@ if(penalty)
     end
 end
 nTol=N(1)^2*NumElement;
-xrfs=XRF_Simulated_decom;xrfr=xrf_level_decom{1}; 
- a=squeeze(xrfr(:,:,2));b=squeeze(xrfs(:,:,2));
- figure, for i=1:3; subplot(2,4,i);imagesc(xrfs(:,:,i));colorbar; subplot(2,4,4+i);imagesc(xrfr(:,:,i));colorbar; end;
- a=sum(sum(XRF_Simulated_raw,1),2);
- b=sum(sum(xrf_level_raw{1},1),2); 
- subplot(2,4,4),plot(DetChannel,squeeze(a),'r.-');
- subplot(2,4,8),plot(DetChannel,squeeze(b),'r.-');
- err_xrf(scale+1)=norm(a(:)-b(:));
+if(Joint~=-1)
+     xrfs=XRF_Simulated_decom;xrfr=xrf_level_decom{1}; 
+     a=squeeze(xrfr(:,:,2));b=squeeze(xrfs(:,:,2));
+     figure, for i=1:3; subplot(2,5,i);imagesc(xrfs(:,:,i));colorbar; subplot(2,5,5+i);imagesc(xrfr(:,:,i));colorbar; end;
+     a=squeeze(sum(sum(XRF_Simulated_raw,1),2));
+     b=squeeze(sum(sum(xrf_level_raw{1},1),2)); 
+     subplot(2,5,4),plot(DetChannel,squeeze(a),'r.-');
+     ub=max(a(:));
+     hold on;
+     for ele=1:NumElement
+         for el =1:4
+         plot([BindingEnergy(ele,el) BindingEnergy(ele,el)],[0 ub],'g--');
+         text(BindingEnergy(ele,el),ub,Element(Z(ele)));
+         end
+     end
+     hold off;
+     axis([0 12.1 0 ub+1e1]);
+     subplot(2,5,9),plot(DetChannel,squeeze(b),'r.-');
+     axis([0 12.1 0 max(b(:))+1e1]);
+     subplot(2,5,5),semilogy(DetChannel(truncInd),a(truncInd),'r.-');
+     axis([0 12.1 0 1e5]);
+     subplot(2,5,10),
+     semilogy(DetChannel(truncInd),b(truncInd),'r.-');
+     axis([0 12.1 0 1e5]);
+     err_xrf(scale+1)=norm(a(:)-b(:));
+end
 
 % save([sample,num2str(N(1)),'_',num2str(numThetan),'_',num2str(nTau+1),'_',num2str(numChannel),'.mat'],'-v7.3')

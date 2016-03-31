@@ -11,14 +11,15 @@ if(length(W_level)==2)
     xstarJ=W_level{2};
 else
     nrow=4;
+    ncol = 3;
 end
 %--------------------------------------------------------------
 % set up boundary conditions
 %--------------------------------------------------------------
  figure;
     clims=[0 max(ws)];
-    for i=1:NumElement
-        subplot(nrow,NumElement,i);
+    for i=1:ncol
+        subplot(nrow,ncol,i);
         
         errCom=reshape(xinitial(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-ws(prod(m)*i-prod(m)+1:prod(m)*i
         imagesc(errCom);colormap jet
@@ -30,7 +31,7 @@ end
         end
         title(Element{Z(i)},'fontsize',12);
     
-        subplot(nrow,NumElement,i+1*NumElement);
+        subplot(nrow,ncol,i+1*ncol);
         
         errCom=reshape(xstar(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-ws(prod(m)*i-prod(m)+1:prod(m)*i
         imagesc(errCom);colormap jet
@@ -42,7 +43,7 @@ end
         end
 
     
-        subplot(nrow,NumElement,i+2*NumElement);
+        subplot(nrow,ncol,i+2*ncol);
         
         errCom=reshape(ws(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));
         imagesc(errCom);colormap jet
@@ -50,26 +51,26 @@ end
         [],'YTick',[]);
         % colorbar;
         if(i==1)
-            ylabel('TomoPy','fontsize',12)
+            ylabel('Joint','fontsize',12)
         end
 %         if(i==NumElement)
 %         hp4 = get(subplot(nrow,NumElement,i+2*NumElement),'Position');
 %         colorbar('Position', [hp4(1)+hp4(3)+0.01  hp4(2)  0.02  hp4(2)+hp4(3)]);
 %         end
-        subplot(nrow,NumElement,i+3*NumElement);
-        ind=prod(m)*i-prod(m)+1:prod(m)*i;
-        [~,sortInd]=sort(ws(ind));
-        plot(1:prod(m),xinitial(sortInd),'ro',1:prod(m),xstar(sortInd),'bs',1:prod(m),ws(sortInd),'g*')
-        xlim([0 prod(m)]);
-        if(i==1)
-            hleg=legend('initial','final','optimal','FontSize',6, 'Box', 'off','Orientation','horizontal');
-            set(hleg,'units','pixels');
-            lp=get(hleg,'outerposition');
-            set(hleg,'Location','NorthWest', 'Box', 'off','outerposition',[lp(1)+50,15,lp(3),20]);
-            ylabel('solution','fontsize',12)
-        end
+         subplot(nrow,ncol,i+3*ncol);
+         ind=prod(m)*i-prod(m)+1:prod(m)*i;
+         [~,sortInd]=sort(ws(ind));
+         plot(1:prod(m),xinitial(sortInd),'ro',1:prod(m),xstar(sortInd),'bs',1:prod(m),ws(sortInd),'g*')
+         xlim([0 prod(m)]);
+         if(i==1)
+             hleg=legend('initial','final','optimal','FontSize',6, 'Box', 'off','Orientation','horizontal');
+             set(hleg,'units','pixels');
+             lp=get(hleg,'outerposition');
+             set(hleg,'Location','NorthWest', 'Box', 'off','outerposition',[lp(1)+50,15,lp(3),20]);
+             ylabel('solution','fontsize',12)
+         end
         if(nrow==5)
-            subplot(nrow,NumElement,i+4*NumElement);
+            subplot(nrow,ncol,i+4*ncol);
             
             errCom=reshape(xstarJ(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-ws(prod(m)*i-prod(m)+1:prod(m)*i
             imagesc(errCom);colormap jet

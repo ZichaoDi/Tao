@@ -138,6 +138,11 @@ while (~conv);
     alpha0 = alpha;
     PieceLinear=1;
     newcon = 0;
+    % p_plot=reshape(p,m(1),m(2),NumElement);
+    % ip_plot = reshape(ipivot,m(1),m(2),NumElement);
+    % figure;for ie=1:3,subplot(2,3,ie);imagesc(p_plot(:,:,ie));if(ie==1);title(['Iter ',num2str(nit)]);end;colorbar;set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',[],'YTick',[]);
+    % cmap=[0 1];
+    % subplot(2,3,ie+3),imagesc(ip_plot(:,:,ie),cmap);colorbar;set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',[],'YTick',[]);end
     if(PieceLinear)
         if(Joint==1)
         [x_new, f_new, g_new, nf1, ierror, alpha,ipivot,newcon,flast,f_xrf,f_xtm] = lin_proj (p, x, f, g, alpha0, sfun, low, up,ipivot,flast,newcon);
@@ -149,18 +154,16 @@ while (~conv);
     end
     Cauchy=0;
     %---------------------------------------------------------%    
+    % update active set, if appropriate
+    %---------------------------------------------------------
     if(alpha<=0)
-        % disp('Error in Initial Step')
-        %---------------------------------------------------------
-        % update active set, if appropriate
-        %---------------------------------------------------------
-        % newcon = 0;
-        % if (abs(alpha-spe) <= eps);% | alpha==1
-        %     % disp('update ipivot due to tiny step length')
-        %     newcon = 1;
-        %     ierror = 0;
-        %     [ipivot, flast] = modz (x, p, ipivot, low, up, flast, f, alpha);
-        % end;
+        newcon = 0;
+        if (abs(alpha-spe) <= eps);% | alpha==1
+            % disp('update ipivot due to tiny step length')
+            newcon = 1;
+            ierror = 0;
+            [ipivot, flast] = modz (x, p, ipivot, low, up, flast, f, alpha);
+        end;
     end
     if (alpha <= 0 & alpha0 ~= 0 | ierror == 3);
         fprintf('Error in Line Search\n');

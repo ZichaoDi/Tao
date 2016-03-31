@@ -4,6 +4,7 @@ global SigMa_XTM SigMa_XRF Beta TempBeta
 global err0 fiter nit maxiter
 global ConstSub InTens OutTens MU_XTM
 global itertest ErrIter icycle scaleMU maxOut
+global pert
 more off;
 %%%----------------------------Initialize dependent variables
 level=1;
@@ -15,7 +16,7 @@ if(synthetic)
     XRF=double(xrf_level{level});
 else
     if(DecomposedElement)
-        XRF=double(xrf_level_decom{level});% XRF_Simulated_decom;% 
+        XRF=double(xrf_level_decom{level});%XRF_Simulated_decom;%  
         % XRF=-log(XRF+1.001);
         DetChannel=DetChannel_decom;
         numChannel=numChannel_decom;
@@ -34,7 +35,12 @@ else
         end
     end
 end
-DisR=xtm_level{level};
+drift = 0;
+if(drift)
+    DisR=xtm_level_pert{level};
+else
+    DisR=xtm_level_true{level};%DisR_Simulated;%  
+end
 L=L_level{level};
 GlobalInd=GI_level{level};
 SelfInd=SI_level{level};
@@ -54,9 +60,9 @@ if(Alternate)
         fctn_half=@(W)sfun_half_linear(W,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
         fctn=@(W)sfun_full_linear(W,XRF,NumElement,m,nTau);
     elseif(Joint==1)
-        TempBeta=1; Beta=1e7;
+        TempBeta=1; Beta=0.005;
         Mrep_P=repmat(reshape(M,[1,1 NumElement numChannel]),[nTau+1,mtol,1,1]);
-        fctn=@(W)sfun_Joint_admm(W,XRF,DisR,MU_e,Mrep_P,NumElement,L,GlobalInd,SelfInd,m,nTau);
+        fctn=@(W)sfun_linear_joint(W,XRF,DisR,MU_e,L,NumElement,m,nTau);
     end
 else
     if(Joint==0)
@@ -65,6 +71,7 @@ else
     elseif(Joint==1)
         TempBeta=1; Beta=1e9;
         fctn=@(W)sfun_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,m,nTau,I0);
+
     elseif(Joint==-1)
         TempBeta=0; Beta=1;
         if(ReconAttenu)
@@ -75,7 +82,9 @@ else
     end
 end
 rng('default');
-x0 =  0*W(:)+1*10^(0)*rand(prod(m)*NumElement,1);
+x0 = 1*10^(0)*rand(m(1),m(2),NumElement);
+% x0(:,:,NumElement)=W(:,:,NumElement);
+x0=x0(:);
 xinitial=x0;
 err0=norm(W0-xinitial);
 NF = [0*N; 0*N; 0*N];
@@ -136,12 +145,17 @@ if(Alternate & linear_S==0)
             fctn_linear=@(x)linear(x,B'*B,B'*d);%B(RealVec,:),d(RealVec));
             f=norm(B*x-d);
         else
-        maxiter=40;
+        maxiter=100;
+        if(EM)
+            algo='EM';
+        else
+            algo='LS';
+        end
         if(bounds)
             clear Mrep_P
-            % [x,f,g,ierror] = tnbc (x,fctn,low,up); algo='TNbc';
-            options = optimoptions('fmincon','Display','iter','GradObj','on','MaxIter',maxiter,'Algorithm','interior-point');% ,'Algorithm','Trust-Region-Reflective'
-            [x, f] = fmincon(fctn,x,[],[],[],[],low,up,[],options); algo='fmincon';
+            [x,f,g,ierror] = tnbc (x,fctn,low,up); % algo='TNbc';
+            % options = optimoptions('fmincon','Display','iter','GradObj','on','MaxIter',maxiter,'Algorithm','interior-point');% ,'Algorithm','Trust-Region-Reflective'
+            % [x, f] = fmincon(fctn,x,[],[],[],[],low,up,[],options); algo='fmincon';
         else
             [x,f,g,ierror] = tn (x,fctn);
         end
@@ -178,14 +192,22 @@ if(Alternate & linear_S==0)
         end
         icycle=icycle+1;
     end
-    save(['xstar_',sample,'_',num2str(N(1)),'_',num2str(numThetan),'_',num2str(numel(num2str(TempBeta))),'_',num2str(numel(num2str(Beta))),'_',num2str(numChannel),'alternate.mat'],'xstar','x0','W0');
+    save(['xstar_',sample,'_',num2str(N(1)),'_',num2str(numThetan),'_',num2str(numel(num2str(TempBeta))),'_',num2str(numel(num2str(Beta))),'_',num2str(numChannel),'-',num2str(nit),algo,'_alternate.mat'],'xstar','x0','W0');
 elseif(Alternate==0)
-    maxiter=100;
+    % pert=L*x0+log(DisR(:)./I0);
+    pert = 0* DisR(:);
+    for icycle =1;
+    maxiter=40;
     if(bounds)
-        [xstar,f,g,ierror]=tnbc(x,fctn,low,up);
+         [xstar,f,g,ierror]=tnbc(x,fctn,low,up);
+         % options = optimoptions('fmincon','Display','iter','GradObj','on','MaxIter',maxiter,'Algorithm','interior-point');% ,'Algorithm','Trust-Region-Reflective'
+         % [xstar, f] = fmincon(fctn,x,[],[],[],[],low,up,[],options); algo='fmincon';
     else
         [xstar,f,g,ierror]=tn(x,fctn);
     end
+    DR=-log(DisR'/I0);
+    % pert=L*xstar+log(DisR(:)./I0);
+end
     save(['xstar_',sample,'_',num2str(N(1)),'_',num2str(numThetan),'_',num2str(numel(num2str(TempBeta))),'_',num2str(numel(num2str(Beta))),'_',num2str(numChannel),'_full.mat'],'xstar','x0','W0');
     if(Joint==0)
         ErrIter_XRF=ErrIter;

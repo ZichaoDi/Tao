@@ -45,7 +45,7 @@ cmap=[min(W0),max(W0)];
 if(TakeLog)
     fctn=@(W)sfun_XRF_EM(W,XRF,MU_e,M,NumElement,numChannel,Ltol,GlobalInd,thetan,m,nTau);
 elseif(Alternate)
-    fctn_f=@(W)Calculate_Attenuation(W,NumElement,L,GlobalInd,SelfInd,m,nTau,XRF,M);
+    fctn_f=@(W)Calculate_Attenuation_Simplified(W,NumElement,L,GlobalInd,SelfInd,m,nTau,XRF,M);
     if(Joint==0)
         TempBeta=1; Beta=0;
         if(linear_S)
@@ -96,7 +96,7 @@ errAtt=[];
 Wtemp=[];
 outCycle=1;
 if(~ReconAttenu)
-    [InTens, OutTens, AttenuM, DW,fold]=Calculate_Attenuation(Wold,NumElement,L,GlobalInd,SelfInd,m,nTau,XRF,M);
+    [InTens, OutTens, AttenuM, DW,fold]=Calculate_Attenuation_Simplified(Wold,NumElement,L,GlobalInd,SelfInd,m,nTau,XRF,M);
     temp_v=L_rep.*InTens;
     ConstSub=bsxfun(@times,bsxfun(@times,temp_v,OutTens),Mrep_P); % part 3
     clear DW temp_v;
@@ -287,7 +287,7 @@ if(linear_S)
             xstar = xtemp.*(xtemp>=0);% xstar+InterSectCount.*xtemp;
             W_update=squeeze(reshape(xstar,1,1,mtol,NumElement)./AttenuM(nAngle,nT,:,:));
             Wold=(1-repmat(InterSectCount,1,NumElement)).*Wold+repmat(InterSectCount,1,NumElement).*W_update;%repmat(1./IntersectCount,1,NumElement).*% 
-            [InTens, OutTens, AttenuM, DW,f]=Calculate_Attenuation(Wold,NumElement,L,GlobalInd,SelfInd,m,nTau,XRF,M);
+            [InTens, OutTens, AttenuM, DW,f]=Calculate_Attenuation_Simplified(Wold,NumElement,L,GlobalInd,SelfInd,m,nTau,XRF,M);
             Wtemp{icycle,nAngle,nT}=Wold;
             errDW(im)=norm(xstar-squeeze(Dstar));
             err(im)=norm(Wold(:)-W(:));

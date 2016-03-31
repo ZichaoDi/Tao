@@ -131,9 +131,9 @@ for n=1:numThetan
             % figure(19);plot(omega([1 2 2 1 1]),omega([3 3 4 4 3]),'r.-');
             % hold on; fill([CurrentCellCenter(1) SSDknot(1,1) SSDknot(NumSSDlet,1)],[CurrentCellCenter(2) SSDknot(1,2) SSDknot(NumSSDlet,2)],'b.-');
             % hold off;
-            area_xrf(n,i,currentInd)=prod(dz);%*length(in_after);prod(dz)*length(in_after);
+            area_xrf(n,i,currentInd)=prod(dz)*length(in_after);
             SelfInd{n,i,currentInd}{2}=in_after;
-            I_after = exp(-sum(MU_after(in_after,:)',2)*area_xrf(n,i,currentInd));%% Attenuation of Flourescent energy emitted from current pixel
+            I_after = exp(-sum(MU_after(in_after,:)',2)./(length(in_after)+1)*area_xrf(n,i,currentInd));%% Attenuation of Flourescent energy emitted from current pixel
             %% ====================================================================
             if(synthetic)
                 xrfSub=xrfSub+Lvec(j)*I_incident*(I_after.*Wsub)'*M;% fluorescence emitted from current pixel

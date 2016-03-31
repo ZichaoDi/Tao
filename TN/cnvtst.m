@@ -9,25 +9,25 @@ global lambdaind
 
 toleps = sqrt(accrcy) + sqrt(eps);
 rtleps = accrcy + eps;
-% conv   = 0;
-% imax   = 0;
-% ltest  = (flast - f <= -0.5*gtp);
-% %---------------------------------------------------------
-% % if anti-zigzag test satisfied, test multipliers;
-% % if appropriate, modify active set, only reduce active set
-% %---------------------------------------------------------
-% if (~ltest)
-%    ind   = find(ipivot ~= 0 & ipivot ~= 2);
-%    if (~isempty(ind));
-%       t = -ipivot(ind).*g(ind);
-%       [cmax, imax] = min(t);
-%       if (cmax >= 0); imax = 0; end;
-%    end;
-% end;
-% if (imax ~= 0)
-%  ipivot(ind(imax)) = 0;
-%    flast = f;
-% else
+conv   = 0;
+imax   = 0;
+ltest  = (flast - f <= -0.5*gtp);
+%---------------------------------------------------------
+% if anti-zigzag test satisfied, test multipliers;
+% if appropriate, modify active set, only reduce active set
+%---------------------------------------------------------
+if (~ltest)
+   ind   = find(ipivot ~= 0 & ipivot ~= 2);
+   if (~isempty(ind));
+      t = -ipivot(ind).*g(ind);
+      [cmax, imax] = min(t);
+      if (cmax >= 0); imax = 0; end;
+   end;
+end;
+if (imax ~= 0)
+ ipivot(ind(imax)) = 0;
+   flast = f;
+else
    stop1 = alpha*pnorm < toleps*(1 + xnorm);
    stop2 = abs(dif) < rtleps*ftest;
    stop3 = gnorm < accrcy^(1/3)*ftest;
@@ -43,7 +43,7 @@ rtleps = accrcy + eps;
            disp('gnorm < eps * |f|')
        end
    end
-% end;
+end;
 flast1  = flast;
 ipivot1 = ipivot;
 lambdaind   = find((ipivot ~= 2) & (ipivot.*g>0));

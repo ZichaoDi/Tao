@@ -1,12 +1,14 @@
 % Define detector and beam 
 global m Tol thetan
 global DetChannel numChannel nTau DetKnot0 SourceKnot0 NumSSDlet 
-% Tol=1e-5; 
-% omega=[-2     2    -2     2].*Tol;
+if(synthetic)
+    Tol=1e-5; 
+    omega=[-2     2    -2     2].*Tol;
+end
 m=[current_n current_n]; %Numerical Resolution
 alpha=atan((omega(4)-omega(3))/(omega(2)-omega(1)));
 dTau=(omega(2)-omega(1))/N(1);%%% width of each discrete beam
-Tau=sqrt((omega(2)-omega(1))^2+(omega(4)-omega(3))^2)-Tol;% omega(2)-omega(1);%
+Tau= omega(2)-omega(1);%sqrt((omega(2)-omega(1))^2+(omega(4)-omega(3))^2)-dTau;%
 if(synthetic)
     nTau=m(1)+1;%ceil(Tau/dTau)+1;% % number of discrete beam%nTau;%
 else

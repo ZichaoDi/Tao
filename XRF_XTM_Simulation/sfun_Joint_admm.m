@@ -4,13 +4,13 @@ function [f,g,f_XRF,f_XTM]=sfun_Joint_admm(W,xrfData,DisR,MU_e,M,NumElement,L,Gl
 %%==== Solve W when the W in exponential term is fixed from the previous iteration
 global NumSSDlet numChannel numThetan I0 W0 
 global InTens OutTens MU_XTM
-global LogScale Beta TempBeta NoSelfAbsorption XTMscale
+global LogScale Beta TempBeta NoSelfAbsorption
 mtol=prod(m);
 W=repmat(reshape(W,[1 mtol NumElement]),[nTau+1 1 1 numChannel]);
 L=reshape(L,numThetan,nTau+1,mtol);
 %%%%% =================== Attenuation Matrix at beam energy
 MUe=reshape(MU_e(:,1,1),1,NumElement);
-MUe_XTM=MUe*XTMscale;
+MUe_XTM=MUe*1;
 MU_XTM=sum(bsxfun(@times,squeeze(W(1,:,:,1)),MUe),2)';
 %%%%% ====================================================================
 f_XRF=zeros(numThetan,1);

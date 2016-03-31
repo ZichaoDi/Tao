@@ -7,8 +7,8 @@
 %%%         O: Object specified by W.*Z
 %%%         MU: Attenuation matrix of O
 %%=======================================================================
-global x y dz m omega AbsorbScale MU_e Z pix_inner
-global XTMscale NumElement 
+global x y dz m omega AbsorbScale MU_e Z 
+global NumElement 
 global slice onlyXRF
 
 load PeriodicTable
@@ -31,9 +31,10 @@ dz=[(omega(2)-omega(1))/m(2) (omega(4)-omega(3))/m(1)];
 %%%========================== the grids of object
 xc = getCellCenteredGrid(omega,[m(2) m(1)]);
 xc = reshape(xc,prod(m),2);
+
 %%%=========== assign weight matrix for each element in each pixel
 if(synthetic)
-    if(strcmp(sample,'Golosio'))
+    if(strcmp(sample,'Golosio') | strcmp(sample, 'checkboard'))
         Z = [6 8 14 20 26];% Golosio's Sample
     elseif(strcmp(sample,'Phantom'))
         Z = [19 31 26];
@@ -42,12 +43,14 @@ if(synthetic)
     end
 else
     if(strcmp(sample,'Rod'))
+        pix_inner = find((xc(:,1)-center(2,1)).^2+(xc(:,2)-center(2,2)).^2 <= (1.5*r(2))^2);
         if(Si)
             Z=14;
+        elseif(W_element)
+            Z=74;
         else
             Z=[79 14 74];% Glass Rod
         end
-        pix_inner = find((xc(:,1).^2+xc(:,2).^2<=1*Tol^2));
     elseif(strcmp(sample,'Seed'))
         Z=[14 16 17 19 20 22 23 24 25 26 28 29 30 31 80 33 34 35 92 37 38 39 40];% Complete Seed
         Z=Z(slice-4);
@@ -68,6 +71,9 @@ if(level==1)
             pix = (X-center(1)).^2+(Y-center(2)).^2 <= (m(1)/4)^2;
             % pix = (X-center(1)).^2+(Y-center(2)).^2 >= (m(1)/5)^2 & (X-center(1)).^2+(Y-center(2)).^2 <= (m(1)/4)^2;
             W(pix)=10;
+        elseif(strcmp(sample,'checkboard'))
+            W = kron(invhilb(N(1)/10)<0, ones(10,10));
+            W=repmat(W,[1 1 NumElement]);
         end
         UnitSpectrumSherman_synthetic; %% Produce BindingEnergy M
     else
@@ -88,12 +94,11 @@ MU_e=MU_e.*AbsorbScale; %% Discrete Scale
 %%%%% =================== Attenuation Matrix at beam energy
 MUe=reshape(MU_e(:,1,1),1,1,NumElement);
 MU=sum(W.*repmat(MUe,[m(1),m(2),1]),3);
-XTMscale=1e0;
-MU_XTM=MU.*XTMscale;
+MU_XTM=MU;
 %%%%% =================== Attenuation Matrix at flourescence energy (Corrected Attenuation)
 MU_after=zeros(prod(m),NumElement);
 for i=1:NumElement
-    MU_after(:,i)=reshape(W*10^scale,prod(m),NumElement)*MU_e(:,1,i+1);
+    MU_after(:,i)=reshape(W,prod(m),NumElement)*MU_e(:,1,i+1);
 end
 %%%%% ====================================================================
 

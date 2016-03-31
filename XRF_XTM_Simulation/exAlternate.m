@@ -5,6 +5,11 @@ if(simulate)
 else
     do_setup;
     opt;
+    Joint = 0;
+    opt;
+    % maxiter =100;
+    % Joint = 1;
+    % opt;
 end
 %{
 return;

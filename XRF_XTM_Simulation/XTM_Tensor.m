@@ -12,34 +12,46 @@ mtol=prod(m);
 eX=ones(m(1),1);
 eY=ones(m(2),1);
 if(level==1)
-    DisR=zeros(nTau+1,numThetan);
+    DisR_true=zeros(nTau+1,numThetan);
+    DisR_pert=zeros(nTau+1,numThetan);
     EmptyBeam=[];
 end
 if(level==1)
    L=sparse(numThetan*(nTau+1),prod(m));
+   L_pert=sparse(numThetan*(nTau+1),prod(m));
 else
    L=sparse(numThetan*(nTau+1),prod(m));
    % L_H=sparse(numThetan*(nTau+1),prod(m));
 end
 GlobalInd=cell(numThetan,nTau+1);
 fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel);
-pert_drift=0;
-pert_angle=0;
+pert_drift=1;
+pert_angle=1;
 drift_angle=pert_angle*0.2*rand(size(thetan));
 for n=1:numThetan
-    theta=thetan(n)/180*pi+drift_angle(n);
+    %% ============== With Probe Drift
     if(mod(n,10)==0)
         fprintf(1,'====== Angle Number  %d of %d: %d\n',n,numThetan,thetan(n));
     end
+    theta_pert=thetan(n)/180*pi+drift_angle(n);
+    TransMatrix_pert=[cos(theta_pert) sin(theta_pert);-sin(theta_pert) cos(theta_pert)];
+    driftx=pert_drift*1e-3*mean(DetKnot0(:,1))*rand(size(DetKnot0(:,1)));
+    drifty=pert_drift*1e-3*mean(DetKnot0(:,2))*rand(size(DetKnot0(:,2)));
+    DetKnot_pert=DetKnot0*TransMatrix_pert+[driftx,drifty];
+    SourceKnot_pert=SourceKnot0*TransMatrix_pert+[driftx,drifty];
+    %% =============== No Probe Drift
+    theta = thetan(n)/180*pi;
     TransMatrix=[cos(theta) sin(theta);-sin(theta) cos(theta)];
     driftx=pert_drift*1e-3*mean(DetKnot0(:,1))*rand(size(DetKnot0(:,1)));
     drifty=pert_drift*1e-3*mean(DetKnot0(:,2))*rand(size(DetKnot0(:,2)));
     DetKnot=DetKnot0*TransMatrix+[driftx,drifty];
     SourceKnot=SourceKnot0*TransMatrix+[driftx,drifty];
-    Rdis=1*I0*ones(nTau+1,1);
+    %% =========================================
+    Rdis_true=1*I0*ones(nTau+1,1);
+    Rdis_pert=1*I0*ones(nTau+1,1);
     xbox=[omega(1) omega(1) omega(2) omega(2) omega(1)];
     ybox=[omega(3) omega(4) omega(4) omega(3) omega(3)];
-    for i=1:nTau+1 %%%%%%%%%================================================================
+    for i=1:nTau+1 %%%%%%%%%========================================================
         %if(level==1)
         % Initialize
         BeforeEmit=1;
@@ -62,14 +74,21 @@ for n=1:numThetan
         end
         %=================================================================
         %=================================================================
+        [index_pert,Lvec_pert,linearInd_pert]=IntersectionSet(SourceKnot_pert(i,:),DetKnot_pert(i,:),xbox,ybox,theta_pert);
         [index,Lvec,linearInd]=IntersectionSet(SourceKnot(i,:),DetKnot(i,:),xbox,ybox,theta);
         %%%%%%%%================================================================
         GlobalInd{n,i}=index;
+        if(~isempty(index_pert)& norm(Lvec_pert)>0)
+            EmptyBeam=[EmptyBeam,(n-1)*numThetan+i];
+            currentInd_pert=sub2ind(m,index_pert(:,2),index_pert(:,1));
+            L_pert(sub2ind([numThetan,nTau+1],n,i),currentInd_pert)=Lvec_pert;
+            Rdis_pert(i)=I0*exp(-eX'*(MU_XTM.*reshape(L_pert(sub2ind([numThetan,nTau+1],n,i),:),m))*eY);%%I0*exp(-eX'*(MU_XTM.*reshape(L(n,i,:,:),subm,subn))*eY); %% Discrete case
+        end
         if(~isempty(index)& norm(Lvec)>0)
             EmptyBeam=[EmptyBeam,(n-1)*numThetan+i];
             currentInd=sub2ind(m,index(:,2),index(:,1));
             L(sub2ind([numThetan,nTau+1],n,i),currentInd)=Lvec;
-            Rdis(i)=I0*exp(-eX'*(MU_XTM.*reshape(L(sub2ind([numThetan,nTau+1],n,i),:),m))*eY);%%I0*exp(-eX'*(MU_XTM.*reshape(L(n,i,:,:),subm,subn))*eY); %% Discrete case
+            Rdis_true(i)=I0*exp(-eX'*(MU_XTM.*reshape(L(sub2ind([numThetan,nTau+1],n,i),:),m))*eY);%%I0*exp(-eX'*(MU_XTM.*reshape(L(n,i,:,:),subm,subn))*eY); %% Discrete case
         end
 
         % else
@@ -90,7 +109,8 @@ for n=1:numThetan
             pause(1);
         end
      if(level==1)
-         DisR(:,n)=Rdis';
+         DisR_pert(:,n)=Rdis_pert';
+         DisR_true(:,n)=Rdis_true';
      end
 end
 if(level>1)
@@ -101,9 +121,9 @@ if(~synthetic)
     DisR_Simulated=DisR;
     DisR=squeeze(data_xrt)';% reshape(dd,size(dd,1)/numThetan,numThetan);%
 end
-if(LogScale)
-    SigMa_XTM=1./(-log(DisR(:)));
-else
-    SigMa_XTM=1./DisR(:);
-end
-SigMa_XTM=ones(size(SigMa_XTM));
+% if(LogScale)
+%     SigMa_XTM=1./(-log(DisR(:)));
+% else
+%     SigMa_XTM=1./DisR(:);
+% end
+SigMa_XTM=ones(size(DisR_true(:)));
