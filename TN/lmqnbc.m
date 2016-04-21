@@ -72,10 +72,10 @@ ErrIter(1)=err0;
 % multipliers are components of the gradient.
 % Then form the projected gradient.
 %---------------------------------------------------------
-% ind = find((ipivot ~= 2) & (ipivot.*g>0));
-% if (~isempty(ind));
-%     ipivot(ind) = zeros(length(ind),1);
-% end;
+ind = find((ipivot ~= 2) & (ipivot.*g>0));
+if (~isempty(ind));
+    ipivot(ind) = zeros(length(ind),1);
+end;
 % ipivotOld=ipivot;
 g = ztime (g, ipivot);
 gnorm = norm(g,'inf');
@@ -133,7 +133,7 @@ while (~conv);
     % line search
     %---------------------------------------------------------
     pe = pnorm + eps;
-    [spe] = stpmax (stepmx, pe, x, p, ipivot, low, up);
+    spe = stpmax (stepmx, pe, x, p, ipivot, low, up);
     alpha = step1 (f, gtp, spe);
     alpha0 = alpha;
     PieceLinear=1;
@@ -152,18 +152,17 @@ while (~conv);
     else
         [x_new, f_new, g_new, nf1, ierror, alpha] = lin1 (p, x, f, alpha0, g, sfun);
     end
-    Cauchy=0;
     %---------------------------------------------------------%    
     % update active set, if appropriate
     %---------------------------------------------------------
     if(alpha<=0)
-        newcon = 0;
-        if (abs(alpha-spe) <= eps);% | alpha==1
-            % disp('update ipivot due to tiny step length')
-            newcon = 1;
-            ierror = 0;
-            [ipivot, flast] = modz (x, p, ipivot, low, up, flast, f, alpha);
-        end;
+       newcon = 0;
+       if (abs(alpha-spe) <= eps);% | alpha==1
+           disp('update ipivot due to tiny step length')
+           newcon = 1;
+           ierror = 0;
+           [ipivot, flast] = modz (x, p, ipivot, low, up, flast, f, alpha);
+       end;
     end
     if (alpha <= 0 & alpha0 ~= 0 | ierror == 3);
         fprintf('Error in Line Search\n');
@@ -185,9 +184,6 @@ while (~conv);
     %#######################
     nf  = nf  + nf1;
     nit = nit +   1;
-%    ASchange(nit)=norm(-ipivot+ipivotOld,1);
-%     save ASchange ASchange
-    
     if (ierror == 3);
         disp('LMQNBC: termination 3')
         xstar = x;
@@ -239,10 +235,6 @@ while (~conv);
     if(nit>=maxiter)
         conv = 1;
     end;
-    %------------------------------- Active set plot
-%     load BindInd
-%     figure(10);plot(1:length(x),g,'r-',BindInd,g(BindInd),'ro',1:length(x),ipivot,'g.-',1:length(x),p,'m*');
-%     pause;
     plotAS=0;
     if((mod(nit,10)==0 | conv | nit==1) & Joint~=-1 & plotAS==1) %
         %     if(conv& Joint~=-1 & plotAS)
@@ -297,21 +289,6 @@ while (~conv);
         return;
     end;
     
-    %%%######################## Update active set using Cauchy point
-    if(Cauchy)
-        [~,i_cauchy,alpha_cp,p_cp]=Cauchy_Point(x,g0, accrcy, xnorm, sfun,low,up);
-        if(i_cauchy~=0)
-            [x, f, g, nf1, ierror] = lin_Cauchy (p_cp, x, f, g0, sfun, alpha_cp);
-            if(ierror==3)
-                disp('descent not found from Cauchy point')
-            else
-                nf = nf+nf1;
-                [ipivot] = crash2 (x,g0, low, up);
-            end
-        else
-            disp('Cauchy point not found')
-        end
-    end
     %%%===========================================================
     
     g = ztime (g, ipivot);
@@ -337,14 +314,6 @@ while (~conv);
     [p, gtp, ncg1, d] = ...
         modlnp (d, x, g, 10, upd1, ireset, bounds, ipivot, argvec, sfun);
     
-    %------------ Start reduction of the dimension of Hp=-g;
-%     free_ind=find(ipivot==0);
-%     [p_sub, gtp, ncg1, d_sub] = ...
-%         modlnp_sub (d, x, g, 10, upd1, ireset, bounds, ipivot, argvec, sfun);
-%     p=zeros(size(x));
-%     p(free_ind)=p_sub;
-%     d(free_ind)=d_sub;
-    %----------------------------------------------------------------
     ptest=p;
     ncg = ncg + ncg1;
     % %---------------------------------------------------------

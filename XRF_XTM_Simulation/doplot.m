@@ -11,7 +11,7 @@ if(length(W_level)==2)
     xstarJ=W_level{2};
 else
     nrow=4;
-    ncol = 3;
+    ncol = NumElement;
 end
 %--------------------------------------------------------------
 % set up boundary conditions

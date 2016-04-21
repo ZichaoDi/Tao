@@ -12,7 +12,7 @@ L=reshape(full(L),numThetan,nTau+1,mtol);
 W=reshape(W,[1,1 mtol NumElement]);
 MUe=squeeze(MU_e(:,1,1));
 MU_XTM=squeeze(W)*MUe;
-Mt=DisR';% -log(DisR'./I0);%
+Mt=-log(DisR'./I0);%DisR';% 
 Rdis=sum(bsxfun(@times,reshape(MU_XTM,[1,1,mtol]),L),3); %% Discrete case
 %%%====================================
 if(penalty)

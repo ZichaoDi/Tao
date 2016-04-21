@@ -1,5 +1,5 @@
 %%%Simulate XRF of a given object with predifined detector and beam
-exAlternate(0);
+exAlternate(1);
 %{
 return;
 h_admm=[];for i=1:size(x_admm,2)-1, h_admm(:,i)=x_admm(:,i+1)-x_admm(:,i);end

@@ -1,4 +1,4 @@
-global low up penalty
+global low up penalty Tik lambda
 global W0 current_n Wold
 global SigMa_XTM SigMa_XRF Beta TempBeta
 global err0 fiter nit maxiter
@@ -10,7 +10,6 @@ more off;
 level=1;
 current_n = N(level);
 W= W_level{level};
-DecomposedElement=1;
 truncChannel=1*(DecomposedElement==0);
 if(synthetic)
     XRF=double(xrf_level{level});
@@ -51,6 +50,17 @@ SigMa_XRF=SigmaR{level};
 fprintf(1,'====== With Self Absorption, Transmission Detector Resolution is %d\n',nTau);
 %%%----------------------------------------------------------------------
 W0=W(:);
+%%%================= First-order derivative regularization
+penalty=0;
+if(penalty)
+    % Tik=spalloc(length(W0)-1,length(W0),2*(length(W0)-1)); 
+    % for i=1:length(W0)-1
+        % Tik(i,i)=-1; Tik(i,i+1)=1;
+        % Tik(i,i)=-1;Tik(i,i+1)=2; Tik(i,i+2)=-1; % 1D
+    % end
+    lambda=1e-3;
+    Tik=delsq(numgrid('S',N(1)+2)); 
+end
 cmap=[min(W0),max(W0)];
 if(Alternate)
     fctn_f=@(W)Calculate_Attenuation_Simplified(W,NumElement,L,GlobalInd,SelfInd,m,nTau,XRF,M);
@@ -60,9 +70,9 @@ if(Alternate)
         fctn_half=@(W)sfun_half_linear(W,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
         fctn=@(W)sfun_full_linear(W,XRF,NumElement,m,nTau);
     elseif(Joint==1)
-        TempBeta=1; Beta=0.005;
+        TempBeta=1; Beta=5;
         Mrep_P=repmat(reshape(M,[1,1 NumElement numChannel]),[nTau+1,mtol,1,1]);
-        fctn=@(W)sfun_linear_joint(W,XRF,DisR,MU_e,L,NumElement,m,nTau);
+        fctn=@(W)sfun_linear_joint_1(W,XRF(:),DisR,MU_e,L,NumElement,m,nTau);
     end
 else
     if(Joint==0)
@@ -82,7 +92,7 @@ else
     end
 end
 rng('default');
-x0 = 1*10^(0)*rand(m(1),m(2),NumElement);
+x0 = x; %1*10^(0)*rand(m(1),m(2),NumElement);
 % x0(:,:,NumElement)=W(:,:,NumElement);
 x0=x0(:);
 xinitial=x0;
@@ -100,14 +110,14 @@ Wtemp=[];
 outCycle=1;
 if(~ReconAttenu & Alternate)
     scaleMU=1e0;
-    [ConstSub, ~, ~, ~, ~,fold]=Calculate_Attenuation_Simplified(0*Wold,NumElement,L,GlobalInd,SelfInd,m,nTau,XRF,M);
+    [ConstSub, ~, ~, ~, ~,fold]=Calculate_Attenuation_Simplified(1*Wold,NumElement,L,GlobalInd,SelfInd,m,nTau,XRF,M);
     res0=fold;
     res=[];
 end
 icycle = icycle + 1;
 %%%==================================================
 low=0*ones(size(x0));
-up=1e6*ones(size(x0));
+up=inf*ones(size(x0));
 x_admm=[];
 x_admm(:,1)=x0;
 err_obj=[];
@@ -145,7 +155,7 @@ if(Alternate & linear_S==0)
             fctn_linear=@(x)linear(x,B'*B,B'*d);%B(RealVec,:),d(RealVec));
             f=norm(B*x-d);
         else
-        maxiter=200;
+        maxiter=50;
         if(EM)
             algo='EM';
         else
@@ -192,7 +202,7 @@ if(Alternate & linear_S==0)
         end
         icycle=icycle+1;
     end
-    save(['xstar_',sample,'_',num2str(N(1)),'_',num2str(numThetan),'_',num2str(numel(num2str(TempBeta))),'_',num2str(numel(num2str(Beta))),'_',num2str(numChannel),'-',num2str(nit),algo,'_alternate.mat'],'xstar','x0','W0');
+    save(['xstar_',sample,'_',num2str(N(1)),'_',num2str(numThetan),'_',num2str(TempBeta),'_',num2str(Beta),'_',num2str(numChannel),'-',num2str(nit),algo,'_linear_',num2str(lambda),'.mat'],'xstar','x0','W0');
 elseif(Alternate==0)
     % pert=L*x0+log(DisR(:)./I0);
     pert = 0* DisR(:);

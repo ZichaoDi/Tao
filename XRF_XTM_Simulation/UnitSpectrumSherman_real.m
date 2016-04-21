@@ -14,7 +14,6 @@ if(strcmp(sample,'Seed'))
     I0=2000;
 elseif(strcmp(sample,'Rod'))
     E0=12.1;
-    I0=6e0;
 end
 NumElement=length(Z);
 NA=6.02e23;%Avogadro's number
@@ -45,6 +44,7 @@ mu=0;
 FWHM = (DetChannel_raw(2)-DetChannel_raw(1))*20;
 sigma = FWHM/2.35;
 truncInd=[];
+truncWidth=0.02;
 %%======================================================================
 while(i<=NumElement)
     PurePeak=0.*DetChannel_decom;
@@ -61,13 +61,13 @@ while(i<=NumElement)
             CS_FluoLine(Z(i),Line(j)+1)=calllib('libxrl','CS_FluorLine',Z(i),Line(j),E0);
         end
         new_energy=LineEnergy(Z(i),Line(j)+1);%
-        intensity=I0*CS_FluoLine(Z(i),Line(j)+1);%
+        intensity=CS_FluoLine(Z(i),Line(j)+1);%
         BindingEnergy(i,j)=new_energy;
         [~,adj]=min(abs(repmat(new_energy,size(DetChannel_decom))-DetChannel_decom));
         PurePeak(adj)=PurePeak(adj)+intensity;    
         M_decom(i,i)=M_decom(i,i)+sum(PurePeak);
-        M_raw(i,:)=M_raw(i,:)+intensity/(sigma*sqrt(2*pi))*exp(-(DetChannel_raw'-BindingEnergy(i,j)).^2./(2*sigma^2));;
-        truncInd=unique([truncInd; find(DetChannel_raw> BindingEnergy(i,j)-FWHM & DetChannel_raw < BindingEnergy(i,j)+FWHM)]);
+        M_raw(i,:)=M_raw(i,:)+intensity/(sigma*sqrt(2*pi))*exp(-(DetChannel_raw'-BindingEnergy(i,j)).^2./(2*sigma^2));
+        truncInd=unique([truncInd; find(DetChannel_raw> BindingEnergy(i,j)-truncWidth & DetChannel_raw < BindingEnergy(i,j)+truncWidth)]);
         j=j+1;
     end
     truncInd=sort(truncInd);

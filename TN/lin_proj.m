@@ -11,7 +11,7 @@ maxit  = 5;
 %%%%%%%%%%%%%%%%%%%#######################################################
 if (alpha == 0); ierror = 0; maxit = 1; end;
 alpha1 = alpha;
-trialLength=2;
+trialLength=4;
 if(alpha1<=1)
     trialAlpha=linspace(1,alpha1,trialLength);
 end
@@ -32,9 +32,9 @@ if(alpha1<=1)%& alpha1>0
             [ft, gt] = feval (sfun, xt);
         end
         Armijo =ft<f+1e-4*trialAlpha(trial)*q0;
-        %         Wolfe = abs(p'*gt)<0.25*abs(q0);%
+        % Wolfe = abs(p'*gt)<0.25*abs(q0);%
         if (Armijo );%& Wolfe);
-            % fprintf('Armijo and Wolfe satisfied, trial= %d\n',trial);
+            % fprintf('Armijo satisfied, trial= %d\n',trial);
             ierror = 0;
             iproj  = 1;
             x   = xt;
@@ -42,7 +42,9 @@ if(alpha1<=1)%& alpha1>0
             g   = gt;
             alpha1=trialAlpha(trial);
             itcnt=trial;
-            % ipivot=ipivot1;
+            ipivot = 0*ipivot1;
+            ipivot(ipivot1==-1 & gt >0)=-1;
+            ipivot(ipivot1==1 & gt <0)=1;
             p = ztime(p,ipivot);
             newcon = 1;
             flast=f;
@@ -53,6 +55,7 @@ if(alpha1<=1)%& alpha1>0
 end
 if (alpha1 == 0); ierror = 0; maxit = 1; end;
 if(iproj==0)
+    disp('start from alpha_max')
     for itcnt = 1:maxit;
         xt = x + alpha1.*p;
         [ft, gt] = feval (sfun, xt);
@@ -62,10 +65,11 @@ if(iproj==0)
             x   = xt;
             f   = ft;
             g   = gt;
-            [ipivot1,~, x] = crash (x, low, up);
+            ipivot = 0*ipivot;
+            ipivot(x==low & gt >0)=-1;
+            ipivot(x==up & gt <0)=1;
             newcon = 1;
             flast=f;
-            ipivot=ipivot1;
             break;
         end;
         alpha1 = alpha1 ./ 2;

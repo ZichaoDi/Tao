@@ -3,8 +3,6 @@ function [xnew, fnew, gnew, nf1, ierror, alpha] = ...
 %------------------------------------------------------------------------
 % line search along the piecewise linear path starting from Cauchy point
 %------------------------------------------------------------------------
-% set up
-%---------------------------------------------------------
 ierror = 3;
 xnew   = x;
 fnew   = f;
@@ -12,8 +10,6 @@ gnew   = g;
 maxit  = 15;
 nf1=0;
 %%%%%%%%%%%%%%%%%%%#######################################################
-% disp('### In LINE SEARCH: lin1 ###')
-% fprintf(' g''p = %e\n',g'*p);
 if (alphaDis == 0); ierror = 0; maxit = 1; end;
 jmax=length(alphaDis);
 %---------------------------------------------------------

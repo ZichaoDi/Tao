@@ -21,11 +21,4 @@ if (~isempty(indu) );
 end;
 %------------------------------------------------
 spe  = min([spe al au]);
-if(abs(spe)<=eps^(1/2))
-    % al
-    % indd=indl(indsub)
-    % ipivot(indd)
-    % x(indd)
-    % p(indd)
-end
 

@@ -2,7 +2,7 @@ function [ipivot1, flast1] = modz (x, p, ipivot, low, up, flast, f, alpha)
 %---------------------------------------------------------------------
 % update the constraint matrix if a new constraint is encountered
 %---------------------------------------------------------------------
-indl = [1:length(p)]';%find(ipivot == 0 & p < 0);%
+indl = find(ipivot == 0 & p < 0);%[1:length(p)]';%
 if (length(indl) > 0);
    toll = 10 * eps^(1/2) * (abs(low(indl)) + ones(size(indl)));
    hitl = find(x(indl)-low(indl) <= toll);
@@ -16,7 +16,7 @@ if (length(indl) > 0);
    end
 end;
 %---------------------------------------------------------------------
-indu = find(ipivot == 0 & p > 0);%[1:length(p)]';%
+indu =find(ipivot == 0 & p > 0);%  [1:length(p)]';% 
 if (length(indu) > 0);
    tolu = 10 * eps * (abs( up(indu)) + ones(size(indu)));
    hitu = find(up(indu)-x(indu)  <= tolu);

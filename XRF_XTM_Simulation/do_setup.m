@@ -6,7 +6,7 @@ global bounds LogScale Joint
 global grad_type err0 
 global onlyXRF NoSelfAbsorption pix_inner
 global W_level xrf_level_decom xrf_level_raw xtm_level L_level GI_level SI_level SigmaR SigmaT m_level nTau_level
-global NumElement xinitial current_n Tik penalty EM
+global NumElement xinitial current_n EM
 %--------------------------------------------------
 % Select technique for gradient calculation.
 
@@ -27,7 +27,7 @@ else
     % sample='Seed';
     sample='Rod';
 end
-N=180;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
+N=100;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
 angleScale=2; %1: half angle; 2: full angle
 if(synthetic)
     numThetan=70; % number of scanning angles/projections
@@ -73,7 +73,7 @@ else
         slice = [4 25 30];
         data_h=[];
         ang_rate=1;
-        tau_rate=9;
+        tau_rate=15;
         for ele=1:size(data,1)
             data_h(ele,:,:)=sum(data(ele,1:ang_rate:end,1:tau_rate:end),1);
         end
@@ -83,12 +83,13 @@ else
             data_h=reshape(data_h,size(data_h,1),1,size(data_h,2));
         end
         truncChannel=0;%(DecomposedElement==0)*0;
-        data_xrt=data_h(40,:,:);%data_h(43,:,:)-data_h(38,:,:); %transimission data: V_dpc_cfg
+        I0=squeeze(data_h(43,:,:));
+        data_xrt=data_h(38,:,:); 
         data_xrf_decom=[];
         data_xrf_decom(1,:,:)=data_h(slice_tot(1),:,:)+data_h(slice_tot(2),:,:);
         data_xrf_decom(2,:,:)=data_h(slice_tot(3),:,:);
         data_xrf_decom(3,:,:)=data_h(slice_tot(4),:,:);
-        save('tomopytest.mat','data_xrf_decom');
+        save('tomopytest.mat','data_xrf_decom','data_xrt');
         load spectra_30;
         data_xrf_raw=permute(spectra_30(1:tau_rate:end,1:ang_rate:end,:),[3 2 1]);
         clear spectra_30
@@ -259,15 +260,7 @@ for level=1:nm
     end
 end
 clear L L_pert L_true W DisR_true DisR_pert GlobalInd SigMa_XTM SelfInd XRF XRF_decom XRF_raw SigMa_XRF data_h;
-%%%================= First-order derivative regularization
-penalty=0;
-if(penalty)
-    Tik=spalloc(length(W(:))-1,length(W(:)),2*(length(W(:))-1)); 
-    for i=1:length(W(:))-1
-        Tik(i,i)=-1; Tik(i,i+1)=1;
-        % Tik(i,i)=-1;Tik(i,i+1)=2; Tik(i,i+2)=-1;
-    end
-end
+
 nTol=N(1)^2*NumElement;
 if(Joint~=-1)
      xrfs=XRF_Simulated_decom;xrfr=xrf_level_decom{1}; 

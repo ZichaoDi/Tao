@@ -17,9 +17,11 @@ eX=ones(m(1),1);
 eY=ones(m(2),1);
 if(synthetic)
     XRF=zeros(numThetan,nTau+1,numChannel);
+    SigMa_XRF=zeros(numThetan*(nTau+1),numChannel);
 else
     XRF_raw=zeros(numThetan,nTau+1,numChannel_raw);
     XRF_decom=zeros(numThetan,nTau+1,numChannel_decom);
+    SigMa_XRF=zeros(numThetan*(nTau+1),numChannel_decom);
 end
 DisR=zeros(nTau+1,numThetan);
 L=zeros(numThetan,nTau+1,m(1),m(2));%zeros(numThetan*(nTau+1)*prod(m),1);
@@ -54,7 +56,7 @@ for n=1:numThetan
     % ===================================================
     %} 
     
-    Rdis=I0*ones(nTau+1,1);
+    Rdis=I0(n,:)';
     for i=1:nTau+1 %%%%%%%%%================================================================
         % Initialize
         xbox=[omega(1) omega(1) omega(2) omega(2) omega(1)];
@@ -142,12 +144,12 @@ for n=1:numThetan
                 xrfSub_decom=xrfSub_decom+Lvec(j)*I_incident*(I_after.*Wsub)'*M_decom;% fluorescence emitted from current pixel
            end
         end
-        Rdis(i)=I0*exp(-eX'*(MU_XTM.*reshape(L(sub2ind([numThetan,nTau+1,prod(m)],n*ones(1,prod(m)),i*ones(1,prod(m)),1:prod(m))),m))*eY); %% Discrete case
+        Rdis(i)=I0(n,i)*exp(-eX'*(MU_XTM.*reshape(L(sub2ind([numThetan,nTau+1,prod(m)],n*ones(1,prod(m)),i*ones(1,prod(m)),1:prod(m))),m))*eY); %% Discrete case
         if(synthetic)
             XRF(n,i,:)=xrfSub;%+0.1*rand(size(xrfSub));
         else
-            XRF_raw(n,i,:)=xrfSub_raw;
-            XRF_decom(n,i,:)=xrfSub_decom;
+            XRF_raw(n,i,:)=I0(n,i)*xrfSub_raw;
+            XRF_decom(n,i,:)=I0(n,i)*xrfSub_decom;
         end
         clear xrfSub xrfSub_raw xrfSub_decom
         if(plotSpec)
@@ -186,14 +188,21 @@ if(~synthetic)
     else
         XRF_raw=permute(data_xrf_raw,[2 3 1]);
     end
+    % SigMa_XRF=1./diag(cov(reshape(XRF_decom,numThetan*(nTau+1),numChannel_decom)'));
+    SigMa_XRF=1./XRF_decom;
     DisR=squeeze(sum(data_xrt(:,:,:),1))';
     % save(['Simulated_',num2str(N(1)),'_',num2str(numThetan),'_',num2str(NumElement),'_',num2str(numChannel_raw), sample,'.mat'],'DisR_Simulated','XRF_raw','XRF_Simulated','DisR');
     clear data_xrt data_xrf_decom data_xrf_raw 
     % clear XRF_Simulated DisR_Simulated
 end
 
-SigMa_XRF=1;
-SigMa_XTM=1;
+%if(LogScale)
+%    SigMa_XTM=1./(-log(DisR./I0));
+%else
+    SigMa_XTM=1./DisR;%1./diag(cov(DisR'));
+%end
+% SigMa_XRF=1;
+% SigMa_XTM=1;
 
 
 

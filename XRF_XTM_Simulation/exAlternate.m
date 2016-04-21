@@ -1,12 +1,20 @@
 function xstar=exAlternate(simulate)
 %%%Simulate XRF of a given object with predifined detector and beam
 if(simulate)
-    do_setup;
+    do_setup_temp;
+    DecomposedElement=0;
+    opt_temp;
 else
     do_setup;
-    opt;
-    Joint = 0;
-    opt;
+    DecomposedElement=0;
+    Beta=1;
+    for bt=1:5;
+        opt;
+        Beta = Beta/2;
+        Beta=5;
+    end
+    % Joint = 0;
+    % opt;
     % maxiter =100;
     % Joint = 1;
     % opt;

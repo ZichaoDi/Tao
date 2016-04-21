@@ -48,9 +48,10 @@ end
 AttenuM=bsxfun(@times,InTens,OutTens);
 DW=bsxfun(@times,AttenuM,reshape(W,[1,1,mtol,NumElement]));
 L_rep=reshape(L,numThetan,nTau+1,mtol);
-temp_v=L_rep.*InTens;
+temp_v=L_rep;%.*InTens;
 Mrep_P=repmat(reshape(M,[1,1,1 NumElement numChannel]),[numThetan,nTau+1,mtol,1,1]);
 ConstSub=bsxfun(@times,bsxfun(@times,temp_v,OutTens),Mrep_P); % part 3
+ConstSub=reshape(permute(ConstSub,[1 2 5 3 4]),[numThetan*(nTau+1)*numChannel,mtol*NumElement]);
 % O2=squeeze(sum(sum(OutTens,1),2));O22=map1D(O2,[0.01 1]);
 % pert = 1e-1;
 % scale = 3;

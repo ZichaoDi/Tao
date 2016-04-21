@@ -81,7 +81,7 @@ if(level==1)
             if(strcmp(sample,'Seed'))
                 W(:,:,tsub)=abs(flipud(permute(iR_num(:,:,slice(tsub)),[2 1 3])));%tsub*2e-1;
             elseif(strcmp(sample,'Rod'))
-                W(:,:,tsub)=abs(rot90(permute(iR_num(:,:,tsub),[2 1 3])));%tsub*2e-1;
+                W(:,:,tsub)=abs(fliplr(rot90(permute(iR_num(:,:,tsub),[2 1 3]))));%tsub*2e-1;
             end
         end
         UnitSpectrumSherman_real; %% Produce BindingEnergy M
