@@ -47,8 +47,8 @@ for n=1:numThetan
     DetKnot=DetKnot0*TransMatrix+[driftx,drifty];
     SourceKnot=SourceKnot0*TransMatrix+[driftx,drifty];
     %% =========================================
-    Rdis_true=1*I0*ones(nTau+1,1);
-    Rdis_pert=1*I0*ones(nTau+1,1);
+    Rdis_true=1*I0(n,:)'.*ones(nTau+1,1);
+    Rdis_pert=1*I0(n,:)'.*ones(nTau+1,1);
     xbox=[omega(1) omega(1) omega(2) omega(2) omega(1)];
     ybox=[omega(3) omega(4) omega(4) omega(3) omega(3)];
     for i=1:nTau+1 %%%%%%%%%========================================================
@@ -82,13 +82,13 @@ for n=1:numThetan
             EmptyBeam=[EmptyBeam,(n-1)*numThetan+i];
             currentInd_pert=sub2ind(m,index_pert(:,2),index_pert(:,1));
             L_pert(sub2ind([numThetan,nTau+1],n,i),currentInd_pert)=Lvec_pert;
-            Rdis_pert(i)=I0*exp(-eX'*(MU_XTM.*reshape(L_pert(sub2ind([numThetan,nTau+1],n,i),:),m))*eY);%%I0*exp(-eX'*(MU_XTM.*reshape(L(n,i,:,:),subm,subn))*eY); %% Discrete case
+            Rdis_pert(i)=I0(n,i)*exp(-eX'*(MU_XTM.*reshape(L_pert(sub2ind([numThetan,nTau+1],n,i),:),m))*eY);%%I0*exp(-eX'*(MU_XTM.*reshape(L(n,i,:,:),subm,subn))*eY); %% Discrete case
         end
         if(~isempty(index)& norm(Lvec)>0)
             EmptyBeam=[EmptyBeam,(n-1)*numThetan+i];
             currentInd=sub2ind(m,index(:,2),index(:,1));
             L(sub2ind([numThetan,nTau+1],n,i),currentInd)=Lvec;
-            Rdis_true(i)=I0*exp(-eX'*(MU_XTM.*reshape(L(sub2ind([numThetan,nTau+1],n,i),:),m))*eY);%%I0*exp(-eX'*(MU_XTM.*reshape(L(n,i,:,:),subm,subn))*eY); %% Discrete case
+            Rdis_true(i)=I0(n,i)*exp(-eX'*(MU_XTM.*reshape(L(sub2ind([numThetan,nTau+1],n,i),:),m))*eY);%%I0*exp(-eX'*(MU_XTM.*reshape(L(n,i,:,:),subm,subn))*eY); %% Discrete case
         end
 
         % else
@@ -118,7 +118,7 @@ L=L;%L_H;
 end
 %%==============================================================
 if(~synthetic)
-    DisR_Simulated=DisR;
+    DisR_Simulated=DisR_true;
     DisR=squeeze(data_xrt)';% reshape(dd,size(dd,1)/numThetan,numThetan);%
 end
 % if(LogScale)

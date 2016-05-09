@@ -35,6 +35,7 @@ end
         
         errCom=reshape(xstar(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-ws(prod(m)*i-prod(m)+1:prod(m)*i
         imagesc(errCom);colormap jet
+        colorbar;
         set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',...
 [],'YTick',[]);
         % colorbar;

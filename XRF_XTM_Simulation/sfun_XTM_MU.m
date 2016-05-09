@@ -6,7 +6,7 @@ global pert
 %%===== DisR: Radon transform with t beam lines and theta angles
 %%===== f: sum_i ||e^T(Ltol_i.*I)e-M_i||^2, i=1..theta
 scale=1e6;
-DR=-log(DisR'/I0);
+DR=-log(DisR'./I0);
 r=Ltol*MU-pert-DR(:);
 g=Ltol'*r;
 JJ = reshape(Ltol,numThetan*(nTau+1),prod(m));

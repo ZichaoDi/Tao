@@ -13,7 +13,7 @@ maxiTrial=5;
 for itcnt = 1:maxiTrial;
     xt = x + alpha.*p;
     [ConstNew, I, O, ~, ~,ft] = feval (sfun, xt);
-    if (ft < f )%| itcnt==1);
+    if (ft < f | itcnt==1);
         ierror = 0;
         xnew   = xt;
         % if(icycle == maxOut) 

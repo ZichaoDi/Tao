@@ -2,7 +2,7 @@ global low up penalty Tik lambda
 global W0 current_n Wold
 global SigMa_XTM SigMa_XRF Beta TempBeta
 global err0 fiter nit maxiter
-global ConstSub InTens OutTens MU_XTM
+global ConstSub InTens OutTens MU_XTM I0 s_a
 global itertest ErrIter icycle scaleMU maxOut
 global pert
 more off;
@@ -38,7 +38,12 @@ drift = 0;
 if(drift)
     DisR=xtm_level_pert{level};
 else
-    DisR=xtm_level_true{level};%DisR_Simulated;%  
+    s_a=0;
+    if(s_a)
+        DisR=squeeze(data_sa)';
+    else
+        DisR=squeeze(data_ds)';%xtm_level_true{level};%DisR_Simulated;%  
+    end
 end
 L=L_level{level};
 GlobalInd=GI_level{level};
@@ -70,9 +75,9 @@ if(Alternate)
         fctn_half=@(W)sfun_half_linear(W,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
         fctn=@(W)sfun_full_linear(W,XRF,NumElement,m,nTau);
     elseif(Joint==1)
-        TempBeta=1; Beta=5;
+        TempBeta=1; Beta=1e0;
         Mrep_P=repmat(reshape(M,[1,1 NumElement numChannel]),[nTau+1,mtol,1,1]);
-        fctn=@(W)sfun_linear_joint(W,XRF,DisR,MU_e,L,NumElement,m,nTau);
+        fctn=@(W)sfun_linear_joint_1(W,XRF(:),DisR,MU_e,L,NumElement,m,nTau);
     end
 else
     if(Joint==0)
@@ -155,12 +160,17 @@ if(Alternate & linear_S==0)
             fctn_linear=@(x)linear(x,B'*B,B'*d);%B(RealVec,:),d(RealVec));
             f=norm(B*x-d);
         else
+            if(maxOut>1)
+                figure(12);
+                x_temp=reshape(x,m(1),m(2),NumElement);
+                for ie=1:NumElement; 
+                    subplot(maxOut+1,NumElement,icycle*NumElement+ie),
+                    imagesc(x_temp(:,:,ie))
+                    set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',[],'YTick',[]);
+                end
+                drawnow;
+            end
         maxiter=100;
-        if(EM)
-            algo='EM';
-        else
-            algo='LS';
-        end
         if(bounds)
             clear Mrep_P
             [x,f,g,ierror] = tnbc (x,fctn,low,up); % algo='TNbc';
@@ -202,7 +212,7 @@ if(Alternate & linear_S==0)
         end
         icycle=icycle+1;
     end
-    save(['xstar_',sample,'_',num2str(N(1)),'_',num2str(numThetan),'_',num2str(TempBeta),'_',num2str(Beta),'_',num2str(numChannel),'-',num2str(nit),algo,'_linear_',num2str(lambda),'.mat'],'xstar','x0','W0');
+    save(['xstar_',sample,'_',num2str(N(1)),'_',num2str(numThetan),'_',num2str(TempBeta),'_',num2str(Beta),'_',num2str(numChannel),'-',num2str(nit),frame,'_linear_',num2str(lambda),'.mat'],'xstar','x0','W0');
 elseif(Alternate==0)
     % pert=L*x0+log(DisR(:)./I0);
     pert = 0* DisR(:);

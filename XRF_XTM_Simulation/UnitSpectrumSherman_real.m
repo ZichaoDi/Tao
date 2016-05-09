@@ -44,7 +44,7 @@ mu=0;
 FWHM = (DetChannel_raw(2)-DetChannel_raw(1))*20;
 sigma = FWHM/2.35;
 truncInd=[];
-truncWidth=0.02;
+truncWidth=0.01;
 %%======================================================================
 while(i<=NumElement)
     PurePeak=0.*DetChannel_decom;

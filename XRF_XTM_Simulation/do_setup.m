@@ -6,7 +6,7 @@ global bounds LogScale Joint
 global grad_type err0 
 global onlyXRF NoSelfAbsorption pix_inner
 global W_level xrf_level_decom xrf_level_raw xtm_level L_level GI_level SI_level SigmaR SigmaT m_level nTau_level
-global NumElement xinitial current_n EM
+global NumElement xinitial current_n frame I0 s_a
 %--------------------------------------------------
 % Select technique for gradient calculation.
 
@@ -27,7 +27,7 @@ else
     % sample='Seed';
     sample='Rod';
 end
-N=100;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
+N=160;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
 angleScale=2; %1: half angle; 2: full angle
 if(synthetic)
     numThetan=70; % number of scanning angles/projections
@@ -73,7 +73,7 @@ else
         slice = [4 25 30];
         data_h=[];
         ang_rate=1;
-        tau_rate=15;
+        tau_rate=9;
         for ele=1:size(data,1)
             data_h(ele,:,:)=sum(data(ele,1:ang_rate:end,1:tau_rate:end),1);
         end
@@ -84,15 +84,22 @@ else
         end
         truncChannel=0;%(DecomposedElement==0)*0;
         I0=squeeze(data_h(43,:,:));
-        data_xrt=data_h(38,:,:); 
+        data_sa=data_h(40,:,:);%% Scattering data: s_a;
+        data_ds=data_h(38,:,:); %% Downstream Transmission 
+        s_a=1;
+        if(s_a)
+            data_xrt=data_sa;
+        else
+            data_xrt=data_ds;
+        end
         data_xrf_decom=[];
         data_xrf_decom(1,:,:)=data_h(slice_tot(1),:,:)+data_h(slice_tot(2),:,:);
         data_xrf_decom(2,:,:)=data_h(slice_tot(3),:,:);
         data_xrf_decom(3,:,:)=data_h(slice_tot(4),:,:);
         save('tomopytest.mat','data_xrf_decom','data_xrt');
-        load spectra_30;
-        data_xrf_raw=permute(spectra_30(1:tau_rate:end,1:ang_rate:end,:),[3 2 1]);
-        clear spectra_30
+        load spectra_30_aligned;
+        data_xrf_raw=permute(spectra_30_aligned(1:tau_rate:end,1:ang_rate:end,:),[3 2 1]);
+        clear spectra_30_aligned
         Tol = 1e-2;
         omega=[-2 2 -2 2]*Tol*2; % units: cm
         m_h=size(iR,1);
@@ -169,7 +176,7 @@ bounds = 1;  % no bound constraints
 Joint=1; % 0: XRF; -1: XTM; 1: Joint inversion
 ReconAttenu = 0*(Joint==-1); % 0: Recover W; 1: Recover miu
 Alternate=1*(Joint~=-1);
-EM=1;
+frame='EM';
 linear_S=0*Alternate;
 LogScale=1; %% determine if the XTM is solved taking log first or not
 Weighted=0; %% 1 if use weighted least-square form

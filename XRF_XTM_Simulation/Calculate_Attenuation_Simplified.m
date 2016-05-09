@@ -1,7 +1,7 @@
 function [ConstSub, InTens, OutTens, AttenuM, DW,f]=Calculate_Attenuation(W_rep,NumElement,L,GlobalInd,SelfInd,m,nTau,xrfData,M)
 %%==== Given elemental map W and pre-calculate the beam and fluorescent attenuation coefficients
 global NumSSDlet numChannel NoSelfAbsorption numThetan
-global icycle maxOut MU_e area_xrf EM scaleMU pix_inner
+global icycle maxOut MU_e area_xrf EM scaleMU pix_inner I0
 mtol=prod(m);
 L=reshape(full(L),numThetan,nTau+1,mtol);
 W=reshape(W_rep,mtol,NumElement);
@@ -48,21 +48,8 @@ end
 AttenuM=bsxfun(@times,InTens,OutTens);
 DW=bsxfun(@times,AttenuM,reshape(W,[1,1,mtol,NumElement]));
 L_rep=reshape(L,numThetan,nTau+1,mtol);
-temp_v=L_rep;%.*InTens;
+temp_v=L_rep.*InTens;
 Mrep_P=repmat(reshape(M,[1,1,1 NumElement numChannel]),[numThetan,nTau+1,mtol,1,1]);
 ConstSub=bsxfun(@times,bsxfun(@times,temp_v,OutTens),Mrep_P); % part 3
 ConstSub=reshape(permute(ConstSub,[1 2 5 3 4]),[numThetan*(nTau+1)*numChannel,mtol*NumElement]);
-% O2=squeeze(sum(sum(OutTens,1),2));O22=map1D(O2,[0.01 1]);
-% pert = 1e-1;
-% scale = 3;
-% xnew   = map1D((W+pert)./(map1D(O2,[0.1 1]).^scale),[min(W(:)),max(W(:))]);
-% nrow=3;
-% figure, for ii=1:3, subplot(nrow,3,ii);imagesc(reshape(W(:,ii),m(1),m(1)));colorbar;
-% subplot(nrow,3,3+ii),imagesc(reshape(O2(:,ii),m(1),m(1)));colorbar;
-% subplot(nrow,3,6+ii);imagesc(reshape(xnew(:,ii),m(1),m(1)));colorbar;
-% if(nrow==4)
-%     subplot(nrow,3,9+ii),imagesc(reshape(MU(:,ii+1),m(1),m(1)));colorbar;
-% end
-% end
-% drawnow;
 clear L_rep temp_v Mrep_P
