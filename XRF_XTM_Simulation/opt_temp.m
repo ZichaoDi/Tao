@@ -16,7 +16,7 @@ if(n_level==1)
             numChannel=numChannel_decom;
             M=M_decom;
         else
-            XRF=XRF_raw;
+            XRF=double(XRF_raw);
             DetChannel=DetChannel_raw;
             numChannel=numChannel_raw;
             M=M_raw;
@@ -99,7 +99,7 @@ if(Alternate)
         fctn_half=@(W)sfun_half_linear(W,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
         fctn=@(W)sfun_full_linear(W,XRF,NumElement,m,nTau);
     elseif(Joint==1)
-        TempBeta=1; Beta=0;
+        TempBeta=1; Beta=1;
         fctn=@(W)sfun_linear_joint_1(W,XRF(:),DisR,MU_e,L,NumElement,m,nTau);
     end
 else

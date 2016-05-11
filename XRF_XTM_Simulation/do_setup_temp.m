@@ -83,7 +83,7 @@ else
             data_h=reshape(data_h,size(data_h,1),1,size(data_h,2));
         end
         truncChannel=0;%(DecomposedElement==0)*0;
-        I0=squeeze(data_h(43,:,:));
+        I0=reshape(data_h(43,:,:),size(data_h,2),size(data_h,3));
         data_sa=data_h(40,:,:);%% Scattering data: s_a;
         data_ds=data_h(38,:,:); %% Downstream Transmission 
         s_a=1;
@@ -109,6 +109,8 @@ else
             iR=iR(:,:,3);
         end
         m_h=size(iR,1);
+        xc=getCellCenteredGrid(omega,[m_h,m_h]);
+        xc=reshape(xc,m_h^2,2);
         [x_ir,y_ir]=meshgrid(1:m_h);
         [x_num,y_num]=meshgrid(linspace(1,m_h,N(1)));
         iR_num=zeros(N(1),N(1),size(iR,3));

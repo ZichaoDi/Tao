@@ -8,7 +8,6 @@ W=reshape(W_rep,mtol,NumElement);
 MU=W*reshape(MU_e(:,1,:),NumElement,NumElement+1);
 %%%%% ====================================================================
 f=0;
-totPro=numThetan*(nTau+1);
 InTens=ones(numThetan,nTau+1,mtol);
 OutTens=ones(numThetan,nTau+1,mtol,NumElement);
 for n=1:numThetan
