@@ -12,14 +12,10 @@ fnew   = f;
 maxiTrial=5;
 for itcnt = 1:maxiTrial;
     xt = x + alpha.*p;
-    [ConstNew, I, O, ~, ~,ft] = feval (sfun, xt);
+    [ConstNew, ft] = feval (sfun, xt);
     if (ft < f | itcnt==1);
         ierror = 0;
         xnew   = xt;
-        % if(icycle == maxOut) 
-        % Out= squeeze(sum(sum(O,1),2));
-        % xnew   = map1D((xt+1e-1)./(map1D(Out(:),[1e-1 1]).^2),[min(xt),max(xt)]);
-        % end
         fnew   = ft;
         ConstNew = ConstSub;
         break;

@@ -20,7 +20,7 @@ else
     Mt=Mt(:)-min(Mt(:));
 end
 Rdis=L*MU_XTM;
-xrfData=xrfData./1e1;
+xrfData=xrfData./1e0;
 %%======================================        
  if(strcmp(frame,'EM'))
       thres=1;

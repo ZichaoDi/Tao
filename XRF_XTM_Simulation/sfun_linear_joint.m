@@ -16,7 +16,7 @@ MU_XTM=reshape(W,mtol,NumElement)*MUe;
 if(s_a)
     Mt=reshape(DisR',numThetan*(nTau+1),1);
 else
-    Mt=-log(DisR'./I0)*1e0; 
+    Mt=-log(DisR'./I0); 
     Mt=Mt(:)-min(Mt(:));
 end
 Rdis=L*MU_XTM;

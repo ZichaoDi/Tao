@@ -3,55 +3,80 @@ global W0 current_n Wold
 global SigMa_XTM SigMa_XRF Beta TempBeta
 global err0 fiter nit maxiter
 global ConstSub InTens OutTens MU_XTM I0 s_a
-global itertest ErrIter icycle scaleMU maxOut
+global itertest ErrIter icycle maxOut
 global pert
 more off;
 %%%----------------------------Initialize dependent variables
-level=1;
-current_n = N(level);
-W= W_level{level};
 truncChannel=1*(DecomposedElement==0);
-if(synthetic)
-    XRF=double(xrf_level{level});
-else
-    if(DecomposedElement)
-        XRF=double(xrf_level_decom{level});%XRF_Simulated_decom;%  
-        % XRF=-log(XRF+1.001);
-        DetChannel=DetChannel_decom;
-        numChannel=numChannel_decom;
-        M=M_decom;
-        % M=-log(M_decom*1e0+1.001);
-    else
-        XRF=double(xrf_level_raw{level});
-        DetChannel=DetChannel_raw;
-        numChannel=numChannel_raw;
-        M=M_raw*1e0;
-        if(truncChannel)
-            XRF=XRF(:,:,truncInd);
-            DetChannel=DetChannel_raw(truncInd);
-            numChannel=length(truncInd);
-            M=M_raw(:,truncInd)*1e0;
+if(n_level==1)
+    if(~synthetic)
+        if(DecomposedElement)
+            XRF=XRF_decom;  
+            DetChannel=DetChannel_decom;
+            numChannel=numChannel_decom;
+            M=M_decom;
+        else
+            XRF=XRF_raw;
+            DetChannel=DetChannel_raw;
+            numChannel=numChannel_raw;
+            M=M_raw;
+            if(truncChannel)
+                XRF=XRF(:,:,truncInd);
+                DetChannel=DetChannel_raw(truncInd);
+                numChannel=length(truncInd);
+                M=M_raw(:,truncInd);
+            end
+        end
+        s_a=0;
+        if(s_a)
+            DisR=squeeze(data_sa)';
+        else
+            DisR=squeeze(data_ds)';  
         end
     end
-end
-drift = 0;
-if(drift)
-    DisR=xtm_level_pert{level};
 else
-    s_a=0;
-    if(s_a)
-        DisR=squeeze(data_sa)';
+    current_n = N(level);
+    W= W_level{level};
+    if(synthetic)
+        XRF=double(xrf_level{level});
     else
-        DisR=squeeze(data_ds)';%xtm_level_true{level};%DisR_Simulated;%  
+        if(DecomposedElement)
+            XRF=double(xrf_level_decom{level});  
+            DetChannel=DetChannel_decom;
+            numChannel=numChannel_decom;
+            M=M_decom;
+        else
+            XRF=double(xrf_level_raw{level});% permute(data_xrf_raw,[2 3 1]);%
+            DetChannel=DetChannel_raw;
+            numChannel=numChannel_raw;
+            M=M_raw*1e0;
+            if(truncChannel)
+                XRF=XRF(:,:,truncInd);
+                DetChannel=DetChannel_raw(truncInd);
+                numChannel=length(truncInd);
+                M=M_raw(:,truncInd)*1e0;
+            end
+        end
     end
+    drift = 0;
+    if(drift)
+        DisR=xtm_level_pert{level};
+    else
+        s_a=0;
+        if(s_a)
+            DisR=squeeze(data_sa)';
+        else
+            DisR=squeeze(data_ds)';%xtm_level_true{level};%DisR_Simulated;%  
+        end
+    end
+    L=L_level{level};
+    GlobalInd=GI_level{level};
+    SelfInd=SI_level{level};
+    m=m_level(level,:);
+    nTau=nTau_level(level);
+    SigMa_XTM=SigmaT{level};
+    SigMa_XRF=SigmaR{level};
 end
-L=L_level{level};
-GlobalInd=GI_level{level};
-SelfInd=SI_level{level};
-m=m_level(level,:);
-nTau=nTau_level(level);
-SigMa_XTM=SigmaT{level};
-SigMa_XRF=SigmaR{level};
 fprintf(1,'====== With Self Absorption, Transmission Detector Resolution is %d\n',nTau);
 %%%----------------------------------------------------------------------
 W0=W(:);
@@ -68,16 +93,14 @@ if(penalty)
 end
 cmap=[min(W0),max(W0)];
 if(Alternate)
-    fctn_f=@(W)Calculate_Attenuation_Simplified(W,NumElement,L,GlobalInd,SelfInd,m,nTau,XRF,M);
+    fctn_f=@(W)Calculate_Attenuation_S1(W,NumElement,L,GlobalInd,SelfInd,m,nTau,XRF,M);
     if(Joint==0)
         TempBeta=1; Beta=0;
-        Mrep_P=repmat(reshape(M,[1,1,1 NumElement numChannel]),[numThetan,nTau+1,mtol,1,1]);
         fctn_half=@(W)sfun_half_linear(W,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
         fctn=@(W)sfun_full_linear(W,XRF,NumElement,m,nTau);
     elseif(Joint==1)
-        TempBeta=1; Beta=1e0;
-        Mrep_P=repmat(reshape(M,[1,1 NumElement numChannel]),[nTau+1,mtol,1,1]);
-        fctn=@(W)sfun_linear_joint_1(W,XRF(:),DisR,MU_e,L,NumElement,m,nTau);
+        TempBeta=1; Beta;
+        fctn=@(W)sfun_linear_joint(W,XRF(:),DisR,MU_e,L,NumElement,m,nTau);
     end
 else
     if(Joint==0)
@@ -98,7 +121,6 @@ else
 end
 rng('default');
 x0 = 1*10^(0)*rand(m(1),m(2),NumElement);
-% x0(:,:,NumElement)=W(:,:,NumElement);
 x0=x0(:);
 xinitial=x0;
 err0=norm(W0-xinitial);
@@ -114,8 +136,7 @@ errAtt=[];
 Wtemp=[];
 outCycle=1;
 if(~ReconAttenu & Alternate)
-    scaleMU=1e0;
-    [ConstSub, ~, ~, ~, ~,fold]=Calculate_Attenuation_Simplified(0*Wold,NumElement,L,GlobalInd,SelfInd,m,nTau,XRF,M);
+    [ConstSub, fold]=Calculate_Attenuation_S1(0*Wold,NumElement,L,GlobalInd,SelfInd,m,nTau,XRF,M);
     res0=fold;
     res=[];
 end
@@ -170,9 +191,8 @@ if(Alternate & linear_S==0)
                 end
                 drawnow;
             end
-        maxiter=100;
+        maxiter=150;
         if(bounds)
-            clear Mrep_P
             [x,f,g,ierror] = tnbc (x,fctn,low,up); % algo='TNbc';
             % options = optimoptions('fmincon','Display','iter','GradObj','on','MaxIter',maxiter,'Algorithm','interior-point');% ,'Algorithm','Trust-Region-Reflective'
             % [x, f] = fmincon(fctn,x,[],[],[],[],low,up,[],options); algo='fmincon';
@@ -181,11 +201,6 @@ if(Alternate & linear_S==0)
         end
     end
         x_pre=x;
-        if(icycle==1)
-            scaleMU=1e0;
-        else
-            scaleMU=1; %10^(6);
-        end
         [x,fold,ConstSub, alpha]=lin3(x_pre-Wold(:),Wold(:),fold,1,fctn_f,ConstSub);
         x_admm(:,icycle+1)=x;
         Wold=x;
@@ -217,7 +232,7 @@ elseif(Alternate==0)
     % pert=L*x0+log(DisR(:)./I0);
     pert = 0* DisR(:);
     for icycle =1;
-    maxiter=40;
+    maxiter=100;
     if(bounds)
          [xstar,f,g,ierror]=tnbc(x,fctn,low,up);
          % options = optimoptions('fmincon','Display','iter','GradObj','on','MaxIter',maxiter,'Algorithm','interior-point');% ,'Algorithm','Trust-Region-Reflective'
@@ -243,5 +258,5 @@ if(~ReconAttenu)
     fprintf('time elapsed = %f \n',t);
 end
 if(plotResult)
-    doplot(1,xstar,W_level,xinitial);
+    doplot(1,xstar,W,xinitial);
 end

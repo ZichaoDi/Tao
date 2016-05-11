@@ -7,7 +7,11 @@ if(simulate)
 else
     do_setup;
     DecomposedElement=0;
-    opt;
+    Beta=0.5;
+    for j_iter=1:2
+        opt;
+        Beta=Beta/2;
+    end
     % Joint = 0;
     % opt;
     % maxiter =100;

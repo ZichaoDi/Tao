@@ -4,15 +4,10 @@ global current_n NumElement Z Element
 % Plot results of soap-film minimal surface
 %--------------------------------------------------------------
 m = [current_n current_n];
-ws=reshape(W_level{1},prod(m)*NumElement,1);
+ws=reshape(W_level,prod(m)*NumElement,1);
 xstar=v;
-if(length(W_level)==2)
-    nrow=5;
-    xstarJ=W_level{2};
-else
     nrow=4;
     ncol = NumElement;
-end
 %--------------------------------------------------------------
 % set up boundary conditions
 %--------------------------------------------------------------

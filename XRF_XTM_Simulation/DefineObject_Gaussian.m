@@ -43,7 +43,6 @@ if(synthetic)
     end
 else
     if(strcmp(sample,'Rod'))
-        pix_inner = find((xc(:,1)-center(2,1)).^2+(xc(:,2)-center(2,2)).^2 <= (1.5*r(2))^2);
         if(Si)
             Z=14;
         elseif(W_element)
@@ -58,8 +57,8 @@ else
 end
 %---------------------------
 NumElement=length(Z);
-W=ones(N(level),N(level),NumElement);
-if(level==1)
+if(n_level==1)
+    W=ones(N,N,NumElement);
     if(synthetic)
         if(strcmp(sample,'Golosio'))
             CreateCircle; 
@@ -88,6 +87,8 @@ if(level==1)
         clear iR_num iR
     end
     clear Line ElementDensity LineEnergy CS_FluoLine CS_Total CS_TotalBeam
+else
+    W=ones(N(level),N(level),NumElement);
 end
 %%%%%================== Attenuation Matrix at beam energy
 MU_e=MU_e.*AbsorbScale; %% Discrete Scale
