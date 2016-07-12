@@ -34,6 +34,8 @@ if(synthetic)
     numChannel=5;% number of energy channels on xrf detector
     DecomposedElement=0;
 else
+    Tol = 1e-2;
+    omega=[-2 2 -2 2]*Tol; % units: cm
     if(strcmp(sample,'Seed'))
         load ./data/ApsDataExtract/DogaSeeds/DownSampleSeeds441_elements.mat
         load RawSpectra_seed.mat
@@ -44,26 +46,33 @@ else
         end
         data = permute(data_H,[2,3,1]);
         clear data_H
-        slice =[13 14 17];%5:27;%      
+        slice =[9 13 14 17];%5:27;%      
         data_h=[];
-        ang_rate=100;
-        tau_rate=40;
+        ang_rate=20;
+        tau_rate=1;
         for ele=1:size(data,1)
             data_h(ele,:,:)=sum(data(ele,1:ang_rate:end,1:tau_rate:end),1);
         end
         if(ndims(data_h)==2)
             data_h=reshape(data_h,size(data_h,1),1,size(data_h,2));
         end
-        DecomposedElement=1;
-        truncChannel=1;% (DecomposedElement==0)*1;
-        data_xrt=data_h(3,:,:); %transimission data
+        truncChannel=0;% (DecomposedElement==0)*1;
+        data_xrt=squeeze(data_h(3,:,:)); %transimission data
+        s_a=0;
+        I0=max(data_xrt(:));% reshape(data_h(2,:,:),size(data_h,2),size(data_h,3));% 
+        % DisR=sparse(data_xrt');
+        load DisR_removeStr
         data_xrf_decom=data_h(slice,:,:);
+        numThetan=size(data_h,2);
+        nTau=size(data_h,3)-1;
+        N = size(data_h,3);
         data_xrf_raw=permute(spectra(1:tau_rate:end,:,1:ang_rate:end),[2 3 1]);
+        data_xrf_raw=sparse(reshape(double(data_xrf_raw),[size(data_xrf_raw,1),size(data_xrf_raw,2)*size(data_xrf_raw,3)]));
         [x_ir,y_ir]=meshgrid(1:size(iR,1));
         [x_num,y_num]=meshgrid(linspace(1,size(iR,1),N(1)));
-        iR_num=zeros(N(1),N(1),size(iR,3));
-        for ele=1:size(iR,3)
-            iR_num(:,:,ele)=interp2(x_ir,y_ir,iR(:,:,ele),x_num,y_num);
+        iR_num=zeros(N(1),N(1),length(slice));
+        for ele=1:size(iR_num,3)
+            iR_num(:,:,ele)=interp2(x_ir,y_ir,iR(:,:,slice(ele)),x_num,y_num);
         end
         save('tomopytest.mat','data_xrf_decom');
     elseif(strcmp(sample,'Rod'))
@@ -73,7 +82,7 @@ else
         slice = [4 25 30];
         data_h=[];
         ang_rate=1;
-        tau_rate=9;
+        tau_rate=10;
         for ele=1:size(data,1)
             data_h(ele,:,:)=sum(data(ele,1:ang_rate:end,1:tau_rate:end),1);
         end
@@ -82,16 +91,20 @@ else
         if(ndims(data_h)==2)
             data_h=reshape(data_h,size(data_h,1),1,size(data_h,2));
         end
+        numThetan=size(data_h,2);
+        nTau=size(data_h,3)-1;
+        N = size(data_h,3);
         truncChannel=0;%(DecomposedElement==0)*0;
-        I0=squeeze(data_h(43,:,:));
+        I0=reshape(data_h(43,:,:),size(data_h,2),size(data_h,3));
         data_sa=data_h(40,:,:);%% Scattering data: s_a;
         data_ds=data_h(38,:,:); %% Downstream Transmission 
-        s_a=1;
+        s_a=0;
         if(s_a)
             data_xrt=data_sa;
         else
             data_xrt=data_ds;
         end
+        DisR=sparse(squeeze(sum(data_xrt(:,:,:),1))');
         data_xrf_decom=[];
         data_xrf_decom(1,:,:)=data_h(slice_tot(1),:,:)+data_h(slice_tot(2),:,:);
         data_xrf_decom(2,:,:)=data_h(slice_tot(3),:,:);
@@ -99,9 +112,8 @@ else
         save('tomopytest.mat','data_xrf_decom','data_xrt');
         load spectra_30_aligned;
         data_xrf_raw=permute(spectra_30_aligned(1:tau_rate:end,1:ang_rate:end,:),[3 2 1]);
-        clear spectra_30_aligned
-        Tol = 1e-2;
-        omega=[-2 2 -2 2]*Tol*2; % units: cm
+        data_xrf_raw=sparse(reshape(double(data_xrf_raw),[size(data_xrf_raw,1),size(data_xrf_raw,2)*size(data_xrf_raw,3)]));
+        clear spectra_30_aligned data_sa data_ds data_h
         Si=0;
         W_element=0;
         if(W_element)
@@ -116,14 +128,13 @@ else
             iR_num(:,:,ele)=interp2(x_ir,y_ir,iR(:,:,ele),x_num,y_num);
         end
     end
-    clear x_ir y_ir x_num y_num iR data spectra 
-    numThetan=size(data_h,2);
+    clear data_xrt x_ir y_ir x_num y_num iR data spectra 
 end
 %%=============================
 NoSelfAbsorption=0; % 0: include self-absorption in the XRF inversion
 bounds = 1;  % no bound constraints
 Joint=1; % 0: XRF; -1: XTM; 1: Joint inversion
-ReconAttenu = 0*(Joint==-1); % 0: Recover W; 1: Recover miu
+ReconAttenu = 1*(Joint==-1); % 0: Recover W; 1: Recover miu
 Alternate=1*(Joint~=-1);
 frame='EM';
 linear_S=0*Alternate;
@@ -149,10 +160,10 @@ if(n_level==1)
             W=MU;
         end
     else
-        XRF_XTM_Simplified;
+        Forward_real;%XRF_XTM_Simplified;
     end
     %-----------------------------------------
-    clear L_pert L_true DisR_true DisR_pert data_h;
+    clear L_pert L_true DisR_true DisR_pert;
 else
     nh=N(1);
     level=[1:n_level];
@@ -254,4 +265,3 @@ if(plotSim & Joint~=-1& n_level==1)
      err_xrf(scale+1)=norm(a(:)-b(:));
 end
 
-% save([sample,num2str(N(1)),'_',num2str(numThetan),'_',num2str(nTau+1),'_',num2str(numChannel),'.mat'],'-v7.3')

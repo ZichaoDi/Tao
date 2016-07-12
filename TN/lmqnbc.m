@@ -12,6 +12,7 @@ global NF N current_n  fiter itertest ErrIter
 global ptest gv ipivot nit
 global i_cauchy W0  m NumElement
 global maxiter err0 Joint 
+global f_xrf f_xtm
 %---------------------------------------------------------
 % check that initial x is feasible and that the bounds
 % are consistent

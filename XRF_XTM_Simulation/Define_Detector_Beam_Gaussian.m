@@ -11,8 +11,6 @@ dTau=(omega(2)-omega(1))/N(1);%%% width of each discrete beam
 Tau= omega(2)-omega(1);%sqrt((omega(2)-omega(1))^2+(omega(4)-omega(3))^2)-dTau;%
 if(synthetic)
     nTau=m(1)+1;%ceil(Tau/dTau)+1;% % number of discrete beam%nTau;%
-else
-    nTau=size(data_h,3)-1;
 end
 tol1=0;%eps^(1/2); % the threshod to gurantee the beam will cover the whole object
 %=============initiate transmission detector location

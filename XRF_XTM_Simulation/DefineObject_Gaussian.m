@@ -8,7 +8,7 @@
 %%%         MU: Attenuation matrix of O
 %%=======================================================================
 global x y dz m omega AbsorbScale MU_e Z 
-global NumElement 
+global NumElement Element 
 global slice onlyXRF
 
 load PeriodicTable
@@ -78,7 +78,7 @@ if(n_level==1)
     else
         for tsub=1:NumElement
             if(strcmp(sample,'Seed'))
-                W(:,:,tsub)=abs(flipud(permute(iR_num(:,:,slice(tsub)),[2 1 3])));%tsub*2e-1;
+                W(:,:,tsub)=abs(fliplr(permute(iR_num(:,:,tsub),[2 1 3])));%tsub*2e-1;
             elseif(strcmp(sample,'Rod'))
                 W(:,:,tsub)=abs(fliplr(rot90(permute(iR_num(:,:,tsub),[2 1 3]))));%tsub*2e-1;
             end

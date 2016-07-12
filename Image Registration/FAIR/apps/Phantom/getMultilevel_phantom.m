@@ -134,7 +134,7 @@ for level = maxLevel:-1:minLevel
     end;
     MLdata{level} = L;
     
-    if fig, % do some plots
+    if fig==0, % do some plots
         str = @(k) sprintf('%s(level=%d), %s',...
             names{k},level,sprintf('m=[%s]',sprintf(' %d',L.m)));
         p0 = level-minLevel+1; dp = (maxLevel-minLevel+1);
@@ -143,6 +143,11 @@ for level = maxLevel:-1:minLevel
             xc = getCellCenteredGrid(omegak{k},L.m);
             subplot(lenIS,dp,p0+(k-1)*dp);
             viewImage(inter(IS{k},omegak{k},xc),omegak{k},L.m);
+            % if(k==2)
+            %     Ttemp{level}=inter(IS{k},omegak{k},xc);
+            % elseif(k==1)
+            %     Rtemp{level}=inter(IS{k},omegak{k},xc);
+            % end
             title(str(k));
         end;
         if dopause, pause; else drawnow; end;

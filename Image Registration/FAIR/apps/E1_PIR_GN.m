@@ -21,19 +21,21 @@ global testpad DrawError Ro
 % T=double(imread('LenaEye.tiff'));
 % R=double(imread('LenaReference.tiff'));
 randn('state',0);
-for i=80;%:2:89
+for i=72;%:2:89
 R=Tiff(['img_2xfm_01',num2str(i),'.h5_H_dpc_cfg.tif'],'r');
 T=Tiff(['img_2xfm_01',num2str(i+1),'.h5_H_dpc_cfg.tif'],'r');
 T=T.read();
 R=R.read();
-% T=T(1:5:46,1:50:end);
-% R=R(1:5:46,1:50:end);
-% pause;
+T=T(1:5:46,1:100:end);
+R=R(1:5:46,1:100:end);
+figure, subplot(1,2,1),imagesc(R)
+subplot(1,2,2),imagesc(T)
+pause;
 end
 
-% c=[3 7]*1;
-% rec=[10 10]*1;
-% r=3;
+c=[3 7]*1;
+rec=[10 10]*1;
+r=3;
 % [T,R]=CreateSimpleTests(c,rec,r);
 To=T;
 Ro=R;

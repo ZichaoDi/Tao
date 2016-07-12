@@ -1,7 +1,8 @@
 %%% Simulate XRF of a given fixed object with rotating predifined detector and beam
 %%% Travelling of fluorescence photon is approximated as the area covered by solid angle 
 global plotSpecSingle BeforeEmit plotTravel SSDlet area_xrf
-global fig2  fig5 finalfig EmptyBeam RealBeam
+global fig2  fig5 finalfig 
+% global EmptyBeam RealBeam
 global LogScale Tol
 plotSpecSingle=0;
 more off;
@@ -30,8 +31,8 @@ area_xrf=zeros(numThetan,nTau+1,mtol);
 AS=cell(6,1);
 SelfInd=repmat({AS},[numThetan,nTau+1,mtol]);
 clear AS
-EmptyBeam=[];
-RealBeam=[];
+% EmptyBeam=[];
+% RealBeam=[];
 if(synthetic)
     fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel);
 else
@@ -89,11 +90,11 @@ for n=1:numThetan
         end
         %=================================================================
         [index,Lvec,linearInd]=IntersectionSet(SourceKnot(i,:),DetKnot(i,:),xbox,ybox,theta);
-        if(isempty(index))
-            EmptyBeam=[EmptyBeam,[n;i]];
-        else
-            RealBeam=[RealBeam,[n;i]];
-        end
+        % if(isempty(index))
+        %     EmptyBeam=[EmptyBeam,[n;i]];
+        % else
+        %     RealBeam=[RealBeam,[n;i]];
+        % end
         %%%%%%%%================================================================
         GlobalInd{n,i}=index;
         if(synthetic)
@@ -112,7 +113,7 @@ for n=1:numThetan
                 temp_sum=0;
                 SelfInd{n,i,currentInd}{5}=sub2ind(m,index(end:-1:j+1,2),index(end:-1:j+1,1));
                 SelfInd{n,i,currentInd}{6}=kron(MU_e(:,1,1)',Lvec(j));%Lvec(end:-1:j+1));
-            elseif(j>1 & j<size(index,1))
+            elseif(j>1 && j<size(index,1))
                 temp_sum=temp_sum+Lvec(j-1)*MU_XTM(index(j-1,2),index(j-1,1));
                 I_incident=exp(-temp_sum);
                 SelfInd{n,i,currentInd}{1}=sub2ind(m,index(j-1:-1:1,2),index(j-1:-1:1,1));

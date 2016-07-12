@@ -17,13 +17,13 @@ viewImage('reset','viewImage','viewImage2D','colormap',gray(256));%,'axis','off'
 
 global TbRs testpad numLevel DrawError
 DrawError=0;
-numLevel=2;
+numLevel=5;
 randn('state',0);
 
 % ===============================================================================
 
 T=double(imread('LoganReference.tiff'));
-R=flipud(double(imread('LoganTest1.tiff')));
+R=flipud(double(imread('CroppedRotate.tiff')));
 %  R=double(imread('CroppedRotate.tiff'));
 TbRs=1;
 % Crop=[100 100 50 50];
@@ -42,7 +42,6 @@ viewOptn = {'viewImage','viewImage2D','colormap','bone(256)'};
 viewImage('reset',viewOptn{:});
 testpad=0;%mean(mean(R));
 [MLdata,minLevel,maxLevel,fig] = getMultilevel_phantom({T,R},{omegat,omega},{mt,m});
-
 % % ===============================================================================
 
 distance('reset','distance','SSD');
@@ -54,7 +53,7 @@ beta = 1; M =[]; wRef=w0;
 % hd=prod(1./m);
 % n=length(w0);
 % beta = 1e0; M = 5e3*spdiags(ones(n,1)*[-1,2,-1],-1:1,n,n); wRef = [0.3,0,0]'; 
-wc = MLPIR_phantom(MLdata,minLevel,maxLevel,'M',M,'beta',beta,'wRef',wRef,'plotIter',0,'plotMLiter',1);
+wc = MLPIR_phantom(MLdata,minLevel,maxLevel,'M',M,'beta',beta,'wRef',wRef,'plotIter',0,'plotMLiter',0);
 
 
 

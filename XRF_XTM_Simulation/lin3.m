@@ -5,15 +5,16 @@ function [xnew, fnew, ConstNew, alpha] = ...
 %---------------------------------------------------------
 % set up
 %---------------------------------------------------------
-global icycle maxOut
+global icycle maxOut 
 alpha  = alphamax;
 xnew   = x;
 fnew   = f;
-maxiTrial=5;
+ConstNew = ConstSub;
+maxiTrial=2;
 for itcnt = 1:maxiTrial;
     xt = x + alpha.*p;
-    [ConstNew, ft] = feval (sfun, xt);
-    if (ft < f | itcnt==1);
+    [ConstSub, ft] = feval (sfun, xt);
+    if (ft < f )%| itcnt==1);
         ierror = 0;
         xnew   = xt;
         fnew   = ft;

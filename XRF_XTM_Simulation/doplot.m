@@ -6,8 +6,8 @@ global current_n NumElement Z Element
 m = [current_n current_n];
 ws=reshape(W_level,prod(m)*NumElement,1);
 xstar=v;
-    nrow=4;
-    ncol = NumElement;
+nrow=3;
+ncol = NumElement;
 %--------------------------------------------------------------
 % set up boundary conditions
 %--------------------------------------------------------------
@@ -20,7 +20,7 @@ xstar=v;
         imagesc(errCom);colormap jet
         set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',...
         [],'YTick',[]);
-        % colorbar;
+        colorbar;
         if(i==1)
             ylabel('Initial Guess','fontsize',12)
         end
@@ -33,9 +33,8 @@ xstar=v;
         colorbar;
         set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',...
 [],'YTick',[]);
-        % colorbar;
         if(i==1)
-            ylabel('XRF','fontsize',12)
+            ylabel('Joint','fontsize',12)
         end
 
     
@@ -45,25 +44,27 @@ xstar=v;
         imagesc(errCom);colormap jet
         set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',...
         [],'YTick',[]);
-        % colorbar;
+        colorbar;
         if(i==1)
-            ylabel('Joint','fontsize',12)
+            ylabel('TomoPy','fontsize',12)
         end
 %         if(i==NumElement)
 %         hp4 = get(subplot(nrow,NumElement,i+2*NumElement),'Position');
 %         colorbar('Position', [hp4(1)+hp4(3)+0.01  hp4(2)  0.02  hp4(2)+hp4(3)]);
 %         end
-         subplot(nrow,ncol,i+3*ncol);
-         ind=prod(m)*i-prod(m)+1:prod(m)*i;
-         [~,sortInd]=sort(ws(ind));
-         plot(1:prod(m),xinitial(sortInd),'ro',1:prod(m),xstar(sortInd),'bs',1:prod(m),ws(sortInd),'g*')
-         xlim([0 prod(m)]);
-         if(i==1)
-             hleg=legend('initial','final','optimal','FontSize',6, 'Box', 'off','Orientation','horizontal');
-             set(hleg,'units','pixels');
-             lp=get(hleg,'outerposition');
-             set(hleg,'Location','NorthWest', 'Box', 'off','outerposition',[lp(1)+50,15,lp(3),20]);
-             ylabel('solution','fontsize',12)
+        if(nrow>3)
+             subplot(nrow,ncol,i+3*ncol);
+             ind=prod(m)*i-prod(m)+1:prod(m)*i;
+             [~,sortInd]=sort(ws(ind));
+             plot(1:prod(m),xinitial(sortInd),'ro',1:prod(m),xstar(sortInd),'bs',1:prod(m),ws(sortInd),'g*')
+             xlim([0 prod(m)]);
+             if(i==1)
+                 hleg=legend('initial','final','optimal','FontSize',6, 'Box', 'off','Orientation','horizontal');
+                 set(hleg,'units','pixels');
+                 lp=get(hleg,'Position');
+                 set(hleg,'Location','NorthWest', 'Box', 'off','Position',[lp(1)+50,15,lp(3),20]);
+                 ylabel('solution','fontsize',12)
+             end
          end
         if(nrow==5)
             subplot(nrow,ncol,i+4*ncol);
@@ -72,7 +73,7 @@ xstar=v;
             imagesc(errCom);colormap jet
             set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',...
     [],'YTick',[]);
-            % colorbar;
+            colorbar;
             if(i==1)
                 ylabel('Joint','fontsize',12)
             end

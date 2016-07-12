@@ -14,7 +14,7 @@ maxIter     = 100;           % maximum number of iterations for PIR
 solver      = '';           % solver for PIR
 getGrid     = @getCellCenteredGrid;
 % setup additional default parameter
-pause       = 'on';            % flag for pauses
+pause       = 'off';            % flag for pauses
 plots       = 1;            % flag for plots
 plotIter    = 0;            % flag for output of iteration history each level
 plotMLiter  = 0;            % flag for output of summarized iteration history

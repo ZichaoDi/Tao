@@ -1,26 +1,17 @@
-function [ft,gt,f_XRF,f_XTM]=sfun_linear_joint(W,xrfData,DisR,MU_e,L,NumElement,m,nTau)
+function [ft,gt,f_XRF,f_XTM]=sfun_linear_joint(W,xrfData,Mt,MU_e,L,NumElement,m,nTau)
 %%==== XRF objective function in least square form
 %%==== Full dimension: nThetan * nTau * nv * ne * nE
 %%==== Solve W when the W in exponential term is fixed 
 global numChannel  numThetan 
 global ConstSub frame LogScale I0 s_a 
-global SigMa_XTM SigMa_XRF
-global Beta TempBeta penalty Tik lambda RealBeam
+global Beta TempBeta penalty Tik lambda RealBeam 
 mtol=prod(m);
 %%%%% =================== XRF 
 XRF_v=ConstSub*W;
 %%%%% =================== XRT and Attenuation Matrix at beam energy
 MUe=squeeze(MU_e(:,1,1));
-L=reshape(full(L),numThetan*(nTau+1),mtol);
 MU_XTM=reshape(W,mtol,NumElement)*MUe;
-if(s_a)
-    Mt=reshape(DisR',numThetan*(nTau+1),1);
-else
-    Mt=-log(DisR'./I0); 
-    Mt=Mt(:)-min(Mt(:));
-end
 Rdis=L*MU_XTM;
-xrfData=xrfData./1e1;
 %%======================================        
  if(strcmp(frame,'EM'))
       thres=1;
@@ -51,13 +42,14 @@ xrfData=xrfData./1e1;
 ft = TempBeta*f_XRF + Beta*f_XTM;
 gt = TempBeta*g(:)  + Beta*g_XTM(:);
 if(penalty)
-    L1_norm=1;
-    L2_norm=0;
-    if(L1_norm)
-        Reg=Tik*reshape(W,mtol,NumElement);
-        ft=ft+lambda*(norm(Reg(:)))^2;
-        gt=gt+lambda*2*reshape(Tik'*(Reg),mtol*NumElement,1);
-    elseif(L2_norm)
+    L1_norm=0;
+    L2_norm=1;
+    if(L2_norm)
+        % Reg=Tik*reshape(W,mtol,NumElement);
+        lambda=1e-3;
+        ft=ft+lambda*sum(W.^2);%(norm(Reg(:)))^2;
+        gt=gt+lambda*2*W;%reshape(Tik'*(Reg),mtol*NumElement,1);
+    elseif(L1_norm)
         Reg=sum(abs(W(:)));
         ft=ft+lambda*Reg;
         gt=gt+lambda;

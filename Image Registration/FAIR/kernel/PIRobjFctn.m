@@ -61,9 +61,7 @@ doDerivative = (nargout>2);            % flag for necessity of derivatives
 % compute transformation, distance, and regularization and combine these
 [yc,dy] = trafo(wc,center(xc,m),'doDerivative',doDerivative);
 [Tc,dT] = inter(T,omega,yc,'doDerivative',doDerivative);
-figure, subplot(1,2,1),imagesc(Rc)
-subplot(1,2,2),imagesc(Tc)
-pause;
+
 % mt=sqrt(length(xc)/2);
 % e=Tc(:)-T(:);
 % figure(10);surf(reshape(xc(1:mt^2),mt,mt),reshape(xc(mt^2+1:end),mt,mt),reshape(e,mt,mt));

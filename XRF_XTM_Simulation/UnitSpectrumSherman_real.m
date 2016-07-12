@@ -8,13 +8,13 @@
 % mu=n_a*CrossSection
 % K_shell:0 L1:1 L2:2 L3:3 M1:4 M2:5 M3:6 M4:7 M5:8
 % KA_LINE:0 KB:1 LA:2 LB:3
-global TakeLog I0 M_decom M_raw Element synthetic
+global TakeLog M_decom M_raw Element synthetic
 if(strcmp(sample,'Seed'))
     E0=12;
-    I0=2000;
 elseif(strcmp(sample,'Rod'))
     E0=12.1;
 end
+% Z=1:95;
 NumElement=length(Z);
 NA=6.02e23;%Avogadro's number
 load_xraylib=0;
@@ -28,7 +28,7 @@ else
     load(['xRayLib',num2str(E0),'.mat'])
 end
 load AtomicWeight
-Line=0:3;%[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
+Line=[-3 -2 -6 -90 -89 -63 -95 -68 -207];%0:3;%[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
 shell=0;  %% Shell type
 BindingEnergy=zeros(NumElement,length(Line));
 M_decom=zeros(NumElement,numChannel_decom);
@@ -44,7 +44,7 @@ mu=0;
 FWHM = (DetChannel_raw(2)-DetChannel_raw(1))*20;
 sigma = FWHM/2.35;
 truncInd=[];
-truncWidth=0.02;
+truncWidth=0.04;
 %%======================================================================
 while(i<=NumElement)
     PurePeak=0.*DetChannel_decom;
@@ -57,21 +57,21 @@ while(i<=NumElement)
     j=1;
     while (j<=length(Line))
         if(load_xraylib)
-            LineEnergy(Z(i),Line(j)+1)=calllib('libxrl','LineEnergy',Z(i),Line(j));
-            CS_FluoLine(Z(i),Line(j)+1)=calllib('libxrl','CS_FluorLine',Z(i),Line(j),E0);
+            LineEnergy(Z(i),j)=calllib('libxrl','LineEnergy',Z(i),Line(j));
+            CS_FluoLine(Z(i),j)=calllib('libxrl','CS_FluorLine',Z(i),Line(j),E0);
         end
-        new_energy=LineEnergy(Z(i),Line(j)+1);%
-        intensity=CS_FluoLine(Z(i),Line(j)+1);%
+        new_energy=LineEnergy(Z(i),j);%
+        intensity=CS_FluoLine(Z(i),j);%
         BindingEnergy(i,j)=new_energy;
         [~,adj]=min(abs(repmat(new_energy,size(DetChannel_decom))-DetChannel_decom));
         PurePeak(adj)=PurePeak(adj)+intensity;    
         M_decom(i,i)=M_decom(i,i)+sum(PurePeak);
         M_raw(i,:)=M_raw(i,:)+intensity/(sigma*sqrt(2*pi))*exp(-(DetChannel_raw'-BindingEnergy(i,j)).^2./(2*sigma^2));
-        truncInd=unique([truncInd; find(DetChannel_raw> BindingEnergy(i,j)-truncWidth & DetChannel_raw < BindingEnergy(i,j)+truncWidth)]);
+        truncInd=unique([truncInd; find(DetChannel_raw> BindingEnergy(i,j)-truncWidth & DetChannel_raw < BindingEnergy(i,j)+truncWidth & DetChannel_raw <= E0)]);
         j=j+1;
     end
     truncInd=sort(truncInd);
-    % fprintf('    %s           %d          %i          %5.2f               %5.2f\n', Element{Z(i)}, Z(i),-Line(j), new_energy, intensity);
+    % fprintf('    %s           %d          %i          %5.2f               %5.2f\n', Element{Z(i)}, Z(i),i, new_energy, intensity);
     
     %%%%=============================== Start Gaussian Convolution
     if(plotUnit)
@@ -93,11 +93,11 @@ if(load_xraylib)
     for i=1:NumElement
      for j=1:length(Line)
          for t=1:NumElement
-             CS_Total(Z(i),Line(j)+1,Z(t))=calllib('libxrl','CS_Total',Z(i),LineEnergy(Z(t),Line(j)+1));
+             CS_Total(Z(i),j,Z(t))=calllib('libxrl','CS_Total',Z(i),LineEnergy(Z(t),j));
          end
      end
     end
-    % save(['./data/xRayLib',num2str(E0),'.mat'],'ElementDensity','LineEnergy','CS_FluoLine','CS_TotalBeam','CS_Total');
+    save(['./data/xRayLib',num2str(E0),'.mat'],'ElementDensity','LineEnergy','CS_FluoLine','CS_TotalBeam','CS_Total');
 end
 %%=======================================================================
 NumLines=NumElement;

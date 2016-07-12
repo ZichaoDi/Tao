@@ -7,10 +7,10 @@ if(simulate)
 else
     do_setup;
     DecomposedElement=0;
-    Beta=0.5;
-    for j_iter=1:2
+    Be=[0.5 0];
+    for j_iter=1:length(Be);
+        Beta=Be(j_iter);
         opt;
-        Beta=Beta/2;
     end
     % Joint = 0;
     % opt;

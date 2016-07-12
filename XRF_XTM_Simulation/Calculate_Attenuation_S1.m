@@ -1,48 +1,62 @@
-function [ConstSub, f]=Calculate_Attenuation(W_rep,NumElement,L,GlobalInd,SelfInd,m,nTau,xrfData,M)
+function [ConstSub, f]=Calculate_Attenuation_S1(W,NumElement,L,GlobalInd,SelfInd,m,nTau,xrfData,Mt, M)
 %%==== Given elemental map W and pre-calculate the beam and fluorescent attenuation coefficients
-global NumSSDlet numChannel NoSelfAbsorption numThetan
-global icycle maxOut MU_e area_xrf EM I0
+global numChannel NoSelfAbsorption numThetan
+global MU_e area_xrf
+global TempBeta Beta Joint frame
 mtol=prod(m);
-L=reshape(full(L),numThetan,nTau+1,mtol);
-W=reshape(W_rep,mtol,NumElement);
+W=reshape(W,mtol,NumElement);
 MU=W*reshape(MU_e(:,1,:),NumElement,NumElement+1);
 %%%%% ====================================================================
-f=0;
-InTens=ones(numThetan,nTau+1,mtol);
-OutTens=ones(numThetan,nTau+1,mtol,NumElement);
+InTens=ones(numThetan*(nTau+1),mtol);
+OutTens=ones(numThetan*(nTau+1),mtol,NumElement);
 for n=1:numThetan
-    sum_Tau=0;
     for i=1:nTau+1
-        XRF_v=zeros(1,numChannel);
-        counted_v=zeros(mtol,1);
-        index=GlobalInd{n,i};
+        ind_bt=(i-1)*numThetan+n;
+        index=GlobalInd{ind_bt};
         if(~isempty(index))
             index_sub=sub2ind(m,index(:,2),index(:,1));
             msub=length(index_sub);
             for v_count=1:msub
                 v=index_sub(v_count);
-                if(~isempty(SelfInd{n,i,v}{1}))
-                    InTens(n,i,v)=exp(-sum(sum(W(SelfInd{n,i,v}{1},:).*SelfInd{n,i,v}{3})));
+                if(~isempty(SelfInd{ind_bt,v}{1}))
+                    InTens(ind_bt,v)=exp(-sum(sum(W(SelfInd{ind_bt,v}{1},:).*SelfInd{ind_bt,v}{3})));
                 end
-                if( ~isempty(SelfInd{n,i,v}{2})& ~NoSelfAbsorption)
-                    OutTens(n,i,v,:)=exp(-sum(MU(SelfInd{n,i,v}{2},2:NumElement+1),1)./(length(SelfInd{n,i,v}{2})+1)*area_xrf(n,i,v));
+                if( ~isempty(SelfInd{ind_bt,v}{2}) && ~NoSelfAbsorption)
+                    OutTens(ind_bt,v,:)=exp(-sum(MU(SelfInd{ind_bt,v}{2},2:NumElement+1),1)./(length(SelfInd{ind_bt,v}{2})+1)*area_xrf(ind_bt,v));
                 end
-                XRF_v=XRF_v+L(n,i,v)*(InTens(n,i,v)*reshape(OutTens(n,i,v,:),1,NumElement).*W(v,:))*M;
-            end
-            if(EM)
-                XRF_v=XRF_v+1;
-                xrfData=xrfData+1;
-                sum_Tau=sum_Tau+sum((-log(XRF_v).*reshape(xrfData(n,i,:),1,numChannel)+XRF_v),2);
-            else
-                sum_Tau=sum_Tau+(squeeze(xrfData(n,i,:))'-XRF_v)*(squeeze(xrfData(n,i,:))'-XRF_v)';     
             end
         end
     end
-    f=f+sum_Tau;
 end
-L_rep=reshape(L,numThetan,nTau+1,mtol);
-temp_v=L_rep.*InTens;
-Mrep_P=repmat(reshape(M,[1,1,1 NumElement numChannel]),[numThetan,nTau+1,mtol,1,1]);
-ConstSub=bsxfun(@times,bsxfun(@times,temp_v,OutTens),Mrep_P); % part 3
-clear L_rep temp_v Mrep_P OutTens InTens
-ConstSub=reshape(permute(ConstSub,[1 2 5 3 4]),[numThetan*(nTau+1)*numChannel,mtol*NumElement]);
+% ConstSub=kron(M',L.*InTens.*squeeze(sum(OutTens,3)./NumElement)); %% Igonor self-absorption
+% clear OutTens InTens
+% ConstSub=kron(ones(numChannel,1),kron(ones(1,NumElement),reshape(L.*InTens,numThetan*(nTau+1),mtol)).*reshape(OutTens,numThetan*(nTau+1),mtol*NumElement)).*kron(M',ones(numThetan*(nTau+1),mtol)); %% Kronecker version 
+%#############################################
+ConstSub=bsxfun(@times,reshape(bsxfun(@times,full(L.*InTens),OutTens),[numThetan*(nTau+1),1,mtol,NumElement]),reshape(M',[1,numChannel,1, NumElement])); 
+clear M InTens OutTens
+ConstSub=sparse(reshape(ConstSub,[numThetan*(nTau+1)*numChannel,mtol*NumElement]));
+XRF_v=ConstSub*W(:);
+if(Joint==0)
+    if(strcmp(frame,'EM'))
+        thres=1;
+        f=sum(-log(XRF_v+thres).*(xrfData(:)+thres)+XRF_v+thres);
+    else
+        f=sum((XRF_v-xrfData).^2);  
+    end
+elseif(Joint==1)
+    MU_XTM=W*squeeze(MU_e(:,1,1));
+    Rdis=reshape(L,numThetan*(nTau+1),mtol)*MU_XTM;
+    if(strcmp(frame,'EM'))
+        thres=1;
+        f=sum(-log(XRF_v+thres).*(xrfData(:)+thres)+XRF_v+thres);
+        f_XTM=sum(-log(Rdis+thres).*(Mt+thres)+Rdis+thres);
+    elseif(strcmp(frame,'LS'))
+        f=sum((XRF_v-xrfData(:)).^2);  
+        f_XTM=sum((Rdis-Mt).^2);
+    elseif(strcmp(frame,'mix'))
+        thres=1;
+        f=sum(-log(XRF_v+thres).*(xrfData(:)+thres)+XRF_v+thres);
+        f_XTM=sum((Rdis-Mt).^2);
+    end
+    f = TempBeta*f + Beta*f_XTM;
+end
