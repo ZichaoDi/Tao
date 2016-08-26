@@ -1,167 +1,115 @@
-%%%Simulate XRF of a given object with predifined detector and beam
-%% Disregard self-absorption
-% function XRF=SimulateXRF(W,MU,BindingEenergy,M,thetan,DetChannel, numChannel, nTau, DetKnot0, SourceKnot0);
-global plotSpecSingle
-close all;
-plotTravel=1; % If plot the intersection of beam with object
-plotSpec = 0; % Do you want to see the spectra? If so plotSpec = 1
-plotWhole =0;
-plotUnit=0;
+%%%Simulate XRF and XRT of a given object with predifined detector and beam
+%%% Travelling of fluorescece photons is approximated as numerical disrectized paths in the range of solid angle
+global plotSpecSingle BeforeEmit plotTravel SSDlet
+global fig2  fig5 finalfig EmptyBeam RealBeam
+global LogScale Tol
 plotSpecSingle=0;
-if plotTravel
-    fig1=[]; fig2=[]; fig3=[];
-end
-% global m x y omega NumElement plotTravel plotSpec plotWhole dz
-startup;
 more off;
-DefineObject; %% Produce W, MU
-Define_Detector_Beam; %% provide the beam source and Detectorlet
-% UnitSpectrum; %% Produce BindingEnergy M
-UnitSpectrumSherman
-thetan=[30 120 210 300];% Projection Angles
+Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
+DefineObject_Gaussian; % Produce W, MU_XTM
 %%%%%%%==============================================================
+if plotTravel
+    fig2=[];  fig5=[];
+end
 %%%=========Start Simulation
-Energy=BindingEnergy;
-
-XRF=cell(length(thetan),nTau+1);
-
-Ltol=cell(length(thetan),nTau+1);
-GlobalInd=cell(length(thetan),nTau+1);
-RMlocal=zeros(m(1),m(2),NumElement);
-fprintf(1,'====== Detector Resolution is %d\n',nTau);
-for n=1:length(thetan)
-    
-    fprintf(1,'====== Angle Number  %d of %d\n',n,length(thetan));
-    
+mtol=prod(m);
+eX=ones(m(1),1);
+eY=ones(m(2),1);
+XRF=zeros(numThetan,nTau+1,numChannel);
+DisR=zeros(nTau+1,numThetan);
+L=zeros(numThetan,nTau+1,m(1),m(2));%zeros(numThetan*(nTau+1)*prod(m),1);
+if(synthetic)
+    fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel);
+else
+    fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel_raw);
+end
+for n=1:numThetan
     theta=thetan(n)/180*pi;
+    fprintf(1,'====== Angle Number  %d of %d: %d\n',n,numThetan,thetan(n));
     TransMatrix=[cos(theta) sin(theta);-sin(theta) cos(theta)];
     DetKnot=DetKnot0*TransMatrix;
     SourceKnot=SourceKnot0*TransMatrix;
-    if plotWhole
-        figure(fig);
-        set(fig3,'visible','off');
-        for i=1:nTau+1
-            fig3=plot([SourceKnot(i,1),DetKnot(i,1)],[SourceKnot(i,2),DetKnot(i,2)],'r.-',SourceKnot(i,1),SourceKnot(i,2),'bo');hold on;
-        end
-    end
+    SSDknot=SSDlet*TransMatrix;
+    %{ 
+    % ============================================================
+             fig=figure('name',['grids & beam line at Angle',num2str(theta)]);
+             % plotGrid(xc,omega,[m(2) m(1)]); hold on;
+             for i=1:nTau+1
+                 fig3=plot([SourceKnot(i,1),DetKnot(i,1)],[SourceKnot(i,2),DetKnot(i,2)],'r.-');hold on;
+             end
+             imagesc((x(1:end-1)+x(2:end))/2,(y(1:end-1)+y(2:end))/2,sum(W,3))
+             pause(1);
+    % ===================================================
+    %} 
     
-    
+    Rdis=I0*ones(nTau+1,1);
     for i=1:nTau+1 %%%%%%%%%================================================================
         % Initialize
-        XRF{n,i} = zeros(numChannel,1);
-        
         xbox=[omega(1) omega(1) omega(2) omega(2) omega(1)];
         ybox=[omega(3) omega(4) omega(4) omega(3) omega(3)];
-        [Ax, Ay] = polyxpoly([SourceKnot(i,1),DetKnot(i,1)],[SourceKnot(i,2),DetKnot(i,2)], xbox, ybox);
-        
-        if(isempty(Ax) | (length(Ax)==1 &length(Ay)==1 ))
-            %             fprintf('no intersection \n')
-            index=[];
-            Q=[];
-            L=sparse(zeros(m(1),m(2)));
-            
-        else
-            if(theta<=pi/2)
-                [Ax,in]=sort(Ax);A=unique([Ax,Ay(in)],'rows');Ax=A(:,1);Ay=A(:,2);
-            else
-                [Ay,in]=sort(Ay);[A,in]=unique([Ax(in),Ay],'rows');
-                if(size(A,1)>1)
-                    A=A(in,:);Ax=A(:,1);Ay=A(:,2);
-                end
-            end
-            
-            if(theta==pi/2)
-                Q=[repmat(Ax(1),size(y')),y'];
-            elseif(theta==0 | theta==2*pi)
-                Q=[x',repmat(Ay(1),size(x'))];
-            elseif(theta==pi)
-                Q=[x(end:-1:1)',repmat(Ay(1),size(x'))];
-                
-            elseif(theta==3*pi/2)
-                Q=[repmat(Ax(1),size(y')),y(end:-1:1)'];
-                
-            else
-                Q=[[x', (Ay(2)-Ay(1))/(Ax(2)-Ax(1)).*x'+(Ay(1)*Ax(2)-Ay(2)*Ax(1))/(Ax(2)-Ax(1))];...
-                    [(y'-(Ay(1)*Ax(2)-Ay(2)*Ax(1))/(Ax(2)-Ax(1)))./((Ay(2)-Ay(1))/(Ax(2)-Ax(1))),y']];
-            end
-            
-            indx=find(Q(:,1)-omega(1)<-1e-6 |Q(:,1)-omega(2)>1e-6); indy=find(Q(:,2)-omega(3)<-1e-6 |Q(:,2)-omega(4)>1e-6);
-            Q=setdiff(Q,Q([indx;indy],:),'rows');
-            Q=unique(Q,'rows');
-            dis=distance(Q,repmat(SourceKnot(i,:),size(Q,1),1));
-            [dis,InterOrder]=sort(dis);
-            Q=Q(InterOrder,:);
-            Lvec=sqrt((Q(2:end,1)-Q(1:end-1,1)).^2+(Q(2:end,2)-Q(1:end-1,2)).^2);
-            %%%%%%%%%================================================================
-            if(theta>=0 & theta<=pi/2 | theta>=pi & theta<=3*pi/2 )
-                index=[floor(myvpa((Q(:,1)+abs(omega(1)))/dz))+1,floor(myvpa((Q(:,2)+abs(omega(3)))/dz))+1];
-            else
-                index=[floor(myvpa((Q(:,1)+abs(omega(1)))/dz))+1,ceil(myvpa((Q(:,2)+abs(omega(3)))/dz))];
-                
-            end
-            index=index(index(:,1)>0 & index(:,1)<=m(1)& index(:,2)<=m(1) & index(:,2)>0,:);
-            [temp,subInd]=unique(index,'rows');
-            clear temp;
-            index=index(sort(subInd),:);
-            GlobalInd{n,i}=index;
-            %%%%%%%%%================================================================
-            if plotTravel
-                figure(fig);
-                set(fig1,'visible','off');
-                set(fig2,'visible','off');
-                drawnow;
-                fig1=plot(Ax,Ay,'r.-',SourceKnot(i,1),SourceKnot(i,2),'ro',DetKnot(i,1),DetKnot(i,2),'r*');
-                if(~isempty(index))
-                    %                     fig2=plot((index(:,1)-abs(omega(1)))*dz,(index(:,2)-abs(omega(3)))*dz,'bo',Q(:,1),Q(:,2),'g.');
-                    fig2=plot((index(:,1)-1/2)*dz-abs(omega(1)),(index(:,2)-1/2)*dz-abs(omega(3)),'bo',Q(:,1),Q(:,2),'g.');
-                    
-                end
-                pause;
-            end
-            %%%%%%%%%================================================================
-            
-            L=sparse(zeros(m(1),m(2)));
-            RM=cell(m(1),m(2));
-            xrfSub=zeros(size(BindingEnergy));
-            for j=1:size(index,1)
-                L(index(j,2),index(j,1))=Lvec(j);
-                if(j==1)
-                    I_incident=1;
-                    temp_sum=0;
-                else
-                    temp_sum=temp_sum+L(index(j-1,2),index(j-1,1))*MU(index(j-1,2),index(j-1,1));
-                    I_incident=exp(-temp_sum);
-                end
-                %% Self-absorption
-                %                 temp_after=0;
-                %                 for t_after=index(j,1)+1:m(2)
-                %                     temp_after=temp_after+dz*MU_after(index(j,2),t_after);
-                %                 end
-                %                 I_after=exp(-temp_after);
-                %% ===========================================================
-                Wsub=reshape(W(index(j,2),index(j,1),:),size(M));
-                RM{index(j,2),index(j,1)}=Lvec(j)*I_incident*(Wsub.*M);%*I_after;
-                temp=zeros(size(RMlocal(index(j,2),index(j,1),:)));
-                temp(1,1,:)=Lvec(j)*I_incident*(Wsub.*M);
-                RMlocal(index(j,2),index(j,1),:)=RMlocal(index(j,2),index(j,1),:)+temp;
-                ExistInd=find(Wsub~=0);
-                for tsub=1:length(ExistInd)
-                    DetInd=find(Energy(ExistInd(tsub))==BindingEnergy);
-                    
-                    xrfSub(DetInd)=xrfSub(DetInd)+RM{index(j,2),index(j,1)}(ExistInd(tsub));
-                end
-            end
-            Ltol{n,i}=L;
-            p1=GaussianFit1(BindingEnergy,xrfSub);
-            if(plotSpec)
-                finalfig=figure('name',sprintf('XRF at beam %d with angle %d',i,thetan(n)));
-                plot(DetChannel,p1,'r-')
-                xlabel('Energy Channel','fontsize',12); ylabel('Intensity','fontsize',12)
-                pause;
-            end
-            XRF{n,i}=p1;
+        XRF(n,i,:) = zeros(numChannel,1);
+        BeforeEmit=1;
+        %============================= Plot Grid and Current Light Beam
+        if(plotSpec)
+            finalfig=figure('name',sprintf('XRF at beam %d with angle %d',i,thetan(n)));
+            subplot(1,2,1);
+            plotGrid(xc,omega,[m(2) m(1)]);
+            hold on;
+            plot(DetKnot(:,1),DetKnot(:,2),'k+-',SourceKnot(:,1),SourceKnot(:,2),'m+-',SSDknot(:,1),SSDknot(:,2),'g+-','LineWidth',0.5)
+            axis equal 
+            imagesc((x(1:end-1)+x(2:end))/2,(y(1:end-1)+y(2:end))/2,sum(W,3))
+            axis xy
+            set(gcf,'Units','normalized')
+            set(gca,'Units','normalized')
+            ax = axis;
+            ap = get(gca,'Position');
+            xp = ([SourceKnot(i,1),DetKnot(i,1)]-ax(1))/(ax(2)-ax(1))*ap(3)+ap(1);
+            yp = ([SourceKnot(i,2),DetKnot(i,2)]-ax(3))/(ax(4)-ax(3))*ap(4)+ap(2);
+            ah=annotation('arrow',xp,yp,'Color','r','LineStyle','--');
         end
-        
+        %=================================================================
+        [index,Lvec,linearInd]=IntersectionSet(SourceKnot(i,:),DetKnot(i,:),xbox,ybox,theta);
+        %%%%%%%%================================================================
+        xrfSub=zeros(1,numChannel);
+        for j=1:size(index,1)
+            CurrentCellCenter=[(index(j,1)-1/2)*dz(1)-abs(omega(1)),(index(j,2)-1/2)*dz(2)-abs(omega(3))];
+            currentInd=sub2ind(m,index(j,2),index(j,1));
+            L(n,i,index(j,2),index(j,1))=Lvec(j);
+            if(j==1)
+                I_incident=1;
+                temp_sum=0;
+            elseif(j>1 & j<size(index,1))
+                temp_sum=temp_sum+Lvec(j-1)*MU_XTM(index(j-1,2),index(j-1,1));
+                I_incident=exp(-temp_sum);
+            else
+                temp_sum=temp_sum+Lvec(j-1)*MU_XTM(index(j-1,2),index(j-1,1));
+                I_incident=exp(-temp_sum);
+            end
+            %% ===========================================================
+            Wsub=reshape(W(index(j,2),index(j,1),:),[NumElement,1]);
+            %% Self-absorption
+            if(NoSelfAbsorption)
+                I_after==1;
+            else
+                in_after=find(inpolygon(xc(:,1),xc(:,2),[CurrentCellCenter(1) SSDknot(1,1) SSDknot(NumSSDlet,1)],[CurrentCellCenter(2) SSDknot(1,2) SSDknot(NumSSDlet,2)])); 
+                in_after=setdiff(in_after,currentInd); %% energy is not attenuated from the source point
+                I_after = exp(-sum(MU_after(in_after,:)',2)./(length(in_after)+1)*prod(dz)*length(in_after));%% Attenuation of Flourescent energy emitted from current pixel
+            end
+            %% ====================================================================
+            xrfSub=xrfSub+Lvec(j)*I_incident*(I_after.*Wsub)'*M;% fluorescence emitted from current pixel
+        end
+        Rdis(i)=I0*exp(-eX'*(MU_XTM.*reshape(L(sub2ind([numThetan,nTau+1,prod(m)],n*ones(1,prod(m)),i*ones(1,prod(m)),1:prod(m))),m))*eY); %% Discrete case
+        XRF(n,i,:)=xrfSub;%+0.1*rand(size(xrfSub));
+        clear xrfSub
+        if(plotSpec)
+            figure(finalfig)
+            subplot(1,2,2);
+            plot(DetChannel,squeeze(XRF_raw(n,i,:)),'r-')
+            xlabel('Energy Channel','fontsize',12); ylabel('Intensity','fontsize',12)
+            pause(1);
+        end
     end
+    DisR(:,n)=Rdis';
+    clear Rdis temp
 end
 

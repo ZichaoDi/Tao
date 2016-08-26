@@ -29,9 +29,11 @@ hold on;
 more off;
 it = it + 1;
 step_bnd = 0;
-v  = mgrid(v,fnl,0,step_bnd);
-doplot(it,v,W_level);
+vinitial=v;
+[v,varargout]  = mgrid(v,fnl,0,step_bnd);
+doplot(it,v,W_level{1},vinitial);
 report_results(N);
+mg_iter(it,:)=[sum(sum(NF(2:end,:),1).*complexity_rate),varargout];
 more on;
 %----------------------------------------------------------------------
 figure(findobj('Tag', 'multigrid_graph'));

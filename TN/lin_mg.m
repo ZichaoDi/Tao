@@ -10,7 +10,7 @@ maxit  = 5;
 %%%%%%%%%%%%%%%%%%%#######################################################
 if (alpha == 0); ierror = 0; maxit = 1; end;
 alpha1 = alpha;
-trialLength=3;
+trialLength=4;
 if(alpha1<=1)
     trialAlpha=linspace(1,alpha1,trialLength);
 end
@@ -23,9 +23,8 @@ if(alpha1<=1)
     for trial=1:length(trialAlpha)
         xt = x + trialAlpha(trial).*p;
         [~,~, xt] = crash (xt, low, up);
-            [ft, gt] = feval (sfun, xt);
+        [ft, gt] = feval (sfun, xt);
         Armijo =ft<f+1e-4*trialAlpha(trial)*q0;
-%         Wolfe = abs(p'*gt)<0.25*abs(q0);%
         if (Armijo );%& Wolfe);
             fprintf('Armijo and Wolfe satisfied, trial= %d\n',trial);
             ierror = 0;

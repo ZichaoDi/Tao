@@ -1,23 +1,14 @@
-function [f,g]=sfun_XTM(W,DisR,MU_e,I0,L,m,nTau,NumElement)
-global SigMa_XTM LogScale numThetan
-global Tik penalty frame s_a RealBeam
+function [f,g]=sfun_XTM(W,DisR,MU_e,I0,L,m,NumElement)
+global Tik penalty frame 
 %%===== Reconstruction discrete objective
 %%===== L: intersection length matrix
 %%===== M: Radon transform with t beam lines and theta angles
 %%===== f: sum_i ||e^T(L_i.*I)e-M_i||^2, i=1..theta
 mtol=prod(m);
 lambda=1e-3;
-L=reshape(full(L),numThetan*(nTau+1),mtol);
 %%%%% =================== Attenuation Matrix at beam energy
 MUe=squeeze(MU_e(:,1,1));
 MU_XTM=reshape(W,mtol,NumElement)*MUe;
-if(s_a)
-    Mt=reshape(DisR',numThetan*(nTau+1),1);
-    Mt=Mt-min(Mt);
-else
-    Mt=-log(DisR'./I0)*1e0; 
-    Mt=Mt(:)-min(Mt(:));
-end
 Rdis=L*MU_XTM;
 %%%====================================
 if(penalty)
@@ -25,7 +16,6 @@ if(penalty)
 else
     f=0;
 end
-% real_ind=(RealBeam(:,1)-1)*(nTau+1)+RealBeam(:,2);
 if(strcmp(frame,'EM'))
     Mt=Mt+1;
     Rdis=Rdis+1;

@@ -1,10 +1,9 @@
-function [f, g, shift_y, shift_yT] = sfun (W)
+function [f, g, r] = sfun (W)
 %--------------------------------------------------------------
-global Joint
+global xtm_level I0 L_level current_n frame N
 
-if(Joint==1)
-    [f,g,shift_y, shift_yT]=sfun_J(W);
-elseif(Joint==0)
-    [f, g, shift_y] = sfun_R (W);
-    shift_yT=[];
-end
+j = find(current_n==N);
+[f, g, r] = sfun_radon(W,xtm_level{j},I0,L_level{j});
+
+
+

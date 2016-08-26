@@ -5,7 +5,7 @@ global N numThetan NF
 global bounds LogScale Joint
 global grad_type err0 
 global onlyXRF NoSelfAbsorption 
-global W_level xrf_level_decom xrf_level_raw xtm_level L_level GI_level SI_level SigmaR SigmaT m_level nTau_level
+global W W_level xrf_level_decom xrf_level_raw xtm_level L_level GI_level SI_level SigmaR SigmaT m_level nTau_level level
 global NumElement xinitial current_n frame I0 s_a
 %--------------------------------------------------
 % Select technique for gradient calculation.
@@ -22,19 +22,19 @@ synthetic=1;
 if(synthetic)
     % sample='circle'; % one element mainly testing self-absorption 
     % sample = 'checkboard';
-    % sample = 'Phantom';
-    sample = 'fakeRod';
-    NumElement=3;
+    sample = 'Phantom';
+    % sample = 'fakeRod';
+    NumElement=1;
 else
     % sample='Seed';
     sample='Rod';
     NumElement=3;
 end
-N=60;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
+N=65;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
 angleScale=2; %1: half angle; 2: full angle
 if(synthetic)
-    numThetan=10; % number of scanning angles/projections
-    DecomposedElement=0;
+    numThetan=100; % number of scanning angles/projections
+    DecomposedElement=1;
 else
     Tol = 1e-2;
     omega=[-2 2 -2 2]*Tol; % units: cm
@@ -135,7 +135,7 @@ end
 %%=============================
 NoSelfAbsorption=0; % 0: include self-absorption in the XRF inversion
 bounds = 1;  % no bound constraints
-Joint=1; % 0: XRF; -1: XTM; 1: Joint inversion
+Joint=-1; % 0: XRF; -1: XTM; 1: Joint inversion
 ReconAttenu = 1*(Joint==-1); % 0: Recover W; 1: Recover miu
 Alternate=1*(Joint~=-1);
 frame='EM';
@@ -150,10 +150,10 @@ plotTravel=0; % If plot the intersection of beam with object
 plotUnit=0;
 plotElement=0;
 plotResult=1;
-onlyXRF=1;
+onlyXRF=0;
 %%------------------------------ Use same finest data for each level
 %%-----------------------------------------------
-n_level=length(N);
+n_level=3;%length(N);
 if(n_level==1)
     current_n=N(1);
     if(onlyXRF)
@@ -196,21 +196,25 @@ else
         current_n=N(level);
         if(Joint==-1)
             if(level==1)
-                % [L,dd,~,~]=build_weight_matrix(MU,thetan,1,'area');
                 XTM_Tensor;
                 Lap{level}=delsq(numgrid('S',N(level)+2));
                 L_level{level}=L;
+                Mt=-log(DisR'./I0); 
+                Mt=Mt(:)-min(Mt(:));
+                xtm_level{level}=Mt;
             else
-                IhH{level} = downdate_L(N, level);
-                Lap{level}=IhH{level}*Lap{level-1}*IhH{level}';
-                L_level{level}=L_level{level-1}*IhH{level}';
+                current_n=N(level-1);
+                % IhH{level} = downdate_L(N, level);
+                % Lap{level}=IhH{level}*Lap{level-1}*IhH{level}';
+                [L_level{level},numThetan,nTau]=downdate_radon(L_level{level-1},0,numThetan_level(level-1),nTau_level(level-1));
+                xtm_level{level}=downdate_radon(xtm_level{level-1},1,numThetan_level(level-1),nTau_level(level-1));
             end
             if(ReconAttenu)
                 NumElement=1;
                 if(level==1)
-                    W_level{level}=MU;
+                    W_level{level}=MU(:);
                 else
-                    W_level{level}=N(level)^2;
+                    W_level{level}=downdate(W_level{level-1},1);
                 end
             else
                 W_level{level}=W;
@@ -220,16 +224,10 @@ else
             W_level{level}=W;
             L_level{level}=L;
         end
-        if(ReconAttenu)
-            xtm_level_true{level}=DisR_true;
-            xtm_level_pert{level}=DisR_pert;
-        else
-            xtm_level_true{level}=DisR;
-        end
         GI_level{level}=GlobalInd;
         nTau_level(level)= nTau;
+        numThetan_level(level)=numThetan;
         m_level(level,:)=[N(level),N(level)];
-        SigmaT{level}=SigMa_XTM;
         %-----------------------------------------
         if(Joint~=-1)
             if(synthetic)
@@ -245,6 +243,7 @@ else
     clear L L_pert L_true W DisR_true DisR_pert GlobalInd SigMa_XTM SelfInd XRF XRF_decom XRF_raw SigMa_XRF data_h;
 end;
 nTol=N(1)^2*NumElement;
+v0=zeros(nTol,1);
 plotSim=0;
 if(plotSim & Joint~=-1& n_level==1)
      a=squeeze(XRF_decom(:,:,2));b=squeeze(XRF_Simulated_decom(:,:,2));

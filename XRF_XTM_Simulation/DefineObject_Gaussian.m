@@ -7,16 +7,14 @@
 %%%         O: Object specified by W.*Z
 %%%         MU: Attenuation matrix of O
 %%=======================================================================
-global x y dz m omega AbsorbScale MU_e Z 
+global x y dz m omega MU_e Z 
 global NumElement Element 
 global slice onlyXRF
 
 load PeriodicTable
 if(synthetic)
-    AbsorbScale=1; % scale on all attenuation coefficient
     ScaleM=1; % scale on unit spectra
 else
-    AbsorbScale=1;
     if(strcmp(sample,'Seed'))
         ScaleM=1;%4e1;
     else
@@ -37,9 +35,11 @@ if(synthetic)
     if(strcmp(sample,'Golosio') | strcmp(sample, 'checkboard'))
         Z = [6 8 14 20 26];% Golosio's Sample
     elseif(strcmp(sample,'Phantom'))
-        Z = [19 31 26];
+        Z = [19];% 31 26];
     elseif(strcmp(sample,'circle'))
         Z = [14];
+    elseif(strcmp(sample, 'fakeRod'))
+            Z=[79 14 74];% Glass Rod
     end
 else
     if(strcmp(sample,'Rod'))
@@ -57,8 +57,7 @@ else
 end
 %---------------------------
 NumElement=length(Z);
-if(n_level==1)
-    W=ones(N,N,NumElement);
+    W=ones(N(1),N(1),NumElement);
     if(synthetic)
         if(strcmp(sample,'Golosio'))
             CreateCircle; 
@@ -73,8 +72,15 @@ if(n_level==1)
         elseif(strcmp(sample,'checkboard'))
             W = kron(invhilb(N(1)/10)<0, ones(10,10));
             W=repmat(W,[1 1 NumElement]);
+        elseif(strcmp(sample,'fakeRod'))
+            CreateRod;
         end
-        UnitSpectrumSherman_synthetic; %% Produce BindingEnergy M
+        UnitSpectrumSherman_real; %% Produce BindingEnergy M
+        if(DecomposedElement)
+            M=M_decom;
+        else
+            M=M_raw;
+        end
     else
         for tsub=1:NumElement
             if(strcmp(sample,'Seed'))
@@ -87,11 +93,6 @@ if(n_level==1)
         clear iR_num iR
     end
     clear Line ElementDensity LineEnergy CS_FluoLine CS_Total CS_TotalBeam
-else
-    W=ones(N(level),N(level),NumElement);
-end
-%%%%%================== Attenuation Matrix at beam energy
-MU_e=MU_e.*AbsorbScale; %% Discrete Scale
 %%%%% =================== Attenuation Matrix at beam energy
 MUe=reshape(MU_e(:,1,1),1,1,NumElement);
 MU=sum(W.*repmat(MUe,[m(1),m(2),1]),3);

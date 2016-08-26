@@ -1,6 +1,10 @@
-% global f_xrf f_xtm
-% do_setup;
-% DecomposedElement=0;
+ global f_xrf f_xtm
+ do_setup;
+ DecomposedElement=0;
+ opt;
+ perato=[1 f_xrf f_xtm];
+ save (['XRT_',sample, num2str(N),'_',num2str(beta_d), '.mat'],'perato','xstar');
+ return;
 % Be=[0 0.25 0.5 1 2 4 8];
 % xs=zeros(length(Be),N*N*NumElement);
 % perato=[];

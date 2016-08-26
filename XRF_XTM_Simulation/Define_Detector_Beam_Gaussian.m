@@ -2,8 +2,8 @@
 global m Tol thetan
 global DetChannel numChannel nTau DetKnot0 SourceKnot0 NumSSDlet 
 if(synthetic)
-    Tol=1e-5; 
-    omega=[-2     2    -2     2].*Tol;
+    Tol=1e-2; 
+    omega=2*[-2     2    -2     2].*Tol;
 end
 m=[current_n current_n]; %Numerical Resolution
 alpha=atan((omega(4)-omega(3))/(omega(2)-omega(1)));
@@ -27,24 +27,25 @@ DetKnot0=DetKnot0(end:-1:1,:);
 SourceKnot0=SourceKnot0(end:-1:1,:);
 SSD0=[detE0-[0,Tol]; SourceE0-[0,Tol]];
 %%%=============Define Energy Channel of the fluorescence detector
-if(synthetic)
-    DetScaleXRF=10;
-    DetChannel=linspace(0,DetScaleXRF,numChannel)';
-else
-    % ==== APS real fluorescence detector energy channel
-    load(['DetChannel_',sample,'.mat']); 
-    numChannel_raw=length(DetChannel);
-    DetChannel_raw=DetChannel;
-    % ==== Decomposed channel
-    numChannel_decom=size(iR_num,3);
-    DetChannel_decom=[1:numChannel_decom]';
-end
+% ==== APS real fluorescence detector energy channel
+load(['DetChannel_','Rod','.mat']); 
+numChannel=length(DetChannel);
+% ==== Decomposed channel
+numChannel_decom=NumElement;
+DetChannel_decom=[1:numChannel_decom]';
+% if(synthetic)
+%     if(DecomposedElement | ReconAttenu)
+%         numChannel=numChannel_decom;
+%         DetChannel=DetChannel_decom;
+%     end
+% end
 %%%=========== Define number of flying paths of fluorescence photons
 NumSSDlet=5;
 SSDlet=[linspace(SSD0(2,1),SSD0(1,1),NumSSDlet)',...
             linspace(SSD0(2,2),SSD0(1,2),NumSSDlet)' ];
 %%%=========== Assign Projection Angles;
 thetan=linspace(363,abs(183*(angleScale)-363),numThetan);% must be positive.
+% thetan=linspace(0,90,numThetan);
 if(strcmp(sample,'Rod'))
     thetan=thetan_real;%linspace(-180,180,numThetan)+360;% must be positive.
 end

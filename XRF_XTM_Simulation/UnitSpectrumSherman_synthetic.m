@@ -10,7 +10,7 @@
 % KA_LINE:0 KB:1 LA:2 LB:3
 global TakeLog I0 M Element synthetic
 
-E0=12;
+E0=12.1;
 E2I=1/3e8/6.62e-34*1e-15;
 I0=E0*E2I;
 NumElement=length(Z);
@@ -26,7 +26,7 @@ else
     load(['xRayLib',num2str(E0),'.mat'])
 end
 load AtomicWeight
-Line=0:3;%[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
+Line=[-3 -2 -6 -90 -89 -63 -95 -68 -207];%0:3;%[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
 shell=0;  %% Shell type
 BindingEnergy=zeros(NumElement,length(Line));
 M=zeros(NumElement,numChannel);

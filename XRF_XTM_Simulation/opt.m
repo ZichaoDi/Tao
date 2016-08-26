@@ -98,13 +98,12 @@ if(Alternate)
         fctn_half=@(W)sfun_half_linear(W,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
         fctn=@(W)sfun_full_linear(W,XRF,NumElement,m,nTau);
     elseif(Joint==1)
-        TempBeta=1; Beta;%=0.5;
+        TempBeta=0; Beta=1;%=0.5;
         if(s_a)
             Mt=reshape(DisR',numThetan*(nTau+1),1);
         else
             Mt=-log(DisR'./I0)*beta_d; 
             Mt=Mt(:)-min(Mt(:));
-            % Mt(Mt<0.1)=0;
         end
         xrfData=XRF(:);%/I0;%/reshape(repmat(I0,[1 1 numChannel]),numThetan*(nTau+1)*numChannel,1);
         fctn_f=@(W)Calculate_Attenuation_S1(W,NumElement,L,GlobalInd,SelfInd,m,nTau,xrfData,Mt,M);
@@ -232,14 +231,17 @@ if(Alternate && linear_S==0)
             err_Joint=err;
             figure(10);h1=plot(0:icycle,[res0,res],'r.-');drawnow;hold on;
         end
-        icycle=icycle+1;
-        x_admm(:,icycle)=x;
+        x_admm(:,icycle+1)=x;
         if(icycle>1)
             if(icycle==maxOut || norm(x_admm(:,icycle)-x_admm(:,icycle-1))<1e-6 );%| err(icycle)>=err(icycle-1))
                 xstar=x;
                 break;
             end
+        elseif(maxOut==1)
+            xstar=x;
+            break;
         end
+        icycle=icycle+1;
     end
     save(['xstar_',sample,'_',num2str(N(1)),'_',num2str(numThetan),'_',num2str(TempBeta),'_',num2str(Beta),'_',num2str(numChannel),'-',num2str(nit),frame,'_linear_',num2str(lambda),'.mat'],'x_admm','W0');
 elseif(Alternate==0)

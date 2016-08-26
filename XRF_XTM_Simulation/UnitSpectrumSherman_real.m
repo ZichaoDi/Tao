@@ -13,10 +13,15 @@ if(strcmp(sample,'Seed'))
     E0=12;
 elseif(strcmp(sample,'Rod'))
     E0=12.1;
+else
+    E0=12.1;
+    E2I=1/3e8/6.62e-34*1e-15;
+    I0=E0*E2I;
 end
-% Z=1:95;
-NumElement=length(Z);
 NA=6.02e23;%Avogadro's number
+% Z=1:95;
+% NumElement=length(Z);
+% numChannel_decom=length(Z);
 load_xraylib=0;
 if(load_xraylib)
     if(ismac)
@@ -28,11 +33,12 @@ else
     load(['xRayLib',num2str(E0),'.mat'])
 end
 load AtomicWeight
-Line=[-3 -2 -6 -90 -89 -63 -95 -68 -207];%0:3;%[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
+Line=[-3 -2 -1 -5 -6 -8 -13 -90 -34 -33 -102 -91 -98 -36 -35 -94 -89 -63 -95 -68 -207 -206];%0:3;%[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
 shell=0;  %% Shell type
 BindingEnergy=zeros(NumElement,length(Line));
 M_decom=zeros(NumElement,numChannel_decom);
-M_raw=zeros(NumElement,numChannel_raw);
+M_raw=zeros(NumElement,numChannel);
+M_temp=zeros(NumElement,numChannel);
 i=1;
 T=1;
 if(plotUnit)
@@ -41,13 +47,12 @@ end
 %fprintf(1,'Element     AtomicNumber    Line     FluorescenceEnergy     Intensity\n')
 %%==set up Gaussian Distribution
 mu=0;
-FWHM = (DetChannel_raw(2)-DetChannel_raw(1))*20;
-sigma = FWHM/2.35;
+% FWHM = (DetChannel(2)-DetChannel(1))*20;
+% sigma = FWHM/2.35;
 truncInd=[];
 truncWidth=0.04;
 %%======================================================================
 while(i<=NumElement)
-    PurePeak=0.*DetChannel_decom;
     if(load_xraylib)
         ElementDensity(Z(i))=calllib('libxrl','ElementDensity',Z(i));%
         A(Z(i))=calllib('libxrl','AtomicWeight',Z(i));
@@ -63,11 +68,16 @@ while(i<=NumElement)
         new_energy=LineEnergy(Z(i),j);%
         intensity=CS_FluoLine(Z(i),j);%
         BindingEnergy(i,j)=new_energy;
-        [~,adj]=min(abs(repmat(new_energy,size(DetChannel_decom))-DetChannel_decom));
-        PurePeak(adj)=PurePeak(adj)+intensity;    
-        M_decom(i,i)=M_decom(i,i)+sum(PurePeak);
-        M_raw(i,:)=M_raw(i,:)+intensity/(sigma*sqrt(2*pi))*exp(-(DetChannel_raw'-BindingEnergy(i,j)).^2./(2*sigma^2));
-        truncInd=unique([truncInd; find(DetChannel_raw> BindingEnergy(i,j)-truncWidth & DetChannel_raw < BindingEnergy(i,j)+truncWidth & DetChannel_raw <= E0)]);
+        [~,adj]=sort(abs(repmat(new_energy,size(DetChannel))-DetChannel*1e3));
+        PurePeak=0.*DetChannel';
+        PurePeak(adj(1))=intensity;    
+        M_decom(i,i)=M_decom(i,i)+intensity;
+        res=abs(DetChannel(adj(2))-DetChannel(adj(1))); % KeV
+        sigma=sqrt((0.1/2.3584)^2+3.58*1e-3*0.114*BindingEnergy(i,j));
+        % M_raw(i,:)=M_raw(i,:)+intensity/(sigma*sqrt(2*pi))*exp(-(DetChannel'-BindingEnergy(i,j)).^2./(2*sigma^2));
+        G=1/(sigma*sqrt(2*pi))*exp(-(DetChannel'-BindingEnergy(i,j)).^2./(2*sigma^2));
+        M_raw(i,:)=M_raw(i,:)+ifft(fft(PurePeak).*fft(G));
+        truncInd=unique([truncInd; find(DetChannel> BindingEnergy(i,j)-truncWidth & DetChannel < BindingEnergy(i,j)+truncWidth & DetChannel <= E0)]);
         j=j+1;
     end
     truncInd=sort(truncInd);
@@ -78,7 +88,7 @@ while(i<=NumElement)
         cmap=colormap(lines);
         cmap = cmap(1:NumElement,:);
         % semilogy(DetChannel,abs(M(i,:)),'color',cmap(i,1:3),'LineStyle','-.','LineWidth',1.5);
-        plot(DetChannel_raw,abs(M_raw(i,:)),'color',cmap(i,1:3),'LineStyle','-.','LineWidth',1.5);
+        plot(DetChannel,abs(M_raw(i,:)),'color',cmap(i,1:3),'LineStyle','-.','LineWidth',1.5);
         Legend{i}=sprintf('%s',Element{Z(i)});
         legend(Legend)
         title('Gaussian spectrum for each element')
@@ -97,7 +107,7 @@ if(load_xraylib)
          end
      end
     end
-    save(['./data/xRayLib',num2str(E0),'.mat'],'ElementDensity','LineEnergy','CS_FluoLine','CS_TotalBeam','CS_Total');
+    % save(['./data/xRayLib',num2str(E0),'.mat'],'ElementDensity','LineEnergy','CS_FluoLine','CS_TotalBeam','CS_Total');
 end
 %%=======================================================================
 NumLines=NumElement;

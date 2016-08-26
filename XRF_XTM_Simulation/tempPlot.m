@@ -1,3 +1,21 @@
+do_setup_mg;
+d=xtm_level{1};
+L=L_level{1};
+return;
+tic;x=lsqnonneg(L,d);time=toc; save('temp.mat','x','time');
+return;
+hollow=1;
+NoSelfAbsorption=0;
+do_setup_simulate;
+save('XRF_rod_hollow.mat','XRF','DisR');
+hollow=0;
+NoSelfAbsorption=0;
+do_setup_simulate;
+save('XRF_rod_solid.mat','XRF','DisR');
+NoSelfAbsorption=1;
+do_setup_simulate;
+save('XRF_rod_solid_noself.mat','XRF','DisR');
+return;
 global numThetan N Beta
 Beta=1;
 fid = fopen('Complexity_Tensor.txt','a');

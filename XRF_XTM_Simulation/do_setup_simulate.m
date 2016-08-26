@@ -18,22 +18,26 @@ grad_type = 'full-linear';  % 'adj' = adjoint/exact
 % Initialize arrays for discretizations
 Tomo_startup;
 %%===============Load Sample=====================
-synthetic=0;
+synthetic=1;
 if(synthetic)
-    % sample='circle'; % one element mainly testing self-absorption; 
-    sample = 'checkboard';
+    % sample='circle'; % one element mainly testing self-absorption 
+    % sample = 'checkboard';
     % sample = 'Phantom';
+    sample = 'fakeRod';
+    NumElement=3;
 else
     % sample='Seed';
     sample='Rod';
+    NumElement=3;
 end
-N=160;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
+N=150;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
 angleScale=2; %1: half angle; 2: full angle
 if(synthetic)
     numThetan=70; % number of scanning angles/projections
-    numChannel=5;% number of energy channels on xrf detector
-    DecomposedElement=0;
+    DecomposedElement=1;
 else
+    Tol = 1e-2;
+    omega=[-2 2 -2 2]*Tol; % units: cm
     if(strcmp(sample,'Seed'))
         load ./data/ApsDataExtract/DogaSeeds/DownSampleSeeds441_elements.mat
         load RawSpectra_seed.mat
@@ -44,29 +48,33 @@ else
         end
         data = permute(data_H,[2,3,1]);
         clear data_H
-        slice =[13 14 17];%5:27;%      
+        slice =[9 13 14 17];%5:27;%      
         data_h=[];
-        ang_rate=100;
-        tau_rate=40;
+        ang_rate=20;
+        tau_rate=1;
         for ele=1:size(data,1)
             data_h(ele,:,:)=sum(data(ele,1:ang_rate:end,1:tau_rate:end),1);
         end
         if(ndims(data_h)==2)
             data_h=reshape(data_h,size(data_h,1),1,size(data_h,2));
         end
-        DecomposedElement=1;
-        truncChannel=1;% (DecomposedElement==0)*1;
-        data_xrt=data_h(3,:,:); %transimission data
+        truncChannel=0;% (DecomposedElement==0)*1;
+        data_xrt=squeeze(data_h(3,:,:)); %transimission data
+        s_a=0;
+        I0=max(data_xrt(:));% reshape(data_h(2,:,:),size(data_h,2),size(data_h,3));% 
+        % DisR=sparse(data_xrt');
+        load DisR_removeStr
         data_xrf_decom=data_h(slice,:,:);
         numThetan=size(data_h,2);
         nTau=size(data_h,3)-1;
         N = size(data_h,3);
         data_xrf_raw=permute(spectra(1:tau_rate:end,:,1:ang_rate:end),[2 3 1]);
+        data_xrf_raw=sparse(reshape(double(data_xrf_raw),[size(data_xrf_raw,1),size(data_xrf_raw,2)*size(data_xrf_raw,3)]));
         [x_ir,y_ir]=meshgrid(1:size(iR,1));
         [x_num,y_num]=meshgrid(linspace(1,size(iR,1),N(1)));
-        iR_num=zeros(N(1),N(1),size(iR,3));
-        for ele=1:size(iR,3)
-            iR_num(:,:,ele)=interp2(x_ir,y_ir,iR(:,:,ele),x_num,y_num);
+        iR_num=zeros(N(1),N(1),length(slice));
+        for ele=1:size(iR_num,3)
+            iR_num(:,:,ele)=interp2(x_ir,y_ir,iR(:,:,slice(ele)),x_num,y_num);
         end
         save('tomopytest.mat','data_xrf_decom');
     elseif(strcmp(sample,'Rod'))
@@ -76,7 +84,7 @@ else
         slice = [4 25 30];
         data_h=[];
         ang_rate=1;
-        tau_rate=17;
+        tau_rate=9;
         for ele=1:size(data,1)
             data_h(ele,:,:)=sum(data(ele,1:ang_rate:end,1:tau_rate:end),1);
         end
@@ -108,8 +116,6 @@ else
         data_xrf_raw=permute(spectra_30_aligned(1:tau_rate:end,1:ang_rate:end,:),[3 2 1]);
         data_xrf_raw=sparse(reshape(double(data_xrf_raw),[size(data_xrf_raw,1),size(data_xrf_raw,2)*size(data_xrf_raw,3)]));
         clear spectra_30_aligned data_sa data_ds data_h
-        Tol = 1e-2;
-        omega=[-2 2 -2 2]*Tol; % units: cm
         Si=0;
         W_element=0;
         if(W_element)
@@ -127,10 +133,10 @@ else
     clear data_xrt x_ir y_ir x_num y_num iR data spectra 
 end
 %%=============================
-NoSelfAbsorption=0; % 0: include self-absorption in the XRF inversion
+% NoSelfAbsorption=0; % 0: include self-absorption in the XRF inversion
 bounds = 1;  % no bound constraints
 Joint=1; % 0: XRF; -1: XTM; 1: Joint inversion
-ReconAttenu = 0*(Joint==-1); % 0: Recover W; 1: Recover miu
+ReconAttenu = 1*(Joint==-1); % 0: Recover W; 1: Recover miu
 Alternate=1*(Joint~=-1);
 frame='EM';
 linear_S=0*Alternate;
@@ -144,22 +150,27 @@ plotTravel=0; % If plot the intersection of beam with object
 plotUnit=0;
 plotElement=0;
 plotResult=1;
+onlyXRF=1;
 %%------------------------------ Use same finest data for each level
 %%-----------------------------------------------
 n_level=length(N);
 if(n_level==1)
     current_n=N(1);
-    if(Joint==-1)
-        XTM_Tensor;
-        if(ReconAttenu)
-            NumElement=1;
-            W=MU;
-        end
+    if(onlyXRF)
+        SimulateXRF;
     else
-        Forward_real;%XRF_XTM_Simplified;
+        if(Joint==-1)
+            XTM_Tensor;
+            if(ReconAttenu)
+                NumElement=1;
+                W=MU;
+            end
+        else
+            Forward_real;%XRF_XTM_Simplified;
+        end
     end
     %-----------------------------------------
-    clear L_pert L_true DisR_true DisR_pert data_h;
+    clear L_pert L_true DisR_true DisR_pert;
 else
     nh=N(1);
     level=[1:n_level];

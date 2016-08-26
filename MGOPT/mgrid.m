@@ -6,9 +6,9 @@ function [v, varargout] = mgrid(v0,fnl,res_prob,step_bnd)
 %--------------------------------------------------
 global current_fnl
 global N current_n
-global bounds v_low v_up
+global bounds v_low v_up W_level  L_level W0
 global GRAPH_N_OLD GRAPH_INDEX_OLD 
-global Hess_norm_H  x_level% norm of coarse-grid Hessian 
+global Hess_norm_H  % norm of coarse-grid Hessian 
 %----------------------------------------------------------------------
 % DECIDE WHETHER TO PRINT ASSESSMENT TEST RESULTS
 % AND WHETHER TO PAUSE AFTER PRINTING TESTS
@@ -57,6 +57,7 @@ j           = find(N==current_n);
 nmin        = N(end);
 if (bounds);
         [v_low,v_up] = set_bounds(j,res_prob);
+        W0=W_level{j};
 end;
 %--------------------------------------------------
 if (res_prob);
@@ -91,7 +92,6 @@ if (current_n <= nmin);
         [low1,up1] = get_bnd (v0,step_bnd);
         nit = nit_solve; [v,F,G,ierror]  = tnbcm(v0,myfun,low1,up1,nit);
     end
-        x_level{level}=v;
 else
     %--------------------------------------------------
     % "relax" on current grid
@@ -118,18 +118,19 @@ else
     %--------------------------------------------------
     % Form new "rhs" vector
     %--------------------------------------------------
-    current_v   = downdate(v,3);
+    current_v   = downdate(v,1);
 
     if (bounds);
             [v_low_1,v_up_1] = set_bounds(j+1,res_prob);
-        current_v = bound_project(current_v,v_low_1,v_up_1);
+            current_v = bound_project(current_v,v_low_1,v_up_1);
     end;
     
-    [Fv  ,Gv ,shift_y, shift_yT] = sfun(v); 
+    [Fv  ,Gv, rv] = sfun(v); 
     [Fvmg,Gvmg] = sfun_mg(v);
     
     %%%%#######################################
-    dGv         = downdate(Gv,1);
+    dGv         = L_level{j+1}'*downdate_radon(rv,1);
+    % dGv         = downdate(Gv,1);
     fnl2        = downdate(fnl,1);
     %%----------------------------------------------------
     test_sep = true;
@@ -189,7 +190,7 @@ else
     current_n   = N(j);
     init_level=0;
     global_setup;
-    %--------------------------------------------------
+    [~ ,Gv2] = sfun(current_v);
     tau         = Gv2 - dGv;
     fnl2        = fnl2 + tau;
     %--------------------------------------------------
@@ -276,36 +277,41 @@ else
     end
     if (bounds);
             [v_low,v_up] = set_bounds(j,res_prob);
-            ipivot = crash (v,v_low,v_up);
-            e(ipivot~=0)=0;
+            W0=W_level{j};
     end;
     %--------------------------------------------------
     current_fnl = fnl;
     testd       = e'*Gvmg;
-    
+    %------------------Compare search direction with optimal direction
+    if(current_n==N(1))
+        ind_test_dir = 1; % indicator: if =1 then plot v and v+e
+    else
+        ind_test_dir=0;
+    end
+    if (ind_test_dir)
+        figure(701)
+        subplot(1,2,1),imagesc(reshape(W0-v,current_n,current_n));
+        title('optimal direction');colorbar;
+        subplot(1,2,2),imagesc(reshape(e,current_n,current_n));
+        title('updated direction');colorbar;
+        pause(1);
+    end
+    %-------------------------------------------------
     if (testd<0)
         if (bounds)          
             alpha0 = stpmax1 (v, e, v_low, v_up);
         else
             alpha0 = 1;
         end;
-        ind_test_dir = 0; % indicator: if =1 then plot v and v+e
-        if (ind_test_dir)
-            nn = length(v);
-            tt = linspace(0,1,nn);
-            figure(701)
-            plot(tt,v), hold on
-            plot(tt,v+e,'r'), hold off
-            disp('Hit any key to continue')
-            pause
-        end
-        if(bounds)
-            [v, ~, ~, ~, alpha, ~, dfdp] = ...
-                lin_mg (e, v, Fvmg, alpha0, Gvmg, myfun,v_low,v_up);
-        else
+        % if(bounds)
+        %     [v, ~, ~, ~, alpha, ~, dfdp] = ...
+        %         lin_mg (e, v, Fvmg, alpha0, Gvmg, myfun,v_low,v_up);
+        %     fprintf('step lenght is %d \n',alpha);
+        % else
+        alpha0=1;
             [v, ~, ~, ~, alpha, ~, dfdp] = ...
                 lin2 (e, v, Fvmg, alpha0, Gvmg, myfun);
-        end
+        % end
         dfdp = dfdp/npts;
         if (assess_print);
             fprintf('NONLINEARITY TEST (nh = %d, alpha = %8.2e): %8.2e\n',N(j),alpha,dfdp);
@@ -351,8 +357,6 @@ else
         [low1,up1] = get_bnd (v,step_bnd);
         nit = 1; [v,F,G,ierror]  = tnbcm(v,myfun,low1,up1,nit);
     end;
-        x_level{level}=v;
-    save x_level x_level
 end
 
 %%%%%%%%%%%%%%%##############################################
@@ -371,7 +375,6 @@ if (current_n > nmin)
 else
     ared = (F_on_entry - F_on_exit);
 end
-
 if (nargout == 2)
-    varargout{1} = ared;
+    varargout{1} = F;
 end

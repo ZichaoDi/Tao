@@ -14,9 +14,8 @@ global problem_name it
 % SETUP FOR MULTIGRID
 %----------------------------------------------------------------------
 more off;
-do_setup;
-
-NF   = [0*N; 0*N; 0*N];
+% do_setup_temp;
+NF = [0*N; 0*N; 0*N];
 it   = 1;
 fnl  = 0*v0;
 current_n    = N(end);
@@ -53,11 +52,13 @@ hold on;
 %----------------------------------------------------------------------
 % MULTIGRID
 %----------------------------------------------------------------------
+mg_iter=[];
 step_bnd  = 0;
-v = mgrid(v0,fnl,0,step_bnd);
-
-doplot(it,v, W_level);
+[v,varargout] = mgrid(v0,fnl,0,step_bnd);
+doplot(it,v, W_level{1}, v0);
 report_results(N);
+complexity_rate=ones(1,n_level)./(4.^([0:n_level-1]));
+mg_iter(it,:)=[sum(sum(NF(2:end,:),1).*complexity_rate),varargout];
 more on;
 %----------------------------------------------------------------------
 % UPDATE MULTIGRID GRAPH
