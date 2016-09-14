@@ -30,10 +30,10 @@ else
     sample='Rod';
     NumElement=3;
 end
-N=65;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
+N=9;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
 angleScale=2; %1: half angle; 2: full angle
 if(synthetic)
-    numThetan=100; % number of scanning angles/projections
+    numThetan=1; % number of scanning angles/projections
     DecomposedElement=1;
 else
     Tol = 1e-2;
@@ -153,7 +153,7 @@ plotResult=1;
 onlyXRF=0;
 %%------------------------------ Use same finest data for each level
 %%-----------------------------------------------
-n_level=3;%length(N);
+n_level=1;%length(N);
 if(n_level==1)
     current_n=N(1);
     if(onlyXRF)

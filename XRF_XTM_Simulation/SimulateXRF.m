@@ -16,6 +16,7 @@ mtol=prod(m);
 eX=ones(m(1),1);
 eY=ones(m(2),1);
 XRF=zeros(numThetan,nTau+1,numChannel);
+XRF_decom=zeros(numThetan,nTau+1,numChannel_decom);
 DisR=zeros(nTau+1,numThetan);
 L=zeros(numThetan,nTau+1,m(1),m(2));%zeros(numThetan*(nTau+1)*prod(m),1);
 if(synthetic)
@@ -23,6 +24,12 @@ if(synthetic)
 else
     fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel_raw);
 end
+% temp_test=zeros(m(1),m(2),NumElement);
+% for i=1:NumElement
+%     temp_test(:,:,i)=flipud(reshape(MU_after(:,i),m(1),m(2))');
+% end
+% temp_test=reshape(temp_test,mtol,NumElement);
+
 for n=1:numThetan
     theta=thetan(n)/180*pi;
     fprintf(1,'====== Angle Number  %d of %d: %d\n',n,numThetan,thetan(n));
@@ -50,7 +57,8 @@ for n=1:numThetan
         XRF(n,i,:) = zeros(numChannel,1);
         BeforeEmit=1;
         %============================= Plot Grid and Current Light Beam
-        if(plotSpec)
+        show_beam=23;%floor(nTau/2);
+        if(plotSpec & i==show_beam)
             finalfig=figure('name',sprintf('XRF at beam %d with angle %d',i,thetan(n)));
             subplot(1,2,1);
             plotGrid(xc,omega,[m(2) m(1)]);
@@ -58,19 +66,21 @@ for n=1:numThetan
             plot(DetKnot(:,1),DetKnot(:,2),'k+-',SourceKnot(:,1),SourceKnot(:,2),'m+-',SSDknot(:,1),SSDknot(:,2),'g+-','LineWidth',0.5)
             axis equal 
             imagesc((x(1:end-1)+x(2:end))/2,(y(1:end-1)+y(2:end))/2,sum(W,3))
+            plot([SourceKnot(i,1) DetKnot(i,1)],[SourceKnot(i,2),DetKnot(i,2)],'r--')
             axis xy
-            set(gcf,'Units','normalized')
-            set(gca,'Units','normalized')
-            ax = axis;
-            ap = get(gca,'Position');
-            xp = ([SourceKnot(i,1),DetKnot(i,1)]-ax(1))/(ax(2)-ax(1))*ap(3)+ap(1);
-            yp = ([SourceKnot(i,2),DetKnot(i,2)]-ax(3))/(ax(4)-ax(3))*ap(4)+ap(2);
-            ah=annotation('arrow',xp,yp,'Color','r','LineStyle','--');
+            % set(gcf,'Units','normalized')
+            % set(gca,'Units','normalized')
+            % ax = axis;
+            % ap = get(gca,'Position');
+            % xp = ([SourceKnot(i,1),DetKnot(i,1)]-ax(1))/(ax(2)-ax(1))*ap(3)+ap(1);
+            % yp = ([SourceKnot(i,2),DetKnot(i,2)]-ax(3))/(ax(4)-ax(3))*ap(4)+ap(2);
+            % ah=annotation('arrow',xp,yp,'Color','r','LineStyle','--');
         end
         %=================================================================
         [index,Lvec,linearInd]=IntersectionSet(SourceKnot(i,:),DetKnot(i,:),xbox,ybox,theta);
         %%%%%%%%================================================================
         xrfSub=zeros(1,numChannel);
+        xrfSub_decom=zeros(1,numChannel_decom);
         for j=1:size(index,1)
             CurrentCellCenter=[(index(j,1)-1/2)*dz(1)-abs(omega(1)),(index(j,2)-1/2)*dz(2)-abs(omega(3))];
             currentInd=sub2ind(m,index(j,2),index(j,1));
@@ -96,17 +106,19 @@ for n=1:numThetan
                 I_after = exp(-sum(MU_after(in_after,:)',2)./(length(in_after)+1)*prod(dz)*length(in_after));%% Attenuation of Flourescent energy emitted from current pixel
             end
             %% ====================================================================
-            xrfSub=xrfSub+Lvec(j)*I_incident*(I_after.*Wsub)'*M;% fluorescence emitted from current pixel
+            xrfSub=xrfSub+Lvec(j)*I_incident*(I_after.*Wsub)'*M_raw;% fluorescence emitted from current pixel
+            xrfSub_decom=xrfSub_decom+Lvec(j)*I_incident*(I_after.*Wsub)'*M_decom;% fluorescence emitted from current pixel
         end
         Rdis(i)=I0*exp(-eX'*(MU_XTM.*reshape(L(sub2ind([numThetan,nTau+1,prod(m)],n*ones(1,prod(m)),i*ones(1,prod(m)),1:prod(m))),m))*eY); %% Discrete case
         XRF(n,i,:)=xrfSub;%+0.1*rand(size(xrfSub));
+        XRF_decom(n,i,:)=xrfSub_decom;%+0.1*rand(size(xrfSub));
         clear xrfSub
-        if(plotSpec)
+        if(plotSpec & i==show_beam)
             figure(finalfig)
             subplot(1,2,2);
-            plot(DetChannel,squeeze(XRF_raw(n,i,:)),'r-')
+            semilogy(DetChannel,squeeze(XRF(n,i,:)),'r-')
             xlabel('Energy Channel','fontsize',12); ylabel('Intensity','fontsize',12)
-            pause(1);
+            drawnow;
         end
     end
     DisR(:,n)=Rdis';

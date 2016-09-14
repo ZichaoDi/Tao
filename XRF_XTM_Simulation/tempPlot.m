@@ -1,35 +1,40 @@
-do_setup_mg;
-d=xtm_level{1};
-L=L_level{1};
-return;
-tic;x=lsqnonneg(L,d);time=toc; save('temp.mat','x','time');
-return;
-hollow=1;
-NoSelfAbsorption=0;
-do_setup_simulate;
-save('XRF_rod_hollow.mat','XRF','DisR');
+% do_setup_mg;
+% d=xtm_level{1};
+% L=L_level{1};
+% return;
+% tic;x=lsqnonneg(L,d);time=toc; save('temp.mat','x','time');
+% return;
+%%======================================================
 hollow=0;
 NoSelfAbsorption=0;
 do_setup_simulate;
-save('XRF_rod_solid.mat','XRF','DisR');
+save('simulate_realrod_solid.mat','XRF_decom','DisR','XRF');
+
+hollow=1;
+NoSelfAbsorption=0;
+do_setup_simulate;
+save('simulate_realrod_hollow.mat','XRF_decom','DisR','XRF');
+
+hollow=0;
 NoSelfAbsorption=1;
 do_setup_simulate;
-save('XRF_rod_solid_noself.mat','XRF','DisR');
-return;
-global numThetan N Beta
-Beta=1;
-fid = fopen('Complexity_Tensor.txt','a');
-for ii=15:5:30
-    N=ii;
-fprintf(fid,'=========================== %d\n', N);
-for i=1:10
-    numThetan=i;
-    do_setup;
-    optXTM_XRF_Tensor;
-    fprintf(fid,'%d    %d      %f\n',prod(m)*NumElement,numThetan,T);
-end
-end
-fclose(fid);
+save('simulate_realrod_solid_noself.mat','XRF_decom','DisR','XRF');
+%%======================================================
+% return;
+% global numThetan N Beta
+% Beta=1;
+% fid = fopen('Complexity_Tensor.txt','a');
+% for ii=15:5:30
+%     N=ii;
+% fprintf(fid,'=========================== %d\n', N);
+% for i=1:10
+%     numThetan=i;
+%     do_setup;
+%     optXTM_XRF_Tensor;
+%     fprintf(fid,'%d    %d      %f\n',prod(m)*NumElement,numThetan,T);
+% end
+% end
+% fclose(fid);
     
 
 

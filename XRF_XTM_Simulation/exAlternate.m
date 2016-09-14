@@ -7,7 +7,7 @@ if(simulate)
 else
     do_setup;
     DecomposedElement=0;
-    Be=[0.5 0];
+    Be=[0 0.5 1 4];
     for j_iter=1:length(Be);
         Beta=Be(j_iter);
         opt;

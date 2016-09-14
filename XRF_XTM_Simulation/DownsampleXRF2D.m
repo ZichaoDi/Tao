@@ -1,8 +1,8 @@
 %% Downsample the XRF spectrum
-slice=20;
+slice=30;
 numChannel=2000;
-nTau=50-1;
-thetan=zeros(36,1);
+nTau=1750;
+% thetan=zeros(73,1);
 DisXRF=zeros(1,1,2000);%zeros(length(thetan),nTau+1,numChannel);
 DisR=zeros(length(thetan),nTau+1);
 mStep=1750;%size(XRF);

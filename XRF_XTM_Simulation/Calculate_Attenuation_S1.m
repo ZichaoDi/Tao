@@ -5,7 +5,11 @@ global MU_e area_xrf
 global TempBeta Beta Joint frame
 mtol=prod(m);
 W=reshape(W,mtol,NumElement);
-MU=W*reshape(MU_e(:,1,:),NumElement,NumElement+1);
+temp=W*reshape(sum(MU_e(:,1,:),2),NumElement,NumElement+1);
+for i=1:NumElement+1
+MU(:,i)=reshape(flipud(reshape(temp(:,i),m(1),m(2))'),mtol,1);
+end
+% MU=W*reshape(MU_e(:,1,:),NumElement,NumElement+1);
 %%%%% ====================================================================
 InTens=ones(numThetan*(nTau+1),mtol);
 OutTens=ones(numThetan*(nTau+1),mtol,NumElement);
@@ -33,8 +37,18 @@ end
 % ConstSub=kron(ones(numChannel,1),kron(ones(1,NumElement),reshape(L.*InTens,numThetan*(nTau+1),mtol)).*reshape(OutTens,numThetan*(nTau+1),mtol*NumElement)).*kron(M',ones(numThetan*(nTau+1),mtol)); %% Kronecker version 
 %#############################################
 ConstSub=bsxfun(@times,reshape(bsxfun(@times,full(L.*InTens),OutTens),[numThetan*(nTau+1),1,mtol,NumElement]),reshape(M',[1,numChannel,1, NumElement])); 
-clear M InTens OutTens
 ConstSub=sparse(reshape(ConstSub,[numThetan*(nTau+1)*numChannel,mtol*NumElement]));
+clear M InTens OutTens
+%%================== Memory saving version
+% c_1=reshape(bsxfun(@times,full(L.*InTens),OutTens),[numThetan*(nTau+1),mtol*NumElement]);
+% ConstSub=sparse(numThetan*(nTau+1)*numChannel,mtol*NumElement);
+% for i1=1:numChannel
+%     for i2=1:numThetan*(nTau+1)
+%           ConstSub(i2+(i1-1)*numThetan*(nTau+1),:)=c_1(i2,:).*M(i1,:);
+%           %reshape(bsxfun(@times,squeeze(c_1(i2,:,:)),M(:,i1)'),mtol*NumElement,1);
+%     end
+% end
+
 XRF_v=ConstSub*W(:);
 if(Joint==0)
     if(strcmp(frame,'EM'))

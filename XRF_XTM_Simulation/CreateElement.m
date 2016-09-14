@@ -1,7 +1,7 @@
 global NumElement
 A=phantom('Shepp-Logan',m(1));
 if(NumElement==1)
-    W=peaks(65);%sum(A,3);
+    W=abs(peaks(m(1)));%sum(A,3);
 else
     % A=ones(m);
     A(A(:)<0)=0;

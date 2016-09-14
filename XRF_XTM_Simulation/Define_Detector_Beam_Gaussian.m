@@ -3,7 +3,12 @@ global m Tol thetan
 global DetChannel numChannel nTau DetKnot0 SourceKnot0 NumSSDlet 
 if(synthetic)
     Tol=1e-2; 
-    omega=2*[-2     2    -2     2].*Tol;
+    if(onlyXRF)
+        scale=1;
+    else
+        scale=2;
+    end
+    omega=scale*[-2     2    -2     2].*Tol;
 end
 m=[current_n current_n]; %Numerical Resolution
 alpha=atan((omega(4)-omega(3))/(omega(2)-omega(1)));
@@ -12,7 +17,7 @@ Tau= omega(2)-omega(1);%sqrt((omega(2)-omega(1))^2+(omega(4)-omega(3))^2)-dTau;%
 if(synthetic)
     nTau=m(1)+1;%ceil(Tau/dTau)+1;% % number of discrete beam%nTau;%
 end
-tol1=0;%eps^(1/2); % the threshod to gurantee the beam will cover the whole object
+tol1=0; % the threshod to gurantee the beam will cover the whole object
 %=============initiate transmission detector location
 detS0=[Tau/2*tan(alpha)+tol1*Tol, Tau/2+tol1*Tol]; 
 detE0=[Tau/2*tan(alpha)+tol1*Tol,-Tau/2-tol1*Tol];
@@ -30,22 +35,20 @@ SSD0=[detE0-[0,Tol]; SourceE0-[0,Tol]];
 % ==== APS real fluorescence detector energy channel
 load(['DetChannel_','Rod','.mat']); 
 numChannel=length(DetChannel);
+DetChannel_raw=DetChannel;
+numChannel_raw=length(DetChannel);
 % ==== Decomposed channel
 numChannel_decom=NumElement;
 DetChannel_decom=[1:numChannel_decom]';
-% if(synthetic)
-%     if(DecomposedElement | ReconAttenu)
-%         numChannel=numChannel_decom;
-%         DetChannel=DetChannel_decom;
-%     end
-% end
 %%%=========== Define number of flying paths of fluorescence photons
 NumSSDlet=5;
 SSDlet=[linspace(SSD0(2,1),SSD0(1,1),NumSSDlet)',...
             linspace(SSD0(2,2),SSD0(1,2),NumSSDlet)' ];
 %%%=========== Assign Projection Angles;
 thetan=linspace(363,abs(183*(angleScale)-363),numThetan);% must be positive.
-% thetan=linspace(0,90,numThetan);
+if(numThetan==1)
+    thetan=45;
+end
 if(strcmp(sample,'Rod'))
     thetan=thetan_real;%linspace(-180,180,numThetan)+360;% must be positive.
 end

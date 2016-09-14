@@ -98,7 +98,7 @@ if(Alternate)
         fctn_half=@(W)sfun_half_linear(W,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
         fctn=@(W)sfun_full_linear(W,XRF,NumElement,m,nTau);
     elseif(Joint==1)
-        TempBeta=0; Beta=1;%=0.5;
+        TempBeta=1; % Beta=1;
         if(s_a)
             Mt=reshape(DisR',numThetan*(nTau+1),1);
         else
@@ -106,6 +106,8 @@ if(Alternate)
             Mt=Mt(:)-min(Mt(:));
         end
         xrfData=XRF(:);%/I0;%/reshape(repmat(I0,[1 1 numChannel]),numThetan*(nTau+1)*numChannel,1);
+        % M_rep=reshape(repmat(reshape(M',[numChannel,1,NumElement]),1,mtol,1),numChannel,mtol*NumElement);
+
         fctn_f=@(W)Calculate_Attenuation_S1(W,NumElement,L,GlobalInd,SelfInd,m,nTau,xrfData,Mt,M);
         fctn=@(W)sfun_linear_joint(W,xrfData,Mt,MU_e,L,NumElement,m,nTau);
     end
@@ -162,7 +164,7 @@ if(Alternate && linear_S==0)
     if(TempBeta==0)
         maxOut=1;
     else
-        maxOut=2;
+        maxOut=3;
     end
     x=x0;
     fprintf(1, 'cycle       alpha         residual      error      sub-residual\n');

@@ -24,17 +24,17 @@ if(synthetic)
     % sample = 'checkboard';
     % sample = 'Phantom';
     sample = 'fakeRod';
-    NumElement=3;
+    NumElement=7;
 else
     % sample='Seed';
     sample='Rod';
     NumElement=3;
 end
-N=150;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
+N=195;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
 angleScale=2; %1: half angle; 2: full angle
 if(synthetic)
-    numThetan=70; % number of scanning angles/projections
-    DecomposedElement=1;
+    numThetan=73; % number of scanning angles/projections
+    DecomposedElement=0;
 else
     Tol = 1e-2;
     omega=[-2 2 -2 2]*Tol; % units: cm

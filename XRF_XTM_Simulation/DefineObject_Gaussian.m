@@ -12,16 +12,6 @@ global NumElement Element
 global slice onlyXRF
 
 load PeriodicTable
-if(synthetic)
-    ScaleM=1; % scale on unit spectra
-else
-    if(strcmp(sample,'Seed'))
-        ScaleM=1;%4e1;
-    else
-        ScaleM=1;%5e3;
-    end
-    scale=0; % scale on fluorescence attenuation coefficient
-end
 %%%%%======================================
 x=linspace(omega(1),omega(2),m(1)+1);
 y=linspace(omega(3),omega(4),m(2)+1);
@@ -39,7 +29,10 @@ if(synthetic)
     elseif(strcmp(sample,'circle'))
         Z = [14];
     elseif(strcmp(sample, 'fakeRod'))
-            Z=[79 14 74];% Glass Rod
+        Z=[79 5 8 11 13 14 74];% Glass Rod
+        if(NumElement==3)
+            Z=Z([1 6 7]);
+        end
     end
 else
     if(strcmp(sample,'Rod'))
@@ -74,12 +67,8 @@ NumElement=length(Z);
             W=repmat(W,[1 1 NumElement]);
         elseif(strcmp(sample,'fakeRod'))
             CreateRod;
-        end
-        UnitSpectrumSherman_real; %% Produce BindingEnergy M
-        if(DecomposedElement)
-            M=M_decom;
-        else
-            M=M_raw;
+            % load data_rod;
+            % W=reshape(xstar_joint,N,N,NumElement);
         end
     else
         for tsub=1:NumElement
@@ -89,19 +78,28 @@ NumElement=length(Z);
                 W(:,:,tsub)=abs(fliplr(rot90(permute(iR_num(:,:,tsub),[2 1 3]))));%tsub*2e-1;
             end
         end
-        UnitSpectrumSherman_real; %% Produce BindingEnergy M
         clear iR_num iR
+    end
+    if(onlyXRF)
+        UnitSpectrumSherman_real_1; %% Produce BindingEnergy M
+    else
+        UnitSpectrumSherman_real; %% Produce BindingEnergy M
     end
     clear Line ElementDensity LineEnergy CS_FluoLine CS_Total CS_TotalBeam
 %%%%% =================== Attenuation Matrix at beam energy
 MUe=reshape(MU_e(:,1,1),1,1,NumElement);
+% MU=flipud(sum(W.*repmat(MUe,[m(1),m(2),1]),3)');
 MU=sum(W.*repmat(MUe,[m(1),m(2),1]),3);
 MU_XTM=MU;
 %%%%% =================== Attenuation Matrix at flourescence energy (Corrected Attenuation)
 MU_after=zeros(prod(m),NumElement);
 for i=1:NumElement
-    MU_after(:,i)=reshape(W,prod(m),NumElement)*MU_e(:,1,i+1);
+    temp=sum(reshape(W,prod(m),NumElement)*MU_e(:,:,i+1),2);
+    temp=flipud(reshape(temp,m(1),m(2))');
+    MU_after(:,i)=temp(:);
+    % MU_after(:,i)=sum(reshape(W,prod(m),NumElement)*MU_e(:,:,i+1),2);
 end
+clear temp;
 %%%%% ====================================================================
 
 %%=================== Picture the object based on atomic number and attenuation
@@ -109,42 +107,3 @@ if(PlotObject)
     figureObject(W,Z,m,NumElement,MU_e,0)
 end
 
-%%=======================================================================
-% W(1,1,:)=[7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];
-% W(1,2,:)=[7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];
-%  W(1,3,:)=[7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];
-% W(2,1,:)= [7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];
-% W(2,2,:)=[7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];
-% W(2,3,:)=[7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];
-% W(3,1,:)=[7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];
-% W(3,2,:)=[7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];
-% W(3,3,:)=[7.61/9 11/9 1.8/9 1.32/9 2.84/9 5/9 19/9];
-%%%========================================
-% W(1,1,:)=[1 1 1 0.5 ];
-% W(1,2,:)=[0 1 1 0.5];
-% W(1,3,:)=[1 1 1 0];
-% W(2,1,:)=[0 0.5 0.5 0.5];
-% W(2,2,:)=[0.7 0.3 0 0.5];
-% W(2,3,:)=[0.5 0.5 1 0];
-% W(3,1,:)=[0.8 0 0 0.2];
-% W(3,2,:)=[1 0 1 0.1];
-% W(3,3,:)=[0 0.1 1 0];
-%%%========================================
-% W(1,1,:)=[1 0 0 0 ];
-% W(1,2,:)=[0 1 0 0];
-% W(1,3,:)=[1 0 0 0];
-% W(1,4,:)=[1 0 0 0];
-% W(2,1,:)=[0 0 0 1];
-% W(2,2,:)=[0 0 1 0] ;
-% W(2,3,:)=[0 1 0 0];
-% W(2,4,:)=[0 1 0 0];
-
-% W(3,1,:)=[0 0 1 0] ;
-% W(3,2,:)= [1 0 0 0] ;
-% W(3,3,:)=[0 1 0 0];
-% W(3,4,:)=[0 1 0 0];
-% W(4,1,:)=[0 0 1 0] ;
-% W(4,2,:)= [1 0 0 0] ;
-% W(4,3,:)=[0 1 0 0];
-% W(4,4,:)=[0 1 0 0];
-%%%========================== locate element attenuation coefficient

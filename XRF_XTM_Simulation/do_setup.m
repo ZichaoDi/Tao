@@ -18,7 +18,7 @@ grad_type = 'full-linear';  % 'adj' = adjoint/exact
 % Initialize arrays for discretizations
 Tomo_startup;
 %%===============Load Sample=====================
-synthetic=1;
+synthetic=0;
 if(synthetic)
     % sample='circle'; % one element mainly testing self-absorption 
     % sample = 'checkboard';
@@ -30,10 +30,10 @@ else
     sample='Rod';
     NumElement=3;
 end
-N=60;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
+N=40;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
 angleScale=2; %1: half angle; 2: full angle
 if(synthetic)
-    numThetan=10; % number of scanning angles/projections
+    numThetan=73; % number of scanning angles/projections
     DecomposedElement=0;
 else
     Tol = 1e-2;
@@ -78,13 +78,21 @@ else
         end
         save('tomopytest.mat','data_xrf_decom');
     elseif(strcmp(sample,'Rod'))
-        load ~/Documents/Research/APSdata/GlassRod/2dSlice/Slice30
-        load ~/Documents/Research/APSdata/GlassRod/2dSlice/tomoRec_3
+        load ~/Documents/Research/APS/GlassRod/2dSlice/Slice30
+        load ~/Documents/Research/APS/GlassRod/2dSlice/tomoRec_3
+        center_shift=floor(size(data,3)/2-842)+2;
+        % data_temp=data.*0;
+        % for sub_ch=1:size(data,1)
+        %     data_temp(sub_ch,:,center_shift:end)=data(sub_ch,:,1:end-center_shift+1);
+        %     data_temp(sub_ch,:,1:center_shift-1)=data(sub_ch,:,end-center_shift+2:end);
+        % end
+        % data=data_temp;
+        clear data_temp;
         slice_tot = [3 4 25 30]; %GlassRod%
         slice = [4 25 30];
         data_h=[];
-        ang_rate=1;
-        tau_rate=9;
+        ang_rate=2;
+        tau_rate=20;
         for ele=1:size(data,1)
             data_h(ele,:,:)=sum(data(ele,1:ang_rate:end,1:tau_rate:end),1);
         end
@@ -113,7 +121,11 @@ else
         data_xrf_decom(3,:,:)=data_h(slice_tot(4),:,:);
         save('tomopytest.mat','data_xrf_decom','data_xrt');
         load spectra_30_aligned;
-        data_xrf_raw=permute(spectra_30_aligned(1:tau_rate:end,1:ang_rate:end,:),[3 2 1]);
+        spectra=0.*spectra_30_aligned;
+        spectra(center_shift:end,:,:)=spectra_30_aligned(1:end-center_shift+1,:,:);
+        spectra(1:center_shift-1,:,:)=spectra_30_aligned(end-center_shift+2:end,:,:);
+        % spectra=spectra_30_aligned;
+        data_xrf_raw=permute(spectra(1:tau_rate:end,1:ang_rate:end,:),[3 2 1]);
         data_xrf_raw=sparse(reshape(double(data_xrf_raw),[size(data_xrf_raw,1),size(data_xrf_raw,2)*size(data_xrf_raw,3)]));
         clear spectra_30_aligned data_sa data_ds data_h
         Si=0;
@@ -150,7 +162,7 @@ plotTravel=0; % If plot the intersection of beam with object
 plotUnit=0;
 plotElement=0;
 plotResult=1;
-onlyXRF=1;
+onlyXRF=0;
 %%------------------------------ Use same finest data for each level
 %%-----------------------------------------------
 n_level=length(N);
@@ -158,6 +170,7 @@ if(n_level==1)
     current_n=N(1);
     if(onlyXRF)
         SimulateXRF;
+        % save('resulted_spectra.mat','XRF_decom','XRF','DisR');
     else
         if(Joint==-1)
             XTM_Tensor;

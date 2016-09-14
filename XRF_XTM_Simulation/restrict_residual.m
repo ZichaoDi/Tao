@@ -24,4 +24,4 @@ for i=1:m
     %         BB(i,2*i)=1;
     % end
 end
-BB=BB./2;
+BB=BB./4;

@@ -19,7 +19,7 @@ GlobalInd=cell(numThetan,nTau+1);
 area_xrf=sparse(zeros(numThetan*(nTau+1),mtol));
 SelfInd=repmat({cell(3,1)},[numThetan*(nTau+1),mtol]);
 
-fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel_raw);
+fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel);
 
 for n=1:numThetan
     theta=thetan(n)/180*pi;

@@ -11,7 +11,12 @@ if(res_prob==0)
     end
     L=L_resTau;
     nT_H=size(L,2);
-    LH_left=restrict_residual(numThetan)*reshape(L,numThetan,nT_H*mtol);
+    if(numThetan>1)
+        LH_left=restrict_residual(numThetan)*reshape(L,numThetan,nT_H*mtol);
+    else
+        LH_left=reshape(L,numThetan,nT_H*mtol);
+    end
+
     nThe_H=size(LH_left,1);
     LH_left=reshape(LH_left,nThe_H*nT_H,mtol);
     LH=zeros(nThe_H*nT_H,N(level)^2);
@@ -24,7 +29,11 @@ elseif(res_prob==1)
     for i=1:numThetan
         L_resTau(i,:) = restrict_residual(nTau+1)*L(i,:)';
     end
-    LH_left=restrict_residual(numThetan)*L_resTau;%L(:,sub_tau);
+    if(numThetan>1)
+        LH_left=restrict_residual(numThetan)*L_resTau;%L(:,sub_tau);
+    else
+        LH_left=L_resTau;%L(:,sub_tau);
+    end
     nThe_H=size(LH_left,1);
     nT_H=size(LH_left,2);
     LH=reshape(LH_left,nThe_H*nT_H,1);
