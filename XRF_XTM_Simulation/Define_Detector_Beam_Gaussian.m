@@ -11,20 +11,25 @@ if(synthetic)
     omega=scale*[-2     2    -2     2].*Tol;
 end
 m=[current_n current_n]; %Numerical Resolution
+dz=[(omega(2)-omega(1))/m(2) (omega(4)-omega(3))/m(1)];
 alpha=atan((omega(4)-omega(3))/(omega(2)-omega(1)));
 dTau=(omega(2)-omega(1))/N(1);%%% width of each discrete beam
 Tau= omega(2)-omega(1);%sqrt((omega(2)-omega(1))^2+(omega(4)-omega(3))^2)-dTau;%
 if(synthetic)
-    nTau=m(1)+1;%ceil(Tau/dTau)+1;% % number of discrete beam%nTau;%
+    nTau=m(1)-1;%ceil(Tau/dTau)+1;% % number of discrete beam%nTau;%
 end
-tol1=0; % the threshod to gurantee the beam will cover the whole object
+if(synthetic)
+    tol1=0; % the threshod to gurantee the beam will cover the whole object
+else
+    tol1=0;
+end
 %=============initiate transmission detector location
-detS0=[Tau/2*tan(alpha)+tol1*Tol, Tau/2+tol1*Tol]; 
-detE0=[Tau/2*tan(alpha)+tol1*Tol,-Tau/2-tol1*Tol];
+detS0=[Tau/2*tan(alpha)+tol1*dz(1), Tau/2+tol1*dz(1)]; 
+detE0=[Tau/2*tan(alpha)+tol1*dz(1),-Tau/2-tol1*dz(1)];
 knot=linspace(detS0(2),detE0(2),nTau+1)';
 DetKnot0=[repmat(detS0(1),size(knot)),knot];%% transmission detectorlet knot points
-SourceS0=[-Tau/2*tan(alpha)-tol1*Tol, Tau/2+tol1*Tol];%initiate beam source
-SourceE0=[-Tau/2*tan(alpha)-tol1*Tol,-Tau/2-tol1*Tol];
+SourceS0=[-Tau/2*tan(alpha)-tol1*dz(1), Tau/2+tol1*dz(1)];%initiate beam source
+SourceE0=[-Tau/2*tan(alpha)-tol1*dz(1),-Tau/2-tol1*dz(1)];
 
 knot=linspace(SourceS0(2),SourceE0(2),nTau+1)';
 SourceKnot0=[repmat(SourceS0(1),size(knot)),knot];%% source knot points
@@ -48,6 +53,8 @@ SSDlet=[linspace(SSD0(2,1),SSD0(1,1),NumSSDlet)',...
 thetan=linspace(363,abs(183*(angleScale)-363),numThetan);% must be positive.
 if(numThetan==1)
     thetan=45;
+elseif(numThetan==3)
+    thetan=[0 45 90];
 end
 if(strcmp(sample,'Rod'))
     thetan=thetan_real;%linspace(-180,180,numThetan)+360;% must be positive.

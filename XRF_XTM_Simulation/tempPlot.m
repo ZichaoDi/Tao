@@ -5,21 +5,24 @@
 % tic;x=lsqnonneg(L,d);time=toc; save('temp.mat','x','time');
 % return;
 %%======================================================
-hollow=0;
-NoSelfAbsorption=0;
-do_setup_simulate;
-save('simulate_realrod_solid.mat','XRF_decom','DisR','XRF');
+% hollow=0;
+% NoSelfAbsorption=0;
+% do_setup_simulate;
+% save('simulate_realrod_solid.mat','XRF_decom','DisR','XRF');
 
-hollow=1;
-NoSelfAbsorption=0;
-do_setup_simulate;
-save('simulate_realrod_hollow.mat','XRF_decom','DisR','XRF');
+% hollow=1;
+% NoSelfAbsorption=0;
+% do_setup_simulate;
+% save('simulate_realrod_hollow.mat','XRF_decom','DisR','XRF');
 
+% hollow=0;
+% NoSelfAbsorption=1;
+% do_setup_simulate;
+% save('simulate_realrod_solid_noself.mat','XRF_decom','DisR','XRF');
 hollow=0;
-NoSelfAbsorption=1;
 do_setup_simulate;
-save('simulate_realrod_solid_noself.mat','XRF_decom','DisR','XRF');
-%%======================================================
+save('simulate_recon195_1.mat','XRF_decom','DisR','XRF');
+% %%======================================================
 % return;
 % global numThetan N Beta
 % Beta=1;

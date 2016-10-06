@@ -13,7 +13,7 @@ eX=ones(m(1),1);
 eY=ones(m(2),1);
 EmptyBeam=[];
 L=sparse(numThetan*(nTau+1),prod(m));
-DisR=zeros(nTau+1,numThetan);
+DisR_Simulated=zeros(nTau+1,numThetan);
 GlobalInd=cell(numThetan,nTau+1);
 fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel);
 for n=1:numThetan
@@ -41,16 +41,11 @@ for n=1:numThetan
             figure(finalfig)
             hold on;
             subplot(1,2,1)
-            plotGrid(xc,omega,[m(2) m(1)]);
-            plot(DetKnot(:,1),DetKnot(:,2),'k+-',SourceKnot(:,1),SourceKnot(:,2),'m+-','LineWidth',0.5)
+            [px,py]=meshgrid(linspace(omega(1),omega(2),m(1)+1),linspace(omega(3),omega(4),m(2)+1));
+            plot(px,py,'b-',px',py','k-','LineWidth',2);
             axis equal
-            set(gcf,'Units','normalized')
-            set(gca,'Units','normalized')
-            ax = axis;
-            ap = get(gca,'Position');
-            xp = ([SourceKnot(i,1),DetKnot(i,1)]-ax(1))/(ax(2)-ax(1))*ap(3)+ap(1);
-            yp = ([SourceKnot(i,2),DetKnot(i,2)]-ax(3))/(ax(4)-ax(3))*ap(4)+ap(2);
-            ah=annotation('arrow',xp,yp,'Color','r','LineStyle','--');
+            dp = -SourceKnot+DetKnot;   
+            quiver(SourceKnot(:,1),SourceKnot(:,2),dp(:,1),dp(:,2),0,'color','r');
             drawnow;
         end
         %=================================================================
@@ -65,7 +60,7 @@ for n=1:numThetan
             Rdis_true(i)=I0*exp(-eX'*(MU_XTM.*reshape(L(sub2ind([numThetan,nTau+1],n,i),:),m))*eY);%%I0*exp(-eX'*(MU_XTM.*reshape(L(n,i,:,:),subm,subn))*eY); %% Discrete case
         end
     end
-        DisR(:,n)=Rdis_true';
+        DisR_Simulated(:,n)=Rdis_true';
         if(plotSpec)
             finalfig=figure('name',sprintf('XRT with angle %d',thetan(n)));
             subplot(1,2,1)
@@ -77,12 +72,8 @@ for n=1:numThetan
         end
         if(plotDisBeam)
             subplot(1,2,2);
-            plot(1:nTau+1,DisR(:,n),'r.-')
+            plot(1:nTau+1,DisR_Simulated(:,n),'r.-')
             xlabel('Beamlet','fontsize',12); ylabel('Intensity','fontsize',12)
         end
 end
 %%==============================================================
-if(~synthetic)
-    DisR_Simulated=DisR;
-end
-SigMa_XTM=ones(size(DisR(:)));

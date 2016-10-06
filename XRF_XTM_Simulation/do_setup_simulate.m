@@ -24,7 +24,7 @@ if(synthetic)
     % sample = 'checkboard';
     % sample = 'Phantom';
     sample = 'fakeRod';
-    NumElement=7;
+    NumElement=8;
 else
     % sample='Seed';
     sample='Rod';
@@ -81,7 +81,6 @@ else
         load ~/Documents/Research/APSdata/GlassRod/2dSlice/Slice30
         load ~/Documents/Research/APSdata/GlassRod/2dSlice/tomoRec_3
         slice_tot = [3 4 25 30]; %GlassRod%
-        slice = [4 25 30];
         data_h=[];
         ang_rate=1;
         tau_rate=9;
@@ -111,7 +110,7 @@ else
         data_xrf_decom(1,:,:)=data_h(slice_tot(1),:,:)+data_h(slice_tot(2),:,:);
         data_xrf_decom(2,:,:)=data_h(slice_tot(3),:,:);
         data_xrf_decom(3,:,:)=data_h(slice_tot(4),:,:);
-        save('tomopytest.mat','data_xrf_decom','data_xrt');
+        % save('tomopytest.mat','data_xrf_decom','data_xrt');
         load spectra_30_aligned;
         data_xrf_raw=permute(spectra_30_aligned(1:tau_rate:end,1:ang_rate:end,:),[3 2 1]);
         data_xrf_raw=sparse(reshape(double(data_xrf_raw),[size(data_xrf_raw,1),size(data_xrf_raw,2)*size(data_xrf_raw,3)]));
@@ -133,7 +132,7 @@ else
     clear data_xrt x_ir y_ir x_num y_num iR data spectra 
 end
 %%=============================
-% NoSelfAbsorption=0; % 0: include self-absorption in the XRF inversion
+NoSelfAbsorption=0; % 0: include self-absorption in the XRF inversion
 bounds = 1;  % no bound constraints
 Joint=1; % 0: XRF; -1: XTM; 1: Joint inversion
 ReconAttenu = 1*(Joint==-1); % 0: Recover W; 1: Recover miu

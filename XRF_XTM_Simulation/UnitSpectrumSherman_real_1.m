@@ -35,7 +35,7 @@ end
 load AtomicWeight
 % Line=[-219:-1];% all K,L,M lines
 Line=[-3 -2 -1 -5 -6 -8 -13 -90 -34 -33 -102 -91 -98 -36 -35 -94 -89 -63 -95 -68 -207 -206];% partially K,L,M lines
-% Line=0:3;% K_alpha, K_beta, L_alpha, L_beta; %[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
+% Line=[0:3];% K_alpha, K_beta, L_alpha, L_beta; %[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
 shell=[0  0  0  0  0  0   0   3   1   1    3   3   3   1   1   3   3   2   3   2  8    8];  %% Shell type
 BindingEnergy=zeros(NumElement,length(Line));
 M_decom=zeros(NumElement,numChannel_decom);

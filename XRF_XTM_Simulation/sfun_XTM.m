@@ -1,4 +1,4 @@
-function [f,g]=sfun_XTM(W,DisR,MU_e,I0,L,m,NumElement)
+function [f,g]=sfun_XTM(W,Mt,MU_e,I0,L,m,NumElement)
 global Tik penalty frame 
 %%===== Reconstruction discrete objective
 %%===== L: intersection length matrix

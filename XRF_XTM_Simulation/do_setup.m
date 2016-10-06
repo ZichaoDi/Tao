@@ -58,7 +58,6 @@ else
         if(ndims(data_h)==2)
             data_h=reshape(data_h,size(data_h,1),1,size(data_h,2));
         end
-        truncChannel=0;% (DecomposedElement==0)*1;
         data_xrt=squeeze(data_h(3,:,:)); %transimission data
         s_a=0;
         I0=max(data_xrt(:));% reshape(data_h(2,:,:),size(data_h,2),size(data_h,3));% 
@@ -78,21 +77,38 @@ else
         end
         save('tomopytest.mat','data_xrf_decom');
     elseif(strcmp(sample,'Rod'))
-        load ~/Documents/Research/APS/GlassRod/2dSlice/Slice30
-        load ~/Documents/Research/APS/GlassRod/2dSlice/tomoRec_3
-        center_shift=floor(size(data,3)/2-842)+2;
-        % data_temp=data.*0;
-        % for sub_ch=1:size(data,1)
-        %     data_temp(sub_ch,:,center_shift:end)=data(sub_ch,:,1:end-center_shift+1);
-        %     data_temp(sub_ch,:,1:center_shift-1)=data(sub_ch,:,end-center_shift+2:end);
-        % end
-        % data=data_temp;
+        % load ~/Documents/Research/APS/GlassRod/2dSlice/Slice30
+        % ind_i0=43;
+        % ind_xrt=38;
+        % slice_tot = [3 4 25 30]; %GlassRod%
+        load slice30
+        slice_tot = [30 31 20 29]; %GlassRod%
+        ind_i0=2;
+        ind_xrt=3;
+        data(isinf(data))=0;
+        data(isnan(data))=0;
+        % xrt=-log(data(ind_xrt,:,:)./data(ind_i0,:,:));
+        % xrf(1,:,:)=sum(data([slice_tot(1) slice_tot(2)],:,:),1);
+        % xrf(2,:,:)=data(slice_tot(3),:,:);
+        % xrf(3,:,:)=data(slice_tot(4),:,:);
+        % save('tomopytest.mat','xrf','xrt');
+        load tomoRod
+        c_sh=1;% floor(size(data,3)/2-842)+20;
+        data_temp=data;
+        for sub_ch=1:size(data,1)
+            if(sub_ch==ind_i0 | sub_ch==ind_xrt)
+                center_shift=1;%c_sh;
+            else
+                center_shift=c_sh;
+            end
+            data_temp(sub_ch,:,center_shift:end)=data(sub_ch,:,1:end-center_shift+1);
+            data_temp(sub_ch,:,1:center_shift-1)=data(sub_ch,:,end-center_shift+2:end);
+        end
+        data=data_temp;
         clear data_temp;
-        slice_tot = [3 4 25 30]; %GlassRod%
-        slice = [4 25 30];
         data_h=[];
-        ang_rate=2;
-        tau_rate=20;
+        ang_rate=1;
+        tau_rate=9;
         for ele=1:size(data,1)
             data_h(ele,:,:)=sum(data(ele,1:ang_rate:end,1:tau_rate:end),1);
         end
@@ -104,36 +120,25 @@ else
         numThetan=size(data_h,2);
         nTau=size(data_h,3)-1;
         N = size(data_h,3);
-        truncChannel=0;%(DecomposedElement==0)*0;
-        I0=reshape(data_h(43,:,:),size(data_h,2),size(data_h,3));
-        data_sa=data_h(40,:,:);%% Scattering data: s_a;
-        data_ds=data_h(38,:,:); %% Downstream Transmission 
-        s_a=0;
-        if(s_a)
-            data_xrt=data_sa;
-        else
-            data_xrt=data_ds;
-        end
+        I0=reshape(data_h(ind_i0,:,:),size(data_h,2),size(data_h,3));
+        data_xrt=data_h(ind_xrt,:,:); %% Downstream Transmission 
         DisR=sparse(squeeze(sum(data_xrt(:,:,:),1))');
         data_xrf_decom=[];
         data_xrf_decom(1,:,:)=data_h(slice_tot(1),:,:)+data_h(slice_tot(2),:,:);
         data_xrf_decom(2,:,:)=data_h(slice_tot(3),:,:);
         data_xrf_decom(3,:,:)=data_h(slice_tot(4),:,:);
-        save('tomopytest.mat','data_xrf_decom','data_xrt');
+        % save('tomopy_coarse.mat','data_xrf_decom','data_xrt');
+        % return;
+        XRF_decom=permute(data_xrf_decom(:,:,:),[2 3 1]);
         load spectra_30_aligned;
         spectra=0.*spectra_30_aligned;
+        center_shif=c_sh;
         spectra(center_shift:end,:,:)=spectra_30_aligned(1:end-center_shift+1,:,:);
         spectra(1:center_shift-1,:,:)=spectra_30_aligned(end-center_shift+2:end,:,:);
-        % spectra=spectra_30_aligned;
         data_xrf_raw=permute(spectra(1:tau_rate:end,1:ang_rate:end,:),[3 2 1]);
         data_xrf_raw=sparse(reshape(double(data_xrf_raw),[size(data_xrf_raw,1),size(data_xrf_raw,2)*size(data_xrf_raw,3)]));
+        XRF_raw=data_xrf_raw';
         clear spectra_30_aligned data_sa data_ds data_h
-        Si=0;
-        W_element=0;
-        if(W_element)
-            data_xrf_decom=data_xrf_decom(3,:,:);
-            iR=iR(:,:,3);
-        end
         m_h=size(iR,1);
         [x_ir,y_ir]=meshgrid(1:m_h);
         [x_num,y_num]=meshgrid(linspace(1,m_h,N(1)));
@@ -142,7 +147,7 @@ else
             iR_num(:,:,ele)=interp2(x_ir,y_ir,iR(:,:,ele),x_num,y_num);
         end
     end
-    clear data_xrt x_ir y_ir x_num y_num iR data spectra 
+    clear data_xrf_raw data_xrf_decom data_xrt x_ir y_ir x_num y_num iR data spectra 
 end
 %%=============================
 NoSelfAbsorption=0; % 0: include self-absorption in the XRF inversion
@@ -170,7 +175,6 @@ if(n_level==1)
     current_n=N(1);
     if(onlyXRF)
         SimulateXRF;
-        % save('resulted_spectra.mat','XRF_decom','XRF','DisR');
     else
         if(Joint==-1)
             XTM_Tensor;
@@ -179,7 +183,7 @@ if(n_level==1)
                 W=MU;
             end
         else
-            Forward_real;%XRF_XTM_Simplified;
+            Forward_real;% XRF_XTM_Simplified; %
         end
     end
     %-----------------------------------------

@@ -38,6 +38,7 @@ if(synthetic)
 else
     fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel_raw);
 end
+W_temp=reshape(W,mtol,NumElement);
 for n=1:numThetan
     theta=thetan(n)/180*pi;
     fprintf(1,'====== Angle Number  %d of %d: %d\n',n,numThetan,thetan(n));
@@ -120,6 +121,7 @@ for n=1:numThetan
                 SelfInd{n,i,currentInd}{3}=kron(Lvec(j-1:-1:1),MU_e(:,1,1)');
                 SelfInd{n,i,currentInd}{5}=sub2ind(m,index(end:-1:j+1,2),index(end:-1:j+1,1));
                 SelfInd{n,i,currentInd}{6}=kron(MU_e(:,1,1)',Lvec(j));%Lvec(end:-1:j+1));
+            % InTens=exp(-sum(sum(W_temp(SelfInd{n,i,currentInd}{1},:).*SelfInd{n,i,currentInd}{3})));
             else
                 temp_sum=temp_sum+Lvec(j-1)*MU_XTM(index(j-1,2),index(j-1,1));
                 I_incident=exp(-temp_sum);

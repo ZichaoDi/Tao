@@ -28,6 +28,7 @@ for n=1:numThetan
     DetKnot=DetKnot0*TransMatrix;
     SourceKnot=SourceKnot0*TransMatrix;
     SSDknot=SSDlet*TransMatrix;
+    %=================================================================
     for i=1:nTau+1 %%%%%%%%%================================================================
         % Initialize
         xbox=[omega(1) omega(1) omega(2) omega(2) omega(1)];
@@ -60,17 +61,6 @@ end
 
 clear Wsub A knot DetKnot DetKnot0 SSDknot SSDlet SourceKnot SourceKnot0 MU_after
 clear xbox ybox eX eY  x y xc 
-    XRF_decom=permute(data_xrf_decom(:,:,:),[2 3 1]);
-    if(truncChannel)
-        DetChannel_raw=DetChannel(truncInd);
-        numChannel_raw=length(truncInd);
-        XRF_raw=data_xrf_raw(truncInd,:)';%permute(data_xrf_raw(truncInd,:,:),[2 3 1]);
-        M_raw=M_raw(:,truncInd);
-        clear truncInd DetChannel
-    else
-        XRF_raw=data_xrf_raw';%permute(data_xrf_raw,[2 3 1]);
-    end
-clear data_xrt data_xrf_decom data_xrf_raw 
 
 
 

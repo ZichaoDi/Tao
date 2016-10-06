@@ -15,7 +15,6 @@ load PeriodicTable
 %%%%%======================================
 x=linspace(omega(1),omega(2),m(1)+1);
 y=linspace(omega(3),omega(4),m(2)+1);
-dz=[(omega(2)-omega(1))/m(2) (omega(4)-omega(3))/m(1)];
 %%%========================== the grids of object
 xc = getCellCenteredGrid(omega,[m(2) m(1)]);
 xc = reshape(xc,prod(m),2);
@@ -29,20 +28,15 @@ if(synthetic)
     elseif(strcmp(sample,'circle'))
         Z = [14];
     elseif(strcmp(sample, 'fakeRod'))
-        Z=[79 5 8 11 13 14 74];% Glass Rod
+        NumElement=8;
+        Z=[79 5 8 11 13 14 19 74];% Glass Rod
         if(NumElement==3)
-            Z=Z([1 6 7]);
+            Z=Z([1 6 8]);
         end
     end
 else
     if(strcmp(sample,'Rod'))
-        if(Si)
-            Z=14;
-        elseif(W_element)
-            Z=74;
-        else
-            Z=[79 14 74];% Glass Rod
-        end
+        Z=[79 14 74];% Glass Rod
     elseif(strcmp(sample,'Seed'))
         Z=[14 16 17 19 20 22 23 24 25 26 28 29 30 31 80 33 34 35 92 37 38 39 40];% Complete Seed
         Z=Z(slice-4);
@@ -67,8 +61,6 @@ NumElement=length(Z);
             W=repmat(W,[1 1 NumElement]);
         elseif(strcmp(sample,'fakeRod'))
             CreateRod;
-            % load data_rod;
-            % W=reshape(xstar_joint,N,N,NumElement);
         end
     else
         for tsub=1:NumElement
@@ -81,14 +73,13 @@ NumElement=length(Z);
         clear iR_num iR
     end
     if(onlyXRF)
-        UnitSpectrumSherman_real_1; %% Produce BindingEnergy M
+        UnitSpectrumSherman_real; %% Produce BindingEnergy M
     else
         UnitSpectrumSherman_real; %% Produce BindingEnergy M
     end
     clear Line ElementDensity LineEnergy CS_FluoLine CS_Total CS_TotalBeam
 %%%%% =================== Attenuation Matrix at beam energy
 MUe=reshape(MU_e(:,1,1),1,1,NumElement);
-% MU=flipud(sum(W.*repmat(MUe,[m(1),m(2),1]),3)');
 MU=sum(W.*repmat(MUe,[m(1),m(2),1]),3);
 MU_XTM=MU;
 %%%%% =================== Attenuation Matrix at flourescence energy (Corrected Attenuation)
@@ -97,7 +88,6 @@ for i=1:NumElement
     temp=sum(reshape(W,prod(m),NumElement)*MU_e(:,:,i+1),2);
     temp=flipud(reshape(temp,m(1),m(2))');
     MU_after(:,i)=temp(:);
-    % MU_after(:,i)=sum(reshape(W,prod(m),NumElement)*MU_e(:,:,i+1),2);
 end
 clear temp;
 %%%%% ====================================================================

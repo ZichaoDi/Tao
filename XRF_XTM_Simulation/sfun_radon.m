@@ -3,6 +3,7 @@ global frame
 %%===== Reconstruction discrete objective
 %%===== Ltol: intersection length matrix
 %%===== f: sum_i ||e^T(Ltol_i.*I)e-M_i||^2, i=1..theta
+MU=MU(:);
 if(strcmp(frame,'EM'))
     thres=1;
     Rdis=Ltol*MU+thres;

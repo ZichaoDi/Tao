@@ -11,9 +11,11 @@ global TakeLog I0 M_decom M_raw Element synthetic
 if(strcmp(sample,'Seed'))
 E0=12;
 I0=2000;
-elseif(strcmp(sample,'Rod'))
+else
 E0=12.1;
 end
+E2I=1/3e8/6.62e-34*1e-15;
+I0=E0*E2I;
 NumElement=length(Z);
 NA=6.02e23;%Avogadro's number
 load_xraylib=1;
@@ -27,7 +29,8 @@ else
 load(['xRayLib',num2str(E0),'.mat'])
 end
 load AtomicWeight
-Line=0:3;%[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
+% Line=0:3;%[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
+Line=-[0:207];
 % Line=[-3 -2 -1 -5 -6 -8 -13 -90 -34 -33 -102 -91 -98 -36 -35 -94 -89 -63 -95 -68 -207 -206];% partially K,L,M lines
 
 shell=0;  %% Shell type
@@ -45,7 +48,7 @@ mu=0;
 FWHM = (DetChannel_raw(2)-DetChannel_raw(1))*20;
 sigma = FWHM/2.35;
 truncInd=[];
-truncWidth=0.03;
+truncWidth=0.02;
 %%======================================================================
 while(i<=NumElement)
 PurePeak=0.*DetChannel_decom;

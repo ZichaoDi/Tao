@@ -8,7 +8,7 @@ b=cell(n_level,1);
 b{1}=-log(reshape(DisR',numThetan*(nTau+1),1)./I0);
 x0=zeros(N(1)^2,1);
 cycle=1;
-maxOut=1;
+maxOut=3;
 xh=cell(n_level-1,1);
 res=[];
 x=x0;
@@ -22,7 +22,7 @@ elseif(strcmp(solver,'RART'))
 end
 
 k1=2;
-k2=1e3;
+k2=1e2;
 sub_level=1;
 while(cycle<=maxOut);
     disp('===================== Pre-smoothing')
@@ -83,7 +83,8 @@ while(cycle<=maxOut);
             subplot(2,2,4);plot(1:N(1)^2,eh,'r.-',1:N(1)^2,W(:)-xh{1},'b.-');legend('updated direction','optimal direction');drawnow;
         end
     end
-    res(cycle+1,:)=[(2*k1+sum(1*k1./(4.^[1:n_level-sub_level-1]))+k2/(4.^(n_level-sub_level)))*cycle,iter(end,2),iter(end,3)];
+    factor=8;
+    res(cycle+1,:)=[(2*k1+sum(1*k1./(factor.^[1:n_level-sub_level-1]))+k2/(factor.^(n_level-sub_level)))*cycle,iter(end,2),iter(end,3)];
     cycle=cycle+1;
 end
 CR_mg=(res(end,2)/res(1,2))^(1/cycle);

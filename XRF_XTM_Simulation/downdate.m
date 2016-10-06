@@ -14,18 +14,15 @@ if(res_prob==3) %% vh: numThetan X nTau+1 X numChannel
     end
 else
     vh=reshape(vh,N(j),N(j),NumElement);
-    vH=zeros(N(j+1),N(j+1),NumElement);
-    vh_b=zeros(N(j)+2,N(j)+2,NumElement);vh_b(2:N(j)+1,2:N(j)+1,:)=vh;
-    for i=1:N(j+1)
-        for nj=1:N(j+1)
-            vH(i,nj,:)=vh_b(2*i,2*nj,:)+...
-                (vh_b(2*i,2*nj-1,:)+vh_b(2*i,2*nj+1,:)+vh_b(2*i+1,2*nj,:)+vh_b(2*i-1,2*nj,:))/2+...
-                (vh_b(2*i-1,2*nj-1,:)+vh_b(2*i-1,2*nj+1,:)+vh_b(2*i+1,2*nj-1,:)+vh_b(2*i+1,2*nj+1,:))/4;
-        end
-    end
-    if(res_prob==0)
-        vH=vH(:)/2;
-    elseif(res_prob==1)
-        vH=vH(:)/2;
-    end
+    % vH=zeros(N(j+1),N(j+1),NumElement);
+    % vh_b=zeros(N(j)+2,N(j)+2,NumElement);vh_b(2:N(j)+1,2:N(j)+1,:)=vh;
+    % for i=1:N(j+1)
+    %     for nj=1:N(j+1)
+    %         vH(i,nj,:)=vh_b(2*i,2*nj,:)+...
+    %             (vh_b(2*i,2*nj-1,:)+vh_b(2*i,2*nj+1,:)+vh_b(2*i+1,2*nj,:)+vh_b(2*i-1,2*nj,:))/2+...
+    %             (vh_b(2*i-1,2*nj-1,:)+vh_b(2*i-1,2*nj+1,:)+vh_b(2*i+1,2*nj-1,:)+vh_b(2*i+1,2*nj+1,:))/4;
+    %     end
+    % end
+    vH=restrict_residual(N(j))*vh*restrict_residual(N(j))';
+    vH=vH(:)/1;
 end

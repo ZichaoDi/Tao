@@ -148,7 +148,7 @@ x_admm(:,1)=x0;
 err_obj=[];
 if(Alternate && linear_S==0)
     if(TempBeta==0)
-        maxOut=1;
+        maxOut=3;
     else
         maxOut=3;
     end

@@ -99,7 +99,7 @@ for n=1:numThetan
             Wsub=reshape(W(index(j,2),index(j,1),:),[NumElement,1]);
             %% Self-absorption
             if(NoSelfAbsorption)
-                I_after==1;
+                I_after=1;
             else
                 in_after=find(inpolygon(xc(:,1),xc(:,2),[CurrentCellCenter(1) SSDknot(1,1) SSDknot(NumSSDlet,1)],[CurrentCellCenter(2) SSDknot(1,2) SSDknot(NumSSDlet,2)])); 
                 in_after=setdiff(in_after,currentInd); %% energy is not attenuated from the source point

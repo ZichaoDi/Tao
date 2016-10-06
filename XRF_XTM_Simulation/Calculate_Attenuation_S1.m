@@ -5,11 +5,18 @@ global MU_e area_xrf
 global TempBeta Beta Joint frame
 mtol=prod(m);
 W=reshape(W,mtol,NumElement);
-temp=W*reshape(sum(MU_e(:,1,:),2),NumElement,NumElement+1);
-for i=1:NumElement+1
-MU(:,i)=reshape(flipud(reshape(temp(:,i),m(1),m(2))'),mtol,1);
+W_temp=reshape(W,m(1),m(2),NumElement);
+for i=1:NumElement
+    W_temp(:,:,i)=flipud(reshape(W(:,i),m(1),m(2))');
 end
-% MU=W*reshape(MU_e(:,1,:),NumElement,NumElement+1);
+W_temp=reshape(W_temp,mtol,NumElement);
+% W_temp=W;
+MU=zeros(prod(m),NumElement);
+for i=1:NumElement
+    temp=sum(reshape(W,prod(m),NumElement)*MU_e(:,:,i+1),2);
+    temp=flipud(reshape(temp,m(1),m(2))');
+    MU(:,i)=temp(:);
+end
 %%%%% ====================================================================
 InTens=ones(numThetan*(nTau+1),mtol);
 OutTens=ones(numThetan*(nTau+1),mtol,NumElement);
@@ -23,10 +30,10 @@ for n=1:numThetan
             for v_count=1:msub
                 v=index_sub(v_count);
                 if(~isempty(SelfInd{ind_bt,v}{1}))
-                    InTens(ind_bt,v)=exp(-sum(sum(W(SelfInd{ind_bt,v}{1},:).*SelfInd{ind_bt,v}{3})));
+                    InTens(ind_bt,v)=exp(-sum(sum(W_temp(SelfInd{ind_bt,v}{1},:).*SelfInd{ind_bt,v}{3})));
                 end
                 if( ~isempty(SelfInd{ind_bt,v}{2}) && ~NoSelfAbsorption)
-                    OutTens(ind_bt,v,:)=exp(-sum(MU(SelfInd{ind_bt,v}{2},2:NumElement+1),1)./(length(SelfInd{ind_bt,v}{2})+1)*area_xrf(ind_bt,v));
+                    OutTens(ind_bt,v,:)=exp(-sum(MU(SelfInd{ind_bt,v}{2},1:NumElement),1)./(length(SelfInd{ind_bt,v}{2})+1)*area_xrf(ind_bt,v));
                 end
             end
         end

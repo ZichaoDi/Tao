@@ -3,9 +3,9 @@
 %---------------------------------------------------------------
 global N numThetan NF
 global bounds LogScale Joint
-global grad_type err0 coarsen_type 
+global grad_type err0 
 global onlyXRF NoSelfAbsorption 
-global W W_level xrf_level_decom xrf_level_raw xtm_level L_level GI_level SI_level SigmaR SigmaT m_level nTau_level level
+global W_level xrf_level_decom xrf_level_raw xtm_level L_level GI_level SI_level SigmaR SigmaT m_level nTau_level
 global NumElement xinitial current_n frame I0 s_a
 %--------------------------------------------------
 % Select technique for gradient calculation.
@@ -18,24 +18,23 @@ grad_type = 'full-linear';  % 'adj' = adjoint/exact
 % Initialize arrays for discretizations
 Tomo_startup;
 %%===============Load Sample=====================
-synthetic=1;
+synthetic=0;
 if(synthetic)
     % sample='circle'; % one element mainly testing self-absorption 
     % sample = 'checkboard';
-    sample = 'Phantom';
-    % sample = 'fakeRod';
-    NumElement=1;
+    % sample = 'Phantom';
+    sample = 'fakeRod';
+    NumElement=3;
 else
     % sample='Seed';
     sample='Rod';
     NumElement=3;
 end
-coarsen_type='smooth';
-N=[17];% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
+N=40;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
 angleScale=2; %1: half angle; 2: full angle
 if(synthetic)
-    numThetan=100; % number of scanning angles/projections
-    DecomposedElement=1;
+    numThetan=73; % number of scanning angles/projections
+    DecomposedElement=0;
 else
     Tol = 1e-2;
     omega=[-2 2 -2 2]*Tol; % units: cm
@@ -59,7 +58,6 @@ else
         if(ndims(data_h)==2)
             data_h=reshape(data_h,size(data_h,1),1,size(data_h,2));
         end
-        truncChannel=0;% (DecomposedElement==0)*1;
         data_xrt=squeeze(data_h(3,:,:)); %transimission data
         s_a=0;
         I0=max(data_xrt(:));% reshape(data_h(2,:,:),size(data_h,2),size(data_h,3));% 
@@ -79,50 +77,62 @@ else
         end
         save('tomopytest.mat','data_xrf_decom');
     elseif(strcmp(sample,'Rod'))
-        load ~/Documents/Research/APSdata/GlassRod/2dSlice/Slice30
-        load ~/Documents/Research/APSdata/GlassRod/2dSlice/tomoRec_3
+        load ~/Documents/Research/APS/GlassRod/2dSlice/Slice30
+        % xrt=-log(data(38,:,:)./data(43,:,:));
+        % xrf(1,:,:)=sum(data([3 4],:,:),1);
+        % xrf(2,:,:)=data(25,:,:);
+        % xrf(3,:,:)=data(30,:,:);
+        % save('tomopytest.mat','xrf','xrt');
+        data=data(:,[1:37,39:73],:);
+        load tomoRod
+        c_sh=floor(size(data,3)/2-842)+20;
+        data_temp=data;
+        for sub_ch=1:size(data,1)
+            if(sub_ch==43 | sub_ch==38)
+                center_shift=1;%c_sh;
+            else
+                center_shift=c_sh;
+            end
+            data_temp(sub_ch,:,center_shift:end)=data(sub_ch,:,1:end-center_shift+1);
+            data_temp(sub_ch,:,1:center_shift-1)=data(sub_ch,:,end-center_shift+2:end);
+        end
+        data=data_temp;
+        clear data_temp;
         slice_tot = [3 4 25 30]; %GlassRod%
         slice = [4 25 30];
         data_h=[];
         ang_rate=1;
-        tau_rate=9;
+        tau_rate=20;
+        starting_ind=1;
         for ele=1:size(data,1)
-            data_h(ele,:,:)=sum(data(ele,1:ang_rate:end,1:tau_rate:end),1);
+            data_h(ele,:,:)=sum(data(ele,starting_ind:ang_rate:end,1:tau_rate:end),1);
         end
         thetan = linspace(1,360,size(data,2));
-        thetan_real = thetan(1:ang_rate:end); 
+        thetan_real = thetan(starting_ind:ang_rate:end); 
         if(ndims(data_h)==2)
             data_h=reshape(data_h,size(data_h,1),1,size(data_h,2));
         end
         numThetan=size(data_h,2);
         nTau=size(data_h,3)-1;
         N = size(data_h,3);
-        truncChannel=0;%(DecomposedElement==0)*0;
         I0=reshape(data_h(43,:,:),size(data_h,2),size(data_h,3));
-        data_sa=data_h(40,:,:);%% Scattering data: s_a;
-        data_ds=data_h(38,:,:); %% Downstream Transmission 
-        s_a=0;
-        if(s_a)
-            data_xrt=data_sa;
-        else
-            data_xrt=data_ds;
-        end
+        data_xrt=data_h(38,:,:); %% Downstream Transmission 
         DisR=sparse(squeeze(sum(data_xrt(:,:,:),1))');
         data_xrf_decom=[];
         data_xrf_decom(1,:,:)=data_h(slice_tot(1),:,:)+data_h(slice_tot(2),:,:);
         data_xrf_decom(2,:,:)=data_h(slice_tot(3),:,:);
         data_xrf_decom(3,:,:)=data_h(slice_tot(4),:,:);
-        save('tomopytest.mat','data_xrf_decom','data_xrt');
+        XRF_decom=permute(data_xrf_decom(:,:,:),[2 3 1]);
         load spectra_30_aligned;
-        data_xrf_raw=permute(spectra_30_aligned(1:tau_rate:end,1:ang_rate:end,:),[3 2 1]);
+        spectra_30_aligned=spectra_30_aligned(:,[1:37,39:73],:);
+        spectra=0.*spectra_30_aligned;
+        center_shif=c_sh;
+        spectra(center_shift:end,:,:)=spectra_30_aligned(1:end-center_shift+1,:,:);
+        spectra(1:center_shift-1,:,:)=spectra_30_aligned(end-center_shift+2:end,:,:);
+        data_xrf_raw=permute(spectra(1:tau_rate:end,starting_ind:ang_rate:end,:),[3 2 1]);
         data_xrf_raw=sparse(reshape(double(data_xrf_raw),[size(data_xrf_raw,1),size(data_xrf_raw,2)*size(data_xrf_raw,3)]));
+        XRF_raw=data_xrf_raw';
         clear spectra_30_aligned data_sa data_ds data_h
-        Si=0;
-        W_element=0;
-        if(W_element)
-            data_xrf_decom=data_xrf_decom(3,:,:);
-            iR=iR(:,:,3);
-        end
         m_h=size(iR,1);
         [x_ir,y_ir]=meshgrid(1:m_h);
         [x_num,y_num]=meshgrid(linspace(1,m_h,N(1)));
@@ -131,12 +141,12 @@ else
             iR_num(:,:,ele)=interp2(x_ir,y_ir,iR(:,:,ele),x_num,y_num);
         end
     end
-    clear data_xrt x_ir y_ir x_num y_num iR data spectra 
+    clear data_xrf_raw data_xrf_decom data_xrt x_ir y_ir x_num y_num iR data spectra 
 end
 %%=============================
 NoSelfAbsorption=0; % 0: include self-absorption in the XRF inversion
 bounds = 1;  % no bound constraints
-Joint=-1; % 0: XRF; -1: XTM; 1: Joint inversion
+Joint=1; % 0: XRF; -1: XTM; 1: Joint inversion
 ReconAttenu = 1*(Joint==-1); % 0: Recover W; 1: Recover miu
 Alternate=1*(Joint~=-1);
 frame='EM';
@@ -175,7 +185,7 @@ if(n_level==1)
 else
     nh=N(1);
     level=[1:n_level];
-    % N=nh./(2.^(level-1))+(2.^(level-1)-1)./2.^(level-1);
+    N=nh./(2.^(level-1))+(2.^(level-1)-1)./2.^(level-1);
     NF = [0*N; 0*N; 0*N];
     nm=length(N);
     W_level=cell(nm,1);
@@ -197,25 +207,21 @@ else
         current_n=N(level);
         if(Joint==-1)
             if(level==1)
+                % [L,dd,~,~]=build_weight_matrix(MU,thetan,1,'area');
                 XTM_Tensor;
                 Lap{level}=delsq(numgrid('S',N(level)+2));
                 L_level{level}=L;
-                Mt=-log(DisR'./I0); 
-                Mt=Mt(:)-min(Mt(:));
-                xtm_level{level}=Mt;
             else
-                current_n=N(level-1);
-                % IhH{level} = downdate_L(N, level);
-                % Lap{level}=IhH{level}*Lap{level-1}*IhH{level}';
-                [L_level{level},numThetan,nTau]=downdate_radon(L_level{level-1},0,numThetan_level(level-1),nTau_level(level-1));
-                xtm_level{level}=downdate_radon(xtm_level{level-1},1,numThetan_level(level-1),nTau_level(level-1));
+                IhH{level} = downdate_L(N, level);
+                Lap{level}=IhH{level}*Lap{level-1}*IhH{level}';
+                L_level{level}=L_level{level-1}*IhH{level}';
             end
             if(ReconAttenu)
                 NumElement=1;
                 if(level==1)
-                    W_level{level}=MU(:);
+                    W_level{level}=MU;
                 else
-                    W_level{level}=downdate(W_level{level-1},1);
+                    W_level{level}=N(level)^2;
                 end
             else
                 W_level{level}=W;
@@ -225,10 +231,16 @@ else
             W_level{level}=W;
             L_level{level}=L;
         end
+        if(ReconAttenu)
+            xtm_level_true{level}=DisR_true;
+            xtm_level_pert{level}=DisR_pert;
+        else
+            xtm_level_true{level}=DisR;
+        end
         GI_level{level}=GlobalInd;
         nTau_level(level)= nTau;
-        numThetan_level(level)=numThetan;
         m_level(level,:)=[N(level),N(level)];
+        SigmaT{level}=SigMa_XTM;
         %-----------------------------------------
         if(Joint~=-1)
             if(synthetic)
@@ -244,7 +256,6 @@ else
     clear L L_pert L_true W DisR_true DisR_pert GlobalInd SigMa_XTM SelfInd XRF XRF_decom XRF_raw SigMa_XRF data_h;
 end;
 nTol=N(1)^2*NumElement;
-v0=zeros(nTol,1);
 plotSim=0;
 if(plotSim & Joint~=-1& n_level==1)
      a=squeeze(XRF_decom(:,:,2));b=squeeze(XRF_Simulated_decom(:,:,2));

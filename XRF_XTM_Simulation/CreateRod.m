@@ -3,18 +3,17 @@ xc=getCellCenteredGrid(omega,[N,N]);
 xc=reshape(xc,N^2,2);
 center = [1.3 -1.3 ; 0 0; 1.3 1.3].*Tol;
 r = [ 0.05 1 0.05].*Tol;
-if(NumElement==7)
-    composition={'B','O','Na','Al','Si'};
-    percentage=[0.26 2.111 0.07 0.04 0.81];
+if(NumElement==8)
+    composition={'B','O','Na','Al','Si','K'};
+    percentage=[0.26 2.111 0.07 0.04 0.81 0.01];
     Density=2.23;
     C=concentration(Density,percentage,composition);
 else
     C=2.33;
 end
-w_ele=[19.3 C 19.3]; % units: g/cm^3
-% w_ele=w_ele.*[1 4 1];
+w_ele=[19.3 C*12 19.3]; % units: g/cm^3
 W = zeros(N^2,NumElement);
-% hollow=0;
+hollow=0;
 for ele=1:NumElement
     if(ele==1)
         ind=1;
@@ -32,7 +31,15 @@ for ele=1:NumElement
         if(hollow)
             pix = (xc(:,1)-center(2,1)).^2+(xc(:,2)-center(2,2)).^2 <= r(2)^2 & (xc(:,1)-center(2,1)).^2+(xc(:,2)-center(2,2)).^2 >= (2*r(2)/3)^2;
         end
-        W(find(pix==1),ele)=w_ele(ele);%6e-3;
+        W(find(pix==1),ele)=w_ele(ele);
     end
 end
 W=reshape(W,[N,N,NumElement]);
+load data_rod;
+Wtemp=reshape(xstar_joint,N,N,3);
+% Wtemp=reshape(x_admm(:,end),N,N,3);
+smooth_rate=10;
+W(:,:,1)=smooth2a(Wtemp(:,:,1),smooth_rate);
+W(:,:,6)=smooth2a(Wtemp(:,:,2),smooth_rate);%smooth2a(Wtemp(:,:,2),2);%*0.81;
+W(:,:,8)=smooth2a(Wtemp(:,:,3),smooth_rate);
+
