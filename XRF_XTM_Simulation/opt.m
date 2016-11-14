@@ -86,7 +86,7 @@ if(Alternate)
         fctn_half=@(W)sfun_half_linear(W,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
         fctn=@(W)sfun_full_linear(W,XRF,NumElement,m,nTau);
     elseif(Joint==1)
-        % TempBeta=1; % Beta=1;
+        TempBeta=1; Beta=1;
         if(s_a)
             Mt=reshape(DisR',numThetan*(nTau+1),1);
         else

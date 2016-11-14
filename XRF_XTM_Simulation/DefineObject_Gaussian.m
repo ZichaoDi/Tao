@@ -73,7 +73,7 @@ NumElement=length(Z);
         clear iR_num iR
     end
     if(onlyXRF)
-        UnitSpectrumSherman_real; %% Produce BindingEnergy M
+        UnitSpectrumSherman_real_1; %% Produce BindingEnergy M
     else
         UnitSpectrumSherman_real; %% Produce BindingEnergy M
     end

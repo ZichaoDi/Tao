@@ -30,7 +30,7 @@ else
     sample='Rod';
     NumElement=3;
 end
-N=40;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
+N=50;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
 angleScale=2; %1: half angle; 2: full angle
 if(synthetic)
     numThetan=73; % number of scanning angles/projections
@@ -77,38 +77,25 @@ else
         end
         save('tomopytest.mat','data_xrf_decom');
     elseif(strcmp(sample,'Rod'))
-        % load ~/Documents/Research/APS/GlassRod/2dSlice/Slice30
-        % ind_i0=43;
-        % ind_xrt=38;
-        % slice_tot = [3 4 25 30]; %GlassRod%
-        load slice30
-        slice_tot = [30 31 20 29]; %GlassRod%
-        ind_i0=2;
-        ind_xrt=3;
-        data(isinf(data))=0;
-        data(isnan(data))=0;
+        load ~/Documents/Research/APS/GlassRod/2dSlice/Slice30
+        ind_i0=43;
+        ind_xrt=38;
+        slice_tot = [3 4 25 30]; %GlassRod%
+        % load slice30
+        % slice_tot = [30 31 20 29]; %GlassRod%
+        % ind_i0=2;
+        % ind_xrt=3;
+        % data(isinf(data))=0;
+        % data(isnan(data))=0;
         % xrt=-log(data(ind_xrt,:,:)./data(ind_i0,:,:));
         % xrf(1,:,:)=sum(data([slice_tot(1) slice_tot(2)],:,:),1);
         % xrf(2,:,:)=data(slice_tot(3),:,:);
         % xrf(3,:,:)=data(slice_tot(4),:,:);
         % save('tomopytest.mat','xrf','xrt');
         load tomoRod
-        c_sh=1;% floor(size(data,3)/2-842)+20;
-        data_temp=data;
-        for sub_ch=1:size(data,1)
-            if(sub_ch==ind_i0 | sub_ch==ind_xrt)
-                center_shift=1;%c_sh;
-            else
-                center_shift=c_sh;
-            end
-            data_temp(sub_ch,:,center_shift:end)=data(sub_ch,:,1:end-center_shift+1);
-            data_temp(sub_ch,:,1:center_shift-1)=data(sub_ch,:,end-center_shift+2:end);
-        end
-        data=data_temp;
-        clear data_temp;
         data_h=[];
-        ang_rate=1;
-        tau_rate=9;
+        ang_rate=2;
+        tau_rate=25;
         for ele=1:size(data,1)
             data_h(ele,:,:)=sum(data(ele,1:ang_rate:end,1:tau_rate:end),1);
         end
@@ -131,11 +118,7 @@ else
         % return;
         XRF_decom=permute(data_xrf_decom(:,:,:),[2 3 1]);
         load spectra_30_aligned;
-        spectra=0.*spectra_30_aligned;
-        center_shif=c_sh;
-        spectra(center_shift:end,:,:)=spectra_30_aligned(1:end-center_shift+1,:,:);
-        spectra(1:center_shift-1,:,:)=spectra_30_aligned(end-center_shift+2:end,:,:);
-        data_xrf_raw=permute(spectra(1:tau_rate:end,1:ang_rate:end,:),[3 2 1]);
+        data_xrf_raw=permute(spectra_30_aligned(1:tau_rate:end,1:ang_rate:end,:),[3 2 1]);
         data_xrf_raw=sparse(reshape(double(data_xrf_raw),[size(data_xrf_raw,1),size(data_xrf_raw,2)*size(data_xrf_raw,3)]));
         XRF_raw=data_xrf_raw';
         clear spectra_30_aligned data_sa data_ds data_h

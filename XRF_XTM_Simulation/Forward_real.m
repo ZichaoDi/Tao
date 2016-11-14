@@ -20,14 +20,18 @@ area_xrf=sparse(zeros(numThetan*(nTau+1),mtol));
 SelfInd=repmat({cell(3,1)},[numThetan*(nTau+1),mtol]);
 
 fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel);
-
+x0=0;%dz(1)*(874-842)/1750*200;
+y0=-dz(1)*(874-842)/1750*200;
 for n=1:numThetan
     theta=thetan(n)/180*pi;
     fprintf(1,'====== Angle Number  %d of %d: %d\n',n,numThetan,thetan(n));
-    TransMatrix=[cos(theta) sin(theta);-sin(theta) cos(theta)];
-    DetKnot=DetKnot0*TransMatrix;
-    SourceKnot=SourceKnot0*TransMatrix;
-    SSDknot=SSDlet*TransMatrix;
+    TransMatrix=[cos(theta) sin(theta) 0; -sin(theta) cos(theta) 0;x0-cos(theta)*x0-sin(theta)*y0 y0+sin(theta)*x0-cos(theta)*y0 1];
+    DetKnot=[DetKnot0 ones(size(DetKnot0,1),1)]*TransMatrix;
+    DetKnot=DetKnot(:,1:2);
+    SourceKnot=[SourceKnot0 ones(size(DetKnot0,1),1)]*TransMatrix;
+    SourceKnot=SourceKnot(:,1:2);
+    SSDknot=[SSDlet ones(size(SSDlet,1),1)]*TransMatrix;
+    SSDknot=SSDknot(:,1:2);
     %=================================================================
     for i=1:nTau+1 %%%%%%%%%================================================================
         % Initialize

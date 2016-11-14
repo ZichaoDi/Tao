@@ -84,6 +84,9 @@ while(i<=NumElement)
         G=1/(sigma*sqrt(2*pi))*exp(-(DetChannel'-BindingEnergy(i,j)).^2./(2*sigma^2));
         M_raw(i,:)=M_raw(i,:)+ifft(fft(PurePeak).*fft(G));
         truncInd_sub{i}=unique([truncInd_sub{i}; find(DetChannel> BindingEnergy(i,j)-truncWidth & DetChannel < BindingEnergy(i,j)+truncWidth & DetChannel <= E0)]);
+        if(intensity<=1e-1 & i~=2 & i~=3)
+            BindingEnergy(i,j)=0;
+        end
         j=j+1;
     end
     truncInd_sub{i}=sort(truncInd_sub{i});

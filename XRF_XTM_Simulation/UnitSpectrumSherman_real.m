@@ -8,14 +8,13 @@
 % K_shell:0 L1:1 L2:2 L3:3 M1:4 M2:5 M3:6 M4:7 M5:8
 % KA_LINE:0 KB:1 LA:2 LB:3
 global TakeLog I0 M_decom M_raw Element synthetic
-if(strcmp(sample,'Seed'))
+if(synthetic)
 E0=12;
-I0=2000;
+E2I=1/3e8/6.62e-34*1e-15;
+I0=E0*E2I;
 else
 E0=12.1;
 end
-E2I=1/3e8/6.62e-34*1e-15;
-I0=E0*E2I;
 NumElement=length(Z);
 NA=6.02e23;%Avogadro's number
 load_xraylib=1;
@@ -29,8 +28,8 @@ else
 load(['xRayLib',num2str(E0),'.mat'])
 end
 load AtomicWeight
-% Line=0:3;%[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
-Line=-[0:207];
+Line=0:3;%[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
+% Line=-[0:207];
 % Line=[-3 -2 -1 -5 -6 -8 -13 -90 -34 -33 -102 -91 -98 -36 -35 -94 -89 -63 -95 -68 -207 -206];% partially K,L,M lines
 
 shell=0;  %% Shell type
@@ -40,7 +39,7 @@ M_raw=zeros(NumElement,numChannel_raw);
 i=1;
 T=1;
 if(plotUnit)
-figure('name', 'Unit Spectrum');
+    figure('name', 'Unit Spectrum');
 end
 %fprintf(1,'Element     AtomicNumber    Line     FluorescenceEnergy     Intensity\n')
 %%==set up Gaussian Distribution
@@ -51,46 +50,46 @@ truncInd=[];
 truncWidth=0.02;
 %%======================================================================
 while(i<=NumElement)
-PurePeak=0.*DetChannel_decom;
-if(load_xraylib)
-ElementDensity(Z(i))=calllib('libxrl','ElementDensity',Z(i));%
-A(Z(i))=calllib('libxrl','AtomicWeight',Z(i));
-CS_TotalBeam(Z(i),1)=calllib('libxrl','CS_Total',Z(i),E0);
-end
-density=ElementDensity(Z(i));%
-j=1;
-while (j<=length(Line))
-if(load_xraylib)
-LineEnergy(Z(i),j)=calllib('libxrl','LineEnergy',Z(i),Line(j));
-CS_FluoLine(Z(i),j)=calllib('libxrl','CS_FluorLine_Kissel',Z(i),Line(j),E0);
-end
-new_energy=LineEnergy(Z(i),j);%
-intensity=CS_FluoLine(Z(i),j);%
-BindingEnergy(i,j)=new_energy;
-[~,adj]=min(abs(repmat(new_energy,size(DetChannel_decom))-DetChannel_decom));
-PurePeak(adj)=PurePeak(adj)+intensity;    
-M_decom(i,i)=M_decom(i,i)+sum(PurePeak);
-M_raw(i,:)=M_raw(i,:)+intensity/(sigma*sqrt(2*pi))*exp(-(DetChannel_raw'-BindingEnergy(i,j)).^2./(2*sigma^2));
-truncInd=unique([truncInd; find(DetChannel_raw> BindingEnergy(i,j)-truncWidth & DetChannel_raw < BindingEnergy(i,j)+truncWidth)]);
-j=j+1;
-end
-truncInd=sort(truncInd);
-% fprintf('    %s           %d          %i          %5.2f               %5.2f\n', Element{Z(i)}, Z(i),-Line(j), new_energy, intensity);
+    PurePeak=0.*DetChannel_decom;
+    if(load_xraylib)
+        ElementDensity(Z(i))=calllib('libxrl','ElementDensity',Z(i));%
+        A(Z(i))=calllib('libxrl','AtomicWeight',Z(i));
+        CS_TotalBeam(Z(i),1)=calllib('libxrl','CS_Total',Z(i),E0);
+    end
+    density=ElementDensity(Z(i));%
+    j=1;
+    while (j<=length(Line))
+        if(load_xraylib)
+            LineEnergy(Z(i),j)=calllib('libxrl','LineEnergy',Z(i),Line(j));
+            CS_FluoLine(Z(i),j)=calllib('libxrl','CS_FluorLine_Kissel',Z(i),Line(j),E0);
+        end
+        new_energy=LineEnergy(Z(i),j);%
+        intensity=CS_FluoLine(Z(i),j);%
+        BindingEnergy(i,j)=new_energy;
+        [~,adj]=min(abs(repmat(new_energy,size(DetChannel_decom))-DetChannel_decom));
+        PurePeak(adj)=PurePeak(adj)+intensity;    
+        M_decom(i,i)=M_decom(i,i)+sum(PurePeak);
+        M_raw(i,:)=M_raw(i,:)+intensity/(sigma*sqrt(2*pi))*exp(-(DetChannel_raw'-BindingEnergy(i,j)).^2./(2*sigma^2));
+        truncInd=unique([truncInd; find(DetChannel_raw> BindingEnergy(i,j)-truncWidth & DetChannel_raw < BindingEnergy(i,j)+truncWidth)]);
+        j=j+1;
+    end
+    truncInd=sort(truncInd);
+    % fprintf('    %s           %d          %i          %5.2f               %5.2f\n', Element{Z(i)}, Z(i),-Line(j), new_energy, intensity);
 
-%%%%=============================== Start Gaussian Convolution
-if(plotUnit)
-cmap=colormap(lines);
-cmap = cmap(1:NumElement,:);
-% semilogy(DetChannel,abs(M(i,:)),'color',cmap(i,1:3),'LineStyle','-.','LineWidth',1.5);
-plot(DetChannel_raw,abs(M_raw(i,:)),'color',cmap(i,1:3),'LineStyle','-.','LineWidth',1.5);
-Legend{i}=sprintf('%s',Element{Z(i)});
-legend(Legend)
-title('Gaussian spectrum for each element')
-hold on;
-end
+    %%%%=============================== Start Gaussian Convolution
+    if(plotUnit)
+        cmap=colormap(lines);
+        cmap = cmap(1:NumElement,:);
+        % semilogy(DetChannel,abs(M(i,:)),'color',cmap(i,1:3),'LineStyle','-.','LineWidth',1.5);
+        plot(DetChannel_raw,abs(M_raw(i,:)),'color',cmap(i,1:3),'LineStyle','-.','LineWidth',1.5);
+        Legend{i}=sprintf('%s',Element{Z(i)});
+        legend(Legend)
+        title('Gaussian spectrum for each element')
+        hold on;
+    end
 
-%fprintf('=====================================================\n')
-i=i+1;
+    %fprintf('=====================================================\n')
+    i=i+1;
 end
 %%%%===================================================================
 if(load_xraylib)

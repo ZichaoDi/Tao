@@ -21,7 +21,7 @@
 % save('simulate_realrod_solid_noself.mat','XRF_decom','DisR','XRF');
 hollow=0;
 do_setup_simulate;
-save('simulate_recon195_1.mat','XRF_decom','DisR','XRF');
+save('simulate_recon195_tipped_1.mat','XRF_decom','DisR','XRF');
 % %%======================================================
 % return;
 % global numThetan N Beta
