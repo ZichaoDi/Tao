@@ -16,7 +16,7 @@ L=sparse(numThetan*(nTau+1),prod(m));
 DisR_Simulated=zeros(nTau+1,numThetan);
 GlobalInd=cell(numThetan,nTau+1);
 fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel);
-r=dz(1)/3*(m(1)/3-N/2);
+r=dz(1)*(m(1)/3-N/2);
 cr=[0 0; -r -r; -r r; r r; r -r;r 0;0 r;-r 0;0 -r];
 cr=cr([1,4],:);
 if(~exist('ind_cr','var'))

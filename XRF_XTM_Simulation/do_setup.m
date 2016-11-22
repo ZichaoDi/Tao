@@ -76,6 +76,8 @@ else
             iR_num(:,:,ele)=interp2(x_ir,y_ir,iR(:,:,slice(ele)),x_num,y_num);
         end
         save('tomopytest.mat','data_xrf_decom');
+    elseif(strcmp(sample,'Filter'))
+        Filter_setup;
     elseif(strcmp(sample,'Rod'))
         load ~/Documents/Research/APS/GlassRod/2dSlice/Slice30
         ind_i0=43;
