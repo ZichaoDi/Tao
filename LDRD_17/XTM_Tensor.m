@@ -3,6 +3,23 @@ global plotSpecSingle BeforeEmit N
 global LogScale EmptyBeam synthetic 
 plotSpecSingle=0;
 more off;
+%%-------------------------- Set up center of rotation
+Tol=1e-2; 
+omega=[-2     2    -2     2].*Tol;
+m=[current_n current_n]; %Numerical Resolution
+dz=[(omega(2)-omega(1))/m(2) (omega(4)-omega(3))/m(1)];
+
+r=dz(1)/3*(m(1)/3-N/2);
+cr=[0 0; -r -r; -r r; r r; r -r;r 0;0 r;-r 0;0 -r];
+cr=cr([1,4],:);
+if(~exist('ind_cr','var'))
+  ind_cr=1;
+end
+delta0(1)=cr(ind_cr,1); 
+delta0(2)=cr(ind_cr,2);
+rotation_point=[delta0(1),delta0(2)];
+Delta_D=[0,r];
+delta_d0=Delta_D(ind_cr);
 %%-----------------------------------------------
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
 DefineObject_Gaussian; % Produce W, MU_XTM
@@ -16,15 +33,6 @@ L=sparse(numThetan*(nTau+1),prod(m));
 DisR_Simulated=zeros(nTau+1,numThetan);
 GlobalInd=cell(numThetan,nTau+1);
 fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel);
-r=dz(1)*(m(1)/3-N/2);
-cr=[0 0; -r -r; -r r; r r; r -r;r 0;0 r;-r 0;0 -r];
-cr=cr([1,4],:);
-if(~exist('ind_cr','var'))
-  ind_cr=1;
-end
-delta0(1)=cr(ind_cr,1); 
-delta0(2)=cr(ind_cr,2);
-rotation_point=[delta0(1),delta0(2)];
 for n=1:numThetan
     if(mod(n,10)==0)
         fprintf(1,'====== Angle Number  %d of %d: %d\n',n,numThetan,thetan(n));

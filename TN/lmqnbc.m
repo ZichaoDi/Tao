@@ -138,11 +138,6 @@ while (~conv);
     alpha0 = alpha;
     PieceLinear=1;
     newcon = 0;
-    % p_plot=reshape(p,m(1),m(2),NumElement);
-    % ip_plot = reshape(ipivot,m(1),m(2),NumElement);
-    % figure;for ie=1:3,subplot(2,3,ie);imagesc(p_plot(:,:,ie));if(ie==1);title(['Iter ',num2str(nit)]);end;colorbar;set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',[],'YTick',[]);
-    % cmap=[0 1];
-    % subplot(2,3,ie+3),imagesc(ip_plot(:,:,ie),cmap);colorbar;set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',[],'YTick',[]);end
     if(PieceLinear)
         if(Joint==1)
         [x_new, f_new, g_new, nf1, ierror, alpha,ipivot,newcon,flast,f_xrf,f_xtm] = lin_proj (p, x, f, g, alpha0, sfun, low, up,ipivot,flast,newcon);
@@ -173,8 +168,6 @@ while (~conv);
         %############################
         fprintf('    |g|     = %12.4e\n', norm(g));
         fprintf('    |p|     = %12.4e\n', norm(p));
-        %         disp('Hit any key to continue')
-        %         pause;
     end;
     %#######################
     x   = x_new;

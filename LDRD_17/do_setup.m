@@ -31,10 +31,10 @@ else
     sample='Rod';
     NumElement=3;
 end
-N=100;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
+N=200;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
 angleScale=2; %1: half angle; 2: full angle
 if(synthetic)
-    numThetan=50; % number of scanning angles/projections
+    numThetan=35; % number of scanning angles/projections
     DecomposedElement=0;
 else
     Tol = 1e-2;
