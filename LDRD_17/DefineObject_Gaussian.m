@@ -15,9 +15,6 @@ load PeriodicTable
 %%%%%======================================
 x=linspace(omega(1),omega(2),m(1)+1);
 y=linspace(omega(3),omega(4),m(2)+1);
-%%%========================== the grids of object
-xc = getCellCenteredGrid(omega,[m(2) m(1)]);
-xc = reshape(xc,prod(m),2);
 
 %%%=========== assign weight matrix for each element in each pixel
 if(synthetic)
@@ -51,7 +48,7 @@ NumElement=length(Z);
             CreateElement; 
         elseif(strcmp(sample,'circle'))
             [X,Y]=meshgrid(1:m(1),1:m(2));
-            center=[m(1)/3, m(2)/3];
+            center=[2*m(1)/3, 2*m(2)/3];
             r=m(1)/10;
             pix = (X-center(1)).^2+(Y-center(2)).^2 <= r^2; %% circle
             % pix = (X-center(1)).^2+(Y-center(2)).^2 >= (m(1)/5)^2 & (X-center(1)).^2+(Y-center(2)).^2 <= (m(1)/4)^2;

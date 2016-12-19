@@ -31,7 +31,7 @@ else
     sample='Rod';
     NumElement=3;
 end
-N=200;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
+N=100;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
 angleScale=2; %1: half angle; 2: full angle
 if(synthetic)
     numThetan=35; % number of scanning angles/projections
@@ -78,16 +78,16 @@ else
         end
         save('tomopytest.mat','data_xrf_decom');
     elseif(strcmp(sample,'Rod'))
-        % load ~/Documents/Research/APS/GlassRod/2dSlice/Slice30
-        % ind_i0=43;
-        % ind_xrt=38;
-        % slice_tot = [3 4 25 30]; %GlassRod%
-        load slice30
-        slice_tot = [30 31 20 29]; %GlassRod%
-        ind_i0=2;
-        ind_xrt=3;
-        data(isinf(data))=0;
-        data(isnan(data))=0;
+        load ~/Documents/Research/APS/GlassRod/2dSlice/Slice30
+        ind_i0=43;
+        ind_xrt=38;
+        slice_tot = [3 4 25 30]; %GlassRod%
+        % load slice30
+        % slice_tot = [30 31 20 29]; %GlassRod%
+        % ind_i0=2;
+        % ind_xrt=3;
+        % data(isinf(data))=0;
+        % data(isnan(data))=0;
         % xrt=-log(data(ind_xrt,:,:)./data(ind_i0,:,:));
         % xrf(1,:,:)=sum(data([slice_tot(1) slice_tot(2)],:,:),1);
         % xrf(2,:,:)=data(slice_tot(3),:,:);
@@ -139,7 +139,7 @@ bounds = 1;  % no bound constraints
 Joint=-1; % 0: XRF; -1: XTM; 1: Joint inversion
 ReconAttenu = 1*(Joint==-1); % 0: Recover W; 1: Recover miu
 Alternate=1*(Joint~=-1);
-frame='EM';
+frame='LS';
 linear_S=0*Alternate;
 LogScale=1; %% determine if the XTM is solved taking log first or not
 Weighted=0; %% 1 if use weighted least-square form

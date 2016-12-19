@@ -137,7 +137,7 @@ end
 %%=============================
 NoSelfAbsorption=0; % 0: include self-absorption in the XRF inversion
 bounds = 1;  % no bound constraints
-Joint=1; % 0: XRF; -1: XTM; 1: Joint inversion
+Joint=-1; % 0: XRF; -1: XTM; 1: Joint inversion
 ReconAttenu = 1*(Joint==-1); % 0: Recover W; 1: Recover miu
 Alternate=1*(Joint~=-1);
 frame='EM';

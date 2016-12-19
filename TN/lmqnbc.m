@@ -10,7 +10,7 @@ function [xstar, f, g, ierror] = ...
 global sk yk sr yr yksk yrsr
 global NF N current_n  fiter itertest ErrIter
 global ptest gv ipivot nit
-global i_cauchy W0  m NumElement
+global n_delta i_cauchy W0  m NumElement
 global maxiter err0 Joint 
 global f_xrf f_xtm
 %---------------------------------------------------------
@@ -77,7 +77,7 @@ ind = find((ipivot ~= 2) & (ipivot.*g>0));
 if (~isempty(ind));
     ipivot(ind) = zeros(length(ind),1);
 end;
-% ipivotOld=ipivot;
+ipivotOld=ipivot;
 g = ztime (g, ipivot);
 gnorm = norm(g,'inf');
 if(Joint==1)
@@ -134,29 +134,33 @@ while (~conv);
     %---------------------------------------------------------
     pe = pnorm + eps;
     spe = stpmax (stepmx, pe, x, p, ipivot, low, up);
+    %---------------------------------------------------------%    
+    % update active set, if appropriate
+    %---------------------------------------------------------
+    if(spe<=eps)
+        disp('update active set due to zero step length');
+        [ipivot, flast] = modz (x, p, ipivot, low, up, flast, f);
+    end
     alpha = step1 (f, gtp, spe);
     alpha0 = alpha;
     PieceLinear=1;
     newcon = 0;
     if(PieceLinear)
         if(Joint==1)
-        [x_new, f_new, g_new, nf1, ierror, alpha,ipivot,newcon,flast,f_xrf,f_xtm] = lin_proj (p, x, f, g, alpha0, sfun, low, up,ipivot,flast,newcon);
+        [x_new, f_new, g_new, nf1, ierror, alpha,ipivot,newcon,flast,f_xrf,f_xtm] = lin_proj (p, x, f, g, alpha0, sfun, low, up,ipivot,newcon,flast);
         else
-        [x_new, f_new, g_new, nf1, ierror, alpha,ipivot,newcon,flast] = lin_proj (p, x, f, g, alpha0, sfun, low, up,ipivot,flast,newcon); 
+        [x_new, f_new, g_new, nf1, ierror, alpha,ipivot,newcon,flast] = lin_proj (p, x, f, g, alpha0, sfun, low, up,ipivot,newcon,flast); 
         end
     else
         [x_new, f_new, g_new, nf1, ierror, alpha] = lin1 (p, x, f, alpha0, g, sfun);
     end
-    %---------------------------------------------------------%    
-    % update active set, if appropriate
-    %---------------------------------------------------------
     if(alpha<=0)
        newcon = 0;
        if (abs(alpha-spe) <= eps);% | alpha==1
            disp('update ipivot due to tiny step length')
            newcon = 1;
            ierror = 0;
-           [ipivot, flast] = modz (x, p, ipivot, low, up, flast, f, alpha);
+           [ipivot, flast] = modz (x, p, ipivot, low, up, flast, f);
        end;
     end
     if (alpha <= 0 & alpha0 ~= 0 | ierror == 3);
@@ -173,7 +177,7 @@ while (~conv);
     x   = x_new;
     f   = f_new;
     g   = g_new;
-    g0=g;
+    g0  = g;
     %#######################
     nf  = nf  + nf1;
     nit = nit +   1;
@@ -228,48 +232,55 @@ while (~conv);
     if(nit>=maxiter)
         conv = 1;
     end;
+
     plotAS=0;
-    if((mod(nit,10)==0 | conv | nit==1) & Joint~=-1 & plotAS==1) %
-        %     if(conv& Joint~=-1 & plotAS)
-        load BindInd
-        figure(10);plot(1:length(x),g,'r.-',1:length(BindInd),g(BindInd),'ro',1:length(x),ipivot,'g.-',1:length(x),p,'m*');
-        addAS=length(find(-ipivot+ipivotOld==1));
-        dropAS=length(find(-ipivot+ipivotOld==-1));
-        figure(19);plot(1:nit,ASchange,'r.-');
-        figure(91);subplot(2,1,1),
-        plot(1:length(x),ipivot,'r.-',1:length(x),x,'bo-',1:length(x),g,'gs');
-        ipivotOld=ipivot;
-        legend('active set','current variable','reduced gradient');
-        subplot(2,1,2);qpPlotAset(ipivot,nit,length(x),[addAS,-dropAS],nitOld);
-        nitOld=nit;
-        if(conv)
-            figure(90);clims=[-1 1];
-            for inum=1:NumElement
-                ASpar=4;
-                subplot(NumElement,ASpar,ASpar*(inum-1)+1)
-                AS=find(x-0<=10 * eps);
-                xmap=zeros(size(x));xmap(AS)=-1;xmap=reshape(xmap,m(1),m(2),NumElement);
-                imagesc(xmap(:,:,inum),clims);ylabel(['Element',num2str(inum)],'fontsize',12);
-                if(inum==1);title('Indicator of x','fontsize',12);end
-                gmap=g;
-                gmap(AS)=-1*sign(g(AS));gmap=reshape(gmap,m(1),m(2),NumElement);
-                subplot(NumElement,ASpar,ASpar*(inum-1)+2)
-                imagesc(gmap(:,:,inum),clims);
-                if(inum==1);title('Indicator of gradient','fontsize',12);end
-                ipmap=reshape(ipivot,m(1),m(2),NumElement);
-                subplot(NumElement,ASpar,ASpar*(inum-1)+3)
-                imagesc(ipmap(:,:,inum),clims);
-                if(inum==1);title('Indicator of active set','fontsize',12);end
-                
-                pmap=p;
-                pmap(AS)=sign(p(AS));pmap=reshape(pmap,m(1),m(2),NumElement);
-                subplot(NumElement,ASpar,ASpar*(inum-1)+4)
-                imagesc(pmap(:,:,inum),clims);
-                if(inum==1);title('search direction','fontsize',12);end
-            end
-            hp4 = get(subplot(NumElement,ASpar,ASpar*NumElement),'Position');
-            colorbar('Position', [hp4(1)+hp4(3)+0.01  hp4(2)  0.02  hp4(2)+hp4(3)*2.1])
-        end
+    if((mod(nit,1)==0 | conv | nit==1) & plotAS==1) %
+        figure(10);
+        subplot(2,2,1);imagesc(reshape(x(n_delta+1:end),m(1),m(2)));
+        colorbar;title('x');
+        subplot(2,2,2);imagesc(reshape(ipivot(n_delta+1:end),m(1),m(2)));
+        colorbar;title('ipivot');
+        subplot(2,2,3);imagesc(reshape(sign(g(n_delta+1:end)),m(1),m(2)));
+        colorbar;title('gradient');
+        subplot(2,2,4);imagesc(reshape(sign(p(n_delta+1:end)),m(1),m(2)));
+        colorbar;title([num2str(nit) ,'direction']);drawnow;
+
+        % addAS=length(find(-ipivot+ipivotOld==1));
+        % dropAS=length(find(-ipivot+ipivotOld==-1));
+        % figure(91);subplot(2,1,1),
+        % plot(1:length(x),ipivot,'r.-',1:length(x),x,'bo-',1:length(x),g,'gs');
+        % ipivotOld=ipivot;
+        % legend('active set','current variable','reduced gradient');
+        % subplot(2,1,2);qpPlotAset(ipivot,nit,length(x),[addAS,-dropAS],nitOld);
+        % nitOld=nit;
+        % if(conv)
+        %     figure(90);clims=[-1 1];
+        %     for inum=1:NumElement
+        %         ASpar=4;
+        %         subplot(NumElement,ASpar,ASpar*(inum-1)+1)
+        %         AS=find(x-0<=10 * eps);
+        %         xmap=zeros(size(x));xmap(AS)=-1;xmap=reshape(xmap(n_delta+1:end),m(1),m(2),NumElement);
+        %         imagesc(xmap(:,:,inum),clims);ylabel(['Element',num2str(inum)],'fontsize',12);
+        %         if(inum==1);title('Indicator of x','fontsize',12);end
+        %         gmap=g;
+        %         gmap(AS)=-1*sign(g(AS));gmap=reshape(gmap(n_delta+1:end),m(1),m(2),NumElement);
+        %         subplot(NumElement,ASpar,ASpar*(inum-1)+2)
+        %         imagesc(gmap(:,:,inum),clims);
+        %         if(inum==1);title('Indicator of gradient','fontsize',12);end
+        %             ipmap=reshape(ipivot(n_delta+1:end),m(1),m(2),NumElement);
+        %         subplot(NumElement,ASpar,ASpar*(inum-1)+3)
+        %         imagesc(ipmap(:,:,ikum),clims);
+        %         if(inum==1);title('Indicator of active set','fontsize',12);end
+        %         
+        %         pmap=p;
+        %         pmap(AS)=sign(p(AS));pmap=reshape(pmap(n_delta+1:end),m(1),m(2),NumElement);
+        %         subplot(NumElement,ASpar,ASpar*(inum-1)+4)
+        %         imagesc(pmap(:,:,inum),clims);
+        %         if(inum==1);title('search direction','fontsize',12);end
+        %     end
+        %     hp4 = get(subplot(NumElement,ASpar,ASpar*NumElement),'Position');
+        %     colorbar('Position', [hp4(1)+hp4(3)+0.01  hp4(2)  0.02  hp4(2)+hp4(3)*2.1])
+        % end
         drawnow;
     end
     %------------------------------------------------------

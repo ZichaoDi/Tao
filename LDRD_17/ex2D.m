@@ -1,5 +1,11 @@
 %%%Simulate XRF of a given object with predifined detector and beam
-exAlternate(0);
+plotPert;
+x_res=[];
+for res=1:25
+    opt;
+end
+save(['x_res_cP_positive',sample,'.mat'],'x_res');
+% exAlternate(0);
 %{
 return;
 h_admm=[];for i=1:size(x_admm,2)-1, h_admm(:,i)=x_admm(:,i+1)-x_admm(:,i);end

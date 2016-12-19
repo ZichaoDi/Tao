@@ -25,10 +25,10 @@ if (~ltest)
    end;
 end;
 if (imax ~= 0)
- ipivot(ind(imax)) = 0;
+   ipivot(ind(imax)) = 0;
    flast = f;
 else
-   stop1 = alpha*pnorm < toleps*(1 + xnorm);
+   stop1 = pnorm < toleps*(1 + xnorm);%alpha*pnorm < toleps*(1 + xnorm);
    stop2 = abs(dif) < rtleps*ftest;
    stop3 = gnorm < accrcy^(1/3)*ftest;
    stop4 = gnorm < .01*sqrt(accrcy)*ftest;

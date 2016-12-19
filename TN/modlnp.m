@@ -63,6 +63,7 @@ for k = 1:maxit
    if (rz/gnorm < tol); 
        ind = 80;
        if (norm(p)==0); p = -g; gtp = p'*g; 
+          disp('MODLNP 02: |p| = 0');
        end;
        return; 
    end;

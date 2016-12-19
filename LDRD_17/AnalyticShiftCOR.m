@@ -6,7 +6,7 @@ global Ddelta_COR
 
 delta_d=0; % off center for the initial reference projection;
 theta=thetan*pi/180;
-step=[1 0];%-10:1e-1:10;
+step=[0];%-10:1e-1:10;
 eps1=zeros(numThetan,1);
 
 Det=norm(DetKnot0(1,:)-SourceKnot0(1,:));
@@ -36,7 +36,6 @@ for k=1:length(step)
     Num=(DetKnot0(1,1)-SourceKnot0(1,1))*(cos(theta).*delta(:,2)'-sin(theta).*delta(:,1)'+2*cos(theta).*sin(theta).*delta(:,1)'+(sin(theta).^2-cos(theta).^2).*delta(:,2)')...
     + (DetKnot0(1,2)-SourceKnot0(1,2))*(-sin(theta).*delta(:,2)'-cos(theta).*delta(:,1)'+2*cos(theta).*sin(theta).*delta(:,2)'+(cos(theta).^2-sin(theta).^2).*delta(:,1)');
     shift(k,:)=Num./Det/dTau+1/2*delta_d0/dTau;
-
     Mt=-log(DisR./I0);%DisR;%
     alignedDiscrete=zeros(nTau+1,numThetan);
     alignedContinuous=alignedDiscrete;
@@ -47,9 +46,7 @@ for k=1:length(step)
         delay=mod(shift(k,i),nTau+1);
         %%---------------- Continuous: Gaussian Convolution
         G=1/(sigma*sqrt(2*pi))*exp(-([-nTau-1:nTau+1]'-delay).^2./(2*sigma^2));
-        G1(:,i)=G;
         aligned_temp=ifft(fft(G).*fft([0*ones(nTau+2,1);tt(:,i)]));
-        aligned1(:,i)=aligned_temp;
         if(abs(delay)>(nTau+1)/2)
             alignedContinuous(:,i)=aligned_temp(nTau+3:end);
         else
@@ -65,22 +62,22 @@ for k=1:length(step)
         end
     end
     %%---------------- Continuous: Gaussian Convolution
-    G=1/(sigma*sqrt(2*pi))*exp(-(repmat([1:nTau+1]',1,numThetan)-repmat(mod(shift(k,:),nTau+1),nTau+1,1)).^2./(2*sigma^2));
-    alignedContinuous1=ifft(fft(G).*fft(tt));
-    errD=alignedContinuous1-alignedContinuous;
+    % G=1/(sigma*sqrt(2*pi))*exp(-(repmat([1:nTau+1]',1,numThetan)-repmat(mod(shift(k,:),nTau+1),nTau+1,1)).^2./(2*sigma^2));
+    % alignedContinuous1=ifft(fft(G).*fft(tt));
+    % errD=alignedContinuous1-alignedContinuous;
     %%--------------------------------------------------
-    err=norm(alignedContinuous-Mt(:,:,1));
+    err=[norm(alignedContinuous-Mt(:,:,1)),norm(alignedDiscrete-Mt(:,:,1))];
 end
 end
-for i = 1:numThetan
-    v_temp=unique(shift(:,i));
-    eps1(i)=(step(2)-step(1))*length(find(shift(:,i)==v_temp(round(length(v_temp)/2))));
-end
+% for i = 1:numThetan
+%     v_temp=unique(shift(:,i));
+%     eps1(i)=(step(2)-step(1))*length(find(shift(:,i)==v_temp(round(length(v_temp)/2))));
+% end
 % fprintf('Correcting Error = %d\n',err);
-%  figure, 
-%  subplot(3,2,1);imagesc(tt);subplot(3,2,2);imagesc(iradon(tt,thetan,'linear','shepp-logan',N));
-%  subplot(3,2,3);imagesc(alignedDiscrete);subplot(3,2,4);imagesc(iradon(alignedDiscrete,thetan,'linear','shepp-logan',N));
-%  subplot(3,2,5);imagesc(Mt(:,:,1));subplot(3,2,6);imagesc(iradon(Mt(:,:,1),thetan));
+figure, 
+subplot(3,2,1);imagesc(tt);subplot(3,2,2);imagesc(iradon(tt,thetan,'linear','shepp-logan',N));
+subplot(3,2,3);imagesc(alignedContinuous);subplot(3,2,4);imagesc(iradon(alignedContinuous,thetan,'linear','shepp-logan',N));
+subplot(3,2,5);imagesc(Mt(:,:,1));subplot(3,2,6);imagesc(iradon(Mt(:,:,1),thetan));
 
 
 % d1=[];d2=[];for i=1:numThetan;[~,d]=max(Mt(:,i,1));d1(i)=d;[~,d]=max(Mt(:,i,2));d2(i)=d;end

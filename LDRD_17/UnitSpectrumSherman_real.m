@@ -8,14 +8,13 @@
 % K_shell:0 L1:1 L2:2 L3:3 M1:4 M2:5 M3:6 M4:7 M5:8
 % KA_LINE:0 KB:1 LA:2 LB:3
 global TakeLog I0 M_decom M_raw Element synthetic
-if(strcmp(sample,'Seed'))
-E0=12;
-I0=2000;
+if(synthetic)
+E0=12.1;
+E2I=1/3e8/6.62e-34*1e-15;
+I0=E0*E2I;
 else
 E0=12.1;
 end
-E2I=1/3e8/6.62e-34*1e-15;
-I0=E0*E2I;
 NumElement=length(Z);
 NA=6.02e23;%Avogadro's number
 load_xraylib=0;

@@ -1,5 +1,5 @@
 function [x, f, g, nf1, ierror, alpha1, ipivot,newcon,flast,f_xrf,f_xtm] = ...
-    lin_proj (p, x, f, g, alpha, sfun, low, up,ipivot,flast,newcon)
+    lin_proj (p, x, f, g, alpha, sfun, low, up,ipivot,newcon,flast)
 global Joint
 %---------------------------------------------------------
 % line search: P(x+alpha*p)

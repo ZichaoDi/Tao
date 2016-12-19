@@ -1,15 +1,20 @@
 function [f,g,r]=sfun_radonCOR_sim(x,XTM,Ltol) 
-global frame  
+global frame n_delta 
 global thetan numThetan dTau nTau 
 %%===== Reconstruction discrete objective
 %%===== Ltol: intersection length matrix
 %%===== f: sum_i ||e^T(Ltol_i.*I)e-M_i||^2, i=1..theta
 %%===== x(1:3): off center for the initial reference projection;
+
 theta=thetan*pi/180;
 
-shift=(cos(theta)-cos(2*theta))*x(1)+(sin(2*theta)-sin(theta))*x(2)+x(3);
-
-Ddelta=[cos(theta)-cos(2*theta);sin(2*theta)-sin(theta);ones(1,numThetan)];
+if(n_delta==2)
+    shift=(cos(theta)-cos(2*theta))*x(1)+(sin(2*theta)-sin(theta))*x(2);
+    Ddelta=[cos(theta)-cos(2*theta);sin(2*theta)-sin(theta)];
+else
+    shift=(cos(theta)-cos(2*theta))*x(1)+(sin(2*theta)-sin(theta))*x(2)+x(3);
+    Ddelta=[cos(theta)-cos(2*theta);sin(2*theta)-sin(theta);ones(1,numThetan)];
+end
 
 alignedSignal=zeros(numThetan,nTau+1);
 DalignedSignal=zeros(numThetan,nTau+1);
@@ -33,27 +38,27 @@ end
 % alignedSignal1=(ifft(fft(G).*fft(XTM')))';
 % DalignedSignal1=(ifft(fft(dG).*fft(XTM')))';
 % norm(alignedSignal-alignedSignal1)
-% norm(DalignedSignal-DalignedSignal1)
+% norm(XTM-alignedSignal1)
 
 %%------------------------------------------------------
-Daligned=repmat(DalignedSignal(:),[1,3]).*repmat(Ddelta,[1,nTau+1])';
+Daligned=repmat(DalignedSignal(:),[1,n_delta]).*repmat(Ddelta,[1,nTau+1])';
+% save('sfun_test.mat','alignedSignal','shift');
+% figure, imagesc(iradon(alignedSignal',thetan));
 XTM=alignedSignal;
 
 if(strcmp(frame,'EM'))
     thres=1;
     Mt=XTM(:)+thres;
-    Rdis=Ltol*x(4:end)+thres;
+    Rdis=Ltol*x(n_delta+1:end)+thres;
     f=sum(-log(Rdis).*Mt+Rdis);
     g= Ltol'*(-Mt./Rdis+1);
     g_pert=-log(Rdis)'*(Daligned);
 elseif(strcmp(frame,'LS'))
-    r=Ltol*x(4:end)-XTM(:);
+    r=Ltol*x(n_delta+1:end)-XTM(:);
     g=Ltol'*r;
     f=1/2*sum(r.^2,1);
     g_pert=-r'*Daligned;
 end
 g=[g_pert';g];
-
-
 
 
