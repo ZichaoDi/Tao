@@ -8,7 +8,7 @@ if(n_delta==2)
 else
     deltaStar=[delta0_bar';1/2*delta_d0/dTau];
 end
-res=1;
+res=2;
 d0=[0 -res -res 0     res res res 0   -res;...
     0  0   -res -res -res 0   res res res];
 % d0=d0(:,2);
@@ -19,7 +19,7 @@ for res_step=1:size(d0,2)
     if(n_delta==2)
         delta=0*[d0(:,res_step)]+1*deltaStar;
     else
-        delta=[d0(:,res_step);0*deltaStar(3)]+1*deltaStar;
+        delta=[d0(:,res_step);-res]+1*deltaStar;
     end
     x0=[delta;0*10^(0)*rand(m(1)*m(2)*NumElement,1)];
     err0=norm(W0-x0);
@@ -47,7 +47,7 @@ for res_step=1:size(d0,2)
     else
         [x,f,g,ierror] = tn (x0,fctn);
     end
-    figure(1),
+    figure(4),
     subplot(size(d0,2),1,res_step);
     imagesc(reshape(x(n_delta+1:end),N,N));
     hold on;

@@ -9,11 +9,11 @@ global thetan numThetan dTau nTau
 theta=thetan*pi/180;
 
 if(n_delta==2)
-    shift=(cos(theta)-cos(2*theta))*x(1)+(sin(2*theta)-sin(theta))*x(2);
-    Ddelta=[cos(theta)-cos(2*theta);sin(2*theta)-sin(theta)];
+    shift=(cos(theta)-1)*x(1)+sin(theta)*x(2);
+    Ddelta=[cos(theta)-1;sin(theta)];
 else
-    shift=(cos(theta)-cos(2*theta))*x(1)+(sin(2*theta)-sin(theta))*x(2)+x(3);
-    Ddelta=[cos(theta)-cos(2*theta);sin(2*theta)-sin(theta);ones(1,numThetan)];
+    shift=(cos(theta)-1)*x(1)+sin(theta)*x(2)+x(3);
+    Ddelta=[cos(theta)-1;sin(theta);ones(1,numThetan)];
 end
 
 alignedSignal=zeros(numThetan,nTau+1);

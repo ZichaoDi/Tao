@@ -89,11 +89,13 @@ else
         % ind_xrt=3;
         % data(isinf(data))=0;
         % data(isnan(data))=0;
+        % xrf=[];
         % xrt=-log(data(ind_xrt,:,:)./data(ind_i0,:,:));
         % xrf(1,:,:)=sum(data([slice_tot(1) slice_tot(2)],:,:),1);
         % xrf(2,:,:)=data(slice_tot(3),:,:);
         % xrf(3,:,:)=data(slice_tot(4),:,:);
         % save('tomopytest.mat','xrf','xrt');
+        % return;
         load tomoRod
         data_h=[];
         ang_rate=2;
@@ -120,9 +122,23 @@ else
         % return;
         XRF_decom=permute(data_xrf_decom(:,:,:),[2 3 1]);
         load spectra_30_aligned;
-        data_xrf_raw=permute(spectra_30_aligned(1:tau_rate:end,1:ang_rate:end,:),[3 2 1]);
+        return;
+        spectra=0.*spectra_30_aligned;
+        center_shift=47;
+        if(center_shift>=0)
+            spectra(center_shift:end,:,:)=spectra_30_aligned(1:end-center_shift+1,:,:);
+            spectra(1:center_shift-1,:,:)=spectra_30_aligned(end-center_shift+2:end,:,:);
+        else
+            spectra(1:end+center_shift,:,:)=spectra_30_aligned(abs(center_shift)+1:end,:,:);
+            spectra(end+center_shift+1:end,:,:)=spectra_30_aligned(1:abs(center_shift),:,:);
+        end
+
+        data_xrf_raw=permute(spectra(1:tau_rate:end,1:ang_rate:end,:),[3 2 1]);
         data_xrf_raw=sparse(reshape(double(data_xrf_raw),[size(data_xrf_raw,1),size(data_xrf_raw,2)*size(data_xrf_raw,3)]));
         XRF_raw=data_xrf_raw';
+        % data_xrf_raw=permute(spectra_30_aligned(1:tau_rate:end,1:ang_rate:end,:),[3 2 1]);
+        % data_xrf_raw=sparse(reshape(double(data_xrf_raw),[size(data_xrf_raw,1),size(data_xrf_raw,2)*size(data_xrf_raw,3)]));
+        % XRF_raw=data_xrf_raw';
         clear spectra_30_aligned data_sa data_ds data_h
         m_h=size(iR,1);
         [x_ir,y_ir]=meshgrid(1:m_h);
@@ -137,7 +153,7 @@ end
 %%=============================
 NoSelfAbsorption=0; % 0: include self-absorption in the XRF inversion
 bounds = 1;  % no bound constraints
-Joint=-1; % 0: XRF; -1: XTM; 1: Joint inversion
+Joint=1; % 0: XRF; -1: XTM; 1: Joint inversion
 ReconAttenu = 1*(Joint==-1); % 0: Recover W; 1: Recover miu
 Alternate=1*(Joint~=-1);
 frame='EM';

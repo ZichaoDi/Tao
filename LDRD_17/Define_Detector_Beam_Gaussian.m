@@ -37,7 +37,7 @@ SSDlet=[linspace(SSD0(2,1),SSD0(1,1),NumSSDlet)',...
 %%%=========== Assign Projection Angles;
 thetan=linspace(0,360,numThetan);%linspace(363,abs(183*(angleScale)-363),numThetan);% must be positive.
 if(numThetan==1)
-    thetan=0;
+    thetan=90;
 end
 if(strcmp(sample,'Rod'))
     thetan=thetan_real;%linspace(-180,180,numThetan)+360;% must be positive.
