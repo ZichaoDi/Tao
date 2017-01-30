@@ -1,29 +1,31 @@
 % function xstar=exAlternate(simulate)
 %%%Simulate XRF of a given object with predifined detector and beam
 do_setup;
-shift_test=[-1:5:40];
-x_shift=zeros(length(shift_test),N^2*NumElement);
-for sind=1:length(shift_test)
-    load spectra_30_aligned;
-    spectra=0.*spectra_30_aligned;
-    center_shift=shift_test(sind);
-    if(center_shift>=0)
-        spectra(center_shift:end,:,:)=spectra_30_aligned(1:end-center_shift+1,:,:);
-        spectra(1:center_shift-1,:,:)=spectra_30_aligned(end-center_shift+2:end,:,:);
-    else
-        spectra(1:end+center_shift,:,:)=spectra_30_aligned(abs(center_shift)+1:end,:,:);
-        spectra(end+center_shift+1:end,:,:)=spectra_30_aligned(1:abs(center_shift),:,:);
-    end
-
-    data_xrf_raw=permute(spectra(1:tau_rate:end,1:ang_rate:end,:),[3 2 1]);
-    data_xrf_raw=sparse(reshape(double(data_xrf_raw),[size(data_xrf_raw,1),size(data_xrf_raw,2)*size(data_xrf_raw,3)]));
-    XRF_raw=data_xrf_raw';
-    DecomposedElement=0;
-    opt;
-    x_shift(sind,:)=xstar';
-    save x_shift x_shift
-end
-% if(simulate)
+DecomposedElement=0;
+opt;
+% shift_test=[-1:5:40];
+% x_shift=zeros(length(shift_test),N^2*NumElement);
+% for sind=1:length(shift_test)
+%     load spectra_30_aligned;
+%     spectra=0.*spectra_30_aligned;
+%     center_shift=shift_test(sind);
+%     if(center_shift>=0)
+%         spectra(center_shift:end,:,:)=spectra_30_aligned(1:end-center_shift+1,:,:);
+%         spectra(1:center_shift-1,:,:)=spectra_30_aligned(end-center_shift+2:end,:,:);
+%     else
+%         spectra(1:end+center_shift,:,:)=spectra_30_aligned(abs(center_shift)+1:end,:,:);
+%         spectra(end+center_shift+1:end,:,:)=spectra_30_aligned(1:abs(center_shift),:,:);
+%     end
+% 
+%     data_xrf_raw=permute(spectra(1:tau_rate:end,1:ang_rate:end,:),[3 2 1]);
+%     data_xrf_raw=sparse(reshape(double(data_xrf_raw),[size(data_xrf_raw,1),size(data_xrf_raw,2)*size(data_xrf_raw,3)]));
+%     XRF_raw=data_xrf_raw';
+%     DecomposedElement=0;
+%     opt;
+%     x_shift(sind,:)=xstar';
+%     save x_shift x_shift
+% end
+% % if(simulate)
 %     do_setup_temp;
 %     DecomposedElement=0;
 %     opt_temp;

@@ -11,15 +11,15 @@ dz=[(omega(2)-omega(1))/m(2) (omega(4)-omega(3))/m(1)];
 
 cor=dz(1)/1*(m(1)/3-N/2);
 cr=[0 0; -cor -cor; -cor cor; cor cor; cor -cor;cor 0;0 cor;-cor 0;0 -cor];
-cr=cr([1 2],:);
+cr=cr([1 4 6],:);
 if(~exist('ind_cr','var'))
   ind_cr=1;
 end
 delta0(1)=cr(ind_cr,1); 
 delta0(2)=cr(ind_cr,2);
 rotation_point=[delta0(1),delta0(2)];
-Delta_D=[0,0*cor];
-delta_d0=Delta_D(ind_cr);
+Delta_D=[0,1*cor];
+delta_d0=Delta_D(1);
 %%-----------------------------------------------
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
 DefineObject_Gaussian; % Produce W, MU_XTM
@@ -36,11 +36,23 @@ plotDisBeam=0;
 if(plotDisBeam)
     figure,
 end
+n_delta=2*1;
+if(n_delta==2*numThetan)
+    pert=rand(numThetan,2)*dz(1)*10;
+elseif(n_delta==4)
+    pert1=1*dz(1)*10; pert2=0.5*dz(1)*10;
+    pert=[pert1*ones(floor(numThetan/2),2);pert2*ones(numThetan-floor(numThetan/2),2)];
+else
+    pert=zeros(numThetan,2);
+end
 for n=1:numThetan
     if(mod(n,10)==0)
         fprintf(1,'====== Angle Number  %d of %d: %d\n',n,numThetan,thetan(n));
     end
     theta = thetan(n)/180*pi;
+    if(ind_cr==2)
+        delta0=cr(2,:)+pert(n,:);
+    end
     TransMatrix=[cos(theta) sin(theta) delta0(1)-cos(theta)*delta0(1)-sin(theta)*delta0(2); -sin(theta) cos(theta) delta0(2)+sin(theta)*delta0(1)-cos(theta)*delta0(2);  0 0 1];
     DetKnot=TransMatrix*[DetKnot0'; ones(1,size(DetKnot0,1))];
     DetKnot=DetKnot(1:2,:)';

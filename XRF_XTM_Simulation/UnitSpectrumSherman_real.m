@@ -9,23 +9,23 @@
 % KA_LINE:0 KB:1 LA:2 LB:3
 global TakeLog I0 M_decom M_raw Element synthetic
 if(synthetic)
-E0=12;
-E2I=1/3e8/6.62e-34*1e-15;
-I0=E0*E2I;
+    E0=12;
+    E2I=1/3e8/6.62e-34*1e-15;
+    I0=E0*E2I;
 else
-E0=12.1;
+    E0=12.1;
 end
 NumElement=length(Z);
 NA=6.02e23;%Avogadro's number
 load_xraylib=1;
 if(load_xraylib)
-if(ismac)
-loadlibrary('/opt/local/lib/libxrl.dylib','/opt/local/include/xraylib/xraylib.h');
+    if(ismac)
+        loadlibrary('/opt/local/lib/libxrl.dylib','/opt/local/include/xraylib/xraylib.h');
+    else
+        loadlibrary('/homes/wendydi/local/xraylib/lib/libxrl.so','/homes/wendydi/local/xraylib/include/xraylib/xraylib.h');
+    end
 else
-loadlibrary('/homes/wendydi/local/xraylib/lib/libxrl.so','/homes/wendydi/local/xraylib/include/xraylib/xraylib.h');
-end
-else
-load(['xRayLib',num2str(E0),'.mat'])
+    load(['xRayLib',num2str(E0),'.mat'])
 end
 load AtomicWeight
 Line=0:3;%[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
@@ -47,7 +47,7 @@ mu=0;
 FWHM = (DetChannel_raw(2)-DetChannel_raw(1))*20;
 sigma = FWHM/2.35;
 truncInd=[];
-truncWidth=0.02;
+truncWidth=0.01;
 %%======================================================================
 while(i<=NumElement)
     PurePeak=0.*DetChannel_decom;

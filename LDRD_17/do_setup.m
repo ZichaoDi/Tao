@@ -20,10 +20,10 @@ Tomo_startup;
 %%===============Load Sample=====================
 synthetic=1;
 if(synthetic)
-    sample='circle'; % one element mainly testing self-absorption 
+    % sample='circle'; % one element mainly testing self-absorption 
     % sample='Golosio';
     % sample = 'checkboard';
-    % sample = 'Phantom';
+    sample = 'Phantom';
     % sample = 'fakeRod';
     NumElement=5;
 else
@@ -139,7 +139,7 @@ bounds = 1;  % no bound constraints
 Joint=-1; % 0: XRF; -1: XTM; 1: Joint inversion
 ReconAttenu = 1*(Joint==-1); % 0: Recover W; 1: Recover miu
 Alternate=1*(Joint~=-1);
-frame='LS';
+frame='EM';
 linear_S=0*Alternate;
 LogScale=1; %% determine if the XTM is solved taking log first or not
 Weighted=0; %% 1 if use weighted least-square form

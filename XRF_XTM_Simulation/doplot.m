@@ -11,7 +11,7 @@ ncol = NumElement;
 %--------------------------------------------------------------
 % set up boundary conditions
 %--------------------------------------------------------------
- figure(2);
+ figure;
     clims=[0 max(ws)];
     for i=1:ncol
         subplot(nrow,ncol,i);

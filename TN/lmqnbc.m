@@ -137,15 +137,15 @@ while (~conv);
     %---------------------------------------------------------%    
     % update active set, if appropriate
     %---------------------------------------------------------
-    if(spe<=eps)
-        disp('update active set due to zero step length');
-        [ipivot, flast] = modz (x, p, ipivot, low, up, flast, f);
-    end
     alpha = step1 (f, gtp, spe);
     alpha0 = alpha;
     PieceLinear=1;
     newcon = 0;
     if(PieceLinear)
+        if(spe<=eps)
+            disp('update active set due to zero step length');
+            [ipivot, flast] = modz (x, p, ipivot, low, up, flast, f);
+        end
         if(Joint==1)
         [x_new, f_new, g_new, nf1, ierror, alpha,ipivot,newcon,flast,f_xrf,f_xtm] = lin_proj (p, x, f, g, alpha0, sfun, low, up,ipivot,newcon,flast);
         else

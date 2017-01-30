@@ -33,6 +33,8 @@ for n=1:numThetan
     SSDknot=[SSDlet ones(size(SSDlet,1),1)]*TransMatrix;
     SSDknot=SSDknot(:,1:2);
     %=================================================================
+    CurrentCellCenter=[];
+    CurrentInd=[];
     for i=1:nTau+1 %%%%%%%%%================================================================
         % Initialize
         xbox=[omega(1) omega(1) omega(2) omega(2) omega(1)];
@@ -42,23 +44,25 @@ for n=1:numThetan
         [index,Lvec,linearInd]=IntersectionSet(SourceKnot(i,:),DetKnot(i,:),xbox,ybox,theta);
         ind_bt=(i-1)*numThetan+n;
         GlobalInd{ind_bt}=index;
-        for j=1:size(index,1)
-            CurrentCellCenter=[(index(j,1)-1/2)*dz(1)-abs(omega(1)),(index(j,2)-1/2)*dz(2)-abs(omega(3))];
-            currentInd=sub2ind(m,index(j,2),index(j,1));
-            L(ind_bt,currentInd)=Lvec(j);
-            if(j>1 && j<size(index,1))
-                SelfInd{ind_bt,currentInd}{1}=sub2ind(m,index(j-1:-1:1,2),index(j-1:-1:1,1));
-                SelfInd{ind_bt,currentInd}{3}=kron(Lvec(j-1:-1:1),MU_e(:,1,1)');
-            else
-                SelfInd{ind_bt,currentInd}{1}=sub2ind(m,index(j-1:-1:1,2),index(j-1:-1:1,1));
-                SelfInd{ind_bt,currentInd}{3}=kron(Lvec(j-1:-1:1),MU_e(:,1,1)');
+        if(size(index,1)>0)
+            CurrentCellCenter=[(index(:,1)-1/2)*dz(1)-abs(omega(1)),(index(:,2)-1/2)*dz(2)-abs(omega(3))];
+            currentInd=sub2ind(m,index(:,2),index(:,1));
+            L(ind_bt,currentInd)=Lvec;
+            for j=1:size(index,1)
+                if(j>1 && j<size(index,1))
+                    SelfInd{ind_bt,currentInd(j)}{1}=sub2ind(m,index(j-1:-1:1,2),index(j-1:-1:1,1));
+                    SelfInd{ind_bt,currentInd(j)}{3}=kron(Lvec(j-1:-1:1),MU_e(:,1,1)');
+                else
+                    SelfInd{ind_bt,currentInd(j)}{1}=sub2ind(m,index(j-1:-1:1,2),index(j-1:-1:1,1));
+                    SelfInd{ind_bt,currentInd(j)}{3}=kron(Lvec(j-1:-1:1),MU_e(:,1,1)');
+                end
+                %% ===========================================================
+                %% Self-absorption
+                in_after=find(inpolygon(xc(:,1),xc(:,2),[CurrentCellCenter(j,1) SSDknot(1,1) SSDknot(NumSSDlet,1)],[CurrentCellCenter(j,2) SSDknot(1,2) SSDknot(NumSSDlet,2)])); 
+                in_after=setdiff(in_after,currentInd); %% energy is not attenuated from the source point
+                area_xrf(ind_bt,currentInd(j))=prod(dz)*length(in_after);
+                SelfInd{ind_bt,currentInd(j)}{2}=in_after;
             end
-            %% ===========================================================
-            %% Self-absorption
-            in_after=find(inpolygon(xc(:,1),xc(:,2),[CurrentCellCenter(1) SSDknot(1,1) SSDknot(NumSSDlet,1)],[CurrentCellCenter(2) SSDknot(1,2) SSDknot(NumSSDlet,2)])); 
-            in_after=setdiff(in_after,currentInd); %% energy is not attenuated from the source point
-            area_xrf(ind_bt,currentInd)=prod(dz)*length(in_after);
-            SelfInd{ind_bt,currentInd}{2}=in_after;
         end
     end
 end

@@ -86,7 +86,8 @@ if(Alternate)
         fctn_half=@(W)sfun_half_linear(W,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
         fctn=@(W)sfun_full_linear(W,XRF,NumElement,m,nTau);
     elseif(Joint==1)
-        TempBeta=1; Beta=1;
+        beta_d=1e1;
+        TempBeta=1; Beta=0e0;
         if(s_a)
             Mt=reshape(DisR',numThetan*(nTau+1),1);
         else
@@ -102,7 +103,7 @@ else
         TempBeta=1; Beta=0;
         fctn=@(W)sfun_Tensor_Simplified(W,XRF,M,NumElement,L,GlobalInd,SelfInd,m,nTau);
     elseif(Joint==1)
-        TempBeta=1; Beta=1e9;
+        TempBeta=1; Beta=1;
         fctn=@(W)sfun_Tensor_Joint(W,XRF,DisR,MU_e,M,NumElement,L,GlobalInd,SelfInd,m,nTau,I0);
 
     elseif(Joint==-1)
@@ -114,7 +115,7 @@ else
             Mt=Mt(:)-min(Mt(:));
         end
         if(ReconAttenu)
-            fctn=@(MU)sfun_radon(MU,Mt,I0,L);% on attenuation coefficients miu;
+            fctn=@(MU)sfun_radon(MU,Mt,L);% on attenuation coefficients miu;
         else
             fctn=@(W)sfun_XTM(W,Mt,MU_e,I0,L,m,NumElement);%on W
         end
@@ -126,7 +127,6 @@ x0=x0(:);
 err0=norm(W0-x0);
 NF = [0*N; 0*N; 0*N];
 tic;
-maxOut=3;
 x=x0;
 Wold=reshape(x,prod(m),NumElement);%zeros(prod(m),NumElement);
 err=[];
@@ -150,9 +150,8 @@ if(Alternate && linear_S==0)
     if(TempBeta==0)
         maxOut=1;
     else
-        maxOut=3;
+        maxOut=1;
     end
-    x=x0;
     fprintf(1, 'cycle       alpha         residual      error      sub-residual\n');
     while(icycle<=maxOut)
     %%%%% =================== Attenuation Matrix at beam energy
@@ -188,14 +187,14 @@ if(Alternate && linear_S==0)
                 figure(12);
                 x_temp=reshape(x,m(1),m(2),NumElement);
                 for ie=1:NumElement; 
-                    subplot(maxOut+1,NumElement,icycle*NumElement+ie),
+                    subplot(maxOut+1,NumElement,(icycle-1)*NumElement+ie),
                     imagesc(x_temp(:,:,ie))
                     set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',[],'YTick',[]);
                 end
                 clear x_temp
                 drawnow;
             end
-        maxiter=50;
+        maxiter=100;
         if(bounds)
             [x,f,g,ierror] = tnbc (x,fctn,low,up); % algo='TNbc';
             % options = optimoptions('fmincon','Display','iter','GradObj','on','MaxIter',maxiter,'Algorithm','interior-point');% ,'Algorithm','Trust-Region-Reflective'
@@ -204,7 +203,7 @@ if(Alternate && linear_S==0)
             [x,f,g,ierror] = tn (x,fctn);
         end
     end
-        [x,fold,ConstSub, alpha]=lin3(x-Wold(:),Wold(:),fold,1,fctn_f,ConstSub);
+        % [x,fold,ConstSub, alpha]=lin3(x-Wold(:),Wold(:),fold,1,fctn_f,ConstSub);
         Wold=x;
         err(icycle)=norm(W0-x);
         res(icycle)=fold;
@@ -236,7 +235,7 @@ elseif(Alternate==0)
     % pert=L*x0+log(DisR(:)./I0);
     pert = 0* DisR(:);
     for icycle =1;
-    maxiter=100;
+    maxiter=20;
     if(bounds)
          [xstar,f,g,ierror]=tnbc(x,fctn,low,up);
          % options = optimoptions('fmincon','Display','iter','GradObj','on','MaxIter',maxiter,'Algorithm','interior-point');% ,'Algorithm','Trust-Region-Reflective'

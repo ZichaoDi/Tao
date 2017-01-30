@@ -28,20 +28,16 @@ shift=zeros(length(step),numThetan);
 for ko_ind=1:length(k_outer);
 
 delta0=k_outer(ko_ind)*cr(2,:);
-delta_d0=Delta_D(2);
 for k=1:length(step)
     k_step=step(k); 
-    delta=repmat(delta0+[0 0],[numThetan,1]);
+    delta=repmat(delta0',[1,numThetan])+pert';%[repmat(cr(2,:),[floor(numThetan/2),1]);repmat(cr(3,:),[numThetan-floor(numThetan/2),1])]';
     % +k_step*Ddelta'.*abs(ceil(eps2))'.*repmat(dz,[numThetan,1]);
-    % Num=(DetKnot0(1,1)-SourceKnot0(1,1))*(cos(theta).*delta(:,2)'-sin(theta).*delta(:,1)'+2*cos(theta).*sin(theta).*delta(:,1)'+(sin(theta).^2-cos(theta).^2).*delta(:,2)')...
-    % + (DetKnot0(1,2)-SourceKnot0(1,2))*(-sin(theta).*delta(:,2)'-cos(theta).*delta(:,1)'+2*cos(theta).*sin(theta).*delta(:,2)'+(cos(theta).^2-sin(theta).^2).*delta(:,1)');
-    Num=(DetKnot0(1,1)-SourceKnot0(1,1))*((cos(theta)-1)*delta0(2)+delta0(1)*sin(theta))+ (DetKnot0(1,2)-SourceKnot0(1,2))*((1-cos(theta))*delta0(1)+sin(theta)*delta0(2));
+    Num=(DetKnot0(1,1)-SourceKnot0(1,1))*((cos(theta)-1).*delta(2,:)+delta(1,:).*sin(theta))+ (DetKnot0(1,2)-SourceKnot0(1,2))*((1-cos(theta)).*delta(1,:)+sin(theta).*delta(2,:));
     shift(k,:)=Num./Det/dTau+1/2*delta_d0/dTau;
     Mt=-log(DisR./I0);%DisR;%
     alignedDiscrete=zeros(nTau+1,numThetan);
     alignedContinuous=alignedDiscrete;
     tt=Mt(:,:,2);
-    % shift(k,:)=linspace(-100,100,numThetan);
     sigma=1.5/2.355;
     for i = 1:numThetan
         delay=mod(shift(k,i),nTau+1);
@@ -76,17 +72,17 @@ end
 % end
 % fprintf('Correcting Error = %d\n',err);
 figure, 
-subplot(3,2,1);imagesc(tt);
+subplot(3,2,1);imagesc(tt); title('Sinogram with True COR')
 % axis xy image;
-subplot(3,2,2);imagesc(iradon(tt,thetan,'linear','shepp-logan',N)); 
+subplot(3,2,2);imagesc(iradon(fliplr(tt),thetan,'linear','shepp-logan',N)); 
+axis xy image;
+subplot(3,2,3);imagesc(alignedContinuous);title('Corrected Sinogram')
 % axis xy image;
-subplot(3,2,3);imagesc(alignedContinuous);
+subplot(3,2,4);imagesc(iradon(fliplr(alignedDiscrete),thetan,'linear','shepp-logan',N)); 
+axis xy image;
+subplot(3,2,5);imagesc(Mt(:,:,1));title('Sinogram with COR(0,0)')
 % axis xy image;
-subplot(3,2,4);imagesc(iradon(alignedContinuous,thetan,'linear','shepp-logan',N)); 
-% axis xy image;
-subplot(3,2,5);imagesc(Mt(:,:,1));
-% axis xy image;
-subplot(3,2,6);imagesc(iradon(Mt(:,:,1),thetan)); 
+subplot(3,2,6);imagesc(W);axis xy image;hold on;plot(delta0(1)/dz(1)+N/2,delta0(2)/dz(2)+N/2,'r*'); 
 % axis xy image;
 
 

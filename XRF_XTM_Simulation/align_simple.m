@@ -1,10 +1,11 @@
 % load spectra_30
 % spectra_30_aligned=spectra_30;
-load slice30
+load Slice30
 data(isnan(data))=0;
 data(isinf(data))=0;
 data=permute(data,[3 2 1]);
-load per_shift.mat
+% load per_shift.mat
+per_shift=r;
 data_aligned=data;
 for ch=1:size(data,3)
     currentSlice=squeeze(data(:,:,ch));

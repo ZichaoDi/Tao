@@ -1,29 +1,26 @@
-function [f,g,r]=sfun_radonCOR(x,XTM,Ltol) 
-global frame  
-global thetan numThetan dTau nTau DetKnot0 SourceKnot0 
+function [f,g,r]=sfun_radonCOR_sim(x,XTM,Ltol) 
+global frame n_delta 
+global thetan numThetan dTau nTau 
 %%===== Reconstruction discrete objective
 %%===== Ltol: intersection length matrix
 %%===== f: sum_i ||e^T(Ltol_i.*I)e-M_i||^2, i=1..theta
-delta_d=x(3)*1; % off center for the initial reference projection;
-delta=x(1:2);
+%%===== x(1:3): off center for the initial reference projection;
+
 theta=thetan*pi/180;
 
-Det=norm(DetKnot0(1,:)-SourceKnot0(1,:));
-Num=(DetKnot0(1,1)-SourceKnot0(1,1))*(cos(theta).*delta(2)'-sin(theta).*delta(1)'+2*cos(theta).*sin(theta).*delta(1)'+(sin(theta).^2-cos(theta).^2).*delta(2)')...
-+ (DetKnot0(1,2)-SourceKnot0(1,2))*(-sin(theta).*delta(2)'-cos(theta).*delta(1)'+2*cos(theta).*sin(theta).*delta(2)'+(cos(theta).^2-sin(theta).^2).*delta(1)');
-shift=Num./Det+1/2*delta_d;
-% shift=shift./dTau;
-
-Ddelta=[(DetKnot0(1,1)-SourceKnot0(1,1))*(-sin(theta)+sin(2*theta))+(DetKnot0(1,2)-SourceKnot0(1,2))*(cos(2*theta)-cos(theta));...
-(DetKnot0(1,1)-SourceKnot0(1,1))*(cos(theta)-cos(2*theta))+(DetKnot0(1,2)-SourceKnot0(1,2))*(sin(2*theta)-sin(theta))];
-Ddelta=[Ddelta./Det;1/2*ones(1,numThetan)];
-% Ddelta=Ddelta./dTau;
+if(n_delta==2)
+    shift=(cos(theta)-1)*x(1)+sin(theta)*x(2);
+    Ddelta=[cos(theta)-1;sin(theta)];
+else
+    shift=(cos(theta)-1)*x(1)+sin(theta)*x(2)+x(3);
+    Ddelta=[cos(theta)-1;sin(theta);ones(1,numThetan)];
+end
 
 alignedSignal=zeros(numThetan,nTau+1);
 DalignedSignal=zeros(numThetan,nTau+1);
+sigma=1.5/2.355;
 for i = 1:numThetan
     delay=shift(i);
-    sigma=1;%length(find(tt(:,i)>0))/2.355;
     G=1/(sigma*sqrt(2*pi))*exp(-([-nTau-1:nTau+1]'-delay).^2./(2*sigma^2));
     dG=1/(sigma*sqrt(2*pi))*(([-nTau-1:nTau+1]'-delay)./(sigma^2)).*exp(-([-nTau-1:nTau+1]'-delay).^2./(2*sigma^2));
     aligned_temp=ifft(fft(G).*fft([zeros(nTau+2,1);XTM(i,:)']));
@@ -36,38 +33,32 @@ for i = 1:numThetan
         DalignedSignal(i,:)=Daligned(1:nTau+1);
     end
 end
-% ddd=sum(XTM',1);
-% sigma=1;%length(find(tt(:,i)>0))/2.355;
 % G=1/(sigma*sqrt(2*pi))*exp(-(repmat([1:nTau+1]',1,numThetan)-repmat(mod(shift,nTau+1),nTau+1,1)).^2./(2*sigma^2));
 % dG=1/(sigma*sqrt(2*pi))*((repmat([1:nTau+1]',1,numThetan)-repmat(mod(shift,nTau+1),nTau+1,1))./(sigma^2)).*exp(-(repmat([1:nTau+1]',1,numThetan)-repmat(mod(shift,nTau+1),nTau+1,1)).^2./(2*sigma^2));
 % alignedSignal1=(ifft(fft(G).*fft(XTM')))';
-% norm_scale=repmat((ddd./sum(alignedSignal1',1)),nTau+1,1);
-% alignedSignal=alignedSignal1.*norm_scale';
-% DalignedSignal=(ifft(fft(dG).*fft(XTM')))'.*norm_scale';
-% figure,subplot(1,4,1);imagesc(alignedSignal);colorbar;subplot(1,4,2);imagesc(alignedSignal1);colorbar;
-% subplot(1,4,3);imagesc(DalignedSignal);colorbar;
-% subplot(1,4,4);imagesc(DalignedSignal1);colorbar;
-% norm(DalignedSignal1-DalignedSignal)
-% norm(alignedSignal1-alignedSignal)
+% DalignedSignal1=(ifft(fft(dG).*fft(XTM')))';
+% norm(alignedSignal-alignedSignal1)
+% norm(XTM-alignedSignal1)
+
 %%------------------------------------------------------
-Daligned=repmat(DalignedSignal(:),[1,3]).*repmat(Ddelta,[1,nTau+1])';
+Daligned=repmat(DalignedSignal(:),[1,n_delta]).*repmat(Ddelta,[1,nTau+1])';
+% save('sfun_test.mat','alignedSignal','shift');
+% figure, imagesc(iradon(alignedSignal',thetan));
 XTM=alignedSignal;
 
 if(strcmp(frame,'EM'))
     thres=1;
     Mt=XTM(:)+thres;
-    Rdis=Ltol*x(4:end)+thres;
+    Rdis=Ltol*x(n_delta+1:end)+thres;
     f=sum(-log(Rdis).*Mt+Rdis);
     g= Ltol'*(-Mt./Rdis+1);
     g_pert=-log(Rdis)'*(Daligned);
 elseif(strcmp(frame,'LS'))
-    r=Ltol*x(4:end)-XTM(:);
+    r=Ltol*x(n_delta+1:end)-XTM(:);
     g=Ltol'*r;
     f=1/2*sum(r.^2,1);
     g_pert=-r'*Daligned;
 end
 g=[g_pert';g];
-
-
 
 

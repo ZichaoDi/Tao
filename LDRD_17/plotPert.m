@@ -2,7 +2,7 @@ Ntest=2;
 DisR=[];
 L_cr=[];
 for ind_cr=1:Ntest;do_setup; L_cr(:,:,ind_cr)=L;DisR(:,:,ind_cr)=DisR_Simulated;end
-cr_trans=cr./repmat(dz,Ntest,1)+N/2;
+cr_trans=cr(1:Ntest,:)./repmat(dz,Ntest,1)+N/2;
 % save('testCircle_smaller.mat','cr_trans','DisR','W','thetan');       
 % cmap=[0 I0];
 % figure, 

@@ -4,7 +4,7 @@ function [ft,gt,f_XRF,f_XTM]=sfun_linear_joint(W,xrfData,Mt,MU_e,L,NumElement,m,
 %%==== Solve W when the W in exponential term is fixed 
 global N numChannel  numThetan 
 global ConstSub frame LogScale I0 s_a 
-global Beta TempBeta penalty Tik lambda RealBeam 
+global Beta TempBeta penalty lambda RealBeam 
 mtol=prod(m);
 %%%%% =================== XRF 
 XRF_v=ConstSub*W;
@@ -46,7 +46,6 @@ if(penalty)
     L1_norm=0;
     L2_norm=1;
     if(L2_norm)
-        % Reg=Tik*reshape(W,mtol,NumElement);
         lambda=1e-3;
         ft=ft+lambda*sum(W.^2);%(norm(Reg(:)))^2;
         gt=gt+lambda*2*W;%reshape(Tik'*(Reg),mtol*NumElement,1);

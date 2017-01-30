@@ -35,12 +35,14 @@ for ele=1:NumElement
     end
 end
 W=reshape(W,[N,N,NumElement]);
-load data_rod;
-Wtemp=reshape(xstar_joint,N,N,3);
-% Wtemp=reshape(x_admm(:,end),N,N,3);
-smooth_rate=10;
-W(:,:,1)=smooth2a(Wtemp(:,:,1),smooth_rate);
-W(:,:,6)=smooth2a(Wtemp(:,:,2),smooth_rate);
-W(:,:,8)=smooth2a(Wtemp(:,:,3),smooth_rate);
-W=W/0.19;
+%%===================== Simulate on the reconstruction
+% load data_rod;
+% Wtemp=reshape(xstar_joint,N,N,3);
+% % Wtemp=reshape(x_admm(:,end),N,N,3);
+% smooth_rate=10;
+% W(:,:,1)=smooth2a(Wtemp(:,:,1),smooth_rate);
+% W(:,:,6)=smooth2a(Wtemp(:,:,2),smooth_rate);
+% W(:,:,8)=smooth2a(Wtemp(:,:,3),smooth_rate);
+% W=W/0.19;
+%%=============================================
 

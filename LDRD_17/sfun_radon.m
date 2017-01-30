@@ -1,4 +1,4 @@
-function [f,g,r]=sfun_radon(MU,Mt,I0,Ltol) 
+function [f,g,r]=sfun_radon(MU,Mt,Ltol) 
 global frame
 %%===== Reconstruction discrete objective
 %%===== Ltol: intersection length matrix
