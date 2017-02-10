@@ -1,17 +1,16 @@
 global n_delta maxiter W0
-global sinoS
-sinoS=-log(DisR(:,:,1)./I0)';
 rng('default');
 Det=norm(DetKnot0(1,:)-SourceKnot0(1,:))*dTau;
-delta=repmat(delta0,[numThetan,1])+pert;
+delta=repmat(cr(2,:),[numThetan,1])+pert;
 if(n_delta==2)
     %%======== fixed COR for every projection
-    delta0_bar=[((DetKnot0(1,1)-SourceKnot0(1,1))*delta0(2)-(DetKnot0(1,2)-SourceKnot0(1,2))*delta0(1))/Det ((DetKnot0(1,1)-SourceKnot0(1,1))*delta0(1)-(DetKnot0(1,2)-SourceKnot0(1,2))*delta0(2))/Det];
+    delta0_bar=[((DetKnot0(1,1)-SourceKnot0(1,1))*delta0(2)-(DetKnot0(1,2)-SourceKnot0(1,2))*delta0(1))/Det ((DetKnot0(1,1)-SourceKnot0(1,1))*delta0(1)+(DetKnot0(1,2)-SourceKnot0(1,2))*delta0(2))/Det];
 elseif(n_delta==2*numThetan)
     %%======== Different COR for each projeciton
-    for n=1:numThetan
-        delta0_bar(2*n-1:2*n)=[((DetKnot0(1,1)-SourceKnot0(1,1))*delta(n,2)-(DetKnot0(1,2)-SourceKnot0(1,2))*delta(n,1))/Det ((DetKnot0(1,1)-SourceKnot0(1,1))*delta(n,1)-(DetKnot0(1,2)-SourceKnot0(1,2))*delta(n,2))/Det];
-    end
+    % for n=1:numThetan
+    %     delta0_bar(2*n-1:2*n)=[((DetKnot0(1,1)-SourceKnot0(1,1))*delta(n,2)-(DetKnot0(1,2)-SourceKnot0(1,2))*delta(n,1))/Det ((DetKnot0(1,1)-SourceKnot0(1,1))*delta(n,1)+(DetKnot0(1,2)-SourceKnot0(1,2))*delta(n,2))/Det];
+    % end
+    delta0_bar=reshape([((DetKnot0(1,1)-SourceKnot0(1,1))*delta(:,2)-(DetKnot0(1,2)-SourceKnot0(1,2))*delta(:,1))/Det ((DetKnot0(1,1)-SourceKnot0(1,1))*delta(:,1)+(DetKnot0(1,2)-SourceKnot0(1,2))*delta(:,2))/Det]',n_delta,1);
 elseif(n_delta==4)
     %%======== single COR for half of the projections
     delta0_bar(1:2)=[((DetKnot0(1,1)-SourceKnot0(1,1))*(cr(2,2)+pert1)-(DetKnot0(1,2)-SourceKnot0(1,2))*(cr(2,1)+pert1))/Det ((DetKnot0(1,1)-SourceKnot0(1,1))*(cr(2,1)+pert1)-(DetKnot0(1,2)-SourceKnot0(1,2))*(cr(2,2)+pert1))/Det];
@@ -21,15 +20,15 @@ end
 if(n_delta==3)
     deltaStar=[delta0_bar';1/2*delta_d0/dTau];
 else
-    deltaStar=delta0_bar';%delta0'/dTau;
+    deltaStar=delta0_bar;%delta0'/dTau;
 end
-% res=7;
+res=0;
 d0=[0 -res -res 0     res res res 0   -res;...
     0  0   -res -res -res 0   res res res];
 d0=d0(:,2:end);
 W0=[deltaStar;W(:)];
 errW=zeros(size(d0,2),1);
-maxiter=100;
+maxiter=50;
 for res_step=1:size(d0,2)
     if(n_delta==3)
         delta=[d0(:,res_step);-res]+1*deltaStar;

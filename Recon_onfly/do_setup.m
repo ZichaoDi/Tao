@@ -50,8 +50,8 @@ else
         clear data_H
         slice =[9 13 14 17];%5:27;%      
         data_h=[];
-        ang_rate=20;
-        tau_rate=1;
+        ang_rate=2;
+        tau_rate=20;
         for ele=1:size(data,1)
             data_h(ele,:,:)=sum(data(ele,1:ang_rate:end,1:tau_rate:end),1);
         end
@@ -59,8 +59,8 @@ else
             data_h=reshape(data_h,size(data_h,1),1,size(data_h,2));
         end
         data_xrt=squeeze(data_h(3,:,:)); %transimission data
-        s_a=0;
-        I0=max(data_xrt(:));% reshape(data_h(2,:,:),size(data_h,2),size(data_h,3));% 
+        % I0=max(data_xrt(:));
+        I0=reshape(data_h(2,:,:),size(data_h,2),size(data_h,3));% 
         % DisR=sparse(data_xrt');
         load DisR_removeStr
         data_xrf_decom=data_h(slice,:,:);
@@ -79,24 +79,17 @@ else
     elseif(strcmp(sample,'Filter'))
         Filter_setup;
     elseif(strcmp(sample,'Rod'))
-        % load slice30
-        % slice_tot = [30 31 20 29]; %GlassRod%
-        % ind_i0=2;
-        % ind_xrt=3;
-        % data(isinf(data))=0;
-        % data(isnan(data))=0;
-        % xrf=[];
-        % xrt=-log(data(ind_xrt,:,:)./data(ind_i0,:,:));
-        % xrf(1,:,:)=sum(data([slice_tot(1) slice_tot(2)],:,:),1);
-        % xrf(2,:,:)=data(slice_tot(3),:,:);
-        % xrf(3,:,:)=data(slice_tot(4),:,:);
-        % save('tomopytest.mat','xrf','xrt');
-        % return;
-        load ~/Documents/Research/APS/GlassRod/2dSlice/Slice30
-        ind_i0=43;
-        ind_xrt=38;
-        slice_tot = [3 4 25 30]; %GlassRod%
-        c_sh=1;%floor(size(data,3)/2-842);
+        % load ~/Documents/Research/APS/GlassRod/2dSlice/Slice30
+        % ind_i0=43;
+        % ind_xrt=38;
+        % slice_tot = [3 4 25 30]; %GlassRod%
+        load hong30;
+        data=MAPS;
+        ind_i0=33;
+        ind_xrt=32;
+        slice_tot = [2 3 16 20];
+        %%%================================
+        c_sh=floor(size(data,3)/2-842);
         data_temp=data;
         center_shift=c_sh;
         if(c_sh>=0)
@@ -110,14 +103,27 @@ else
                 data_temp(sub_ch,:,end+center_shift+1:end)=data(sub_ch,:,1:abs(center_shift));
             end
         end
-
         data=data_temp;
         clear data_temp;
+        %%===========================filter original silicon detector XRT
+        windowSize=10;
+        xrt1=zeros(size(data(ind_xrt,:,:)));
+        for i=1:73, 
+            % y=filter(1/windowSize*ones(1,windowSize),1,[squeeze(data_xrt(1,i,1))*ones(windowSize,1);squeeze(data_xrt(1,i,:))]); 
+            % xrt1(1,i,:)=y(11:end);end
+            if(i==72 | i==73)
+                xrt1(1,i,:)=medfilt1(data(ind_xrt,i,:),windowSize,'truncate')-30;
+            else
+                xrt1(1,i,:)=medfilt1(data(ind_xrt,i,:),windowSize,'truncate');
+            end
+        end
+        data(ind_xrt,:,:)=xrt1;
+        clear y xrt1;
 
         load tomoRod
         data_h=[];
-        ang_rate=10;
-        tau_rate=30;
+        ang_rate=2;
+        tau_rate=20;
         for ele=1:size(data,1)
             data_h(ele,:,:)=sum(data(ele,1:ang_rate:end,1:tau_rate:end),1);
             % data_h(ele,:,:)=sum_interval(squeeze(data(ele,:,:)),ang_rate,tau_rate);
@@ -131,8 +137,10 @@ else
         thetan=linspace(0,360,numThetan);
         nTau=size(data_h,3)-1;
         N = size(data_h,3);
-        I0=reshape(data_h(ind_i0,:,:),size(data_h,2),size(data_h,3));
-        data_xrt=-log(data_h(ind_xrt,:,:)./data_h(ind_i0,:,:)); %% Downstream Transmission 
+        data_xrt=data_h(ind_xrt,:,:); %% Downstream Transmission 
+        %%==============================================
+        I0=max(data_xrt(:));
+        % I0=reshape(data_h(ind_i0,:,:),size(data_h,2),size(data_h,3));
         DisR=sparse(squeeze(sum(data_xrt(:,:,:),1))');
         data_xrf_decom=[];
         data_xrf_decom(1,:,:)=data_h(slice_tot(1),:,:)+data_h(slice_tot(2),:,:);
@@ -140,7 +148,11 @@ else
         data_xrf_decom(3,:,:)=data_h(slice_tot(4),:,:);
         % save('tomopy_coarse.mat','data_xrf_decom','data_xrt');
         XRF_decom=permute(data_xrf_decom(:,:,:),[2 3 1]);
-        load spectra_30_aligned;
+        %%================================================
+        % load spectra_30_aligned;
+        load hong_spectra30;
+        spectra_30_aligned=spectra;
+        %%================================================
         spectra=double(0.*spectra_30_aligned);
         center_shift=c_sh;
         if(center_shift>=0)
@@ -160,7 +172,7 @@ else
         % data_xrf_raw=sparse(reshape(double(data_xrf_raw),[size(data_xrf_raw,1),size(data_xrf_raw,2)*size(data_xrf_raw,3)]));
         % XRF_raw=data_xrf_raw';
         %%=================================
-        clear spectra_30_aligned data_sa data_ds data_h
+        clear spectra spectra_30_aligned data_sa data_ds data_h
         m_h=size(iR,1);
         [x_ir,y_ir]=meshgrid(1:m_h);
         [x_num,y_num]=meshgrid(linspace(1,m_h,N(1)));
@@ -192,122 +204,17 @@ plotResult=1;
 onlyXRF=0;
 %%------------------------------ Use same finest data for each level
 %%-----------------------------------------------
-n_level=length(N);
-if(n_level==1)
-    current_n=N(1);
-    if(onlyXRF)
-        SimulateXRF;
-    else
-        if(Joint==-1)
-            XTM_Tensor;
-            if(ReconAttenu)
-                NumElement=1;
-                W=MU;
-            end
-        else
-            Forward_real;% XRF_XTM_Simplified; %
-        end
-    end
-    %-----------------------------------------
-    clear L_pert L_true DisR_true DisR_pert;
+current_n=N(1);
+if(onlyXRF)
+    SimulateXRF;
 else
-    nh=N(1);
-    level=[1:n_level];
-    N=nh./(2.^(level-1))+(2.^(level-1)-1)./2.^(level-1);
-    NF = [0*N; 0*N; 0*N];
-    nm=length(N);
-    W_level=cell(nm,1);
-    if(synthetic)
-        xrf_level=cell(nm,1);
-    else
-        xrf_level_decom=cell(nm,1);
-        xrf_level_raw=cell(nm,1);
-    end
-    xtm_level=cell(nm,1);
-    L_level=cell(nm,1);
-    GI_level=cell(nm,1);
-    SI_level=cell(nm,1);
-    SigmaR=cell(nm,1);
-    SigmaT=cell(nm,1);
-    m_level=zeros(nm,2);
-    nTau_level= zeros(nm,1);
-    for level=1:nm
-        current_n=N(level);
-        if(Joint==-1)
-            if(level==1)
-                % [L,dd,~,~]=build_weight_matrix(MU,thetan,1,'area');
-                XTM_Tensor;
-                Lap{level}=delsq(numgrid('S',N(level)+2));
-                L_level{level}=L;
-            else
-                IhH{level} = downdate_L(N, level);
-                Lap{level}=IhH{level}*Lap{level-1}*IhH{level}';
-                L_level{level}=L_level{level-1}*IhH{level}';
-            end
-            if(ReconAttenu)
-                NumElement=1;
-                if(level==1)
-                    W_level{level}=MU;
-                else
-                    W_level{level}=N(level)^2;
-                end
-            else
-                W_level{level}=W;
-            end
-        else
-            XRF_XTM_Simplified;
-            W_level{level}=W;
-            L_level{level}=L;
-        end
+    if(Joint==-1)
+        XTM_Tensor;
         if(ReconAttenu)
-            xtm_level_true{level}=DisR_true;
-            xtm_level_pert{level}=DisR_pert;
-        else
-            xtm_level_true{level}=DisR;
+            NumElement=1;
+            W=MU;
         end
-        GI_level{level}=GlobalInd;
-        nTau_level(level)= nTau;
-        m_level(level,:)=[N(level),N(level)];
-        SigmaT{level}=SigMa_XTM;
-        %-----------------------------------------
-        if(Joint~=-1)
-            if(synthetic)
-                xrf_level{level}=XRF;
-            else
-                xrf_level_decom{level}=XRF_decom;
-                xrf_level_raw{level}=XRF_raw;
-            end
-            SI_level{level}=SelfInd;
-            SigmaR{level}=SigMa_XRF;
-        end
+    else
     end
-    clear L L_pert L_true W DisR_true DisR_pert GlobalInd SigMa_XTM SelfInd XRF XRF_decom XRF_raw SigMa_XRF data_h;
-end;
-nTol=N(1)^2*NumElement;
-plotSim=0;
-if(plotSim & Joint~=-1& n_level==1)
-     a=squeeze(XRF_decom(:,:,2));b=squeeze(XRF_Simulated_decom(:,:,2));
-     figure, for i=1:3; subplot(2,5,i);imagesc(XRF_Simulated_decom(:,:,i));colorbar; subplot(2,5,5+i);imagesc(XRF_decom(:,:,i));colorbar; end;
-     a=squeeze(sum(sum(XRF_Simulated_raw,1),2));
-     b=squeeze(sum(sum(XRF_decom{1},1),2)); 
-     subplot(2,5,4),plot(DetChannel,squeeze(a),'r.-');
-     ub=max(a(:));
-     hold on;
-     for ele=1:NumElement
-         for el =1:4
-         plot([BindingEnergy(ele,el) BindingEnergy(ele,el)],[0 ub],'g--');
-         text(BindingEnergy(ele,el),ub,Element(Z(ele)));
-         end
-     end
-     hold off;
-     axis([0 12.1 0 ub+1e1]);
-     subplot(2,5,9),plot(DetChannel,squeeze(b),'r.-');
-     axis([0 12.1 0 max(b(:))+1e1]);
-     subplot(2,5,5),semilogy(DetChannel(truncInd),a(truncInd),'r.-');
-     axis([0 12.1 0 1e5]);
-     subplot(2,5,10),
-     semilogy(DetChannel(truncInd),b(truncInd),'r.-');
-     axis([0 12.1 0 1e5]);
-     err_xrf(scale+1)=norm(a(:)-b(:));
 end
-
+nTol=N(1)^2*NumElement;

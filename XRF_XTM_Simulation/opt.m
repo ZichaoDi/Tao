@@ -150,7 +150,7 @@ if(Alternate && linear_S==0)
     if(TempBeta==0)
         maxOut=1;
     else
-        maxOut=1;
+        maxOut=3;
     end
     fprintf(1, 'cycle       alpha         residual      error      sub-residual\n');
     while(icycle<=maxOut)
@@ -203,7 +203,7 @@ if(Alternate && linear_S==0)
             [x,f,g,ierror] = tn (x,fctn);
         end
     end
-        % [x,fold,ConstSub, alpha]=lin3(x-Wold(:),Wold(:),fold,1,fctn_f,ConstSub);
+        [x,fold,ConstSub, alpha]=lin3(x-Wold(:),Wold(:),fold,1,fctn_f,ConstSub);
         Wold=x;
         err(icycle)=norm(W0-x);
         res(icycle)=fold;

@@ -40,7 +40,7 @@ for k=1:length(step)
     tt=Mt(:,:,2);
     sigma=1.5/2.355;
     for i = 1:numThetan
-        delay=mod(shift(k,i),nTau+1);
+        delay=floor(mod(shift(k,i),nTau+1));
         %%---------------- Continuous: Gaussian Convolution
         G=1/(sigma*sqrt(2*pi))*exp(-([-nTau-1:nTau+1]'-delay).^2./(2*sigma^2));
         aligned_temp=ifft(fft(G).*fft([0*ones(nTau+2,1);tt(:,i)]));
@@ -63,9 +63,9 @@ for k=1:length(step)
     % alignedContinuous1=ifft(fft(G).*fft(tt));
     % errD=alignedContinuous1-alignedContinuous;
     %%--------------------------------------------------
-    err=[norm(alignedContinuous-Mt(:,:,1)),norm(alignedDiscrete-Mt(:,:,1))];
 end
 end
+% err(sig_i,:)=[norm(alignedContinuous-Mt(:,:,1)),norm(alignedDiscrete-Mt(:,:,1))];
 % for i = 1:numThetan
 %     v_temp=unique(shift(:,i));
 %     eps1(i)=(step(2)-step(1))*length(find(shift(:,i)==v_temp(round(length(v_temp)/2))));
@@ -74,15 +74,16 @@ end
 figure, 
 subplot(3,2,1);imagesc(tt); title('Sinogram with True COR')
 % axis xy image;
-subplot(3,2,2);imagesc(iradon(fliplr(tt),thetan,'linear','shepp-logan',N)); 
+subplot(3,2,2);imagesc(iradon(fliplr(tt),thetan,'linear','shepp-logan',N)'); 
 axis xy image;
 subplot(3,2,3);imagesc(alignedContinuous);title('Corrected Sinogram')
 % axis xy image;
-subplot(3,2,4);imagesc(iradon(fliplr(alignedDiscrete),thetan,'linear','shepp-logan',N)); 
+subplot(3,2,4);imagesc(iradon(fliplr(alignedContinuous),thetan,'linear','shepp-logan',N)'); 
 axis xy image;
 subplot(3,2,5);imagesc(Mt(:,:,1));title('Sinogram with COR(0,0)')
 % axis xy image;
-subplot(3,2,6);imagesc(W);axis xy image;hold on;plot(delta0(1)/dz(1)+N/2,delta0(2)/dz(2)+N/2,'r*'); 
+subplot(3,2,6);imagesc(W);axis xy image;hold on;
+plot(delta(1,:)/dz(1)+N/2,delta(2,:)/dz(2)+N/2,'r.-'); 
 % axis xy image;
 
 

@@ -20,18 +20,13 @@ area_xrf=sparse(zeros(numThetan*(nTau+1),mtol));
 SelfInd=repmat({cell(3,1)},[numThetan*(nTau+1),mtol]);
 
 fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel);
-x0=0;%dz(1)*(874-842)/1750*200;
-y0=-dz(1)*(874-842)/1750*200;
 for n=1:numThetan
     theta=thetan(n)/180*pi;
     fprintf(1,'====== Angle Number  %d of %d: %d\n',n,numThetan,thetan(n));
-    TransMatrix=[cos(theta) sin(theta) 0; -sin(theta) cos(theta) 0;x0-cos(theta)*x0-sin(theta)*y0 y0+sin(theta)*x0-cos(theta)*y0 1];
-    DetKnot=[DetKnot0 ones(size(DetKnot0,1),1)]*TransMatrix;
-    DetKnot=DetKnot(:,1:2);
-    SourceKnot=[SourceKnot0 ones(size(DetKnot0,1),1)]*TransMatrix;
-    SourceKnot=SourceKnot(:,1:2);
-    SSDknot=[SSDlet ones(size(SSDlet,1),1)]*TransMatrix;
-    SSDknot=SSDknot(:,1:2);
+    TransMatrix=[cos(theta) sin(theta);-sin(theta) cos(theta)];
+    DetKnot=DetKnot0*TransMatrix;
+    SourceKnot=SourceKnot0*TransMatrix;
+    SSDknot=SSDlet*TransMatrix;
     %=================================================================
     CurrentCellCenter=[];
     CurrentInd=[];
@@ -49,17 +44,12 @@ for n=1:numThetan
             currentInd=sub2ind(m,index(:,2),index(:,1));
             L(ind_bt,currentInd)=Lvec;
             for j=1:size(index,1)
-                if(j>1 && j<size(index,1))
-                    SelfInd{ind_bt,currentInd(j)}{1}=sub2ind(m,index(j-1:-1:1,2),index(j-1:-1:1,1));
-                    SelfInd{ind_bt,currentInd(j)}{3}=kron(Lvec(j-1:-1:1),MU_e(:,1,1)');
-                else
-                    SelfInd{ind_bt,currentInd(j)}{1}=sub2ind(m,index(j-1:-1:1,2),index(j-1:-1:1,1));
-                    SelfInd{ind_bt,currentInd(j)}{3}=kron(Lvec(j-1:-1:1),MU_e(:,1,1)');
-                end
+                SelfInd{ind_bt,currentInd(j)}{1}=sub2ind(m,index(j-1:-1:1,2),index(j-1:-1:1,1));
+                SelfInd{ind_bt,currentInd(j)}{3}=kron(Lvec(j-1:-1:1),MU_e(:,1,1)');
                 %% ===========================================================
                 %% Self-absorption
                 in_after=find(inpolygon(xc(:,1),xc(:,2),[CurrentCellCenter(j,1) SSDknot(1,1) SSDknot(NumSSDlet,1)],[CurrentCellCenter(j,2) SSDknot(1,2) SSDknot(NumSSDlet,2)])); 
-                in_after=setdiff(in_after,currentInd); %% energy is not attenuated from the source point
+                in_after=setdiff(in_after,currentInd(j)); %% energy is not attenuated from the source point
                 area_xrf(ind_bt,currentInd(j))=prod(dz)*length(in_after);
                 SelfInd{ind_bt,currentInd(j)}{2}=in_after;
             end
@@ -68,7 +58,7 @@ for n=1:numThetan
 end
 
 clear Wsub A knot DetKnot DetKnot0 SSDknot SSDlet SourceKnot SourceKnot0 MU_after
-clear xbox ybox eX eY  x y xc 
+clear xbox ybox eX eY  x y  
 
 
 
