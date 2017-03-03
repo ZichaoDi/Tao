@@ -9,7 +9,7 @@ omega=[-2     2    -2     2].*Tol;
 m=[current_n current_n]; %Numerical Resolution
 dz=[(omega(2)-omega(1))/m(2) (omega(4)-omega(3))/m(1)];
 
-cor=dz(1)/1*(m(1)/3-N/2);
+cor=dz(1)/1*(m(1)/3-N(1)/2);
 cr=[0 0; -cor -cor; -cor cor; cor cor; cor -cor;cor 0;0 cor;-cor 0;0 -cor];
 cr=cr([1 4 6],:);
 if(~exist('ind_cr','var'))
@@ -36,10 +36,10 @@ plotRotation=0;
 if(plotDisBeam | plotRotation)
     figure,
 end
-n_delta=2*numThetan;
+n_delta=2*1;
 if(n_delta==2*numThetan)
     rng('default');
-    pert=(-1+2*rand(numThetan,2))*dz(1)*5;
+    pert=(-1+2*rand(numThetan,2))*dz(1)*2;
     pert=cumsum(pert,1);
 elseif(n_delta==4)
     pert1=1*dz(1)*10; pert2=0.5*dz(1)*10;
@@ -77,9 +77,9 @@ for n=1:numThetan
         drawnow;
     end
     if(plotRotation)
-        output=rotateAround(padarray(W,[N/2,N/2]),delta0(1)/dz(1)+N,delta0(2)/dz(1)+N,thetan(n));
+        output=rotateAround(padarray(W,[N(1)/2,N(1)/2]),delta0(1)/dz(1)+N(1),delta0(2)/dz(1)+N(1),thetan(n));
         subplot(5,7,n)
-        imagesc(sum(output,3)); hold on; plot(delta0(1)/dz(1)+N,delta0(2)/dz(1)+N,'r*');
+        imagesc(sum(output,3)); hold on; plot(delta0(1)/dz(1)+N(1),delta0(2)/dz(1)+N(1),'r*');
         set(gca,'xtick',[],'ytick',[]);
         drawnow;
     end

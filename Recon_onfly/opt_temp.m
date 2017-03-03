@@ -8,7 +8,7 @@ global initialize mtol xbox ybox L in_after
 %%% Simulate XRF of a given fixed object with rotating predifined detector and beam
 %%% Travelling of fluorescence photon is approximated as the area covered by solid angle
 global LogScale Tol
-do_setup;
+do_setup_temp;
 more off;
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
 DefineObject_Gaussian; % Produce W, MU_XTM

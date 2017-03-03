@@ -106,17 +106,16 @@ else
         data=data_temp;
         clear data_temp;
         %%===========================filter original silicon detector XRT
-        windowSize=20;
+        windowSize=10;
         xrt1=zeros(size(data(ind_xrt,:,:)));
         for i=1:73, 
             % y=filter(1/windowSize*ones(1,windowSize),1,[squeeze(data_xrt(1,i,1))*ones(windowSize,1);squeeze(data_xrt(1,i,:))]); 
             % xrt1(1,i,:)=y(11:end);end
-            xrt1(1,i,:)=medfilt1(data(ind_xrt,i,:),windowSize,'truncate');
-            % if(i==72 | i==73)
-            %     xrt1(1,i,:)=medfilt1(data(ind_xrt,i,:),windowSize,'truncate')-30;
-            % else
-            %     xrt1(1,i,:)=medfilt1(data(ind_xrt,i,:),windowSize,'truncate');
-            % end
+            if(i==72 | i==73)
+                xrt1(1,i,:)=medfilt1(data(ind_xrt,i,:),windowSize,'truncate')-30;
+            else
+                xrt1(1,i,:)=medfilt1(data(ind_xrt,i,:),windowSize,'truncate');
+            end
         end
         data(ind_xrt,:,:)=xrt1;
         clear y xrt1;
@@ -124,7 +123,7 @@ else
         load tomoRod
         data_h=[];
         ang_rate=1;
-        tau_rate=20;
+        tau_rate=9;
         for ele=1:size(data,1)
             data_h(ele,:,:)=sum(data(ele,1:ang_rate:end,1:tau_rate:end),1);
             % data_h(ele,:,:)=sum_interval(squeeze(data(ele,:,:)),ang_rate,tau_rate);

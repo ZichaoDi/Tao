@@ -51,7 +51,7 @@ end
 
 %%------------------------------------------------------
 Daligned=repmat(DalignedSignal(:),[1,n_delta]).*repmat(Ddelta,[1,nTau+1])';
-% save('sfun_test.mat','alignedSignal','shift');
+% save('sfun_test.mat','Daligned','Ddelta','alignedSignal','shift');
 % figure, subplot(1,2,1),imagesc(alignedSignal');subplot(1,2,2);imagesc(iradon(alignedSignal',thetan));
 XTM=alignedSignal;
 

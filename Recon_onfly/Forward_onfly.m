@@ -42,17 +42,19 @@ fprintf(1,'====== Start Forward Mapping: %d angles %d beamlets\n',numThetan, nTa
                     L(ind_bt,currentInd)=Lvec;
                 end
                 InTens=exp(-cumsum([0;sum(x(currentInd(1:end-1),:).*kron(Lvec(1:end-1),MU_e(:,1,1)'),2)]));
-                OutTens=[];
-                for j=1:length(currentInd)
-                    if(initialize)
-                        in_after{ind_bt,j}=int32(setdiff(find(inpolygon(xc(:,1),xc(:,2),[CurrentCellCenter(j,1) SSDknot(1,1) SSDknot(NumSSDlet,1)],[CurrentCellCenter(j,2) SSDknot(1,2) SSDknot(NumSSDlet,2)])),currentInd(j))); %% energy is not attenuated from the source point
-                    end
-                    if( ~NoSelfAbsorption)
-                        OutTens(j,:)=exp(-sum(MU(in_after{ind_bt,j},1:NumElement),1)./(length(in_after{ind_bt,j})+1)*prod(dz)*length(in_after{ind_bt,j}));
-                    end
-                end
+                % OutTens=ones(length(currentInd),NumElement);
+                % for j=1:length(currentInd)
+                %     if(initialize)
+                %         in_after{ind_bt,j}=int32(setdiff(find(inpolygon(xc(:,1),xc(:,2),[CurrentCellCenter(j,1) SSDknot(1,1) SSDknot(NumSSDlet,1)],[CurrentCellCenter(j,2) SSDknot(1,2) SSDknot(NumSSDlet,2)])),currentInd(j))); %% energy is not attenuated from the source point
+                %     end
+                %     if( ~NoSelfAbsorption)
+                %         OutTens(j,:)=exp(-sum(MU(in_after{ind_bt,j},1:NumElement),1)./(length(in_after{ind_bt,j})+1)*prod(dz)*length(in_after{ind_bt,j}));
+                %     end
+                % end
+                % ConstSub(ind_bt+([1:numChannel]-1)*(numThetan*(nTau+1)),reshape(repmat(currentInd,1,NumElement)'+(repmat([1:NumElement],length(currentInd),1)'-1).*mtol,length(currentInd)*NumElement,1))=...
+                %    reshape(repmat(M',[1,length(currentInd),1]),[numChannel,length(currentInd)*NumElement]).*repmat(reshape(repmat(Lvec.*InTens,1,NumElement)'.*OutTens',[length(currentInd)*NumElement,1])',numChannel,1);
                 ConstSub(ind_bt+([1:numChannel]-1)*(numThetan*(nTau+1)),reshape(repmat(currentInd,1,NumElement)'+(repmat([1:NumElement],length(currentInd),1)'-1).*mtol,length(currentInd)*NumElement,1))=...
-                   reshape(repmat(M',[1,length(currentInd),1]),[numChannel,length(currentInd)*NumElement]).*repmat(reshape(repmat(Lvec.*InTens,1,NumElement)'.*OutTens',[length(currentInd)*NumElement,1])',numChannel,1);
+                   reshape(repmat(M',[1,length(currentInd),1]),[numChannel,length(currentInd)*NumElement]).*repmat(reshape(repmat(Lvec.*InTens,1,NumElement)',[length(currentInd)*NumElement,1])',numChannel,1);
             end
         end
     end

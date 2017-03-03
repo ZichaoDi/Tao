@@ -1,8 +1,8 @@
 global NumElement
-A=phantom3d(N);%phantom('Shepp-Logan',m(1));
-if(~exist('cross_ind','var'))
-    cross_ind=floor(N/2);
-end
+A=phantom3d(N(1));%phantom('Shepp-Logan',m(1));
+% if(~exist('cross_ind','var'))
+    cross_ind=floor(N(1)/2);
+% end
 A=squeeze(A(:,:,cross_ind));
 if(NumElement==1)
     W=sum(A,3);% abs(peaks(m(1)));%

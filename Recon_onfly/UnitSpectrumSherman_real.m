@@ -28,9 +28,10 @@ else
     load(['xRayLib',num2str(E0),'.mat'])
 end
 load AtomicWeight
-Line=0:3;%[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
+% Line=0:3;%[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
 % Line=-[0:207];
 % Line=[-3 -2 -1 -5 -6 -8 -13 -90 -34 -33 -102 -91 -98 -36 -35 -94 -89 -63 -95 -68 -207 -206];% partially K,L,M lines
+Line=[0:3 -207 -206];% partially K,L,M lines
 
 shell=0;  %% Shell type
 BindingEnergy=zeros(NumElement,length(Line));
@@ -47,7 +48,7 @@ mu=0;
 FWHM = (DetChannel_raw(2)-DetChannel_raw(1))*20;
 sigma = FWHM/2.35;
 truncInd=[];
-truncWidth=0.02;
+truncWidth=0.04;
 %%======================================================================
 while(i<=NumElement)
     PurePeak=0.*DetChannel_decom;
@@ -71,7 +72,7 @@ while(i<=NumElement)
         PurePeak(adj)=PurePeak(adj)+intensity;    
         M_decom(i,i)=M_decom(i,i)+sum(PurePeak);
         M_raw(i,:)=M_raw(i,:)+intensity/(sigma*sqrt(2*pi))*exp(-(DetChannel_raw'-BindingEnergy(i,j)).^2./(2*sigma^2));
-        truncInd=unique([truncInd; find(DetChannel_raw> BindingEnergy(i,j)-truncWidth & DetChannel_raw < BindingEnergy(i,j)+truncWidth)]);
+        truncInd=unique([truncInd; find(DetChannel_raw> BindingEnergy(i,j)-truncWidth & DetChannel_raw < BindingEnergy(i,j)+truncWidth & DetChannel_raw<E0)]);
         j=j+1;
     end
     truncInd=sort(truncInd);

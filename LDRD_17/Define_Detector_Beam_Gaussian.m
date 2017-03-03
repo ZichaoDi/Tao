@@ -5,8 +5,10 @@ alpha=atan((omega(4)-omega(3))/(omega(2)-omega(1)));
 Tau= omega(2)-omega(1);
 if(synthetic)
     nTau=1*ceil(sqrt(2*prod(m)));%m(1)-1;% % number of discrete beam%nTau;%
+    tol1=1/2*N(1);
+else
+    tol1=0;
 end
-tol1=1/2*N;
 %=============initiate transmission detector location
 detS0=[Tau/2*tan(alpha)+tol1*dz(1), Tau/2+tol1*dz(1)]; 
 detE0=[Tau/2*tan(alpha)+tol1*dz(1),-Tau/2-tol1*dz(1)+delta_d0];
