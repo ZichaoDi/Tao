@@ -1,4 +1,4 @@
-function ndia3 (e, v, gv, r, vgv)
+function e = ndia3 (e, v, gv, r, vgv)
 %---------------------------------------------------------
 % update the preconditioning matrix based on a diagonal 
 % version of the bfgs quasi-newton update.

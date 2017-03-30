@@ -7,11 +7,13 @@ global itertest ErrIter icycle maxOut
 global initialize mtol xbox ybox L in_after
 %%% Simulate XRF of a given fixed object with rotating predifined detector and beam
 %%% Travelling of fluorescence photon is approximated as the area covered by solid angle
-global LogScale Tol
+global LogScale Tol Itemp
 do_setup;
 more off;
+icycle=0;
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
 DefineObject_Gaussian; % Produce W, MU_XTM
+return;
 %%%----------------------------Initialize dependent variables
 DecomposedElement=0;
 if(strcmp(sample,'Seed'))
@@ -84,11 +86,12 @@ up=inf*ones(size(x0));
 x_admm=[];
 x_admm(:,1)=x0;
 err_obj=[];
+Itemp=ones(size(L,1),size(L,2),5);
 if(Alternate && linear_S==0)
     if(TempBeta==0)
         maxOut=1;
     else
-        maxOut=2;
+        maxOut=5;
     end
     fprintf(1, 'cycle       alpha         residual      error      sub-residual\n');
     while(icycle<=maxOut)
@@ -103,13 +106,15 @@ if(Alternate && linear_S==0)
             clear x_temp
             drawnow;
         end
-        maxiter=50;
+        maxiter=10;
         if(bounds)
             [x,f,g,ierror] = tnbc (x,fctn,low,up); % algo='TNbc';
         else
             [x,f,g,ierror] = tn (x,fctn);
         end
-        [x,fold,ConstSub, alpha]=lin3(x-Wold(:),Wold(:),fold,1,fctn_f,ConstSub);
+        [ConstSub,fold]=feval(fctn_f,x);
+        % [x,fold,ConstSub, alpha]=lin3(x-Wold(:),Wold(:),fold,1,fctn_f,ConstSub);
+        alpha=1;
         Wold=x;
         err(icycle)=norm(W0-x);
         res(icycle)=fold;

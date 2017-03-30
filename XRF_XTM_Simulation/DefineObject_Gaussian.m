@@ -28,7 +28,6 @@ if(synthetic)
     elseif(strcmp(sample,'circle'))
         Z = [14];
     elseif(strcmp(sample, 'fakeRod'))
-        NumElement=3;
         Z=[79 5 8 11 13 14 19 74];% Glass Rod
         if(NumElement==3)
             Z=Z([1 6 8]);

@@ -124,7 +124,7 @@ else
         load tomoRod
         data_h=[];
         ang_rate=1;
-        tau_rate=20;
+        tau_rate=10;
         for ele=1:size(data,1)
             data_h(ele,:,:)=sum(data(ele,1:ang_rate:end,1:tau_rate:end),1);
             % data_h(ele,:,:)=sum_interval(squeeze(data(ele,:,:)),ang_rate,tau_rate);
@@ -147,10 +147,10 @@ else
         data_xrf_decom(1,:,:)=data_h(slice_tot(1),:,:)+data_h(slice_tot(2),:,:);
         data_xrf_decom(2,:,:)=data_h(slice_tot(3),:,:);
         data_xrf_decom(3,:,:)=data_h(slice_tot(4),:,:);
-        % save('tomopy_coarse.mat','data_xrf_decom','data_xrt');
+        save('tomopy_coarse.mat','data_xrf_decom','data_xrt');
+        return;
         XRF_decom=permute(data_xrf_decom(:,:,:),[2 3 1]);
         %%================================================
-        % load spectra_30_aligned;
         load hong_spectra30;
         spectra_30_aligned=spectra;
         %%================================================

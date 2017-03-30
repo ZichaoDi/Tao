@@ -76,6 +76,7 @@ for k = 1:maxit
    if (bounds); v  = ztime ( v, ipivot); end;
    gv = gtims (v, x, g, accrcy, xnorm, sfun);
    if (bounds); gv = ztime (gv, ipivot); end;
+   % v_gv(k) = abs(v'*gv);
    v_gv(k) = v'*gv;
    if (v_gv(k)/gnorm < tol); 
        ind = 50; 
@@ -85,7 +86,7 @@ for k = 1:maxit
        end;
        return; 
    end;
-   ndia3 (dnew, v, gv, r, v_gv(k));
+   % dnew = ndia3 (dnew, v, gv, r, v_gv(k));
 %------------------------------------------------------------
 % compute current solution and related vectors
 %------------------------------------------------------------

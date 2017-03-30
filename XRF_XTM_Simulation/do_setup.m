@@ -18,13 +18,13 @@ grad_type = 'full-linear';  % 'adj' = adjoint/exact
 % Initialize arrays for discretizations
 Tomo_startup;
 %%===============Load Sample=====================
-synthetic=0;
+synthetic=1;
 if(synthetic)
     % sample='circle'; % one element mainly testing self-absorption 
     % sample = 'checkboard';
     % sample = 'Phantom';
     sample = 'fakeRod';
-    NumElement=3;
+    NumElement=8;
 else
     % sample='Seed';
     sample='Rod';
@@ -32,7 +32,7 @@ else
 end
 angleScale=2; %1: half angle; 2: full angle
 if(synthetic)
-    N=50;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
+    N=195;% [33 17 9 5 3];% 17 9];%[129 65  9 5];%
     numThetan=73; % number of scanning angles/projections
     DecomposedElement=0;
 else
@@ -116,8 +116,8 @@ else
 
         load tomoRod
         data_h=[];
-        ang_rate=10;
-        tau_rate=30;
+        ang_rate=40;
+        tau_rate=19;
         for ele=1:size(data,1)
             data_h(ele,:,:)=sum(data(ele,1:ang_rate:end,1:tau_rate:end),1);
             % data_h(ele,:,:)=sum_interval(squeeze(data(ele,:,:)),ang_rate,tau_rate);
@@ -189,7 +189,7 @@ plotTravel=0; % If plot the intersection of beam with object
 plotUnit=0;
 plotElement=0;
 plotResult=1;
-onlyXRF=0;
+onlyXRF=1;
 %%------------------------------ Use same finest data for each level
 %%-----------------------------------------------
 n_level=length(N);

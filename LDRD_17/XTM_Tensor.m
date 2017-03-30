@@ -36,11 +36,11 @@ plotRotation=0;
 if(plotDisBeam | plotRotation)
     figure,
 end
-n_delta=2*1;
+n_delta=2*numThetan;
 if(n_delta==2*numThetan)
     rng('default');
     pert=(-1+2*rand(numThetan,2))*dz(1)*2;
-    pert=cumsum(pert,1);
+    pert=cumsum(pert,1)*0;
 elseif(n_delta==4)
     pert1=1*dz(1)*10; pert2=0.5*dz(1)*10;
     pert=[pert1*ones(floor(numThetan/2),2);pert2*ones(numThetan-floor(numThetan/2),2)];

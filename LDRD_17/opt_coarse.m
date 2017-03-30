@@ -24,16 +24,33 @@ if(n_delta==3)
 else
     deltaStar=delta0_bar;%delta0'/dTau;
 end
-res=7;
+res=2;
 d0=[0 -res -res 0     res res res 0   -res;...
     0  0   -res -res -res 0   res res res];
-    d0=d0(:,2);
+d0=d0(:,2);
 N_level=[N (N+1)/2];
 current_n=N_level(2);
 W0=[deltaStar;downdate(W(:),1)];
 errW=zeros(size(d0,2),1);
 maxiter=100;
 x_res_fine=[];
+Lmap=[];
+NF = [0*N_level; 0*N_level; 0*N_level];
+if(ndims(DisR)>=3)
+    Mt=squeeze(-log(DisR(:,:,2)./I0));
+    % Mt=-log(xrt_shift./I0);
+    Lmap=downdate_radon(squeeze(L_cr(:,:,1)),numThetan,nTau);
+else
+    Mt=-log(DisR./I0');
+    Mt=Mt-min(Mt(:));
+    % Mt=XRF_decom(:,:,1)';
+    Lmap=L;
+end
+scale=1e0;
+Q=diag(1./sum(Lmap,1));
+Lmap=Lmap*Q;
+Mt=Mt*scale;
+    
 figure,
 for res_step=1:size(d0,2)
     if(n_delta==3)
@@ -43,17 +60,6 @@ for res_step=1:size(d0,2)
     end
     x0=[delta;0*10^(0)*rand(current_n^2*NumElement,1)];
     err0=norm(W0-x0);
-    NF = [0*N_level; 0*N_level; 0*N_level];
-    if(ndims(DisR)>=3)
-        Mt=squeeze(-log(DisR(:,:,2)./I0));
-        % Mt=-log(xrt_shift./I0);
-        Lmap=downdate_radon(squeeze(L_cr(:,:,1)),numThetan,nTau);
-    else
-        Mt=-log(DisR./I0');
-        Mt=Mt-min(Mt(:));
-        % Mt=XRF_decom(:,:,1)';
-        Lmap=L;
-    end
     % for k_step=0
     %     delta=delta-k_step*Ddelta.*abs(ceil(eps2))*repmat(dz(1),[numThetan,1]);
     %     XTM=aligned(delta,Mt,DetKnot0(1,:),SourceKnot0(1,:),thetan,nTau,numThetan,dTau);
@@ -71,6 +77,9 @@ for res_step=1:size(d0,2)
     else
         [x,f,g,ierror] = tn (x0,fctn);
     end
+
+    [f,g,alignedSignal_coarse]=feval(fctn_COR,xCOR);
+
     x_res_fine=[x_res_fine,update(xCOR(n_delta+1:end),1)];
     subplot(size(d0,2),2,1+2*(res_step-1));
     imagesc(reshape(xCOR(n_delta+1:end),current_n,current_n));

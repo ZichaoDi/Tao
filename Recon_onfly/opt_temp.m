@@ -14,11 +14,6 @@ Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
 DefineObject_Gaussian; % Produce W, MU_XTM
 %%%----------------------------Initialize dependent variables
 DecomposedElement=0;
-if(strcmp(sample,'Seed'))
-    beta_d=1e0;
-elseif(strcmp(sample,'Rod'))
-    beta_d=1e1;
-end
 
 if(~synthetic & ~ReconAttenu)
     truncChannel=1*(DecomposedElement==0);
@@ -109,7 +104,9 @@ if(Alternate && linear_S==0)
         else
             [x,f,g,ierror] = tn (x,fctn);
         end
-        [x,fold,ConstSub, alpha]=lin3(x-Wold(:),Wold(:),fold,1,fctn_f,ConstSub);
+        [ConstSub,fold]=feval(fctn_f,x);
+        % [x,fold,ConstSub, alpha]=lin3(x-Wold(:),Wold(:),fold,1,fctn_f,ConstSub);
+        alpha=1;
         Wold=x;
         err(icycle)=norm(W0-x);
         res(icycle)=fold;

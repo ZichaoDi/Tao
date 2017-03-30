@@ -11,7 +11,7 @@ if(NumElement==8)
 else
     C=2.33;
 end
-w_ele=[19.3 C*12 19.3]; % units: g/cm^3
+w_ele=[19.3 C*120 19.3]; % units: g/cm^3
 W = zeros(N^2,NumElement);
 hollow=0;
 for ele=1:NumElement
@@ -35,14 +35,16 @@ for ele=1:NumElement
     end
 end
 W=reshape(W,[N,N,NumElement]);
+% figure, for i=1:8,subplot(1,8,i);imagesc(W(:,:,i));colorbar;end
 %%===================== Simulate on the reconstruction
-% load data_rod;
-% Wtemp=reshape(xstar_joint,N,N,3);
-% % Wtemp=reshape(x_admm(:,end),N,N,3);
-% smooth_rate=10;
-% W(:,:,1)=smooth2a(Wtemp(:,:,1),smooth_rate);
-% W(:,:,6)=smooth2a(Wtemp(:,:,2),smooth_rate);
-% W(:,:,8)=smooth2a(Wtemp(:,:,3),smooth_rate);
-% W=W/0.19;
+load xstar_joint;
+Wtemp=reshape(xstar_joint,N,N,3);
+% Wtemp=reshape(x_admm(:,end),N,N,3);
+smooth_rate=0;
+W(:,:,1)=smooth2a(Wtemp(:,:,1),smooth_rate)/10;
+W(:,:,6)=smooth2a(Wtemp(:,:,2),smooth_rate)/10;
+W(:,:,8)=smooth2a(Wtemp(:,:,3),smooth_rate)/10;
+% figure, for i=1:8,subplot(1,8,i);imagesc(W(:,:,i));colorbar;end
+W=W/0.19;
 %%=============================================
 

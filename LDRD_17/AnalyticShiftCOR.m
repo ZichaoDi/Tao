@@ -78,7 +78,7 @@ subplot(3,2,2);imagesc(iradon(fliplr(tt),thetan,'linear','shepp-logan',N)');
 axis xy image;
 subplot(3,2,3);imagesc(alignedContinuous);title('Corrected Sinogram')
 % axis xy image;
-subplot(3,2,4);imagesc(iradon(fliplr(alignedContinuous),thetan,'linear','shepp-logan',N)'); 
+subplot(3,2,4);imagesc(iradon(fliplr(alignedContinuous),thetan)');%,'linear','shepp-logan',N)'); 
 axis xy image;
 subplot(3,2,5);imagesc(Mt(:,:,1));title('Sinogram with COR(0,0)')
 % axis xy image;

@@ -12,7 +12,7 @@ global NF N current_n  fiter itertest ErrIter
 global ptest gv ipivot nit
 global n_delta i_cauchy W0  m NumElement
 global maxiter err0 Joint 
-global f_xrf f_xtm
+global  f_xrf f_xtm
 %---------------------------------------------------------
 % check that initial x is feasible and that the bounds
 % are consistent
@@ -214,6 +214,8 @@ while (~conv);
     gnorm = norm(gv, 'inf');
     ftest = 1 + abs(f);
     xnorm = norm(x,'inf');
+    % x_iter(:,nit+1)=x;
+    % save x_iter x_iter
     %--------------------------------- Error
     ErrIter(nit+1)=norm(x-W0);
     if(Joint==1)

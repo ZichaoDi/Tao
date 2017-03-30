@@ -1,4 +1,4 @@
-function [f,g,r]=sfun_COR(x,XTM,Ltol) 
+function [f,g,XTM]=sfun_COR(x,XTM,Ltol) 
 global frame n_delta 
 global thetan numThetan dTau nTau 
 global sinoS

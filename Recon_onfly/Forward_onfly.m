@@ -5,13 +5,13 @@ global NoSelfAbsorption
 global m numChannel NumElement nTau numThetan NumSSDlet
 global SSDlet DetKnot0 SourceKnot0 thetan omega 
 global MU_e dz mtol xbox ybox xc BeforeEmit 
-global L in_after
+global L in_after 
 %%%=========Start Simulation
 x=reshape(x,mtol,NumElement);
 MU=zeros(mtol,NumElement);
 for i=1:NumElement
     temp=sum(x*MU_e(:,:,i+1),2);
-    temp=flipud(reshape(temp,m(1),m(2))');
+    temp=reshape(temp,m(1),m(2));%flipud(reshape(temp,m(1),m(2))');
     MU(:,i)=temp(:);
 end
 ConstSub=sparse(numThetan*(nTau+1)*numChannel,mtol*NumElement);
@@ -41,7 +41,8 @@ fprintf(1,'====== Start Forward Mapping: %d angles %d beamlets\n',numThetan, nTa
                 if(initialize)
                     L(ind_bt,currentInd)=Lvec;
                 end
-                InTens=exp(-cumsum([0;sum(x(currentInd(1:end-1),:).*kron(Lvec(1:end-1),MU_e(:,1,1)'),2)]));
+                % InTens=exp(-cumsum([0;sum(x(currentInd(1:end-1),:).*kron(Lvec(1:end-1),MU_e(:,1,1)'),2)]));
+                InTens=exp(-cumsum([0;sum(x(currentInd(end-1:-1:1),:).*kron(Lvec(1:end-1),MU_e(:,1,1)'),2)]));
                 % OutTens=ones(length(currentInd),NumElement);
                 % for j=1:length(currentInd)
                 %     if(initialize)

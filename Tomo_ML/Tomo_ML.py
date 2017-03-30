@@ -25,7 +25,7 @@ model = []
 model = Sequential()
 model.add(Dense(2500, input_dim=1500))
 model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
-model.fit(X_train, Y_train, nb_epoch=100, batch_size=32)
+model.fit(X_train, Y_train, nb_epoch=10, batch_size=32)
 loss_and_metrics = model.evaluate(X_test, Y_test, batch_size=32)
 Y_predict = model.predict(np.reshape(X_train[7846],(1,1500)),batch_size=1)  
 import matplotlib.pyplot as plt   

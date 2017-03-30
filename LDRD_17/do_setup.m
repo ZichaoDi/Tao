@@ -18,7 +18,7 @@ grad_type = 'full-linear';  % 'adj' = adjoint/exact
 % Initialize arrays for discretizations
 Tomo_startup;
 %%===============Load Sample=====================
-synthetic=0;
+synthetic=1;
 if(synthetic)
     % sample='circle'; % one element mainly testing self-absorption 
     % sample='Golosio';
@@ -32,10 +32,10 @@ else
     NumElement=3;
 end
 coarsen_type='smooth';
-N=[65];%[33 17 9 5 3];% 17 9];%[129 65  9 5];%
+N=[33];%[33 17 9 5 3];% 17 9];%[129 65  9 5];%
 angleScale=2; %1: half angle; 2: full angle
 if(synthetic)
-    numThetan=35; % number of scanning angles/projections
+    numThetan=50; % number of scanning angles/projections
     DecomposedElement=0;
 else
     Tol = 1e-2;
@@ -86,7 +86,7 @@ else
         slice_tot = [2 3 16 20];
         load tomoRod
         data_h=[];
-        ang_rate=2;
+        ang_rate=1;
         tau_rate=10;
         for ele=1:size(data,1)
             data_h(ele,:,:)=sum(data(ele,1:ang_rate:end,1:tau_rate:end),1);

@@ -124,4 +124,4 @@ for n=1:numThetan
     DisR(:,n)=Rdis';
     clear Rdis temp
 end
-
+save(['simulate_rod',num2str(N),'.mat'],'BindingEnergy','DisR','XRF','XRF_decom','DetChannel');

@@ -55,6 +55,7 @@ truncWidth=(DetChannel(2)-DetChannel(1))*5;% 0.02;
 %%======================================================================
 while(i<=NumElement)
     if(load_xraylib)
+        calllib('libxrl','SetErrorMessages',0);
         ElementDensity(Z(i))=calllib('libxrl','ElementDensity',Z(i));%
         A(Z(i))=calllib('libxrl','AtomicWeight',Z(i));
         CS_TotalBeam(Z(i),1)=calllib('libxrl','CS_Total',Z(i),E0);
