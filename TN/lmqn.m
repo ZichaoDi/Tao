@@ -6,8 +6,8 @@ function [xstar, f, g, ierror] = ...
 %---------------------------------------------------------
 global hyk ykhyk hyr yksr ykhyr yrhyr sk yk sr yr ...
     hg gsk yksk yrsr
-global NF N current_n   fiter itertest
-global gv ptest maxiter
+global NF N current_n xiter fiter itertest
+global gv ptest maxiter 
 %---------------------------------------------------------
 % set up
 %---------------------------------------------------------
@@ -29,7 +29,9 @@ end;
 %---------------------------------------------------------
 [f, g] = feval (sfun, x);
 oldf   = f;
+fiter=[];xiter=[];
 fiter(1)=oldf;
+xiter(:,1)=x;
 gnorm  = norm(g,'inf');
 nf     = 1;
 nit    = 0;
@@ -80,6 +82,7 @@ while (~conv);
     oldf   = f;
     fiter(nit+2)=oldf;
     itertest(nit+2)=nf+ncg;
+    xiter(:,nit+2)=x;
     %---------------------------------------------------------
     % line search
     %---------------------------------------------------------

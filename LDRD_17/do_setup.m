@@ -18,12 +18,12 @@ grad_type = 'full-linear';  % 'adj' = adjoint/exact
 % Initialize arrays for discretizations
 Tomo_startup;
 %%===============Load Sample=====================
-synthetic=1;
+synthetic=0;
 if(synthetic)
-    % sample='circle'; % one element mainly testing self-absorption 
+    sample='circle'; % one element mainly testing self-absorption 
     % sample='Golosio';
     % sample = 'checkboard';
-    sample = 'Phantom';
+    % sample = 'Phantom';
     % sample = 'fakeRod';
     NumElement=5;
 else
@@ -32,7 +32,7 @@ else
     NumElement=3;
 end
 coarsen_type='smooth';
-N=[33];%[33 17 9 5 3];% 17 9];%[129 65  9 5];%
+N=[129];%[33 17 9 5 3];% 17 9];%[129 65  9 5];%
 angleScale=2; %1: half angle; 2: full angle
 if(synthetic)
     numThetan=50; % number of scanning angles/projections
@@ -157,6 +157,8 @@ if(n_level==1)
                 NumElement=1;
                 W=MU_XTM;
             end
+            % L=build_weight_matrix(W,thetan,0);
+            % L=reshape(permute(reshape(L,nTau+1,numThetan,N^2),[2 1 3]),(nTau+1)*numThetan,N^2);
         else
             Forward_real;% XRF_XTM_Simplified; %
         end
@@ -189,7 +191,7 @@ else
         if(Joint==-1)
             if(level==1)
                 XTM_Tensor;
-                L_level{level}=L;
+                L_level{level}=L;%build_weight_matrix(W,thetan,0);
             else
                 L_level{level}=downdate_radon(L_level{level-1},numThetan,nTau);
             end

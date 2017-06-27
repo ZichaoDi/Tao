@@ -1,10 +1,18 @@
 %%%Simulate XRF of a given object with predifined detector and beam
-plotPert;
 x_res=[];
-for res=1:25
+f_dr=[];
+N_total=[13 25 50 60 70 80 90 100 120 140];% 17 9];%[129 65  9 5];%
+res=2;
+for i_N=1:length(N_total);
+    N=N_total(i_N);
+    plotPert;
     opt;
+    f_dr(i_N,1)=f;
+    x0_opt=x0;
+    opt_dr;
+    f_dr(i_N,2)=f;
 end
-save(['x_res_cP_positive',sample,'.mat'],'x_res');
+% save(['x_res_cP_positive',sample,'.mat'],'x_res');
 % exAlternate(0);
 %{
 return;

@@ -1,4 +1,4 @@
-function [p, gtp, ncg1, dnew, eig_val] = ...
+function [p, gtp, ncg1, dnew, eig_val,ind] = ...
 	modlnp (d, x, g, maxit, upd1, ireset, bounds, ipivot, argvec, sfun)
 %---------------------------------------------------------
 % this routine performs a preconditioned conjugate-gradient
@@ -61,7 +61,7 @@ for k = 1:maxit
    if (bounds); zk = ztime (zk, ipivot); end;
    rz = r'*zk;
    if (rz/gnorm < tol); 
-       ind = 80;
+      ind = 80;
        if (norm(p)==0); p = -g; gtp = p'*g; 
           disp('MODLNP 02: |p| = 0');
        end;
@@ -76,9 +76,11 @@ for k = 1:maxit
    if (bounds); v  = ztime ( v, ipivot); end;
    gv = gtims (v, x, g, accrcy, xnorm, sfun);
    if (bounds); gv = ztime (gv, ipivot); end;
-   % v_gv(k) = abs(v'*gv);
    v_gv(k) = v'*gv;
    if (v_gv(k)/gnorm < tol); 
+       if(v_gv(k)<0)
+           % disp('Non-positive Hessian Approximation')
+       end
        ind = 50; 
        if (norm(p)==0);
           disp('MODLNP 03: |p| = 0');
@@ -120,7 +122,11 @@ for k = 1:maxit
 % perform cautionary test
 %------------------------------------------------------------
    if (gtp > 0); 
+       disp('non-descent direction')
        ind = 40; 
+       g'*p
+       p=p-alpha*v;
+       g'*p
        if (norm(p)==0);
           disp('MODLNP 05: |p| = 0');
           pause(1);

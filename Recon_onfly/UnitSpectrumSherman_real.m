@@ -12,6 +12,8 @@ if(synthetic)
     E0=12;
     E2I=1/3e8/6.62e-34*1e-15;
     I0=E0*E2I;
+elseif(strcmp(sample,'Filter'))
+    E0=10.4;
 else
     E0=12.1;
 end
@@ -29,7 +31,6 @@ else
 end
 load AtomicWeight
 % Line=0:3;%[-0 -1 -2 -3]; %% Transition Line, detailed defination see xraylib-lines.h
-% Line=-[0:207];
 % Line=[-3 -2 -1 -5 -6 -8 -13 -90 -34 -33 -102 -91 -98 -36 -35 -94 -89 -63 -95 -68 -207 -206];% partially K,L,M lines
 Line=[0:3 -207 -206];% partially K,L,M lines
 
@@ -48,7 +49,7 @@ mu=0;
 FWHM = (DetChannel_raw(2)-DetChannel_raw(1))*20;
 sigma = FWHM/2.35;
 truncInd=[];
-truncWidth=0.04;
+truncWidth=0.03;
 %%======================================================================
 while(i<=NumElement)
     PurePeak=0.*DetChannel_decom;

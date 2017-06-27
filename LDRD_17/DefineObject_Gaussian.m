@@ -49,7 +49,7 @@ NumElement=length(Z);
         elseif(strcmp(sample,'circle'))
             [X,Y]=meshgrid(1:m(1),1:m(2));
             center=[2*m(1)/3, 2*m(2)/3];
-            r=m(1)/10;
+            r=m(1)/3;
             pix = (X-center(1)).^2+(Y-center(2)).^2 <= r^2; %% circle
             % pix = (X-center(1)).^2+(Y-center(2)).^2 >= (m(1)/5)^2 & (X-center(1)).^2+(Y-center(2)).^2 <= (m(1)/4)^2;
             % pix = (X<=center(1)+r & X>=center(1)-r & Y<=center(1)+r & Y>=center(1)-r ); %% square

@@ -12,13 +12,14 @@ global NF N current_n  fiter itertest ErrIter
 global ptest gv ipivot nit
 global n_delta i_cauchy W0  m NumElement
 global maxiter err0 Joint 
-global  f_xrf f_xtm
+global f_xrf f_xtm
 %---------------------------------------------------------
 % check that initial x is feasible and that the bounds
 % are consistent
 %---------------------------------------------------------
 [f, g] = feval (sfun, x);
 oldf   = f;
+fiter=[];
 fiter(1)=oldf;
 [ipivot, ierror, x] = crash(x, low, up);
 if (ierror ~= 0);
@@ -65,14 +66,10 @@ nitOld=nit;
 flast  = f;
 itertest=[];
 ErrIter=[];
+x_iter=[];
+x_iter(:,1)=x;
 itertest(1)=nf+ncg;
 ErrIter(1)=err0;
-%-------------------------------------------------------
-% Test if Lagrange multipliers are non-negative.
-% Because the constraints are only bounds, the Lagrange
-% multipliers are components of the gradient.
-% Then form the projected gradient.
-%---------------------------------------------------------
 ind = find((ipivot ~= 2) & (ipivot.*g>0));
 if (~isempty(ind));
     ipivot(ind) = zeros(length(ind),1);
@@ -122,12 +119,17 @@ argvec = [accrcy gnorm xnorm];
 [p, gtp, ncg1, d, eig_val] = ...
     modlnp (d, x, g, maxit, upd1, ireset, bounds, ipivot, argvec, sfun);
 ncg = ncg + ncg1;
+% figure,
 while (~conv);
     oldg = g;
     pnorm = norm(p, 'inf');
     oldf = f;
     fiter(nit+2)=oldf;
     itertest(nit+2)=nf+ncg;
+    % ang=acos(dot(g,p)/(norm(g)*norm(p)));
+    % ang*180/pi
+    % ang=acos(dot(g(1:n_delta),p(1:n_delta))/(norm(g(1:n_delta))*norm(p(1:n_delta))));
+    % ang*180/pi
     
     %---------------------------------------------------------
     % line search
@@ -141,11 +143,13 @@ while (~conv);
     alpha0 = alpha;
     PieceLinear=1;
     newcon = 0;
+    % plot(p(1:n_delta),'r.-');pause;
+    % p(n_delta+1:end)=1e3*p(n_delta+1:end);
     if(PieceLinear)
-        if(spe<=eps)
-            disp('update active set due to zero step length');
-            [ipivot, flast] = modz (x, p, ipivot, low, up, flast, f);
-        end
+        % if(spe<=eps)
+        %     disp('update active set due to zero step length');
+        %     [ipivot, flast] = modz (x, p, ipivot, low, up, flast, f);
+        % end
         if(Joint==1)
         [x_new, f_new, g_new, nf1, ierror, alpha,ipivot,newcon,flast,f_xrf,f_xtm] = lin_proj (p, x, f, g, alpha0, sfun, low, up,ipivot,newcon,flast);
         else
@@ -214,8 +218,8 @@ while (~conv);
     gnorm = norm(gv, 'inf');
     ftest = 1 + abs(f);
     xnorm = norm(x,'inf');
-    % x_iter(:,nit+1)=x;
-    % save x_iter x_iter
+    x_iter(:,nit+1)=x;
+    save x_iter x_iter
     %--------------------------------- Error
     ErrIter(nit+1)=norm(x-W0);
     if(Joint==1)
@@ -317,9 +321,8 @@ while (~conv);
     %---------------------------------------------------------
     argvec = [accrcy gnorm xnorm];
     
-    [p, gtp, ncg1, d] = ...
+    [p, gtp, ncg1, d,~,cgstop] = ...
         modlnp (d, x, g, 10, upd1, ireset, bounds, ipivot, argvec, sfun);
-    
     ptest=p;
     ncg = ncg + ncg1;
     % %---------------------------------------------------------

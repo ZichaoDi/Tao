@@ -7,7 +7,7 @@ global Joint
 % set up
 %---------------------------------------------------------
 ierror = 3;
-maxit  = 5;
+maxit  = 10;
 %%%%%%%%%%%%%%%%%%%#######################################################
 if (alpha == 0); ierror = 0; maxit = 1; end;
 alpha1 = alpha;
@@ -43,9 +43,10 @@ if(alpha1<=1)%& alpha1>0
             alpha1=trialAlpha(trial);
             itcnt=trial;
             ipivot = 0*ipivot1;
-            ipivot(ipivot1==-1 & gt >0)=-1;
-            ipivot(ipivot1==1 & gt <0)=1;
-            p = ztime(p,ipivot);
+            % ipivot(x==low & gt >0)=-1;
+            % ipivot(x==up & gt <0)=1;
+            ipivot(x==low)=-1;
+            ipivot(x==up)=1;
             newcon = 1;
             flast=f;
             break;
@@ -55,7 +56,7 @@ if(alpha1<=1)%& alpha1>0
 end
 if (alpha1 == 0); ierror = 0; maxit = 1; end;
 if(iproj==0)
-    disp('start from alpha_max')
+    % disp('start from alpha_max')
     for itcnt = 1:maxit;
         xt = x + alpha1.*p;
         [ft, gt] = feval (sfun, xt);
@@ -66,8 +67,10 @@ if(iproj==0)
             f   = ft;
             g   = gt;
             ipivot = 0*ipivot;
-            ipivot(x==low & gt >0)=-1;
-            ipivot(x==up & gt <0)=1;
+            % ipivot(x==low & gt >0)=-1;
+            % ipivot(x==up & gt <0)=1;
+            ipivot(x==low)=-1;
+            ipivot(x==up)=1;
             newcon = 1;
             flast=f;
             break;

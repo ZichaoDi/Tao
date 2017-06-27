@@ -5,4 +5,4 @@ global N_level NumElement current_n
 j=find(N_level==current_n);
 vH=reshape(vH,N_level(j),N_level(j),NumElement);
 vh=restrict_residual(N_level(j-1))'*vH*restrict_residual(N_level(j-1));
-vh=vh(:)/1;
+vh=vh(:)/2;

@@ -4,24 +4,25 @@ global Beta TempBeta beta_d
 global err0 fiter nit maxiter
 global ConstSub MU_XTM I0 DisR
 global itertest ErrIter icycle maxOut
-global initialize mtol xbox ybox L in_after
+global COR initialize mtol xbox ybox L in_after
 %%% Simulate XRF of a given fixed object with rotating predifined detector and beam
 %%% Travelling of fluorescence photon is approximated as the area covered by solid angle
 global LogScale Tol Itemp
+COR=0;
 do_setup;
 more off;
 icycle=0;
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
 DefineObject_Gaussian; % Produce W, MU_XTM
-return;
 %%%----------------------------Initialize dependent variables
-DecomposedElement=0;
+DecomposedElement=1;
 if(strcmp(sample,'Seed'))
     beta_d=1e0;
 elseif(strcmp(sample,'Rod'))
     beta_d=1e1;
+else
+    beta_d=1e3;
 end
-
 if(~synthetic & ~ReconAttenu)
     truncChannel=1*(DecomposedElement==0);
     if(DecomposedElement)
@@ -48,8 +49,7 @@ W0=W(:);
 %%%================= First-order derivative regularization
 penalty=0;
 cmap=[min(W0),max(W0)];
-beta_d=1.0e2;
-% TempBeta=0; Beta=1;
+TempBeta=1; Beta=1e2;
 Mt=-log(DisR'./I0)*beta_d;
 Mt=Mt(:)-min(Mt(:));
 xrfData=XRF(:);%/I0;%/reshape(repmat(I0,[1 1 numChannel]),numThetan*(nTau+1)*numChannel,1);
@@ -64,7 +64,7 @@ Wold=reshape(x,prod(m),NumElement);%zeros(prod(m),NumElement);
 err=[];
 outCycle=2;
 if(~ReconAttenu && Alternate)
-    % initialize=0;
+    initialize=1;
     %%%%%%%==============================================================
     if(initialize)
         mtol=prod(m);
@@ -91,7 +91,7 @@ if(Alternate && linear_S==0)
     if(TempBeta==0)
         maxOut=1;
     else
-        maxOut=5;
+        maxOut=1;
     end
     fprintf(1, 'cycle       alpha         residual      error      sub-residual\n');
     while(icycle<=maxOut)
@@ -106,7 +106,7 @@ if(Alternate && linear_S==0)
             clear x_temp
             drawnow;
         end
-        maxiter=10;
+        maxiter=60;
         if(bounds)
             [x,f,g,ierror] = tnbc (x,fctn,low,up); % algo='TNbc';
         else

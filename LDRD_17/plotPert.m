@@ -1,4 +1,4 @@
-Ntest=2;
+Ntest=1;
 DisR=[];
 L_cr=[];
 for ind_cr=1:Ntest;do_setup; L_cr(:,:,ind_cr)=L;DisR(:,:,ind_cr)=DisR_Simulated;end

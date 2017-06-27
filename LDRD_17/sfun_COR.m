@@ -1,11 +1,11 @@
-function [f,g,XTM]=sfun_COR(x,XTM,Ltol) 
+function [f,g,XTM,shift]=sfun_COR(x,XTM,Ltol) 
 global frame n_delta 
-global thetan numThetan dTau nTau 
-global sinoS
+global N thetan numThetan dTau nTau 
+global sinoS I0 
 %%===== Reconstruction discrete objective
 %%===== Ltol: intersection length matrix
 %%===== f: sum_i ||e^T(Ltol_i.*I)e-M_i||^2, i=1..theta
-%%===== x(1:3): off center for the initial reference projection;
+%%===== x(1:n_delta): off center for the initial reference projection;
 
 theta=thetan*pi/180;
 if(n_delta==2*numThetan)
@@ -33,28 +33,46 @@ end
 
 alignedSignal=zeros(numThetan,nTau+1);
 DalignedSignal=zeros(numThetan,nTau+1);
-sigma=1.5/2.355;
+sigma=0.05;%
 for i = 1:numThetan
     delay=shift(i);
-    G=1/(sigma*sqrt(2*pi))*exp(-([-nTau-1:nTau+1]'-delay).^2./(2*sigma^2));
-    dG=1/(sigma*sqrt(2*pi))*(([-nTau-1:nTau+1]'-delay)./(sigma^2)).*exp(-([-nTau-1:nTau+1]'-delay).^2./(2*sigma^2));
-    aligned_temp=ifft(fft(G).*fft([zeros(nTau+2,1);XTM(i,:)']));
-    Daligned=ifft(fft(dG).*fft([zeros(nTau+2,1);XTM(i,:)']));
-    if(abs(delay)>(nTau+1)/2)
-        alignedSignal(i,:)=aligned_temp(nTau+3:end);
-        DalignedSignal(i,:)=Daligned(nTau+3:end);
-    else
-        alignedSignal(i,:)=aligned_temp(1:nTau+1);
-        DalignedSignal(i,:)=Daligned(1:nTau+1);
-    end
+    % x_coarse=[-nTau-1:nTau+1];
+    % interpolate_rate=1;
+    % x_fine=[-nTau-1:interpolate_rate:nTau+1];
+    % tt_coarse=[zeros(nTau+2,1);XTM(i,:)'];
+    % tt_fine=interp1(x_coarse,tt_coarse,x_fine)';
+    % G=exp(-(x_fine'-delay).^2./(2*sigma^2));
+    % dG=((x_fine'-delay)./(sigma^2)).*exp(-(x_fine'-delay).^2./(2*sigma^2));
+    % aligned_temp=ifft(fft(G).*fft(tt_fine));
+    % aligned_temp=aligned_temp(1:1/interpolate_rate:end);
+    % Daligned=ifft(fft(dG).*fft(tt_fine));
+    % %%%=============================================
+    % Daligned=Daligned(1:1/interpolate_rate:end);
+    % alignedSignal(i,:)=aligned_temp(1:nTau+1);
+    % DalignedSignal(i,:)=Daligned(1:nTau+1);
+    %%%=============================================
+        H=fft(XTM(i,:));
+        u=[0:floor((nTau+1)/2)-1 floor(-(nTau+1)/2):-1] / (nTau+1);
+        ubar=exp(-j*2*pi.*(u*delay));
+        H1=H.*ubar;
+        alignedSignal(i,:)=real(ifft(H1));
+        % plot(1:nTau+1,XTM(i,:),'r.-',1:nTau+1,alignedSignal(i,:),'b.-');title(num2str(delay));pause(1);
+        DalignedSignal(i,:)=real(ifft(H.*ubar.*(-2*pi*j*u)));
 end
+% figure, subplot(1,2,1),imagesc(alignedSignal);colorbar;subplot(1,2,2);imagesc(DalignedSignal);colorbar;
 
 %%------------------------------------------------------
-Daligned=repmat(DalignedSignal(:),[1,n_delta]).*repmat(Ddelta,[1,nTau+1])';
-% save('sfun_test.mat','Daligned','Ddelta','alignedSignal','shift');
-% figure, subplot(1,2,1),imagesc(alignedSignal');subplot(1,2,2);imagesc(iradon(alignedSignal',thetan));
-XTM=alignedSignal;
+Daligned=zeros(numThetan*(nTau+1),n_delta);
+for i=1:n_delta/2
+    Daligned(i:numThetan:end,2*i-1)=DalignedSignal(i,:);
+    Daligned(i:numThetan:end,2*i)=DalignedSignal(i,:);
+end
 
+Daligned=Daligned.*repmat(Ddelta,[1,nTau+1])';
+% Daligned=repmat(DalignedSignal(:),[1,n_delta]).*repmat(Ddelta,[1,nTau+1])';
+% save('sfun_test.mat','Daligned','Ddelta','alignedSignal','shift');
+% figure, subplot(1,2,1),imagesc(alignedSignal');subplot(1,2,2);imagesc(reshape(x(n_delta+1:end),N,N));
+XTM=alignedSignal;
 if(strcmp(frame,'EM'))
     thres=1;
     Mt=XTM(:)+thres;
@@ -69,5 +87,26 @@ elseif(strcmp(frame,'LS'))
     g_pert=-r'*Daligned;
 end
 g=[g_pert';g];
+penalty=1;
+if(penalty & n_delta==numThetan*2)
+    % Tik=delsq(numgrid('S',N(1)+2)); 
+    [~,~,Tik]=laplacian(n_delta/2,{'DD'});
+    L1_norm=0;
+    L2_norm=1;
+    if(L2_norm)
+        lambda=1e1;
+        Reg=Tik*shift';
+        f=f+lambda*(norm(Reg))^2;
+        g_temp=[Tik'*Tik*(cos(theta')-1).*x(1:2:n_delta),Tik'*Tik*sin(theta').*x(2:2:n_delta)]';
+        g=g+lambda*2*[g_temp(:);zeros(N^2,1)];
+        % Reg=Tik*x(n_delta+1:end);
+        % f=f+lambda*(norm(Reg))^2;
+        % g=g+lambda*2*[zeros(n_delta,1);Tik'*Reg];
+    elseif(L1_norm)
+        Reg=sum(abs(W(:)));
+        f=f+lambda*Reg;
+        g=g+lambda;
+    end
+end
 
 
