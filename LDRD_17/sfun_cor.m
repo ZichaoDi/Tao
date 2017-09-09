@@ -1,4 +1,5 @@
-function [f,g,XTM]=sfun_cor(x,xstar,XTM,Ltol) 
+function [f,g,XTM]=sfun_cor(x,XTM,Ltol) 
+global shift
 global frame n_delta 
 global N thetan numThetan dTau nTau 
 global sinoS I0 
@@ -10,8 +11,7 @@ global sinoS I0
 theta=thetan*pi/180;
 if(n_delta==2*numThetan)
     %%=============================== COR for each projection
-    delta=reshape(x,2,numThetan);
-    shift=(cos(theta)-1).*delta(1,:)+sin(theta).*delta(2,:);
+    shift=(cos(theta)-1).*x(1:2:n_delta)'+sin(theta).*x(2:2:n_delta)';
     i1=[1:2*numThetan];
     i2=reshape(repmat((1:numThetan),[2,1]),2*numThetan,1);
     i3=reshape([cos(theta)-1;sin(theta)],2*numThetan,1);
@@ -33,21 +33,22 @@ end
 
 alignedSignal=zeros(numThetan,nTau+1);
 DalignedSignal=zeros(numThetan,nTau+1);
-sigma=0.05;%
+sigma=0.9/2.355;%
+scale=1;%/sqrt(2*pi);%2/pi;%sqrt(2*pi*1);
 for i = 1:numThetan
     delay=shift(i);
-    % delay=double(mod(int32(shift(i)),nTau+1));
-    G=exp(-([-nTau-1:nTau+1]'-delay).^2./(2*sigma^2));
-    dG=(([-nTau-1:nTau+1]'-delay)./(sigma^2)).*exp(-([-nTau-1:nTau+1]'-delay).^2./(2*sigma^2));
-    aligned_temp=ifft(fft(G).*fft([zeros(nTau+2,1);XTM(i,:)']));
-    Daligned=ifft(fft(dG).*fft([zeros(nTau+2,1);XTM(i,:)']));
-    if(abs(delay)>(nTau+1)/2)
-        alignedSignal(i,:)=aligned_temp(nTau+2:end-1);
-        DalignedSignal(i,:)=Daligned(nTau+2:end-1);
-    else
-        alignedSignal(i,:)=aligned_temp(1:nTau+1);
-        DalignedSignal(i,:)=Daligned(1:nTau+1);
-    end
+    range=[0:floor((nTau+1)/2)-1 floor(-(nTau+1)/2):-1];% / (nTau+1);
+    G=exp(-(range'-delay).^2./(2*sigma^2));
+    dG=((range'-delay)./(sigma^2)).*exp(-(range'-delay).^2./(2*sigma^2));
+    alignedSignal(i,:)=scale*real(ifft(fft(G).*fft(XTM(i,:)')));
+    DalignedSignal(i,:)=scale*real(ifft(fft(dG).*fft(XTM(i,:)')));
+
+    % subplot(1,2,1)
+    % plot(1:nTau+1,sinoS(:,i),'r.-',1:nTau+1,alignedSignal(i,:),'b.-')
+    % subplot(1,2,2)
+    % plot(1:nTau+1,G,'r.-')
+    % % title(num2str(delay));
+    % pause;
 end
 
 %%------------------------------------------------------
@@ -62,12 +63,36 @@ XTM=alignedSignal;
 if(strcmp(frame,'EM'))
     thres=1;
     Mt=XTM(:)+thres;
-    Rdis=Ltol*xstar+thres;
+    Rdis=Ltol*x(n_delta+1:end)+thres;
     f=sum(-log(Rdis).*Mt+Rdis);
-    g=-Daligned'*log(Rdis);
+    g= Ltol'*(-Mt./Rdis+1);
+    g_pert=-log(Rdis)'*(Daligned);
 elseif(strcmp(frame,'LS'))
-    r=Ltol*xstar-XTM(:);
+    r=Ltol*x(n_delta+1:end)-XTM(:);
+    g=Ltol'*r;
     f=1/2*sum(r.^2,1);
-    g=-Daligned'*r;
+    g_pert=-r'*Daligned;
 end
-
+g=[g_pert';g];
+%% == add regularizer
+penalty=0;
+if(penalty & n_delta==numThetan*2)
+    % Tik=delsq(numgrid('S',N(1)+2)); 
+    [~,~,Tik]=laplacian(n_delta/2,{'DD'});
+    L1_norm=0;
+    L2_norm=1;
+    if(L2_norm)
+        lambda=1e0;
+        Reg=Tik*shift';
+        f=f+lambda*(sum(Reg.^2));
+        g_temp=[(cos(theta')-1).*(Tik'*Tik*shift'),sin(theta').*(Tik'*Tik*shift')]';
+        g=g+lambda*2*[g_temp(:);zeros(N^2,1)];
+        % Reg=Tik*x(n_delta+1:end);
+        % f=f+lambda*(norm(Reg))^2;
+        % g=g+lambda*2*[zeros(n_delta,1);Tik'*Reg];
+    elseif(L1_norm)
+        Reg=sum(abs(W(:)));
+        f=f+lambda*Reg;
+        g=g+lambda;
+    end
+end

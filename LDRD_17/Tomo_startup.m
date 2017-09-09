@@ -21,6 +21,7 @@ addpath_recurse(['./result']);
 path(path,'../TN');
 path(path,'../MGOPT');
 addpath_recurse('../XRF_XTM_Simulation/data');
+addpath_recurse('../Recon_onfly/result');
 addpath_recurse('../SimplerCode');
 if(ismac)
 addpath_recurse([macDir,slash,'APSdata']);

@@ -1,9 +1,9 @@
 function gh=foo(fctn,x0);
-global testind
+global n_delta testind
 z0 = x0;
 z = z0(:);
 n = length(z);
-h =1e-8;
+h =1e-12;
 testind=0;
 [f,g] =feval(fctn,z0);
 diff_ind = 0; % Use 1 for central differencing, 0 for forward differencing
@@ -11,14 +11,14 @@ gh=zeros(size(g));
 if (diff_ind == 0);
 %     disp('Forward Differencing')
 %     fprintf(' i                g                gh         error\n')
-    for i= 1:n;
+    for i= 1:n_delta/2;
         testind=i;
         zh = z;
         zh(i) = zh(i) + h;
         fh = feval(fctn,zh);
         gh(i,:) = (fh(:)-f(:))./h;
         eee = norm(g(i,:)-gh(i,:))/(1+norm(g(i,:)));
-           fprintf('%3i     %8.8e        %8.8e     %8.8e\n',i,norm(g(i,:),inf),norm(gh(i,:),inf),eee);
+        fprintf('%3i     %8.8e        %8.8e     %8.8e\n',i,norm(g(i,:),inf),norm(gh(i,:),inf),eee);
     end;
      err = norm(g-gh)/(1+norm(g))
 else

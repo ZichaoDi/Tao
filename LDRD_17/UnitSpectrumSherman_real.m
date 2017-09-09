@@ -15,7 +15,6 @@ I0=E0*E2I;
 else
 E0=12.1;
 end
-NumElement=length(Z);
 NA=6.02e23;%Avogadro's number
 load_xraylib=0;
 if(load_xraylib)

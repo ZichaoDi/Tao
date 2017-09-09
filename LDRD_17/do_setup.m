@@ -18,109 +18,35 @@ grad_type = 'full-linear';  % 'adj' = adjoint/exact
 % Initialize arrays for discretizations
 Tomo_startup;
 %%===============Load Sample=====================
-synthetic=0;
+synthetic=1;
 if(synthetic)
-    sample='circle'; % one element mainly testing self-absorption 
+    % sample='circle'; % one element mainly testing self-absorption 
     % sample='Golosio';
     % sample = 'checkboard';
-    % sample = 'Phantom';
+    sample = 'Phantom';
     % sample = 'fakeRod';
-    NumElement=5;
+    NumElement=6;
 else
-    % sample='Seed';
-    sample='Rod';
-    NumElement=3;
+    sample='Paunesku';%'Rod';%'Filter';%
+    NumElement=4;
 end
 coarsen_type='smooth';
-N=[129];%[33 17 9 5 3];% 17 9];%[129 65  9 5];%
+N=[65];%[33 17 9 5 3];% 17 9];%[129 65  9 5];%
 angleScale=2; %1: half angle; 2: full angle
 if(synthetic)
-    numThetan=50; % number of scanning angles/projections
+    numThetan=30; % number of scanning angles/projections
     DecomposedElement=0;
 else
     Tol = 1e-2;
     omega=[-2 2 -2 2]*Tol; % units: cm
     if(strcmp(sample,'Seed'))
-        load ./data/ApsDataExtract/DogaSeeds/DownSampleSeeds441_elements.mat
-        load RawSpectra_seed.mat
-        if(angleScale==1)
-            cutInd=floor(size(data_H,3)/2);
-            data_H=data_H(:,:,1:cutInd);
-            spectra=spectra(:,:,1:cutInd);
-        end
-        data = permute(data_H,[2,3,1]);
-        clear data_H
-        slice =[9 13 14 17];%5:27;%      
-        data_h=[];
-        ang_rate=20;
-        tau_rate=1;
-        for ele=1:size(data,1)
-            data_h(ele,:,:)=sum(data(ele,1:ang_rate:end,1:tau_rate:end),1);
-        end
-        if(ndims(data_h)==2)
-            data_h=reshape(data_h,size(data_h,1),1,size(data_h,2));
-        end
-        data_xrt=squeeze(data_h(3,:,:)); %transimission data
-        s_a=0;
-        I0=max(data_xrt(:));% reshape(data_h(2,:,:),size(data_h,2),size(data_h,3));% 
-        % DisR=sparse(data_xrt');
-        load DisR_removeStr
-        data_xrf_decom=data_h(slice,:,:);
-        numThetan=size(data_h,2);
-        nTau=size(data_h,3)-1;
-        N = size(data_h,3);
-        data_xrf_raw=permute(spectra(1:tau_rate:end,:,1:ang_rate:end),[2 3 1]);
-        data_xrf_raw=sparse(reshape(double(data_xrf_raw),[size(data_xrf_raw,1),size(data_xrf_raw,2)*size(data_xrf_raw,3)]));
-        [x_ir,y_ir]=meshgrid(1:size(iR,1));
-        [x_num,y_num]=meshgrid(linspace(1,size(iR,1),N(1)));
-        iR_num=zeros(N(1),N(1),length(slice));
-        for ele=1:size(iR_num,3)
-            iR_num(:,:,ele)=interp2(x_ir,y_ir,iR(:,:,slice(ele)),x_num,y_num);
-        end
-        save('tomopytest.mat','data_xrf_decom');
+        setup_seed;
+    elseif(strcmp(sample,'Filter'))
+        setup_filter;
     elseif(strcmp(sample,'Rod'))
-        load hong30;
-        data=MAPS;
-        ind_i0=33;
-        ind_xrt=32;
-        slice_tot = [2 3 16 20];
-        load tomoRod
-        data_h=[];
-        ang_rate=1;
-        tau_rate=10;
-        for ele=1:size(data,1)
-            data_h(ele,:,:)=sum(data(ele,1:ang_rate:end,1:tau_rate:end),1);
-        end
-        thetan = linspace(0,360,size(data,2));
-        thetan_real = thetan(1:ang_rate:end); 
-        if(ndims(data_h)==2)
-            data_h=reshape(data_h,size(data_h,1),1,size(data_h,2));
-        end
-        numThetan=size(data_h,2);
-        nTau=size(data_h,3)-1;
-        N = size(data_h,3);
-        I0=reshape(data_h(ind_i0,:,:),size(data_h,2),size(data_h,3));
-        data_xrt=data_h(ind_xrt,:,:); %% Downstream Transmission 
-        % DisR=sparse(squeeze(sum(data_xrt(:,:,:),1))');
-        data_xrf_decom=[];
-        data_xrf_decom(1,:,:)=data_h(slice_tot(1),:,:)+data_h(slice_tot(2),:,:);
-        data_xrf_decom(2,:,:)=data_h(slice_tot(3),:,:);
-        data_xrf_decom(3,:,:)=data_h(slice_tot(4),:,:);
-        % save('tomopy_coarse.mat','data_xrf_decom','data_xrt');
-        % return;
-        XRF_decom=permute(data_xrf_decom(:,:,:),[2 3 1]);
-        load spectra_30_aligned;
-        data_xrf_raw=permute(spectra_30_aligned(1:tau_rate:end,1:ang_rate:end,:),[3 2 1]);
-        data_xrf_raw=sparse(reshape(double(data_xrf_raw),[size(data_xrf_raw,1),size(data_xrf_raw,2)*size(data_xrf_raw,3)]));
-        XRF_raw=data_xrf_raw';
-        clear spectra_30_aligned data_sa data_ds data_h
-        m_h=size(iR,1);
-        [x_ir,y_ir]=meshgrid(1:m_h);
-        [x_num,y_num]=meshgrid(linspace(1,m_h,N(1)));
-        iR_num=zeros(N(1),N(1),size(iR,3));
-        for ele=1:size(iR,3)
-            iR_num(:,:,ele)=interp2(x_ir,y_ir,iR(:,:,ele),x_num,y_num);
-        end
+        setup_rod;
+    elseif(strcmp(sample,'Paunesku'))
+        setup_paunesku;
     end
     clear data_xrf_raw data_xrf_decom data_xrt x_ir y_ir x_num y_num iR data spectra 
 end

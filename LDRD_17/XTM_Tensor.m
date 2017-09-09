@@ -37,13 +37,13 @@ end
 n_delta=2*numThetan;
 if(n_delta==2*numThetan)
     rng('default');
-    pert=(-1+2*rand(numThetan,2))*dz(1)*1;
+    pert=(-1+2*rand(numThetan,2))*dz(1)*2;
     pert=cumsum(pert,1)*1;
 elseif(n_delta==4)
     pert1=1*dz(1)*10; pert2=0.5*dz(1)*10;
     pert=[pert1*ones(floor(numThetan/2),2);pert2*ones(numThetan-floor(numThetan/2),2)];
 else
-    pert=zeros(numThetan,2)*dz(1)*2;
+    pert=zeros(numThetan,2)*dz(1)*1;
 end
 xbox=[omega(1) omega(1) omega(2) omega(2) omega(1)];
 ybox=[omega(3) omega(4) omega(4) omega(3) omega(3)];
@@ -54,6 +54,9 @@ if(ind_cr==2)
     % delta0=[sin(theta/2)*r,cos(theta/2)*r];
     % delta0=[cos(-theta)*r,sin(-theta)*r];
     delta0(delta0==inf)=0;
+% load integerShift;
+% delta0(:,2)=dd1;
+% delta0(:,1)=dd2;
 else
     delta0=sparse(numThetan,2);
 end
@@ -115,4 +118,6 @@ for n=1:numThetan
            drawnow;
         end
 end
+scale=1;%max(L(:));
+L=L./scale;
 %%==============================================================

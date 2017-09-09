@@ -36,7 +36,7 @@ else
       end;
       hg = ssbfgs(sr,hg,hyr,yrsr,yrhyr,gsr,ghyr);
       if (first);
-	 hyk = ssbfgs(sr,hyk,hyr,yrsr,yrhyr,yksr,ykhyr);
+	  hyk = ssbfgs(sr,hyk,hyr,yrsr,yrhyr,yksr,ykhyr);
       end;
       ykhyk = hyk'*yk;
       ghyk  = hyk'*g;

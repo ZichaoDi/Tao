@@ -21,28 +21,39 @@ if(n_delta==3)
 else
     deltaStar=delta0_bar;%delta0'/dTau;
 end
-res=2;
+res=3;
 x_res=[];
 aligned=[];
 d0=[0 -res -res 0     res res res 0   -res;...
     0  0   -res -res -res 0   res res res];
-d0=d0(:,2);
+d0=d0(:,1);
 initial_direction=size(d0,2);
 W0=[deltaStar;W(:)];
 errW=zeros(size(d0,2),1);
 f_global=zeros(size(d0,2),1);
-maxiter=250;
+x0_opt=[];
+maxiter=200;
 NF = [0*N; 0*N; 0*N];
 Lmap=[];
 if(synthetic==0)
     deltaStar=0*deltaStar;
-    Mt=XRF_decom(:,:,3)';
+    Mt=XRF_decom(:,:,4)';
+    Mt=Mt./max(Mt(:));
+    % Mt(1:15,:)=0;
+    % xrt1=zeros(size(Mt));
+    % for i=1:numThetan, 
+    %     xrt1(:,i)=medfilt1(Mt(:,i),10);
+    % end
+    % Mt=xrt1;
+    % clear xrt1;
+
+    sinoS=Mt;
     Q=sparse(diag(1./sum(L,1)));
     Q=speye(size(Q));
     Lmap=sparse(L*Q);
 else
     if(ndims(DisR)>=3)
-        Mt=squeeze(-log(DisR(:,:,2)./I0'));
+        Mt=squeeze(-log(DisR(:,:,2)./I0'));%/scale;
         Lmap=sparse(squeeze(L_cr(:,:,1)));
         sinoS=squeeze(-log(DisR(:,:,1)./I0'));
     else
@@ -50,7 +61,7 @@ else
         Mt=Mt-min(Mt(:));
         Lmap=sparse(L);
     end
-    Q=sparse(diag(1./sum(Lmap,1).^1));
+    Q=sparse(diag(1./sum(Lmap,1).^(1/2)));
     Q=1e0*speye(size(Q));
     Lmap=Lmap*Q;
 end
@@ -60,21 +71,25 @@ low_COR=reshape([low_CORx;low_CORy],n_delta,1)/dTau;
 up_CORx=repmat(omega(2),1,n_delta/2);
 up_CORy=repmat(omega(4),1,n_delta/2);
 up_COR=reshape([up_CORx;up_CORy],n_delta,1)/dTau;
-    % low=[-inf.*ones(size(low_COR));zeros(prod(m)*NumElement,1)];
-    % up=[inf.*ones(size(up_COR));inf*ones(prod(m)*NumElement,1)];
-    low=[low_COR;zeros(prod(m)*NumElement,1)];
-    up=[up_COR;inf*ones(prod(m)*NumElement,1)];
+% low=[low_COR;zeros(prod(m)*NumElement,1)];
+% up=[up_COR;inf*ones(prod(m)*NumElement,1)];
+low=[-inf.*ones(size(low_COR));zeros(prod(m)*NumElement,1)];
+up=[inf.*ones(size(up_COR));inf*ones(prod(m)*NumElement,1)];
 for res_step=1:initial_direction
+    per=0;
     if(n_delta==3)
-        delta=[d0(:,res_step);-res]+1*deltaStar;
+        delta=[d0(:,res_step);-res]+0*deltaStar;
     else
-        delta=repmat(d0(:,res_step),n_delta/2,1)+1*deltaStar;
+        delta=repmat(d0(:,res_step),n_delta/2,1)+per*deltaStar;
     end
-    x0=[delta;0*10^(0)*rand(m(1)*m(2)*NumElement,1)];
-    x0_opt=x0;
+    x0= W0;%[delta;0*10^(0)*rand(m(1)*m(2)*NumElement,1)];
+    x0_opt(:,res_step)=x0;
     err0=norm(W0-x0);
-    fctn_COR=@(x)sfun_COR(x,full(Mt'),sparse(Lmap));% on attenuation coefficients miu;
-    fctn=@(x)sfun_radon(x,full(Mt'),sparse(Lmap));% on attenuation coefficients miu;
+    fctn_COR1=@(x)sfun_COR(x,full(Mt'),sparse(Lmap));% on attenuation coefficients miu;
+    fctn_COR=@(x)sfun_cor(x,full(Mt'),sparse(Lmap));% on attenuation coefficients miu;
+    % [~,~,xtm1]=feval(fctn_COR,xc2);
+    % fctn=@(x)sfun_radon(x,full(xtm1),sparse(Lmap));% on attenuation coefficients miu;
+    fctn=@(x)sfun_radon(x,full(sinoS'),sparse(Lmap));% on attenuation coefficients miu;
     bounds=1;
     if(bounds)
         [xCOR,f,g,ierror] = tnbc (x0,fctn_COR,low,up); % algo='TNbc';
@@ -82,11 +97,11 @@ for res_step=1:initial_direction
         errW(res_step)=norm(W0(n_delta+1:end)-xCOR(n_delta+1:end));
         f_global(res_step)=f;
         [~,~,alignedSignal]=feval(fctn_COR,xCOR);
-        % err_sino(res_step)=norm(alignedSignal'-sinoS);
-        %%============================================
-        % W0=W(:);
-        % [x,f,g,ierror] = tnbc (x0(n_delta+1:end),fctn,low(n_delta+1:end),up(n_delta+1:end)); % algo='TNbc';
-        % W0=[deltaStar;W(:)];
+        err_sino(res_step)=norm(alignedSignal'-sinoS);
+        %% ============================================
+        W0=W(:);
+        [x,f,g,ierror] = tnbc (x0(n_delta+1:end),fctn,low(n_delta+1:end),up(n_delta+1:end)); % algo='TNbc';
+        W0=[deltaStar;W(:)];
         %%============================================
         % options = optimoptions('fmincon','Display','iter','GradObj','on','MaxIter',maxiter);%,'Algorithm','interior-point');
         % [x, f] = fmincon(fctn_COR,x0,[],[],[],[],low,up,[],options); %algo='fmincon';
@@ -116,7 +131,7 @@ end
 % hold off; legend(legends);ylabel('Recovered CORs');
 subplot(nrow,initial_direction,[1*initial_direction+1:initial_direction*2]);
 plot(errW,'b*-'); ylabel('reconstruction error')
-subplot(nrow,initial_direction,[2*initial_direction+1:initial_direction*3]);semilogy(f_global,'ro-'); 
+subplot(nrow,initial_direction,[2*initial_direction+1:initial_direction*3]);plot(f_global,'ro-'); 
 ylabel('objective value')
 for i=1:initial_direction, 
     subplot(nrow,initial_direction,3*initial_direction+i);imagesc(reshape(aligned(:,i),numThetan,nTau+1));

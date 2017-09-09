@@ -10,8 +10,7 @@ global sinoS I0
 theta=thetan*pi/180;
 if(n_delta==2*numThetan)
     %%=============================== COR for each projection
-    delta=reshape(x(1:numThetan*2),2,numThetan);
-    shift=(cos(theta)-1).*delta(1,:)+sin(theta).*delta(2,:);
+    shift=(cos(theta)-1).*x(1:2:n_delta)'+sin(theta).*x(2:2:n_delta)';
     i1=[1:2*numThetan];
     i2=reshape(repmat((1:numThetan),[2,1]),2*numThetan,1);
     i3=reshape([cos(theta)-1;sin(theta)],2*numThetan,1);
@@ -33,34 +32,34 @@ end
 
 alignedSignal=zeros(numThetan,nTau+1);
 DalignedSignal=zeros(numThetan,nTau+1);
-sigma=0.05;%
 for i = 1:numThetan
     delay=shift(i);
-    % x_coarse=[-nTau-1:nTau+1];
-    % interpolate_rate=1;
-    % x_fine=[-nTau-1:interpolate_rate:nTau+1];
-    % tt_coarse=[zeros(nTau+2,1);XTM(i,:)'];
-    % tt_fine=interp1(x_coarse,tt_coarse,x_fine)';
-    % G=exp(-(x_fine'-delay).^2./(2*sigma^2));
-    % dG=((x_fine'-delay)./(sigma^2)).*exp(-(x_fine'-delay).^2./(2*sigma^2));
-    % aligned_temp=ifft(fft(G).*fft(tt_fine));
-    % aligned_temp=aligned_temp(1:1/interpolate_rate:end);
-    % Daligned=ifft(fft(dG).*fft(tt_fine));
-    % %%%=============================================
-    % Daligned=Daligned(1:1/interpolate_rate:end);
-    % alignedSignal(i,:)=aligned_temp(1:nTau+1);
-    % DalignedSignal(i,:)=Daligned(1:nTau+1);
     %%%=============================================
-        H=fft(XTM(i,:));
-        u=[0:floor((nTau+1)/2)-1 floor(-(nTau+1)/2):-1] / (nTau+1);
-        ubar=exp(-j*2*pi.*(u*delay));
-        H1=H.*ubar;
-        alignedSignal(i,:)=real(ifft(H1));
-        % plot(1:nTau+1,XTM(i,:),'r.-',1:nTau+1,alignedSignal(i,:),'b.-');title(num2str(delay));pause(1);
-        DalignedSignal(i,:)=real(ifft(H.*ubar.*(-2*pi*j*u)));
+    % interpolate_rate=2;
+    % H=fft(interp1(1:nTau+1,XTM(i,:),1:1/interpolate_rate:nTau+1,'nearest'));
+    % u=[0:1/interpolate_rate:floor((nTau+1)/2)-1 floor(-(nTau+1)/2):1/interpolate_rate:-0.5] / (2*nTau+1);
+    % ubar=exp(-j*2*pi.*(u*delay*interpolate_rate*2));
+    % H1=H.*ubar;
+    % align_temp=real(ifft(H1));
+    % alignedSignal(i,:)=align_temp(1:interpolate_rate:end);
+    % Dalign_temp1=real(ifft(H.*ubar.*(-2*pi*j*u*4)));
+    % DalignedSignal(i,:)=Dalign_temp1(1:interpolate_rate:end);
+    %%%=============================================
+    H=fft(XTM(i,:));
+    u=[0:floor((nTau+1)/2)-1 floor(-(nTau+1)/2):-1] / (nTau+1);
+    ubar=exp(-j*2*pi.*(u*delay));
+    alignedSignal(i,:)=abs(real(ifft(H.*ubar)));
+    DalignedSignal(i,:)=sign(real(ifft(H.*ubar))).*real(ifft(H.*ubar.*(-2*pi*j*u)));
+    %%%=============================================
+    % H=fftshift(fft(XTM(i,:)));
+    % u=[floor(-(nTau+1)/2):floor((nTau+1)/2)-1]/(nTau+1);
+    % ubar=exp(-j*2*pi.*(u*delay));
+    % alignedSignal1(i,:)=real(ifft(fftshift(H.*ubar)));
+    % DalignedSignal(i,:)=real(ifft(fftshift(H.*ubar.*(-2*pi*j*u))));
+    % % %%%=============================================
+    % subplot(1,2,1),plot(1:nTau+1,alignedSignal(i,:),'r.-');hold on; plot(1:nTau+1,XTM(i,:),'b.-');hold off;title(num2str(delay));
+    % subplot(1,2,2),plot(1:nTau+1,alignedSignal(i,:),'r.-');hold on; plot(1:nTau+1,alignedSignal1(i,:),'b.-');hold off;title(num2str(delay));pause;%,1:nTau+1,alignedSignal1(i,:),'g.-'
 end
-% figure, subplot(1,2,1),imagesc(alignedSignal);colorbar;subplot(1,2,2);imagesc(DalignedSignal);colorbar;
-
 %%------------------------------------------------------
 Daligned=zeros(numThetan*(nTau+1),n_delta);
 for i=1:n_delta/2
@@ -69,7 +68,6 @@ for i=1:n_delta/2
 end
 
 Daligned=Daligned.*repmat(Ddelta,[1,nTau+1])';
-% Daligned=repmat(DalignedSignal(:),[1,n_delta]).*repmat(Ddelta,[1,nTau+1])';
 % save('sfun_test.mat','Daligned','Ddelta','alignedSignal','shift');
 % figure, subplot(1,2,1),imagesc(alignedSignal');subplot(1,2,2);imagesc(reshape(x(n_delta+1:end),N,N));
 XTM=alignedSignal;
@@ -87,17 +85,17 @@ elseif(strcmp(frame,'LS'))
     g_pert=-r'*Daligned;
 end
 g=[g_pert';g];
-penalty=1;
+penalty=0;
 if(penalty & n_delta==numThetan*2)
     % Tik=delsq(numgrid('S',N(1)+2)); 
     [~,~,Tik]=laplacian(n_delta/2,{'DD'});
     L1_norm=0;
     L2_norm=1;
     if(L2_norm)
-        lambda=1e1;
+        lambda=1e2;
         Reg=Tik*shift';
-        f=f+lambda*(norm(Reg))^2;
-        g_temp=[Tik'*Tik*(cos(theta')-1).*x(1:2:n_delta),Tik'*Tik*sin(theta').*x(2:2:n_delta)]';
+        f=f+lambda*(sum(Reg.^2));
+        g_temp=[(cos(theta')-1).*(Tik'*Tik*shift'),sin(theta').*(Tik'*Tik*shift')]';
         g=g+lambda*2*[g_temp(:);zeros(N^2,1)];
         % Reg=Tik*x(n_delta+1:end);
         % f=f+lambda*(norm(Reg))^2;

@@ -13,7 +13,7 @@ slice_tot = [2 3 4 8 16 19];
 %%%================================
 data_h=[];
 ang_rate=1;
-tau_rate=4;
+tau_rate=6;
 for ele=1:size(data,1)
     data_h(ele,:,:)=data(ele,1:ang_rate:end,1:tau_rate:end);
 end
@@ -27,9 +27,16 @@ thetan=linspace(0,360,numThetan);
 nTau=size(data_h,3)-1;
 N = size(data_h,3);
 data_xrt=data_h(ind_xrt,:,:); %% Downstream Transmission 
+windowSize=2;
+xrt1=zeros(size(data_xrt));
+for i=1:numThetan, 
+    xrt1(1,i,:)=medfilt1(data_xrt(1,i,:),windowSize);
+end
+data_xrt=xrt1;
+clear y xrt1;
 %%==============================================
-I0=reshape(data_h(ind_i0,:,:),size(data_h,2),size(data_h,3));
-% I0=repmat(max(squeeze(data_xrt),[],2),1,nTau+1);
+% I0=reshape(data_h(ind_i0,:,:),size(data_h,2),size(data_h,3));
+I0=repmat(max(squeeze(data_xrt),[],2),1,nTau+1);
 DisR=sparse(squeeze(sum(data_xrt(:,:,:),1))');
 data_xrf_decom=[];
 for ele=1:NumElement

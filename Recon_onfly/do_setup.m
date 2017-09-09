@@ -41,7 +41,7 @@ else
     if(strcmp(sample,'Seed'))
         setup_seed;
     elseif(strcmp(sample,'Filter'))
-        setup_filter;
+        setup_filter_sim;
     elseif(strcmp(sample,'Rod'))
         setup_rod;
     end

@@ -1,3 +1,5 @@
+%%% Simulate XRF of a given fixed object with rotating predifined detector and beam
+%%% Travelling of fluorescence photon is approximated as the area covered by solid angle
 global low up penalty Tik lambda
 global W0 current_n Wold
 global Beta TempBeta beta_d
@@ -5,8 +7,6 @@ global err0 fiter nit maxiter
 global ConstSub MU_XTM I0 DisR
 global itertest ErrIter icycle maxOut
 global COR initialize mtol xbox ybox L in_after
-%%% Simulate XRF of a given fixed object with rotating predifined detector and beam
-%%% Travelling of fluorescence photon is approximated as the area covered by solid angle
 global LogScale Tol Itemp
 COR=0;
 do_setup;
@@ -15,13 +15,13 @@ icycle=0;
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
 DefineObject_Gaussian; % Produce W, MU_XTM
 %%%----------------------------Initialize dependent variables
-DecomposedElement=1;
+DecomposedElement=0;
 if(strcmp(sample,'Seed'))
     beta_d=1e0;
 elseif(strcmp(sample,'Rod'))
     beta_d=1e1;
 else
-    beta_d=1e3;
+    % beta_d=1e3;
 end
 if(~synthetic & ~ReconAttenu)
     truncChannel=1*(DecomposedElement==0);
@@ -49,9 +49,23 @@ W0=W(:);
 %%%================= First-order derivative regularization
 penalty=0;
 cmap=[min(W0),max(W0)];
-TempBeta=1; Beta=1e2;
-Mt=-log(DisR'./I0)*beta_d;
+% TempBeta=1; Beta=1e2;
+Mt=-log(DisR'./I0);
+windowSize=2;
+xrt1=zeros(size(Mt));
+for i=1:numThetan, 
+    xrt1(i,:)=medfilt1(Mt(i,:),windowSize);
+end
+xrt1(:,1)=xrt1(:,2);
+Mt=xrt1*beta_d;
+clear y xrt1;
 Mt=Mt(:)-min(Mt(:));
+
+% for ele=1:NumElement
+%     a=XRF(:,:,ele);
+%     a(ind)=0;
+%     XRF(:,:,ele)=a;
+% end
 xrfData=XRF(:);%/I0;%/reshape(repmat(I0,[1 1 numChannel]),numThetan*(nTau+1)*numChannel,1);
 fctn_f=@(W)Forward_onfly(W,xrfData,Mt,M);
 rng('default');
@@ -64,7 +78,7 @@ Wold=reshape(x,prod(m),NumElement);%zeros(prod(m),NumElement);
 err=[];
 outCycle=2;
 if(~ReconAttenu && Alternate)
-    initialize=1;
+    % initialize=1;
     %%%%%%%==============================================================
     if(initialize)
         mtol=prod(m);
@@ -133,7 +147,7 @@ if(Alternate && linear_S==0)
         end
         icycle=icycle+1;
     end
-    save(['xstar_',sample,'_',num2str(N(1)),'_',num2str(numThetan),'_',num2str(TempBeta),'_',num2str(Beta),'_',num2str(numChannel),'-',num2str(nit),frame,'.mat'],'x_admm','W0');%,'_linear_',num2str(lambda),'.mat'
+    save(['xstar_',sample,'_',num2str(N(1)),'_',num2str(numThetan),'_',num2str(TempBeta),'_',num2str(Beta),'_',num2str(beta_d),'_',num2str(numChannel),'-',num2str(nit),frame,'.mat'],'x_admm','W0');%,'_linear_',num2str(lambda),'.mat'
 end
 %%%%%%%%%%%%%%%%%%%%======================================================
 if(~ReconAttenu)

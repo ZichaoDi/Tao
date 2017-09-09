@@ -7,16 +7,17 @@ m = [current_n current_n];
 ws=reshape(W_level,prod(m)*NumElement,1);
 xstar=v;
 nrow=3;
-ncol = NumElement;
 %--------------------------------------------------------------
 % set up boundary conditions
 %--------------------------------------------------------------
+subind=[1:NumElement];
+ncol = length(subind);
  figure;
     clims=[0 max(ws)];
     for i=1:ncol
         subplot(nrow,ncol,i);
-        
-        errCom=reshape(xinitial(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-ws(prod(m)*i-prod(m)+1:prod(m)*i
+       i_sub=subind(i); 
+        errCom=reshape(xinitial(prod(m)*i_sub-prod(m)+1:prod(m)*i_sub),m(1),m(2));%-ws(prod(m)*i-prod(m)+1:prod(m)*i
         imagesc(errCom);colormap jet
         set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',...
         [],'YTick',[]);
@@ -24,11 +25,11 @@ ncol = NumElement;
         if(i==1)
             ylabel('Initial Guess','fontsize',12)
         end
-        title(Element{Z(i)},'fontsize',12);
+        title(Element{Z(i_sub)},'fontsize',12);
     
         subplot(nrow,ncol,i+1*ncol);
         
-        errCom=reshape(xstar(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));%-ws(prod(m)*i-prod(m)+1:prod(m)*i
+        errCom=reshape(xstar(prod(m)*i_sub-prod(m)+1:prod(m)*i_sub),m(1),m(2));%-ws(prod(m)*i-prod(m)+1:prod(m)*i
         imagesc(errCom);colormap jet
         colorbar;
         set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',...
@@ -40,7 +41,7 @@ ncol = NumElement;
     
         subplot(nrow,ncol,i+2*ncol);
         
-        errCom=reshape(ws(prod(m)*i-prod(m)+1:prod(m)*i),m(1),m(2));
+        errCom=reshape(ws(prod(m)*i_sub-prod(m)+1:prod(m)*i_sub),m(1),m(2));
         imagesc(errCom);colormap jet
         set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',...
         [],'YTick',[]);

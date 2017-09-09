@@ -7,10 +7,11 @@ function [xstar, f, g, ierror] = ...
 % this routine) with a diagonal scaling (routine ndia3).
 % For further details, see routine tnbc.
 %---------------------------------------------------------
+global shift
 global sk yk sr yr yksk yrsr
 global NF N current_n  fiter itertest ErrIter
 global ptest gv ipivot nit
-global n_delta i_cauchy W0  m NumElement
+global n_delta N_delta i_cauchy W0  m NumElement
 global maxiter err0 Joint 
 global f_xrf f_xtm
 %---------------------------------------------------------
@@ -143,8 +144,6 @@ while (~conv);
     alpha0 = alpha;
     PieceLinear=1;
     newcon = 0;
-    % plot(p(1:n_delta),'r.-');pause;
-    % p(n_delta+1:end)=1e3*p(n_delta+1:end);
     if(PieceLinear)
         % if(spe<=eps)
         %     disp('update active set due to zero step length');
@@ -158,15 +157,37 @@ while (~conv);
     else
         [x_new, f_new, g_new, nf1, ierror, alpha] = lin1 (p, x, f, alpha0, g, sfun);
     end
-    if(alpha<=0)
-       newcon = 0;
-       if (abs(alpha-spe) <= eps);% | alpha==1
-           disp('update ipivot due to tiny step length')
-           newcon = 1;
-           ierror = 0;
-           [ipivot, flast] = modz (x, p, ipivot, low, up, flast, f);
-       end;
-    end
+    % [~,~,signal]=sfun(x_new);
+    % subplot(1,2,1)
+    % imagesc(abs(reshape(x_new(N_delta+1:end)-W0(N_delta+1:end),N,N)))
+    % colorbar;
+    % subplot(1,2,2)
+    % imagesc(reshape(x_new(N_delta+1:end),N,N))
+    % pause(0.1);
+
+    % if(length(x_new)==N^2)
+    %     subplot(1,2,1);plot(p,'r.-');
+    %     subplot(1,2,2);imagesc(reshape(x_new,N,N));
+    % elseif(length(x_new)==n_delta+N^2)
+    %     subplot(3,2,1);plot(g_new(n_delta+1:end),'r.-');subplot(3,2,2);plot(g_new(1:n_delta),'g.-')
+    %     subplot(3,2,3);plot(p(n_delta+1:end),'r.-');subplot(3,2,4);plot(p(1:n_delta),'g.-')
+    %     subplot(3,2,5);plot(shift,'r.-');
+    %     subplot(3,2,6);imagesc(reshape(x_new(n_delta+1:end),N,N));
+    % else
+    %     subplot(3,2,1);plot(g_new(N_delta+1:end),'r.-');subplot(3,2,2);plot(g_new(1:N_delta),'g.-')
+    %     subplot(3,2,3);plot(p(N_delta+1:end),'r.-');subplot(3,2,4);plot(p(1:N_delta),'g.-')
+    %     subplot(3,2,5);plot(shift,'r.-');
+    %     subplot(3,2,6);imagesc(reshape(x_new(N_delta+1:end),N,N));
+    % end
+    % drawnow;
+    % pause(1);
+    newcon = 0;
+    if (abs(alpha-spe) <= 10*eps);% | alpha==1
+        disp('update ipivot due to tiny step length')
+        newcon = 1;
+        ierror = 0;
+        [ipivot, flast] = modz (x, p, ipivot, low, up, flast, f);
+    end;
     if (alpha <= 0 & alpha0 ~= 0 | ierror == 3);
         fprintf('Error in Line Search\n');
         fprintf('    ierror = %3i\n',    ierror);
@@ -219,7 +240,6 @@ while (~conv);
     ftest = 1 + abs(f);
     xnorm = norm(x,'inf');
     x_iter(:,nit+1)=x;
-    save x_iter x_iter
     %--------------------------------- Error
     ErrIter(nit+1)=norm(x-W0);
     if(Joint==1)

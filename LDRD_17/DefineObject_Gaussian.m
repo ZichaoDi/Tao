@@ -36,6 +36,10 @@ else
     elseif(strcmp(sample,'Seed'))
         Z=[14 16 17 19 20 22 23 24 25 26 28 29 30 31 80 33 34 35 92 37 38 39 40];% Complete Seed
         Z=Z(slice-4);
+    elseif(strcmp(sample,'Paunesku'))
+        Z=[20 22 26 30];
+    elseif(strcmp(sample,'Filter'))
+        Z=[14 15 16 20 30 58];
     end
 end
 %---------------------------
@@ -51,8 +55,6 @@ NumElement=length(Z);
             center=[2*m(1)/3, 2*m(2)/3];
             r=m(1)/3;
             pix = (X-center(1)).^2+(Y-center(2)).^2 <= r^2; %% circle
-            % pix = (X-center(1)).^2+(Y-center(2)).^2 >= (m(1)/5)^2 & (X-center(1)).^2+(Y-center(2)).^2 <= (m(1)/4)^2;
-            % pix = (X<=center(1)+r & X>=center(1)-r & Y<=center(1)+r & Y>=center(1)-r ); %% square
             W(pix)=10;
         elseif(strcmp(sample,'checkboard'))
             W = kron(invhilb(N(1)/10)<0, ones(10,10));
@@ -66,15 +68,15 @@ NumElement=length(Z);
                 W(:,:,tsub)=abs(fliplr(permute(iR_num(:,:,tsub),[2 1 3])));%tsub*2e-1;
             elseif(strcmp(sample,'Rod'))
                 W(:,:,tsub)=abs(fliplr(rot90(permute(iR_num(:,:,tsub),[2 1 3]))));%tsub*2e-1;
+            elseif(strcmp(sample,'Filter'))
+                W(:,:,tsub)=abs((rot90(iR_num(:,:,tsub),3)));
+    elseif(strcmp(sample,'Paunesku'))
+                W(:,:,tsub)=abs(fliplr(rot90(permute(iR_num(:,:,tsub),[2 1 3]))));%tsub*2e-1;
             end
         end
-        clear iR_num iR
+        clear iR
     end
-    if(onlyXRF)
-        UnitSpectrumSherman_real_1; %% Produce BindingEnergy M
-    else
-        UnitSpectrumSherman_real; %% Produce BindingEnergy M
-    end
+    UnitSpectrumSherman_real; %% Produce BindingEnergy M
     clear Line ElementDensity LineEnergy CS_FluoLine CS_Total CS_TotalBeam
 %%%%% =================== Attenuation Matrix at beam energy
 MUe=reshape(MU_e(:,1,1),1,1,NumElement);
