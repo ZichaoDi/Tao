@@ -54,9 +54,9 @@ if(ind_cr==2)
     % delta0=[sin(theta/2)*r,cos(theta/2)*r];
     % delta0=[cos(-theta)*r,sin(-theta)*r];
     delta0(delta0==inf)=0;
-% load integerShift;
-% delta0(:,2)=dd1;
-% delta0(:,1)=dd2;
+    % load integerShift;
+    % delta0(:,2)=dd1;
+    % delta0(:,1)=dd2;
 else
     delta0=sparse(numThetan,2);
 end

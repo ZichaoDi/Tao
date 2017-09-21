@@ -18,7 +18,7 @@ grad_type = 'full-linear';  % 'adj' = adjoint/exact
 % Initialize arrays for discretizations
 Tomo_startup;
 %%===============Load Sample=====================
-synthetic=1;
+synthetic=0;
 if(synthetic)
     % sample='circle'; % one element mainly testing self-absorption 
     % sample='Golosio';
@@ -34,7 +34,7 @@ coarsen_type='smooth';
 N=[65];%[33 17 9 5 3];% 17 9];%[129 65  9 5];%
 angleScale=2; %1: half angle; 2: full angle
 if(synthetic)
-    numThetan=30; % number of scanning angles/projections
+    numThetan=10; % number of scanning angles/projections
     DecomposedElement=0;
 else
     Tol = 1e-2;

@@ -1,5 +1,5 @@
 function [f,g,r]=sfun_radon(MU,Mt,Ltol) 
-global frame
+global lambda frame N
 %%===== Reconstruction discrete objective
 %%===== Ltol: intersection length matrix
 %%===== f: sum_i ||e^T(Ltol_i.*I)e-M_i||^2, i=1..theta
@@ -15,4 +15,21 @@ elseif(strcmp(frame,'LS'))
     g=Ltol'*r;
     f=1/2*sum(r.^2,1);
 end
+penalty=1;
+if(penalty)
+    Tik=delsq(numgrid('S',N(1)+2)); 
+    L1_norm=0;
+    L2_norm=1;
+    lambda=5e-7;
+    if(L2_norm)
+        Reg=Tik*MU;
+        f=f+lambda*(sum(Reg.^2));
+        g=g+lambda*2*Tik'*Tik*MU;
+    elseif(L1_norm)
+        Reg=sum(abs(W(:)));
+        f=f+lambda*Reg;
+        g=g+lambda;
+    end
+end
+
 

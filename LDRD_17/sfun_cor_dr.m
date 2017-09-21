@@ -10,14 +10,15 @@ global sinoS N
 shift=x(1:N_delta);
 alignedSignal=zeros(numThetan,nTau+1);
 DalignedSignal=zeros(numThetan,nTau+1);
-sigma=0.001/2.355;
+sigma=1.5/2.355;
+scale=1/sqrt(2*pi)/sigma;
 for i = 1:numThetan
     delay=shift(i);
     range=[0:floor((nTau+1)/2)-1 floor(-(nTau+1)/2):-1]';%
     G=exp(-(range-delay).^2./(2*sigma^2));
     dG=((range-delay)./(sigma^2)).*exp(-(range-delay).^2./(2*sigma^2));
-    alignedSignal(i,:)=1*real(ifft(fft(G).*(fft(XTM(i,:)'))));
-    DalignedSignal(i,:)=1*real(ifft(fft(dG).*(fft(XTM(i,:)'))));
+    alignedSignal(i,:)=scale*real(ifft(fft(G).*(fft(XTM(i,:)'))));
+    DalignedSignal(i,:)=scale*real(ifft(fft(dG).*(fft(XTM(i,:)'))));
     % subplot(1,2,1)
     % plot(1:nTau+1,alignedSignal(i,:),'r.-',1:nTau+1,sinoS(:,i),'b.-')
     % title(num2str(delay));
@@ -43,6 +44,6 @@ elseif(strcmp(frame,'LS'))
     r=Ltol*x(N_delta+1:end)-XTM(:);
     f=1/2*sum(r.^2,1);
     g=Ltol'*r;
-    g_pert=-Daligned'*r;
+    g_pert=-r'*Daligned;
 end
 g=[g_pert';g];

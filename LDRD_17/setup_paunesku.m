@@ -1,19 +1,27 @@
-load Paunesku_tomo86;
+load ang;
+load(['Paunesku',num2str(slice),'.mat']);
+off_ind=setdiff(1:48,[7 12 26]);
+time=time(off_ind);
+ang=ang(off_ind);
+data=data(:,off_ind,:);
 ind_i0=2;
 ind_xrt=3;
-slice_tot = [7 8 11 14];
+slice_tot = [3 4 7 8 11 14];
 %%%================================
 load tomoRod
 data_h=[];
 ang_rate=1;
 tau_rate=1;
-thetan=ang(timeInd);
-data=data(:,timeInd,:);
+thetan=ang;
 for ele=1:size(data,1)
-    data_h(ele,:,:)=sum(data(ele,1:ang_rate:end,1:tau_rate:end),1);
-    % data_h(ele,:,:)=sum_interval(squeeze(data(ele,:,:)),ang_rate,tau_rate);
+    data_h(ele,:,:)=data(ele,1:ang_rate:end,1:tau_rate:end);
+    for n=1:length(ang)
+        data_h(ele,n,:)=map1D(data_h(ele,n,:),[0,1]);
+    end
 end
 thetan_real = thetan(1:ang_rate:end)'; 
+thetan=mod(thetan_real,360);%linspace(-180,180,numThetan)+360;% must be positive.
+
 if(ndims(data_h)==2)
     data_h=reshape(data_h,size(data_h,1),1,size(data_h,2));
 end

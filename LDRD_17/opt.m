@@ -26,13 +26,13 @@ x_res=[];
 aligned=[];
 d0=[0 -res -res 0     res res res 0   -res;...
     0  0   -res -res -res 0   res res res];
-d0=d0(:,1);
+d0=d0(:,5);
 initial_direction=size(d0,2);
 W0=[deltaStar;W(:)];
 errW=zeros(size(d0,2),1);
 f_global=zeros(size(d0,2),1);
 x0_opt=[];
-maxiter=200;
+maxiter=350;
 NF = [0*N; 0*N; 0*N];
 Lmap=[];
 if(synthetic==0)
@@ -58,7 +58,6 @@ else
         sinoS=squeeze(-log(DisR(:,:,1)./I0'));
     else
         Mt=-log(DisR./I0');
-        Mt=Mt-min(Mt(:));
         Lmap=sparse(L);
     end
     Q=sparse(diag(1./sum(Lmap,1).^(1/2)));
@@ -82,13 +81,12 @@ for res_step=1:initial_direction
     else
         delta=repmat(d0(:,res_step),n_delta/2,1)+per*deltaStar;
     end
-    x0= W0;%[delta;0*10^(0)*rand(m(1)*m(2)*NumElement,1)];
+    x0= [delta;0*10^(0)*rand(m(1)*m(2)*NumElement,1)];
     x0_opt(:,res_step)=x0;
     err0=norm(W0-x0);
-    fctn_COR1=@(x)sfun_COR(x,full(Mt'),sparse(Lmap));% on attenuation coefficients miu;
     fctn_COR=@(x)sfun_cor(x,full(Mt'),sparse(Lmap));% on attenuation coefficients miu;
     % [~,~,xtm1]=feval(fctn_COR,xc2);
-    % fctn=@(x)sfun_radon(x,full(xtm1),sparse(Lmap));% on attenuation coefficients miu;
+    % fctn=@(x)sfun_radon(x,full(xtm2),sparse(Lmap));% on attenuation coefficients miu;
     fctn=@(x)sfun_radon(x,full(sinoS'),sparse(Lmap));% on attenuation coefficients miu;
     bounds=1;
     if(bounds)
@@ -99,12 +97,12 @@ for res_step=1:initial_direction
         [~,~,alignedSignal]=feval(fctn_COR,xCOR);
         err_sino(res_step)=norm(alignedSignal'-sinoS);
         %% ============================================
-        W0=W(:);
-        [x,f,g,ierror] = tnbc (x0(n_delta+1:end),fctn,low(n_delta+1:end),up(n_delta+1:end)); % algo='TNbc';
-        W0=[deltaStar;W(:)];
-        %%============================================
-        % options = optimoptions('fmincon','Display','iter','GradObj','on','MaxIter',maxiter);%,'Algorithm','interior-point');
-        % [x, f] = fmincon(fctn_COR,x0,[],[],[],[],low,up,[],options); %algo='fmincon';
+        % W0=W(:);
+        % [x,f,g,ierror] = tnbc (x0(n_delta+1:end),fctn,low(n_delta+1:end),up(n_delta+1:end)); % algo='TNbc';
+        % W0=[deltaStar;W(:)];
+        %% ============================================
+        %% options = optimoptions('fmincon','Display','iter','GradObj','on','MaxIter',maxiter);%,'Algorithm','interior-point');
+        %% [x, f] = fmincon(fctn_COR,x0,[],[],[],[],low,up,[],options); %algo='fmincon';
     else
         [xCOR,f,g,ierror] = tn (x0,fctn_COR);
     end

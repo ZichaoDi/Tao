@@ -30,11 +30,11 @@ elseif(n_delta==2)
     shift=(cos(theta)-1)*x(1)+sin(theta)*x(2);
     Ddelta=[cos(theta)-1;sin(theta)];
 end
-
+save shift shift
 alignedSignal=zeros(numThetan,nTau+1);
 DalignedSignal=zeros(numThetan,nTau+1);
-sigma=0.9/2.355;%
-scale=1;%/sqrt(2*pi);%2/pi;%sqrt(2*pi*1);
+sigma=1.5/2.355;
+scale=1/sqrt(2*pi)/sigma;%2/pi;%sqrt(2*pi*1);
 for i = 1:numThetan
     delay=shift(i);
     range=[0:floor((nTau+1)/2)-1 floor(-(nTau+1)/2):-1];% / (nTau+1);
@@ -42,11 +42,14 @@ for i = 1:numThetan
     dG=((range'-delay)./(sigma^2)).*exp(-(range'-delay).^2./(2*sigma^2));
     alignedSignal(i,:)=scale*real(ifft(fft(G).*fft(XTM(i,:)')));
     DalignedSignal(i,:)=scale*real(ifft(fft(dG).*fft(XTM(i,:)')));
-
-    % subplot(1,2,1)
-    % plot(1:nTau+1,sinoS(:,i),'r.-',1:nTau+1,alignedSignal(i,:),'b.-')
-    % subplot(1,2,2)
-    % plot(1:nTau+1,G,'r.-')
+    % subplot(1,3,1)
+    % % plot(1:nTau+1,sinoS(:,i),'r.-',1:nTau+1,alignedSignal(i,:),'b.-',1:nTau+1,XTM(i,:),'g--')
+    % plot(1:nTau+1,sinoS(:,i),'r.-',1:nTau+1,XTM(i,:),'b.-')
+    % title(num2str([delay,i]));
+    % subplot(1,3,2)
+    % plot(1:nTau+1,sinoS(:,i)'-alignedSignal(i,:),'r.-')
+    % subplot(1,3,3)
+    % plot(range,G,'r.-')
     % % title(num2str(delay));
     % pause;
 end
@@ -81,15 +84,13 @@ if(penalty & n_delta==numThetan*2)
     [~,~,Tik]=laplacian(n_delta/2,{'DD'});
     L1_norm=0;
     L2_norm=1;
+    lambda=1e1;
     if(L2_norm)
-        lambda=1e0;
         Reg=Tik*shift';
-        f=f+lambda*(sum(Reg.^2));
+        f=f+lambda*(sum(Reg.^2));%+lambda*sum(x(n_delta+1:end).^2);
         g_temp=[(cos(theta')-1).*(Tik'*Tik*shift'),sin(theta').*(Tik'*Tik*shift')]';
         g=g+lambda*2*[g_temp(:);zeros(N^2,1)];
-        % Reg=Tik*x(n_delta+1:end);
-        % f=f+lambda*(norm(Reg))^2;
-        % g=g+lambda*2*[zeros(n_delta,1);Tik'*Reg];
+        % g=g+lambda*2*[g_temp(:);x(n_delta+1:end)];
     elseif(L1_norm)
         Reg=sum(abs(W(:)));
         f=f+lambda*Reg;

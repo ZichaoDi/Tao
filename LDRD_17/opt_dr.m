@@ -6,7 +6,7 @@ deltaStar=(cos(theta)-1).*delta0_bar(1:2:n_delta)+sin(theta).*delta0_bar(2:2:n_d
 x_res=[];
 aligned=[];
 W0=[deltaStar;W(:)];
-maxiter=300;
+maxiter=350;
 NF = [0*N; 0*N; 0*N];
 Lmap=[];
 if(synthetic==0)
@@ -26,7 +26,7 @@ end
 
 for res_step=1:initial_direction
     delta=(cos(theta)-1).*x0_opt(1:2:n_delta,res_step)+sin(theta).*x0_opt(2:2:n_delta,res_step);
-    x0=W0;%[delta;x0_opt(n_delta+1:end,res_step)];
+    x0=[delta;x0_opt(n_delta+1:end,res_step)];
     err0=norm(W0-x0);
     fctn_COR=@(x)sfun_cor_dr(x,full(Mt'),sparse(Lmap));% on attenuation coefficients miu;
     low=[-inf*ones(N_delta,1);zeros(prod(m)*NumElement,1)];

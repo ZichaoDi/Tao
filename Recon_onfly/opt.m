@@ -21,7 +21,7 @@ if(strcmp(sample,'Seed'))
 elseif(strcmp(sample,'Rod'))
     beta_d=1e1;
 else
-    % beta_d=1e3;
+    beta_d=1e2;
 end
 if(~synthetic & ~ReconAttenu)
     truncChannel=1*(DecomposedElement==0);
@@ -49,8 +49,9 @@ W0=W(:);
 %%%================= First-order derivative regularization
 penalty=0;
 cmap=[min(W0),max(W0)];
-% TempBeta=1; Beta=1e2;
+TempBeta=1; Beta=48;
 Mt=-log(DisR'./I0);
+return;
 windowSize=2;
 xrt1=zeros(size(Mt));
 for i=1:numThetan, 
@@ -61,12 +62,7 @@ Mt=xrt1*beta_d;
 clear y xrt1;
 Mt=Mt(:)-min(Mt(:));
 
-% for ele=1:NumElement
-%     a=XRF(:,:,ele);
-%     a(ind)=0;
-%     XRF(:,:,ele)=a;
-% end
-xrfData=XRF(:);%/I0;%/reshape(repmat(I0,[1 1 numChannel]),numThetan*(nTau+1)*numChannel,1);
+xrfData=XRF(:);
 fctn_f=@(W)Forward_onfly(W,xrfData,Mt,M);
 rng('default');
 x0 = 0*10^(0)*rand(m(1)*m(2)*NumElement,1);
@@ -78,7 +74,7 @@ Wold=reshape(x,prod(m),NumElement);%zeros(prod(m),NumElement);
 err=[];
 outCycle=2;
 if(~ReconAttenu && Alternate)
-    % initialize=1;
+    initialize=1;
     %%%%%%%==============================================================
     if(initialize)
         mtol=prod(m);
@@ -147,7 +143,7 @@ if(Alternate && linear_S==0)
         end
         icycle=icycle+1;
     end
-    save(['xstar_',sample,'_',num2str(N(1)),'_',num2str(numThetan),'_',num2str(TempBeta),'_',num2str(Beta),'_',num2str(beta_d),'_',num2str(numChannel),'-',num2str(nit),frame,'.mat'],'x_admm','W0');%,'_linear_',num2str(lambda),'.mat'
+    save(['xstar_',sample,'_',num2str(N(1)),'_',num2str(numThetan),'_',num2str(TempBeta),'_',num2str(Beta),'_',num2str(beta_d),'_',num2str(numChannel),'-',num2str(nit),frame,num2str(slice),'.mat'],'x_admm','W0');%,'_linear_',num2str(lambda),'.mat'
 end
 %%%%%%%%%%%%%%%%%%%%======================================================
 if(~ReconAttenu)
