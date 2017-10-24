@@ -14,16 +14,17 @@ sigma=1.5/2.355;
 scale=1/sqrt(2*pi)/sigma;
 for i = 1:numThetan
     delay=shift(i);
-    range=[0:floor((nTau+1)/2)-1 floor(-(nTau+1)/2):-1]';%
+    range=[0:ceil((nTau+1)/2)-1 ceil(-(nTau+1)/2):-1]';%
     G=exp(-(range-delay).^2./(2*sigma^2));
     dG=((range-delay)./(sigma^2)).*exp(-(range-delay).^2./(2*sigma^2));
     alignedSignal(i,:)=scale*real(ifft(fft(G).*(fft(XTM(i,:)'))));
     DalignedSignal(i,:)=scale*real(ifft(fft(dG).*(fft(XTM(i,:)'))));
     % subplot(1,2,1)
-    % plot(1:nTau+1,alignedSignal(i,:),'r.-',1:nTau+1,sinoS(:,i),'b.-')
-    % title(num2str(delay));
+    % plot(1:nTau+1,alignedSignal(i,:),'r.-',1:nTau+1,XTM(i,:),'b.-')
+    % title(num2str([i,delay]));
     % subplot(1,2,2)
-    % plot(G,'r.-');
+    % % plot(range,scale*G,'r.-');
+    % plot(DalignedSignal(i,:),'r.-')
     % pause;
 end
 %%------------------------------------------------------

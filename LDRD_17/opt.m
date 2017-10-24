@@ -26,26 +26,27 @@ x_res=[];
 aligned=[];
 d0=[0 -res -res 0     res res res 0   -res;...
     0  0   -res -res -res 0   res res res];
-d0=d0(:,5);
+d0=d0(:,4);
 initial_direction=size(d0,2);
 W0=[deltaStar;W(:)];
 errW=zeros(size(d0,2),1);
 f_global=zeros(size(d0,2),1);
 x0_opt=[];
-maxiter=350;
+maxiter=50;
 NF = [0*N; 0*N; 0*N];
 Lmap=[];
 if(synthetic==0)
     deltaStar=0*deltaStar;
-    Mt=XRF_decom(:,:,4)';
-    Mt=Mt./max(Mt(:));
-    % Mt(1:15,:)=0;
-    % xrt1=zeros(size(Mt));
+    Mt=XRF_decom(:,:,2)';
+    % Mt=map1D(Mt,[0,1]);
+
+    Mt=Mt./max(Mt(:));%%==normalize data;
+    Mt=Mt-min(Mt(:));%%==normalize data;
+
     % for i=1:numThetan, 
-    %     xrt1(:,i)=medfilt1(Mt(:,i),10);
+    %     % Mt(:,i)=medfilt1(Mt(:,i),3);
+    %     Mt(:,i)=max(0,Mt(:,i)-0.05);%min(Mt(:,i));
     % end
-    % Mt=xrt1;
-    % clear xrt1;
 
     sinoS=Mt;
     Q=sparse(diag(1./sum(L,1)));
@@ -53,7 +54,7 @@ if(synthetic==0)
     Lmap=sparse(L*Q);
 else
     if(ndims(DisR)>=3)
-        Mt=squeeze(-log(DisR(:,:,2)./I0'));%/scale;
+        Mt=squeeze(-log(DisR(:,:,4)./I0'));%/scale;
         Lmap=sparse(squeeze(L_cr(:,:,1)));
         sinoS=squeeze(-log(DisR(:,:,1)./I0'));
     else
@@ -85,9 +86,6 @@ for res_step=1:initial_direction
     x0_opt(:,res_step)=x0;
     err0=norm(W0-x0);
     fctn_COR=@(x)sfun_cor(x,full(Mt'),sparse(Lmap));% on attenuation coefficients miu;
-    % [~,~,xtm1]=feval(fctn_COR,xc2);
-    % fctn=@(x)sfun_radon(x,full(xtm2),sparse(Lmap));% on attenuation coefficients miu;
-    fctn=@(x)sfun_radon(x,full(sinoS'),sparse(Lmap));% on attenuation coefficients miu;
     bounds=1;
     if(bounds)
         [xCOR,f,g,ierror] = tnbc (x0,fctn_COR,low,up); % algo='TNbc';
@@ -96,10 +94,6 @@ for res_step=1:initial_direction
         f_global(res_step)=f;
         [~,~,alignedSignal]=feval(fctn_COR,xCOR);
         err_sino(res_step)=norm(alignedSignal'-sinoS);
-        %% ============================================
-        % W0=W(:);
-        % [x,f,g,ierror] = tnbc (x0(n_delta+1:end),fctn,low(n_delta+1:end),up(n_delta+1:end)); % algo='TNbc';
-        % W0=[deltaStar;W(:)];
         %% ============================================
         %% options = optimoptions('fmincon','Display','iter','GradObj','on','MaxIter',maxiter);%,'Algorithm','interior-point');
         %% [x, f] = fmincon(fctn_COR,x0,[],[],[],[],low,up,[],options); %algo='fmincon';
@@ -134,3 +128,4 @@ ylabel('objective value')
 for i=1:initial_direction, 
     subplot(nrow,initial_direction,3*initial_direction+i);imagesc(reshape(aligned(:,i),numThetan,nTau+1));
 end
+

@@ -26,15 +26,13 @@ for i = 1:numThetan
     % %%%=============================================
     H=fft(XTM(i,:));
     u=[0:floor((nTau+1)/2)-1 floor(-(nTau+1)/2):-1] / (nTau+1);
-    ubar=exp(-j*2*pi.*(u*delay));
-    % temp=ifft(H.*ubar);
-    alignedSignal(i,:)=abs(real(ifft(H.*ubar)));
-    DalignedSignal(i,:)=sign(real(ifft(H.*ubar))).*real(ifft(H.*ubar.*(-2*pi*j*u)));
+    ubar=exp(-j*2*pi.*(u*(delay)));
+    alignedSignal(i,:)=real(ifft(H.*ubar));
+    DalignedSignal(i,:)=real(ifft(H.*ubar.*(-2*pi*j*u)));
+    plot(1:nTau+1,alignedSignal(i,:),'r.-',1:nTau+1,XTM(i,:),'b.-')
+    title(num2str([i,delay]));
+    pause;
 
-    % plot(1:nTau+1,real(temp),'r.-',1:nTau+1,imag(temp),'k.-')
-    % plot(1:nTau+1,XTM(i,:),'b.-',1:nTau+1,alignedSignal(i,:),'m.-')
-    % title(num2str([delay, mod(delay,nTau+1)]));
-    % pause;
 end
 
 %%------------------------------------------------------
@@ -42,9 +40,6 @@ Daligned=zeros(numThetan*(nTau+1),N_delta);
 for i=1:N_delta
     Daligned(i:numThetan:end,i)=DalignedSignal(i,:);
 end
-% Daligned1=repmat(DalignedSignal(:),[1,N_delta]);
-% save('sfun_test.mat','Daligned','alignedSignal','shift');
-% figure, subplot(1,2,1),imagesc(alignedSignal');subplot(1,2,2);imagesc(reshape(x(N_delta+1:end),N,N));
 XTM=alignedSignal;
 
 if(strcmp(frame,'EM'))
@@ -61,7 +56,7 @@ elseif(strcmp(frame,'LS'))
     g_pert=-r'*Daligned;
 end
 g=[g_pert';g];
-penalty=1;
+penalty=0;
 if(penalty & N_delta==numThetan)
     % Tik=delsq(numgrid('S',N(1)+2)); 
     [~,~,Tik]=laplacian(N_delta,{'DD'});

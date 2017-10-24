@@ -1,7 +1,7 @@
 %---------------------------------------------------------------
 % Set up a problem for optimization [multigrid or regular].
 %---------------------------------------------------------------
-global N numThetan NF
+global N numThetan NF nslice
 global bounds LogScale Joint
 global grad_type err0 
 global onlyXRF NoSelfAbsorption coarsen_type 
@@ -27,8 +27,8 @@ if(synthetic)
     % sample = 'fakeRod';
     NumElement=6;
 else
-    sample='Paunesku';%'Rod';%'Filter';%
-    NumElement=4;
+    sample='Paunesku';%'miller';%'Rod';%'Filter';%
+    NumElement=6;
 end
 coarsen_type='smooth';
 N=[65];%[33 17 9 5 3];% 17 9];%[129 65  9 5];%
@@ -47,6 +47,8 @@ else
         setup_rod;
     elseif(strcmp(sample,'Paunesku'))
         setup_paunesku;
+    elseif(strcmp(sample,'miller'))
+        setup_miller;
     end
     clear data_xrf_raw data_xrf_decom data_xrt x_ir y_ir x_num y_num iR data spectra 
 end
@@ -54,8 +56,8 @@ end
 NoSelfAbsorption=0; % 0: include self-absorption in the XRF inversion
 bounds = 1;  % no bound constraints
 Joint=-1; % 0: XRF; -1: XTM; 1: Joint inversion
-ReconAttenu = 1*(Joint==-1); % 0: Recover W; 1: Recover miu
 Alternate=1*(Joint~=-1);
+% ReconAttenu = 0*(Joint==-1); % 0: Recover W; 1: Recover miu
 frame='EM';
 linear_S=0*Alternate;
 LogScale=1; %% determine if the XTM is solved taking log first or not

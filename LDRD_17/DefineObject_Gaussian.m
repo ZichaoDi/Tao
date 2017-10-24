@@ -37,9 +37,12 @@ else
         Z=[14 16 17 19 20 22 23 24 25 26 28 29 30 31 80 33 34 35 92 37 38 39 40];% Complete Seed
         Z=Z(slice-4);
     elseif(strcmp(sample,'Paunesku'))
-        Z=[20 22 26 30];
+        Z=[15 16 20 22 26 30];
+        Z=Z(ele_ind);
     elseif(strcmp(sample,'Filter'))
         Z=[14 15 16 20 30 58];
+    elseif(strcmp(sample,'miller'))
+        Z=[20 30 68];
     end
 end
 %---------------------------
@@ -52,8 +55,8 @@ NumElement=length(Z);
             CreateElement; 
         elseif(strcmp(sample,'circle'))
             [X,Y]=meshgrid(1:m(1),1:m(2));
-            center=[2*m(1)/3, 2*m(2)/3];
-            r=m(1)/3;
+            center=[m(1)/3, m(2)/3];
+            r=m(1)/2;
             pix = (X-center(1)).^2+(Y-center(2)).^2 <= r^2; %% circle
             W(pix)=10;
         elseif(strcmp(sample,'checkboard'))

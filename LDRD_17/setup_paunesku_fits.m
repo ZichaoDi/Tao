@@ -1,11 +1,11 @@
 % for slice=1:131
 load ang;
-load(['Paunesku_raw_Fourier',num2str(slice),'.mat']);
-% data=max(0,data-data_ref);
-off_ind=1:48;%setdiff(1:48,[7 12 26]);
+load(['Paunesku_fits',num2str(slice),'.mat']);
+off_ind=setdiff(1:48,[7 12 26]);
 time=time(off_ind);
 ang=ang(off_ind);
 data(isnan(data))=0;
+data(isinf(data))=0;
 % dd(:,:,:,slice)=data;
 % end
 % dd=map1D(dd,[0,1]);
@@ -26,8 +26,6 @@ data=data(:,ang_ind,:);
 ind_i0=2;
 ind_xrt=3;
 slice_tot = [3 4 7 8 11 14];
-ele_ind=1:6;
-slice_tot=slice_tot(ele_ind);
 %%%================================
 load tomoRod
 data_h=[];
@@ -46,12 +44,6 @@ thetan=mod(thetan_real,360);%linspace(-180,180,numThetan)+360;% must be positive
 if(ndims(data_h)==2)
     data_h=reshape(data_h,size(data_h,1),1,size(data_h,2));
 end
-load Paunesku_raw;
-nslice=131;
-Mt=double(project0(2:end,1:nslice,slice_tot,:));
-Mt=Mt(1:tau_rate:end,:,:,1:ang_rate:end);
-Mt=Mt(2:end,:,:,:);
-
 data_h=data_h(:,:,2:end);
 numThetan=size(data_h,2);
 nTau=size(data_h,3)-1;

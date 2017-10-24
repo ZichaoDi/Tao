@@ -30,7 +30,6 @@ elseif(n_delta==2)
     shift=(cos(theta)-1)*x(1)+sin(theta)*x(2);
     Ddelta=[cos(theta)-1;sin(theta)];
 end
-save shift shift
 alignedSignal=zeros(numThetan,nTau+1);
 DalignedSignal=zeros(numThetan,nTau+1);
 sigma=1.5/2.355;
@@ -42,16 +41,13 @@ for i = 1:numThetan
     dG=((range'-delay)./(sigma^2)).*exp(-(range'-delay).^2./(2*sigma^2));
     alignedSignal(i,:)=scale*real(ifft(fft(G).*fft(XTM(i,:)')));
     DalignedSignal(i,:)=scale*real(ifft(fft(dG).*fft(XTM(i,:)')));
-    % subplot(1,3,1)
-    % % plot(1:nTau+1,sinoS(:,i),'r.-',1:nTau+1,alignedSignal(i,:),'b.-',1:nTau+1,XTM(i,:),'g--')
-    % plot(1:nTau+1,sinoS(:,i),'r.-',1:nTau+1,XTM(i,:),'b.-')
-    % title(num2str([delay,i]));
-    % subplot(1,3,2)
-    % plot(1:nTau+1,sinoS(:,i)'-alignedSignal(i,:),'r.-')
-    % subplot(1,3,3)
-    % plot(range,G,'r.-')
-    % % title(num2str(delay));
+    % subplot(1,2,1)
+    % plot(1:nTau+1,alignedSignal(i,:),'r.-',1:nTau+1,XTM(i,:),'b.-')
+    % title(num2str([i,delay]));
+    % subplot(1,2,2)
+    % plot(G,'r.-');
     % pause;
+
 end
 
 %%------------------------------------------------------

@@ -61,7 +61,7 @@ else
     delta0=sparse(numThetan,2);
 end
 theta=thetan'/180*pi;
-% MU_XTM=imrotate(MU_XTM,60,'crop');
+% MU_XTM=xs;%imrotate(MU_XTM,60,'crop');
 for n=1:numThetan
     if(mod(n,10)==0)
         fprintf(1,'====== Angle Number  %d of %d: %d\n',n,numThetan,thetan(n));
@@ -104,7 +104,7 @@ for n=1:numThetan
         if(~isempty(index)& norm(Lvec)>0)
             NonEmptyBeam=[NonEmptyBeam,sub2ind([numThetan,nTau+1],n,i)];
             currentInd=sub2ind(m,index(:,2),index(:,1));
-            L(sub2ind([numThetan,nTau+1],n,i),currentInd)=Lvec;
+            L(sub2ind([numThetan,nTau+1],n,i),currentInd)=Lvec/sum(Lvec);
             Rdis_true(i)=mean(I0(:))*exp(-eX'*(MU_XTM.*reshape(L(sub2ind([numThetan,nTau+1],n,i),:),m))*eY);%% Discrete case
         end
     end
@@ -118,6 +118,6 @@ for n=1:numThetan
            drawnow;
         end
 end
-scale=1;%max(L(:));
-L=L./scale;
+% scale=1e2;%/sqrt(N(1));
+% L=map1D(L*scale,[0,1]);
 %%==============================================================

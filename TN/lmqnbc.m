@@ -157,13 +157,6 @@ while (~conv);
     else
         [x_new, f_new, g_new, nf1, ierror, alpha] = lin1 (p, x, f, alpha0, g, sfun);
     end
-    % [~,~,signal]=sfun(x_new);
-    % subplot(1,2,1)
-    % imagesc(abs(reshape(x_new(N_delta+1:end)-W0(N_delta+1:end),N,N)))
-    % colorbar;
-    % subplot(1,2,2)
-    % imagesc(reshape(x_new(N_delta+1:end),N,N))
-    % pause(0.1);
 
     % if(length(x_new)==N^2)
     %     subplot(1,2,1);plot(p,'r.-');
@@ -181,13 +174,6 @@ while (~conv);
     % end
     % drawnow;
     % pause(1);
-    newcon = 0;
-    if (abs(alpha-spe) <= 10*eps);% | alpha==1
-        disp('update ipivot due to tiny step length')
-        newcon = 1;
-        ierror = 0;
-        [ipivot, flast] = modz (x, p, ipivot, low, up, flast, f);
-    end;
     if (alpha <= 0 & alpha0 ~= 0 | ierror == 3);
         fprintf('Error in Line Search\n');
         fprintf('    ierror = %3i\n',    ierror);
@@ -206,6 +192,16 @@ while (~conv);
     %#######################
     nf  = nf  + nf1;
     nit = nit +   1;
+%---------------------------------------------------------
+% update active set, if appropriate
+%---------------------------------------------------------
+    newcon = 0;
+    if (abs(alpha-spe) <= 10*eps);% | alpha==1
+        disp('update ipivot due to tiny step length')
+        newcon = 1;
+        ierror = 0;
+        [ipivot, flast] = modz (x, p, ipivot, low, up, flast, f);
+    end;
     if (ierror == 3);
         disp('LMQNBC: termination 3')
         xstar = x;
@@ -262,13 +258,13 @@ while (~conv);
     plotAS=0;
     if((mod(nit,1)==0 | conv | nit==1) & plotAS==1) %
         figure(10);
-        subplot(2,2,1);imagesc(reshape(x(n_delta+1:end),m(1),m(2)));
+        subplot(2,2,1);imagesc(reshape(x,m(1),m(2)));
         colorbar;title('x');
-        subplot(2,2,2);imagesc(reshape(ipivot(n_delta+1:end),m(1),m(2)));
+        subplot(2,2,2);imagesc(reshape(ipivot,m(1),m(2)));
         colorbar;title('ipivot');
-        subplot(2,2,3);imagesc(reshape(sign(g(n_delta+1:end)),m(1),m(2)));
+        subplot(2,2,3);imagesc(reshape(sign(g),m(1),m(2)));
         colorbar;title('gradient');
-        subplot(2,2,4);imagesc(reshape(sign(p(n_delta+1:end)),m(1),m(2)));
+        subplot(2,2,4);imagesc(reshape(sign(p),m(1),m(2)));
         colorbar;title([num2str(nit) ,'direction']);drawnow;
 
         % addAS=length(find(-ipivot+ipivotOld==1));
@@ -308,6 +304,7 @@ while (~conv);
         %     colorbar('Position', [hp4(1)+hp4(3)+0.01  hp4(2)  0.02  hp4(2)+hp4(3)*2.1])
         % end
         drawnow;
+        pause;
     end
     %------------------------------------------------------
     if (conv);

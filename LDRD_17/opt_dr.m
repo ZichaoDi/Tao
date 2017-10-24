@@ -6,7 +6,7 @@ deltaStar=(cos(theta)-1).*delta0_bar(1:2:n_delta)+sin(theta).*delta0_bar(2:2:n_d
 x_res=[];
 aligned=[];
 W0=[deltaStar;W(:)];
-maxiter=350;
+maxiter=150;
 NF = [0*N; 0*N; 0*N];
 Lmap=[];
 if(synthetic==0)
@@ -29,8 +29,10 @@ for res_step=1:initial_direction
     x0=[delta;x0_opt(n_delta+1:end,res_step)];
     err0=norm(W0-x0);
     fctn_COR=@(x)sfun_cor_dr(x,full(Mt'),sparse(Lmap));% on attenuation coefficients miu;
-    low=[-inf*ones(N_delta,1);zeros(prod(m)*NumElement,1)];
-    up=inf*ones(prod(m)*NumElement+N_delta,1);
+    low=[floor(-nTau/2*ones(N_delta,1));zeros(prod(m)*NumElement,1)];
+    up=[floor(nTau/2*ones(N_delta,1));inf*ones(prod(m)*NumElement,1)];
+    % low=[-inf*ones(N_delta,1);zeros(prod(m)*NumElement,1)];
+    % up=[inf*ones(N_delta,1);inf*ones(prod(m)*NumElement,1)];
     bounds=1;
     if(bounds)
         [xCOR,f,g,ierror] = tnbc (x0,fctn_COR,low,up); % algo='TNbc';
@@ -39,6 +41,20 @@ for res_step=1:initial_direction
         f_global(res_step)=f;
         [~,~,alignedSignal]=feval(fctn_COR,xCOR);
         aligned=[aligned,alignedSignal(:)];
+
+        %% ============================================
+        % load align86_5;
+        [~,~,xtm1]=feval(fctn_COR,xCOR);
+        % xtm1=max(0,xtm1-0.1);
+        % for n=1:numThetan
+        %     xtm1(n,:)=map1D(xtm1(n,:),[0 1]);
+        % end
+        fctn=@(x)sfun_radon(x,full(xtm1),sparse(Lmap));% on attenuation coefficients miu;
+        W0=W(:);
+        [x,f,g,ierror] = tnbc (x0(N_delta+1:end),fctn,low(N_delta+1:end),up(N_delta+1:end)); % algo='TNbc';
+        W0=[deltaStar;W(:)];
+        % %% ============================================
+
         % err_sino(res_step)=norm(alignedSignal'-sinoS);
         % options = optimoptions('intlinprog','Display','iter');%,'Algorithm','interior-point');
         % [x, f] = intlinprog(fctn_COR,[1:N_delta],[],[],[],[],low,up,options); %algo='fmincon';

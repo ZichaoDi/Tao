@@ -2,15 +2,15 @@
 delta_d=0; % off center for the initial reference projection;
 Det=norm(DetKnot0(1,:)-SourceKnot0(1,:));
 Num=(DetKnot0(1,1)-SourceKnot0(1,1))*((cos(theta')-1).*delta0(:,2)'+delta0(:,1)'.*sin(theta'))+ (DetKnot0(1,2)-SourceKnot0(1,2))*((1-cos(theta')).*delta0(:,1)'+sin(theta').*delta0(:,2)');
-% Mt=XRF_decom(:,:,2)';
-shift=Num./Det/dTau+1/2*delta_d0/dTau;
-Mt=-log(DisR./I0');
+% Mt=XRF_decom(:,:,5)';
+shift=shift(1,:);%xCOR(1:N_delta);
+% shift=Num./Det/dTau+1/2*delta_d0/dTau;
+% Mt=-log(DisR./I0');
 alignedDiscrete=zeros(nTau+1,numThetan);
 alignedContinuous=alignedDiscrete;
-tt=Mt(:,:,2);
+Mt=b;
+tt=Mt;%Mt(:,:,2);
 for i = 1:numThetan
-    % delay=floor(mod(shift(k,i),nTau+1));
-    % delay=double(mod(int32(shift(k,i)),nTau+1));
     delay=shift(i);
     %%---------------- Continuous: Gaussian Convolution
     sigma=1.5/2.355;
@@ -44,7 +44,7 @@ for i = 1:numThetan
     subplot(1,2,1)
     plot(Mt(:,i,1),'r.-');
     hold on;
-    plot(Mt(:,i,2),'m.--');
+    plot(alignedContinuous(:,i),'m.--');
     plot(alignedContinuous2(:,i),'k.-');
     title(num2str([delay,i]));
     hold off;

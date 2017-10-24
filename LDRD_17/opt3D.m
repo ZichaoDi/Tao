@@ -1,5 +1,7 @@
 global N_delta maxiter W0 sinoS
 global xiter fiter ErrIter
+
+ReconAttenu = 1; % 0: Recover W; 1: Recover miu
 slice=1;
 do_setup;
 N_delta=numThetan;
@@ -9,11 +11,11 @@ x_res=[];
 aligned=[];
 d0=[0 -res -res 0     res res res 0   -res;...
     0  0   -res -res -res 0   res res res];
-d0=d0(:,5);
+d0=d0(:,7);
 initial_direction=size(d0,2);
 deltaStar=zeros(N_delta,1);
 W0=[deltaStar;W(:)];
-maxiter=150;
+maxiter=350;
 for element_ind=1:6
     recon=sparse(N^2+N_delta,131);
     for slice=1:131
@@ -22,11 +24,11 @@ for element_ind=1:6
         f_global=zeros(size(d0,2),1);
         NF = [0*N; 0*N; 0*N];
         Mt=XRF_decom(:,:,element_ind)';
-        Mt=Mt./max(Mt(:));
+        Mt=Mt./max(Mt(:));%%==normalize data;
         sinoS=Mt;
         Lmap=sparse(L);
-        low=[-inf.*ones(N_delta,1);zeros(prod(m)*NumElement,1)];
-        up=[inf.*ones(N_delta,1);inf*ones(prod(m)*NumElement,1)];
+        low=[-nTau/2*ones(N_delta,1);zeros(prod(m)*NumElement,1)];
+        up=[nTau/2*ones(N_delta,1);inf*ones(prod(m)*NumElement,1)];
         for res_step=1:initial_direction
             delta=(cos(theta)-1).*d0(1,res_step)+sin(theta).*d0(2,res_step);
             x0= [delta;0*10^(0)*rand(m(1)*m(2)*NumElement,1)];
@@ -48,7 +50,7 @@ for element_ind=1:6
         end
         recon(:,slice)=xCOR;
     end
-    save(['result/paunesku/recon_reduced_normalized',num2str(element_ind),'.mat'],'recon');
+    save(['result/paunesku1/recon_reduced',num2str(element_ind),'.mat'],'recon');
 end
 % nrow=4;
 % figure, 
