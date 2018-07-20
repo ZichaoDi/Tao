@@ -1,12 +1,10 @@
 global N_delta maxiter W0 sinoS
 global xiter fiter ErrIter
 
-ReconAttenu = 0; % 0: Recover W; 1: Recover miu
-initialize=1;
-ind_scan=1;
+ReconAttenu = 1; % 0: Recover W; 1: Recover miu
 slice=1;
-tau_rate=1;
-ang_rate=1;
+tau_rate=3;
+ang_rate=2;
 do_setup;
 N_delta=numThetan;
 rng('default');
@@ -18,42 +16,40 @@ d0=[0 -res -res 0     res res res 0   -res;...
 d0=d0(:,1);
 initial_direction=size(d0,2);
 deltaStar=zeros(N_delta,1);
-maxiter=100;
-for element_ind=1:NumElement
-    recon0=zeros(N^2,nslice);
-    recon1=zeros(N^2+numThetan,nslice);
-    for slice=1:nslice
+W0=[deltaStar;W(:)];
+maxiter=350;
+for element_ind=1;%:6
+    for slice=1:100:nslice
 
-        % load(['Run02_',num2str(slice)]);
-        % XRF_decom=-log(data(1:tau_rate:end,1:ang_rate:end)'./max(max(data)));
+        load(['Run02_',num2str(slice)]);
+        XRF_decom=-log(data(1:tau_rate:end,1:ang_rate:end)'./max(max(data)));
         % setup_paunesku;
-        XRF_decom=squeeze(XRF_decom3D(:,slice,:,:));
         errW=zeros(size(d0,2),1);
         f_global=zeros(size(d0,2),1);
         NF = [0*N; 0*N; 0*N];
-        Mt=XRF_decom(:,:,element_ind);
+        Mt=XRF_decom(:,:,element_ind)';
         Mt=Mt./max(Mt(:));%%==normalize data;
         sinoS=Mt;
         Lmap=sparse(L);
-        low=[-nTau/2*ones(N_delta,1);zeros(prod(m)*1,1)];
-        up=[nTau/2*ones(N_delta,1);inf*ones(prod(m)*1,1)];
-        W0=reshape(W(:,:,element_ind),N^2,1);
+        low=[-nTau/2*ones(N_delta,1);zeros(prod(m)*NumElement,1)];
+        up=[nTau/2*ones(N_delta,1);inf*ones(prod(m)*NumElement,1)];
+        W0=W(:);
         err0=norm(W0);
-        fctn=@(x)sfun_radon(x,full(Mt),sparse(Lmap));% on attenuation coefficients miu;
-        [x,f,g,ierror] = tnbc (zeros(N^2,1),fctn,low(N_delta+1:end),up(N_delta+1:end)); % algo='TNbc';
-        W0=[deltaStar;reshape(W(:,:,element_ind),N^2,1)];
+        fctn=@(x)sfun_radon(x,full(Mt'),sparse(Lmap));% on attenuation coefficients miu;
+        [x,f,g,ierror] = tnbc (zeros(N^2*NumElement,1),fctn,low(N_delta+1:end),up(N_delta+1:end)); % algo='TNbc';
+        W0=[deltaStar;W(:)];
         for res_step=1:initial_direction
             delta=(cos(theta)-1).*d0(1,res_step)+sin(theta).*d0(2,res_step);
-            x0= [delta;0*10^(0)*rand(m(1)*m(2)*1,1)];
+            x0= [delta;0*10^(0)*rand(m(1)*m(2)*NumElement,1)];
             err0=norm(W0-x0);
-            fctn_COR=@(x)sfun_cor_dr(x,full(Mt),sparse(Lmap));% on attenuation coefficients miu;
+            fctn_COR=@(x)sfun_cor_dr(x,full(Mt'),sparse(Lmap));% on attenuation coefficients miu;
             bounds=1;
             if(bounds)
                 [xCOR,f,g,ierror] = tnbc (x0,fctn_COR,low,up); % algo='TNbc';
                 errW(res_step)=norm(W0(N_delta+1:end)-xCOR(N_delta+1:end));
                 f_global(res_step)=f;
                 [~,~,alignedSignal]=feval(fctn_COR,xCOR);
-                err_sino(res_step)=norm(alignedSignal-sinoS);
+                err_sino(res_step)=norm(alignedSignal'-sinoS);
                 %% ============================================
             else
                 [xCOR,f,g,ierror] = tn (x0,fctn_COR);
@@ -61,11 +57,10 @@ for element_ind=1:NumElement
             x_res=[x_res,xCOR];
             aligned=[aligned,alignedSignal(:)];
         end
-        recon1(:,slice)=xCOR;recon0(:,slice)=x;
-        % save(['result/olga/recon_reduced',num2str(slice),'_',num2str(N),'_',num2str(numThetan),'.mat'],'x','xCOR');
+    save(['result/run02/recon_reduced',num2str(slice),'_',num2str(N),'_',num2str(numThetan),'.mat'],'x','xCOR');
         
     end
-    save(['result/Zn_modified_6/recon_reduced',num2str(element_ind),'.mat'],'recon1','recon0');
+    % save(['result/paunesku1/recon_reduced',num2str(element_ind),'.mat'],'recon');
 end
 % nrow=4;
 % figure, 

@@ -9,7 +9,7 @@
 %%=======================================================================
 global x y dz m omega MU_e Z 
 global NumElement Element 
-global slice onlyXRF
+global slice 
 
 load PeriodicTable
 %%%%%======================================
@@ -19,9 +19,9 @@ y=linspace(omega(3),omega(4),m(2)+1);
 %%%=========== assign weight matrix for each element in each pixel
 if(synthetic)
     if(strcmp(sample,'Golosio') | strcmp(sample, 'checkboard'))
-        Z = [6 8 14 20 26];% Golosio's Sample
-    elseif(strcmp(sample,'Phantom'))
-        Z = [19 31 26];
+        Z = 19;%[6 8 14 20 26];% Golosio's Sample
+    elseif(strcmp(sample,'Phantom')|strcmp(sample,'mri'))
+        Z = [19];
     elseif(strcmp(sample,'circle'))
         Z = [14];
     elseif(strcmp(sample, 'fakeRod'))
@@ -43,6 +43,13 @@ else
         Z=[14 15 16 20 30 58];
     elseif(strcmp(sample,'miller'))
         Z=[20 30 68];
+    elseif(strcmp(sample,'Run02'))
+        Z=20;
+    elseif(strcmp(sample,'20173'))
+        Z=[15 16 17 19 20 25 26 29 30];
+        Z=Z(slice_tot);
+    elseif(strcmp(sample,'Zn_modified_6'))
+        Z=30;
     end
 end
 %---------------------------
@@ -51,13 +58,13 @@ NumElement=length(Z);
     if(synthetic)
         if(strcmp(sample,'Golosio'))
             CreateCircle; 
-        elseif(strcmp(sample,'Phantom'))
+        elseif(strcmp(sample,'Phantom')|strcmp(sample,'mri'))
             CreateElement; 
         elseif(strcmp(sample,'circle'))
             [X,Y]=meshgrid(1:m(1),1:m(2));
-            center=[m(1)/3, m(2)/3];
-            r=m(1)/2;
-            pix = (X-center(1)).^2+(Y-center(2)).^2 <= r^2; %% circle
+            center=[m(1)/2, m(2)/2];
+            r=20;
+            pix = (X-center(1)).^2+(Y-center(2)).^2 <= r^2;%& (X-center(1)).^2+(Y-center(2)).^2>=(r-5).^2; %% circle
             W(pix)=10;
         elseif(strcmp(sample,'checkboard'))
             W = kron(invhilb(N(1)/10)<0, ones(10,10));
@@ -84,14 +91,6 @@ NumElement=length(Z);
 %%%%% =================== Attenuation Matrix at beam energy
 MUe=reshape(MU_e(:,1,1),1,1,NumElement);
 MU_XTM=sum(W.*repmat(MUe,[m(1),m(2),1]),3);
-%%%%% =================== Attenuation Matrix at flourescence energy (Corrected Attenuation)
-MU_after=zeros(prod(m),NumElement);
-for i=1:NumElement
-    temp=sum(reshape(W,prod(m),NumElement)*MU_e(:,:,i+1),2);
-    temp=flipud(reshape(temp,m(1),m(2))');
-    MU_after(:,i)=temp(:);
-end
-clear temp;
 %%%%% ====================================================================
 
 %%=================== Picture the object based on atomic number and attenuation

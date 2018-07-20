@@ -47,11 +47,13 @@ if(ndims(data_h)==2)
     data_h=reshape(data_h,size(data_h,1),1,size(data_h,2));
 end
 load Paunesku_raw;
-nslice=131;
-Mt=double(project0(2:end,1:nslice,slice_tot,:));
+project0=project0(:,:,:,ang_ind);
+slice_rate=1;
+Mt=double(project0(2:end,1:slice_rate:end,slice_tot,:));
 Mt=Mt(1:tau_rate:end,:,:,1:ang_rate:end);
 Mt=Mt(2:end,:,:,:);
-
+nslice=size(Mt,2);
+clear project0;
 data_h=data_h(:,:,2:end);
 numThetan=size(data_h,2);
 nTau=size(data_h,3)-1;
@@ -68,7 +70,7 @@ end
 % return;
 XRF_decom=permute(data_xrf_decom(:,:,:),[2 3 1]);
 %%================================================
-load tomopy_paunesku;
+iR=zeros(N,N,NumElement);
 m_h=size(iR,1);
 [x_ir,y_ir]=meshgrid(1:m_h);
 [x_num,y_num]=meshgrid(linspace(1,m_h,N(1)));

@@ -15,12 +15,12 @@ initial_direction=size(d0,2);
 deltaStar=zeros(N_delta,1);
 W0=W(:);
 maxiter=150;
-for element_ind=1:length(slice_tot)
+for element_ind=1;% :length(slice_tot)
     recon=sparse(N^2,nslice);
     for slice=1:nslice
-        setup_miller;
+        % setup_miller;
         NF = [0*N; 0*N; 0*N];
-        Mt=XRF_decom(:,:,element_ind)';
+        Mt=squeeze(XRF_decom3D(:,slice,:))';%XRF_decom(:,:,element_ind)';
         sinoS=Mt;
         Lmap=sparse(L);
         low=[-inf.*ones(N_delta,1);zeros(prod(m)*NumElement,1)];
@@ -30,8 +30,9 @@ for element_ind=1:length(slice_tot)
             x0= [delta;0*10^(0)*rand(m(1)*m(2)*NumElement,1)];
             err0=norm(x0-x0);
             fctn_COR=@(x)sfun_cor_dr(x,full(Mt'),sparse(Lmap));% on attenuation coefficients miu;
-            load aligned30_2_miller
-            x0(1:N_delta)=shift;
+            % load aligned30_2_miller
+
+            x0(1:N_delta)=shift_mean;
             [~,~,aligned_xtm]=feval(fctn_COR,x0);
              % for i=1:numThetan
              %     aligned_xtm(i,:)=map1D(aligned_xtm(i,:),[0,1]);
@@ -45,6 +46,6 @@ for element_ind=1:length(slice_tot)
         end
         recon(:,slice)=x;
     end
-    save(['result/miller/recon_aligned_raw',num2str(element_ind),'.mat'],'recon','aligned');
+    % save(['result/miller/recon_aligned_raw',num2str(element_ind),'.mat'],'recon','aligned');
     % save(['result/miller/recon_aligned_norm',num2str(element_ind),'.mat'],'recon','aligned');
 end

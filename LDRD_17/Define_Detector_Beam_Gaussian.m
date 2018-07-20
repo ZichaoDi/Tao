@@ -4,7 +4,7 @@ global DetChannel numChannel nTau DetKnot0 SourceKnot0 NumSSDlet
 alpha=atan((omega(4)-omega(3))/(omega(2)-omega(1)));
 Tau= omega(2)-omega(1);
 if(synthetic)
-    nTau=0+ceil(sqrt(2*prod(m)));%m(1)-1;% % number of discrete beam%nTau;%
+    nTau=ceil(sqrt(2*prod(m)));%m(1)-1;% % number of discrete beam%nTau;%
     tol1=1/2*N(1);
 else
     tol1=0;
@@ -37,7 +37,7 @@ NumSSDlet=5;
 SSDlet=[linspace(SSD0(2,1),SSD0(1,1),NumSSDlet)',...
             linspace(SSD0(2,2),SSD0(1,2),NumSSDlet)' ];
 %%%=========== Assign Projection Angles;
-thetan=linspace(1,90,numThetan);%linspace(363,abs(183*(angleScale)-363),numThetan);% must be positive.
+thetan=linspace(1,360,numThetan);%linspace(363,abs(183*(angleScale)-363),numThetan);% must be positive.
 if(~synthetic)
     thetan=mod(thetan_real,360);%linspace(-180,180,numThetan)+360;% must be positive.
 end

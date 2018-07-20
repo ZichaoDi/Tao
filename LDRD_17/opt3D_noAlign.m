@@ -1,18 +1,21 @@
 global N_delta maxiter W0 sinoS
 global xiter fiter ErrIter
 
+initialize=1;
+ind_scan=1;
 ReconAttenu = 1; % 0: Recover W; 1: Recover miu
 slice=1;
 do_setup;
 rng('default');
 W0=W(:);
 maxiter=150;
-for element_ind=1:length(slice_tot)
+for element_ind=1;%:length(slice_tot)
     recon=sparse(N^2,nslice);
     for slice=1:nslice
-        setup_miller;
+        % setup_miller;
         NF = [0*N; 0*N; 0*N];
-        Mt=XRF_decom(:,:,element_ind)';
+        XRF_decom=squeeze(XRF_decom3D(:,slice,:,:));
+        Mt=XRF_decom(:,:,element_ind);
         Mt=Mt./max(Mt(:));
         Mt=Mt-min(Mt(:));
         sinoS=Mt;
@@ -26,7 +29,7 @@ for element_ind=1:length(slice_tot)
         [x,f,g,ierror] = tnbc (x0,fctn,low,up); % algo='TNbc';
         recon(:,slice)=x;
     end
-    save(['result/miller/recon0',num2str(element_ind),'.mat'],'recon');
+    % save(['result/miller/recon0',num2str(element_ind),'.mat'],'recon');
 end
 % nrow=4;
 % figure, 

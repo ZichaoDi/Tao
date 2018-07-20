@@ -16,7 +16,7 @@ deltaStar=zeros(N_delta,1);
 W0=[deltaStar;W(:)];
 maxiter=200;
 recon=sparse(N^2*NumElement+N_delta,nslice);
-for slice=1:nslice
+for slice=86;%1:nslice
     setup_paunesku;
     NF = [0*N; 0*N; 0*N];
     Mt=XRF_decom(:,:,:);
@@ -35,6 +35,10 @@ for slice=1:nslice
         low=[-nTau/2*ones(N_delta,1);zeros(prod(m)*NumElement,1)];
         up=[nTau/2*ones(N_delta,1);inf*ones(prod(m)*NumElement,1)];
         bounds=1;
+        load aligned86_5_paunesku;
+        x0(1:numThetan)=shift;
+            [~,~,alignedSignal]=feval(fctn_COR,x0);
+            return;
         if(bounds)
             [xCOR,f,g,ierror] = tnbc (x0,fctn_COR,low,up); % algo='TNbc';
             errW(res_step)=norm(W0(n_delta+1:end)-xCOR(n_delta+1:end));
@@ -56,20 +60,24 @@ for slice=1:nslice
     end
     recon(:,slice)=xCOR;
 end
-save(['result/miller/Recon_shift_mc_weighted.mat'],'recon');
+% save(['result/miller/Recon_shift_mc_weighted.mat'],'recon');
 
-% nrow=3;
-% figure,
+nrow=2;
+figure,
 % xc=reshape(x_res(N_delta+1:end,:),[N,N,NumElement,initial_direction]);
-% for ele=1:NumElement
-%     subplot(nrow,NumElement,ele);
-%     imagesc(XRF_decom(:,:,ele));
-%     if(ele==1);ylabel('original');end
-%     subplot(nrow,NumElement,NumElement+ele);
-%     align=reshape(alignedSignal,numThetan*(nTau+1),NumElement);
-%     imagesc(reshape(align(:,ele),numThetan,nTau+1));
-%     if(ele==1);ylabel('aligned');end
-%     subplot(nrow,NumElement,NumElement*2+ele);
-%     imagesc(xc(:,:,ele));
-%     if(ele==1);ylabel('reconstruction');end
-% end
+for ele=1:NumElement
+    subplot(nrow,NumElement,ele);
+    imagesc(XRF_decom(:,:,ele));
+    title(Element{Z(ele)});
+set(gca,'xtick',[],'ytick',[]);
+    if(ele==1);xlabel('\tau');ylabel('original: \theta');end
+    subplot(nrow,NumElement,NumElement+ele);
+    align=reshape(alignedSignal,numThetan*(nTau+1),NumElement);
+    imagesc(reshape(align(:,ele),numThetan,nTau+1));
+set(gca,'xtick',[],'ytick',[]);
+
+    if(ele==1);xlabel('\tau');ylabel('aligned: \theta');end
+    % subplot(nrow,NumElement,NumElement*2+ele);
+    % imagesc(xc(:,:,ele));
+    % if(ele==1);ylabel('reconstruction');end
+end

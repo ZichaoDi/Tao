@@ -51,13 +51,17 @@ for i = 1:numThetan
 end
 
 %%------------------------------------------------------
-Daligned=zeros(numThetan*(nTau+1),n_delta);
-for i=1:n_delta/2
-    Daligned(i:numThetan:end,2*i-1)=DalignedSignal(i,:);
-    Daligned(i:numThetan:end,2*i)=DalignedSignal(i,:);
-end
+if(n_delta==2 | n_delta==4)
+    Daligned=repmat(DalignedSignal(:),[1,n_delta]).*repmat(Ddelta,[1,nTau+1])';
+else
+    Daligned=zeros(numThetan*(nTau+1),n_delta);
+    for i=1:numThetan
+        Daligned(i:numThetan:end,2*i-1)=DalignedSignal(i,:);
+        Daligned(i:numThetan:end,2*i)=DalignedSignal(i,:);
+    end
 
-Daligned=Daligned.*repmat(Ddelta,[1,nTau+1])';
+    Daligned=Daligned.*repmat(Ddelta,[1,nTau+1])';
+end
 XTM=alignedSignal;
 if(strcmp(frame,'EM'))
     thres=1;

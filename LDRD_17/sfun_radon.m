@@ -1,4 +1,5 @@
 function [f,g,r]=sfun_radon(MU,Mt,Ltol) 
+% [x,f,g,ierror] = tnbc (zeros(N^2,1),fctn,low(n_delta+1:end),up(n_delta+1:end)); % algo='TNbc';
 global lambda frame N
 %%===== Reconstruction discrete objective
 %%===== Ltol: intersection length matrix
@@ -15,7 +16,7 @@ elseif(strcmp(frame,'LS'))
     g=Ltol'*r;
     f=1/2*sum(r.^2,1);
 end
-penalty=1;
+penalty=0;
 if(penalty)
     Tik=delsq(numgrid('S',N(1)+2)); 
     L1_norm=0;

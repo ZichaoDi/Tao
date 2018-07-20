@@ -8,29 +8,33 @@ global sinoS N
 %%===== x(1:N_delta): off center for the initial reference projection;
 
 shift=x(1:N_delta);
-alignedSignal=zeros(numThetan,nTau+1);
-DalignedSignal=zeros(numThetan,nTau+1);
 sigma=1.5/2.355;
 scale=1/sqrt(2*pi)/sigma;
-range=[0:ceil((nTau+1)/2)-1 ceil(-(nTau+1)/2):-1]';%
+extNtau=nTau+1+20;
+realInd=11:nTau+1+10;
+padInd=setdiff([1:extNtau],realInd);
+alignedSignal=zeros(numThetan,nTau+1);
+DalignedSignal=zeros(numThetan,extNtau);
 for i = 1:numThetan
+    temp=zeros(extNtau,1);temp(realInd)=XTM(i,:);
+    temp1=gaussfilt(1:extNtau,temp,5/2.355);
+    temp(padInd)=temp1(padInd); 
     delay=shift(i);
+    range=[0:ceil(extNtau/2)-1 ceil(-extNtau/2):-1]';%
     G=exp(-(range-delay).^2./(2*sigma^2));
     dG=((range-delay)./(sigma^2)).*exp(-(range-delay).^2./(2*sigma^2));
-    alignedSignal(i,:)=scale*real(ifft(fft(G).*(fft(XTM(i,:)'))));
-    DalignedSignal(i,:)=scale*real(ifft(fft(dG).*(fft(XTM(i,:)'))));
-    % subplot(1,2,1)
-    % plot(1:nTau+1,alignedSignal(i,:),'r.-',1:nTau+1,XTM(i,:),'b.-')
-    % title(num2str([i,delay]));
-    % subplot(1,2,2)
-    % % plot(range,scale*G,'r.-');
-    % plot(DalignedSignal(i,:),'r.-')
+    aligned_temp=scale*real(ifft(fft(G).*(fft(temp))));
+    alignedSignal(i,:)=aligned_temp(realInd);
+    DalignedSignal(i,:)=scale*real(ifft(fft(dG).*(fft(temp))));
+    % plot(1:extNtau,temp,'m-',realInd,alignedSignal(i,:),'r.-',realInd,XTM(i,:),'g.-',1:extNtau,aligned_temp,'b-',[11,11],[0,1],'k--',[nTau+11,nTau+11],[0,1],'k--')
+    % legend('original padded','shifted','original','shifted padded')
+    % title(num2str([i,shift(i)]));
     % pause;
 end
 %%------------------------------------------------------
 Daligned=zeros(numThetan*(nTau+1),N_delta);
 for i=1:N_delta
-    Daligned(i:numThetan:end,i)=DalignedSignal(i,:);
+    Daligned(i:numThetan:end,i)=DalignedSignal(i,realInd);
 end
 XTM=alignedSignal;
 

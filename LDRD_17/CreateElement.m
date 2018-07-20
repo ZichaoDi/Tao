@@ -1,11 +1,16 @@
-global NumElement
-A=phantom3d(N(1));%phantom('Shepp-Logan',m(1));
+global cross_ind NumElement
+global ind_scan
+% A=double(imread('MRIhead-R.jpg'));
+A=phantom3d(N(1));
 % if(~exist('cross_ind','var'))
-    cross_ind=floor(N(1)/2);
+cross_ind=floor(N(1)/2);
 % end
-A=squeeze(A(:,:,cross_ind));
+A=squeeze(A(:,:,cross_ind));% sum(imread('phantom.png'),3);%
+% A=map1D(double(A),[0,1]);
 if(NumElement==1)
     W=sum(A,3);% abs(peaks(m(1)));%
+    % W(W<0.1)=0;
+    % W(40:100,40:100)=W(40:100,40:100)+1e-2;
 else
     % A=ones(m);
     A(A(:)<0)=0;

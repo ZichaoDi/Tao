@@ -3,7 +3,7 @@ global numThetan testind
 z0 = x0;
 z = z0(:);
 n = length(z);
-h =1e-0;
+h =1e-6;
 testind=0;
 [f,g] =feval(fctn,z0);
 diff_ind = 0; % Use 1 for central differencing, 0 for forward differencing

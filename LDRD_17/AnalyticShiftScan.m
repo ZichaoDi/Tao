@@ -1,38 +1,22 @@
 %% Analytical formula to find the shift of each projection due to center of rotation transformation;
 delta_d=0; % off center for the initial reference projection;
-Det=norm(DetKnot0(1,:)-SourceKnot0(1,:));
-Num=(DetKnot0(1,1)-SourceKnot0(1,1))*((cos(theta')-1).*delta0(:,2)'+delta0(:,1)'.*sin(theta'))+ (DetKnot0(1,2)-SourceKnot0(1,2))*((1-cos(theta')).*delta0(:,1)'+sin(theta').*delta0(:,2)');
-shift=Num./Det/dTau+1/2*delta_d0/dTau;
 Mt=-log(DisR./I0');
 alignedDiscrete=zeros(nTau+1,numThetan);
 alignedContinuous=alignedDiscrete;
-alignedContinuous1=alignedDiscrete;
-alignedContinuous2=alignedDiscrete;
-Mt1=Mt(:,:,1);%Mth(1:4/factor:end,:,1);
 tt=Mt(:,:,2);
-sig=1.5/2.355;%linspace(0.0125,1.0616,50);
-err=[];
-for ti=1:length(sig)
-    sigma=sig(ti);
+shift=pert_scan*nTau;
 for i = 1:numThetan
     delay=shift(i);
     %%---------------- Continuous: Gaussian Convolution
-    % sigma=1.5/2.355;
+    sigma=1.5/2.355;
     nT=nTau+1;
     %%=============================================
-    %%=============================================
-    H=fftshift(fft(tt(:,i)'));
-    u=[1:nTau+1]/(nTau+1);
-    ubar=exp(-sqrt(-1)*2*pi.*(u*delay));
-    H1=H.*ubar;
-    alignedContinuous1(:,i)=(abs(ifft((H1))));
-    %%=========================================================
     scale=1/(sqrt(2*pi)*sigma);
     range=[0:floor((nTau+1)/2)-1 floor(-(nTau+1)/2):-1]';% / (nTau+1);
-    G=exp(-(range-delay).^2./(2*sigma^2));
+    G=exp(-(range-shift).^2./(2*sigma^2));
     alignedContinuous(:,i)=scale*real(ifft((fft(G)).*(fft(tt(:,i)))));
+    pause;
     %%---------------- Discrete: Permutation Matrix
-    delay=round(delay);
     if(delay>=0)
         alignedDiscrete(delay+1:end,i)=tt(1:end-delay,i);
         alignedDiscrete(1:delay,i)=tt(end-delay+1:end,i);
@@ -53,9 +37,6 @@ for i = 1:numThetan
     % hold off;
     % pause;
 end
-err(ti,:)=[norm(Mt1(:)-alignedContinuous(:)),norm(Mt1(:)-alignedDiscrete(:))];
-end
-% save('/nfs2/wendydi/Documents/Research/optdi/NanoLDRD/SISC/GenerateFig/data/CoRanalytic_1mri.mat','Mt1','Mt2','delta0','dz','N','alignedDiscrete','alignedContinuous','W')
 figure, 
 nrow=3;
 subplot(nrow,2,1);imagesc(Mt(:,:,2)); title('Observed Sinogram')
@@ -80,8 +61,8 @@ subplot(nrow,2,6);
 imagesc(W);axis xy image;hold on;
 set(gca,'xtick',[],'ytick',[]);
 title('Ground Truth')
-plot(delta0(:,1)/dz(1)+N/2,delta0(:,2)/dz(2)+N/2,'r*-','MarkerSize',5);
 return;
+plot(delta0(:,1)/dz(1)+N/2,delta0(:,2)/dz(2)+N/2,'r*-','MarkerSize',5);
 subplot(1,2,1);imagesc(Mt(:,:,1));
 set(gca,'xtick',[],'ytick',[]);
 xlabel('\theta');ylabel('\tau','FontWeight','bold','FontSize',14);
