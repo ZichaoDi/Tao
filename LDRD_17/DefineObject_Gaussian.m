@@ -54,6 +54,7 @@ else
 end
 %---------------------------
 NumElement=length(Z);
+iR_num=zeros(N,N,NumElement);
     W=zeros(N(1),N(1),NumElement);
     if(synthetic)
         if(strcmp(sample,'Golosio'))
@@ -62,12 +63,12 @@ NumElement=length(Z);
             CreateElement; 
         elseif(strcmp(sample,'circle'))
             [X,Y]=meshgrid(1:m(1),1:m(2));
-            center=[m(1)/2, m(2)/2];
-            r=20;
+            center=[m(1)/3, m(2)/3];
+            r=5;
             pix = (X-center(1)).^2+(Y-center(2)).^2 <= r^2;%& (X-center(1)).^2+(Y-center(2)).^2>=(r-5).^2; %% circle
-            W(pix)=10;
+            W(pix)=1;
         elseif(strcmp(sample,'checkboard'))
-            W = kron(invhilb(N(1)/10)<0, ones(10,10));
+            W = kron(invhilb(round(N(1)/10))<0, ones(10,10));
             W=repmat(W,[1 1 NumElement]);
         elseif(strcmp(sample,'fakeRod'))
             CreateRod;
@@ -94,7 +95,4 @@ MU_XTM=sum(W.*repmat(MUe,[m(1),m(2),1]),3);
 %%%%% ====================================================================
 
 %%=================== Picture the object based on atomic number and attenuation
-if(PlotObject)
-    figureObject(W,Z,m,NumElement,MU_e,0)
-end
 

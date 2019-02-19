@@ -6,11 +6,12 @@ more off;
 %%-------------------------- Set up center of rotation
 Tol=1e-2; 
 omega=[-2     2    -2     2].*Tol;
-m=[current_n current_n]; %Numerical Resolution
+m=[N N]; %Numerical Resolution
 dz=[(omega(2)-omega(1))/m(2) (omega(4)-omega(3))/m(1)];
 
 driftfactor=4;
-cor=dz(1)*driftfactor/2*(m(1)/4-N(1)/3);
+cor=dz(1)*0.02*N;%
+% cor=dz(1)*driftfactor/2*(m(1)/4-N(1)/3);
 cr=[0 0; -cor -cor; -cor cor; cor cor; cor -cor;cor 0;0 cor;-cor 0;0 -cor];
 cr=cr([1 4 6],:);
 if(~exist('ind_cr','var'))
@@ -28,12 +29,11 @@ eX=ones(m(1),1);
 eY=ones(m(2),1);
 NonEmptyBeam=[];
 if(initialize)
-L=sparse(numThetan*(nTau+1),prod(m));
+    L=sparse(numThetan*(nTau+1),prod(m));
 else
     L=L_cr(:,:,ind_cr);
 end
-DisR_Simulated=zeros(nTau+1,numThetan);
-fprintf(1,'====== Fluorescence Detector Resolution is %d\n',numChannel);
+DisR_Simulated=zeros(numThetan,nTau+1);
 plotDisBeam=0;
 plotRotation=0;
 if(plotDisBeam | plotRotation)
@@ -126,7 +126,7 @@ for n=1:numThetan
         end
 
     end
-        DisR_Simulated(:,n)=Rdis_true';
+        DisR_Simulated(n,:)=Rdis_true;
         % if(plotDisBeam)
         %    subplot(numThetan,col,col*(n-1)+2)
         %    plot(1:nTau+1,DisR_Simulated(:,n),'r.-')
@@ -136,7 +136,7 @@ for n=1:numThetan
         %    drawnow;
         % end
 end
-scale=sqrt(N(1));
+% scale=sqrt(N(1));
 % L=L*scale;
-% L=map1D(L*scale,[0,1]);
+% L=map1D(L,[0,1]);
 %%==============================================================

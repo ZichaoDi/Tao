@@ -14,13 +14,13 @@ d0=d0(:,5);
 initial_direction=size(d0,2);
 deltaStar=zeros(N_delta,1);
 W0=W(:);
-maxiter=150;
-for element_ind=1;% :length(slice_tot)
+maxiter=10;
+for element_ind=1:length(slice_tot)
     recon=sparse(N^2,nslice);
     for slice=1:nslice
         % setup_miller;
         NF = [0*N; 0*N; 0*N];
-        Mt=squeeze(XRF_decom3D(:,slice,:))';%XRF_decom(:,:,element_ind)';
+        Mt=squeeze(XRF_decom3D(:,slice,:));%XRF_decom(:,:,element_ind);
         sinoS=Mt;
         Lmap=sparse(L);
         low=[-inf.*ones(N_delta,1);zeros(prod(m)*NumElement,1)];
@@ -29,8 +29,7 @@ for element_ind=1;% :length(slice_tot)
             delta=(cos(theta)-1).*d0(1,res_step)+sin(theta).*d0(2,res_step);
             x0= [delta;0*10^(0)*rand(m(1)*m(2)*NumElement,1)];
             err0=norm(x0-x0);
-            fctn_COR=@(x)sfun_cor_dr(x,full(Mt'),sparse(Lmap));% on attenuation coefficients miu;
-            % load aligned30_2_miller
+            fctn_COR=@(x)sfun_cor_dr(x,full(Mt),sparse(Lmap));% on attenuation coefficients miu;
 
             x0(1:N_delta)=shift_mean;
             [~,~,aligned_xtm]=feval(fctn_COR,x0);

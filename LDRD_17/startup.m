@@ -34,7 +34,5 @@ addpath_recurse([mcsDir,slash,'Tao/Image Registration/FAIR']);
 addpath_recurse([mcsDir,slash,'APS']);
 addpath_recurse([mcsDir,slash,'Di_MATLABtool']);
 addpath_recurse([mcsDir,slash,'multigrid']);
-addpath_recurse([mcsDir,slash,'optdi/Reconstruction/Writing/multimodal/version1/GenerateFig']);
 end
-% ADiMat_startup;
 

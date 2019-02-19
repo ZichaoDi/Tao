@@ -1,9 +1,9 @@
 function output=GaussianPadded(x)
 global numThetan nTau nslice NumElement
 global realIndSlice realInd extNtau extNslice
-sigma=1/2.355;
+sigma=1.5/2.355;
 scale=1/(sqrt(2*pi)*sigma);
-padwidth=1*max(nTau+1,nslice);
+padwidth=0;%1*max(nTau+1,nslice);
 nstart=1*floor(padwidth/2);
 extNslice=nslice+padwidth;
 realIndSlice=nstart+1:nslice+nstart;
@@ -15,9 +15,9 @@ N=extNtau;
 M=extNslice;
 for n=1:numThetan
     for ele=1:NumElement
-        temp=zeros(extNtau,extNslice);temp(realInd,realIndSlice)=x(:,:,ele,n);
+        temp=zeros(extNtau,extNslice);temp(realInd,realIndSlice)=x(n,:,:,ele);
         temp1=gaussfilt2D(temp,5.*[sigma,sigma]);
         temp(padInd,padIndSlice)=temp1(padInd,padIndSlice); 
-        output(:,:,ele,n)=temp;
+        output(n,:,:,ele)=temp;
     end
 end

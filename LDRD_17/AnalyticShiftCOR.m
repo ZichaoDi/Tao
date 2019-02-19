@@ -10,8 +10,9 @@ alignedContinuous1=alignedDiscrete;
 alignedContinuous2=alignedDiscrete;
 Mt1=Mt(:,:,1);%Mth(1:4/factor:end,:,1);
 tt=Mt(:,:,2);
-sig=1.5/2.355;%linspace(0.0125,1.0616,50);
+sig=linspace(0.0125,1.0616,50);
 err=[];
+shift=15*ones(numThetan,1);
 for ti=1:length(sig)
     sigma=sig(ti);
 for i = 1:numThetan
@@ -21,24 +22,24 @@ for i = 1:numThetan
     nT=nTau+1;
     %%=============================================
     %%=============================================
-    H=fftshift(fft(tt(:,i)'));
-    u=[1:nTau+1]/(nTau+1);
-    ubar=exp(-sqrt(-1)*2*pi.*(u*delay));
-    H1=H.*ubar;
-    alignedContinuous1(:,i)=(abs(ifft((H1))));
+    % H=fftshift(fft(tt(i,:)));
+    % u=[1:nTau+1]/(nTau+1);
+    % ubar=exp(-sqrt(-1)*2*pi.*(u*delay));
+    % H1=H.*ubar;
+    % alignedContinuous1(:,i)=(abs(ifft((H1))));
     %%=========================================================
     scale=1/(sqrt(2*pi)*sigma);
     range=[0:floor((nTau+1)/2)-1 floor(-(nTau+1)/2):-1]';% / (nTau+1);
     G=exp(-(range-delay).^2./(2*sigma^2));
-    alignedContinuous(:,i)=scale*real(ifft((fft(G)).*(fft(tt(:,i)))));
+    alignedContinuous(:,i)=scale*real(ifft((fft(G)).*(fft(tt(i,:)'))));
     %%---------------- Discrete: Permutation Matrix
     delay=round(delay);
     if(delay>=0)
-        alignedDiscrete(delay+1:end,i)=tt(1:end-delay,i);
-        alignedDiscrete(1:delay,i)=tt(end-delay+1:end,i);
+        alignedDiscrete(delay+1:end,i)=tt(i,1:end-delay);
+        alignedDiscrete(1:delay,i)=tt(i,end-delay+1:end);
     else
-        alignedDiscrete(1:end+delay,i)=tt(-delay+1:end,i);
-        alignedDiscrete(end+delay+1:end,i)=tt(1:-delay,i);
+        alignedDiscrete(1:end+delay,i)=tt(i,-delay+1:end);
+        alignedDiscrete(end+delay+1:end,i)=tt(i,1:-delay);
     end
     %%--------------------------------------------------
     % subplot(1,2,1)
@@ -53,7 +54,8 @@ for i = 1:numThetan
     % hold off;
     % pause;
 end
-err(ti,:)=[norm(Mt1(:)-alignedContinuous(:)),norm(Mt1(:)-alignedDiscrete(:))];
+% err(ti,:)=[norm(Mt1(:)-alignedContinuous(:)),norm(Mt1(:)-alignedDiscrete(:))];
+err(ti,:,:)=Mt1-alignedContinuous';
 end
 % save('/nfs2/wendydi/Documents/Research/optdi/NanoLDRD/SISC/GenerateFig/data/CoRanalytic_1mri.mat','Mt1','Mt2','delta0','dz','N','alignedDiscrete','alignedContinuous','W')
 figure, 
@@ -65,7 +67,7 @@ subplot(nrow,2,2);imagesc(reshape(W,N,N));%,'linear','shepp-logan',N)');
 axis xy image;
 set(gca,'xtick',[],'ytick',[]);
 title('Reconstruction w/o correction')
-subplot(nrow,2,3);imagesc(alignedContinuous);title('Continuous Corrected')
+subplot(nrow,2,3);imagesc(alignedContinuous');title('Continuous Corrected')
 % set(gca,'xtick',[],'ytick',[]);
 subplot(nrow,2,4);imagesc(reshape(W,N,N),[0,max(W(:))]);%,'linear','shepp-logan',N)'); 
 title('Reconstruction with correction')

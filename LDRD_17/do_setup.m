@@ -18,25 +18,34 @@ grad_type = 'full-linear';  % 'adj' = adjoint/exact
 % Initialize arrays for discretizations
 % n_delta=2*1;%numThetan;
 %%===============Load Sample=====================
-synthetic=1;
+% synthetic=0;
 if(synthetic)
-    % sample='circle'; % one element mainly testing self-absorption 
+    sample='circle'; % one element mainly testing self-absorption 
     % sample='Golosio';
     % sample = 'checkboard';
-    sample = 'Phantom';
+    % sample = 'Phantom';
     % sample = 'fakeRod';
     NumElement=1;
 else
     % sample='Run02';%'olga';%'miller';%'Rod';%'Filter';%
     sample='Paunesku';%'Zn_modified_6';
-    NumElement=1;
 end
+if(~exist('slice','var'))
+    slice=1;
+end
+if(~exist('element_ind','var'))
+    element_ind=1;
+end
+initialize=1;
+
 coarsen_type='smooth';
-% N=[2^(factor+5)];
-N=100;
+% N=128;
+% if(strcmp(sample,'checkboard'))
+%     N=100;
+% end
 angleScale=2; %1: half angle; 2: full angle
 if(synthetic)
-    numThetan=5; % number of scanning angles/projections
+    % numThetan=30; % number of scanning angles/projections
     DecomposedElement=0;
 else
     Tol = 1e-2;
@@ -88,13 +97,18 @@ else
         thetan_real=thetan_real';
     end
     clear data_xrf_raw data_xrf_decom data_xrt x_ir y_ir x_num y_num iR data spectra 
+    n_delta=2*numThetan;
+    ind_scan=0;
 end
 %%=============================
 bounds = 1;  % no bound constraints
 Joint=-1; % 0: XRF; -1: XTM; 1: Joint inversion
-ReconAttenu = 1;% 0: Recover W; 1: Recover miu
-frame='LS';
+if(~exist('ReconAttenu','var'))
+    ReconAttenu = 1;% 0: Recover W; 1: Recover miu
+end
+frame='EM';
 %%--------------------------------------------------------------------
+
 XTM_Tensor;
 if(ReconAttenu)
     NumElement=1;

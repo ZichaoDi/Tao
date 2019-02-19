@@ -20,7 +20,7 @@ for n=1:numThetan
     dG_y=((range_y-delta(2,n))./(sigma^2)).*exp(-(range_y-delta(2,n)).^2./(2*sigma^2));
 
     for ele=1:NumElement
-        X = fft2(x(:,:,ele,n));
+        X = fft2(squeeze(x(n,:,:,ele)));
         ytemp=scale^2*real(ifft2(X.*(fft2(G_x*G_y))));
         y(n,:,:,ele)=ytemp(realInd,realIndSlice);
         Daligned(2*n-1,n,:,:,ele) = scale^2*real(ifft2(X.*fft2(dG_x*G_y)));

@@ -61,7 +61,7 @@ for res_step=1:initial_direction
         
         x0=[delta;0*10^(0)*rand(current_n^2*NumElement,1)];
         err0=norm(W0-x0);
-        fctn_COR=@(x)sfun_COR(x,full(Mt'),sparse(Lmap_coarse));% on attenuation coefficients miu;
+        fctn_COR=@(x)sfun_COR(x,full(Mt),sparse(Lmap_coarse));% on attenuation coefficients miu;
 
         low=[low_COR;zeros(current_n^2*NumElement,1)];
         up=[up_COR;inf*ones(current_n^2*NumElement,1)];
@@ -83,7 +83,7 @@ for res_step=1:initial_direction
         Q=diag(1./sum(Lmap,1));
         Lmap=Lmap*Q;
         err0=norm(W0-x0);
-        fctn_COR=@(x)sfun_COR(x,full(Mt'),sparse(Lmap));% on attenuation coefficients miu;
+        fctn_COR=@(x)sfun_COR(x,full(Mt),sparse(Lmap));% on attenuation coefficients miu;
         low=[low_COR;zeros(current_n^2*NumElement,1)];
         up=[up_COR;inf*ones(current_n^2*NumElement,1)];
         bounds=1;

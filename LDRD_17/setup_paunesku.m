@@ -1,4 +1,6 @@
-% for slice=1:131
+XRF_raw_tot=[];
+ang_rate=1;
+for slice=1:131
 load ang;
 load(['Paunesku_raw_Fourier',num2str(slice),'.mat']);
 % data=max(0,data-data_ref);
@@ -26,12 +28,16 @@ data=data(:,ang_ind,:);
 ind_i0=2;
 ind_xrt=3;
 slice_tot = [3 4 7 8 11 14];
-ele_ind=1:6;
+XRF_raw_tot(:,:,:,slice)=permute(data(slice_tot,1:ang_rate:end,2:end),[2 3 1]);
+end;
+Ztot=[15 16 20 22 26 30];
+ele_ind=[1:6];%
 slice_tot=slice_tot(ele_ind);
+XRF_raw=XRF_raw_tot(:,:,ele_ind,:);
+Z=Ztot(ele_ind);%[15 16 20 26 30];
+NumElement=length(Z);
 %%%================================
-load tomoRod
 data_h=[];
-ang_rate=1;
 tau_rate=1;
 thetan=ang;
 for ele=1:size(data,1)
@@ -40,8 +46,9 @@ for ele=1:size(data,1)
     %     data_h(ele,n,:)=map1D(data_h(ele,n,:),[0,1]);
     % end
 end
-thetan_real = thetan(1:ang_rate:end)'; 
+thetan_real =thetan(1:ang_rate:end)';% linspace(1,360,48);% 
 thetan=mod(thetan_real,360);%linspace(-180,180,numThetan)+360;% must be positive.
+numThetan=length(thetan);
 
 if(ndims(data_h)==2)
     data_h=reshape(data_h,size(data_h,1),1,size(data_h,2));
@@ -49,13 +56,12 @@ end
 load Paunesku_raw;
 project0=project0(:,:,:,ang_ind);
 slice_rate=1;
-Mt=double(project0(2:end,1:slice_rate:end,slice_tot,:));
-Mt=Mt(1:tau_rate:end,:,:,1:ang_rate:end);
-Mt=Mt(2:end,:,:,:);
-nslice=size(Mt,2);
+XRF_decom3D=double(project0(2:end,1:slice_rate:end,slice_tot,:));
+XRF_decom3D=XRF_decom3D(1:tau_rate:end,:,:,1:ang_rate:end);
+XRF_decom3D=XRF_decom3D(2:end,:,:,:);
+nslice=size(XRF_decom3D,2);
 clear project0;
 data_h=data_h(:,:,2:end);
-numThetan=size(data_h,2);
 nTau=size(data_h,3)-1;
 N = nTau+1;%ceil((nTau+1)/sqrt(2)); 
 data_xrt=data_h(ind_xrt,:,:); %% Downstream Transmission 

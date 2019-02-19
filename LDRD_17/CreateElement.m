@@ -1,12 +1,11 @@
 global cross_ind NumElement
-global ind_scan
 % A=double(imread('MRIhead-R.jpg'));
 A=phantom3d(N(1));
 % if(~exist('cross_ind','var'))
 cross_ind=floor(N(1)/2);
 % end
 A=squeeze(A(:,:,cross_ind));% sum(imread('phantom.png'),3);%
-% A=map1D(double(A),[0,1]);
+A=map1D(double(A),[0,1]);
 if(NumElement==1)
     W=sum(A,3);% abs(peaks(m(1)));%
     % W(W<0.1)=0;
@@ -41,25 +40,3 @@ else
         end
     end
 end;
-if(plotElement)
-    figure('name','Element Map')
-    clims=[0 max(W(:))];
-    for i=1:NumElement
-        ax(i)=subplot(1,NumElement,i);
-        imagesc(W(:,:,i),clims);
-        if(i==1)
-            xlabel('\leftarrow       0.1mm      \rightarrow','FontSize',13,'FontWeight','bold')
-        end
-        title(Element{Z(i)},'FontSize',18,'FontWeight','bold');
-        set(gca,'XTickLabel',[],'YTickLabel',[],'XTick',[],'YTick',[])
-        axis image xy
-        colormap(jet)
-    end
-    h=colorbar('SouthOutside');
-    set(h, 'Position', [.125 .28 .50 .03]);
-    for i=1:NumElement
-        pos=get(ax(i), 'Position');
-        set(ax(i), 'Position', [pos(1) 0.1+pos(2) pos(3) 0.8*pos(4)]);
-    end;
-    drawnow;
-end
