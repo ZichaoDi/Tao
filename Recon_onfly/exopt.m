@@ -1,22 +1,10 @@
-for slice=2:201
-    opt;
+% beta=[1 1; 1 10; 1 20; 1 30;1 40];%[1 0; 0 1;1 1; 1 10; 1 15; 1 20; 1 30] ;%0.5;1 1; 1 10; 1 100; 1 1e3];
+initialize=1; 
+for slice =[30 40 50 60];
+    beta=[1 0; 1 1];% 1 30; 1 40; 1 50; 1 60; 1 70; 1 80];
+    for t=1:size(beta,1)
+        TempBeta=beta(t,1); Beta=beta(t,2);
+        opt;
+    end
+    initialize=0;
 end
-% beta=[1 0.0; 1 0.5; 1 1; 1 2; 1 6; 1 12; 1 24; 1 48; 1 100; 1 1e3];
-% beta_dT=[1e2];
-% beta=[1 0.5; 1 1;  1 6; 1 12; 1 24; 1 48; 1 100];
-% for bt2=1:length(beta_dT)
-%     beta_d=beta_dT(bt2);
-% f_pareto=zeros(size(beta,1),2);
-% for bt=1:size(beta,1)
-%     TempBeta=beta(bt,1); Beta=beta(bt,2);
-%     if(bt==1) 
-%         initialize=1; 
-%     else 
-%         initialize=0;
-%     end
-%     opt;
-%     [~,~,f_xrf,f_xrt]=feval(fctn,xstar);
-%     f_pareto(bt,:)=[f_xrf,f_xrt];
-% end
-% save(['f_pareto',num2str(beta_d),'.mat'],'f_pareto');
-

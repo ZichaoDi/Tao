@@ -33,8 +33,7 @@ image = @(str) double(flipud(imread(str))); % reads and converts
 % load the original data, set domain, initial discretization, and grid
 dataT = image('US.jpg');
 omega = [0,size(dataT,1),0,size(dataT,2)];
-m     = 128*[3,2];
-
+m     =128*[3,2]; % size(dataT);
 % set view options and interpolation options
 viewOptn = {'viewImage','viewImage2D','colormap','bone(256)'};
 viewImage('reset',viewOptn{:});
@@ -44,9 +43,9 @@ inter('reset',intOptn{:});
 str = 'Vibe Heldmann.jpg';
 viewData  = @(I) viewImage(inter(I,omega,getCellCenteredGrid(omega,m)),omega,m);
 
-FAIRfigure(1,'figname',mfilename); clf;
-viewData(dataT); title(str,'interpreter','none');
-MLdata = getMultilevel(dataT,omega,m,'fig',2);
+% FAIRfigure(1,'figname',mfilename); clf;
+% viewData(dataT); title(str,'interpreter','none');
+% MLdata = getMultilevel(dataT,omega,m,'fig',2);
 
 % save to outfile
-save(outfile,'dataT','omega','m','MLdata','viewOptn','intOptn');
+save(outfile,'dataT','omega','m');%,'MLdata','viewOptn','intOptn');

@@ -41,8 +41,8 @@ fprintf(1,'====== Start Forward Mapping: %d angles %d beamlets\n',numThetan, nTa
                 if(initialize)
                     L(ind_bt,currentInd)=Lvec;
                 end
-                % InTens=exp(-cumsum([0;sum(x(currentInd(1:end-1),:).*kron(Lvec(1:end-1),MU_e(:,1,1)'),2)]));
                 InTens=exp(-cumsum([0;sum(x(currentInd(end-1:-1:1),:).*kron(Lvec(1:end-1),MU_e(:,1,1)'),2)]));
+            %=================================================================
                 % OutTens=ones(length(currentInd),NumElement);
                 % for j=1:length(currentInd)
                 %     if(initialize)
@@ -54,6 +54,7 @@ fprintf(1,'====== Start Forward Mapping: %d angles %d beamlets\n',numThetan, nTa
                 % end
                 % ConstSub(ind_bt+([1:numChannel]-1)*(numThetan*(nTau+1)),reshape(repmat(currentInd,1,NumElement)'+(repmat([1:NumElement],length(currentInd),1)'-1).*mtol,length(currentInd)*NumElement,1))=...
                 %    reshape(repmat(M',[1,length(currentInd),1]),[numChannel,length(currentInd)*NumElement]).*repmat(reshape(repmat(Lvec.*InTens,1,NumElement)'.*OutTens',[length(currentInd)*NumElement,1])',numChannel,1);
+            %=================================================================
                 ConstSub(ind_bt+([1:numChannel]-1)*(numThetan*(nTau+1)),reshape(repmat(currentInd,1,NumElement)'+(repmat([1:NumElement],length(currentInd),1)'-1).*mtol,length(currentInd)*NumElement,1))=...
                    reshape(repmat(M',[1,length(currentInd),1]),[numChannel,length(currentInd)*NumElement]).*repmat(reshape(repmat(Lvec.*InTens,1,NumElement)',[length(currentInd)*NumElement,1])',numChannel,1);
             end

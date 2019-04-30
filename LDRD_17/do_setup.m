@@ -20,15 +20,17 @@ grad_type = 'full-linear';  % 'adj' = adjoint/exact
 %%===============Load Sample=====================
 % synthetic=0;
 if(synthetic)
-    sample='circle'; % one element mainly testing self-absorption 
+    % sample='circle'; % one element mainly testing self-absorption 
     % sample='Golosio';
     % sample = 'checkboard';
+    % sample = 'MRI';
     % sample = 'Phantom';
     % sample = 'fakeRod';
     NumElement=1;
 else
     % sample='Run02';%'olga';%'miller';%'Rod';%'Filter';%
-    sample='Paunesku';%'Zn_modified_6';
+    % sample='Paunesku';%'miller';%'Zn_modified_6';
+    sample = 'synthetic';
 end
 if(~exist('slice','var'))
     slice=1;
@@ -52,6 +54,18 @@ else
     omega=[-2 2 -2 2]*Tol; % units: cm
     if(strcmp(sample,'Seed'))
         setup_seed;
+    elseif(strcmp(sample,'synthetic'))
+        load syntheticMultiSino.mat; 
+        thetan_real=thetan;
+        XRF_raw_tot=prj;
+        XRF_raw=prj;
+        N=size(wtrue,1);
+        numThetan=size(prj,1);
+        nTau=size(prj,2)-1;
+        nslice=1;
+        Ztot=[20 25 36];
+        % ele_ind=1;
+        Z=Ztot(ele_ind);
     elseif(strcmp(sample,'Filter'))
         setup_filter;
     elseif(strcmp(sample,'Rod'))

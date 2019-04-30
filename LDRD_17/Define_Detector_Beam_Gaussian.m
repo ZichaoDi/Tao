@@ -4,7 +4,7 @@ global DetChannel numChannel nTau DetKnot0 SourceKnot0 NumSSDlet
 alpha=atan((omega(4)-omega(3))/(omega(2)-omega(1)));
 Tau= omega(2)-omega(1);
 if(synthetic)
-    nTau=ceil(sqrt(2*prod(m)));%m(1)-1;% % number of discrete beam%nTau;%
+    nTau=N-1;%ceil(sqrt(2*prod(m)));%m(1)-1;% % number of discrete beam%nTau;%
     tol0=1/2*N(1);
     tol1=tol0;
 else

@@ -6,6 +6,7 @@ global reg_str
 ReconAttenu = 0; % 0: Recover W; 1: Recover miu
 slice=1;
 synthetic=0;
+ele_ind=1;
 do_setup;
 N_delta=numThetan;
 rng('default');
@@ -16,30 +17,26 @@ d0=d0(:,1);
 initial_direction=size(d0,2);
 deltaStar=zeros(N_delta,1);
 W0=[deltaStar;W(:)];
-maxiter=500;
+maxiter=300;
 aligned3D=zeros(numThetan*(nTau+1),NumElement,nslice);
 recon=sparse(N^2*NumElement+N_delta,nslice);
-for ele=4;%1:size(XRF_raw_tot,3);
-    for slice= 86;%1:nslice
+for ele=1:size(XRF_raw_tot,3);
+    for slice= 1;%1:nslice
         NF = [0*N; 0*N; 0*N];
-        Mt=XRF_raw_tot(:,:,ele,slice);
-        % Mt(Mt<40)=0;
-        % Mt=map1D(Mt,[0,1]);
-        Mt=Mt./max(Mt(:))+abs(min(Mt(:)));
-        Z = Ztot(ele);
-        sinoS=reshape(Mt,numThetan*(nTau+1),NumElement);
-        Lmap=sparse(L);
+        MtS=Mt(:,:,ele);%XRF_raw_tot(:,:,ele,slice);
+        % MtS=MtS./max(MtS(:));
+        % MtS=imnoise(max(MtS./max(MtS(:)),0),'Gaussian',0,0.01);
         for res_step=1:initial_direction
             delta=repmat(d0(:,res_step),n_delta/2,1);
             x0 = [(cos(theta)-1)*delta(1)+sin(theta)*delta(2);0*10^(0)*rand(m(1)*m(2)*NumElement,1)];
             err0=norm(W0-x0);
             alpha=1;
-            fctn_COR=@(x)sfun_shift_mc(x,Mt,Lmap);% on attenuation coefficients miu;
+            fctn_COR=@(x)sfun_shift_mc(x,MtS,Lmap);% on attenuation coefficients miu;
             low=[-nTau/2*ones(N_delta,1);zeros(prod(m)*NumElement,1)];
             up=[nTau/2*ones(N_delta,1);inf*ones(prod(m)*NumElement,1)];
             bounds=1;
-            load aligned86_5_paunesku;
-            x0(1:numThetan)=shift;
+            % load aligned86_5_paunesku;
+            % x0(1:numThetan)=shift;
             reg_str={'TV'};
             lam=-6;%[-15:2:-4];%, 0.2 0.4 0.8 1.6];
             for i=1:length(lam)
@@ -59,7 +56,8 @@ for ele=4;%1:size(XRF_raw_tot,3);
         recon(:,slice)=xCOR;
         aligned3D(:,:,slice)=alignedSignal(:);
     end
-    % save(['result/',sample,'/Recon_shift_sc',num2str(ele),'.mat'],'lam','recon','aligned3D');
+prj(:,:,ele)=reshape(alignedSignal,numThetan,nTau+1,NumElement);
+xtot(:,ele)=xCOR;
 nrow=3;
 figure,
 xc=reshape(xCOR(N_delta+1:end,:),[N,N,NumElement,initial_direction]);
@@ -80,3 +78,4 @@ xc=reshape(xCOR(N_delta+1:end,:),[N,N,NumElement,initial_direction]);
 
 end
 
+% save(['result/',sample,'/Recon_shift_sc_noise',num2str(numThetan),'.mat'],'xtot','prj');

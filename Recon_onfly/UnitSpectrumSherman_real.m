@@ -15,7 +15,7 @@ if(synthetic)
 elseif(strcmp(sample,'Filter'))
     E0=10.4;
 else
-    E0=12.1;
+    E0=10.3;
 end
 NumElement=length(Z);
 NA=6.02e23;%Avogadro's number

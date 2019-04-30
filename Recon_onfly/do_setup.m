@@ -27,8 +27,10 @@ if(synthetic)
     NumElement=3;
 else
     % sample='Seed';
-    sample='Filter';
-    NumElement=6;
+    sample='Xtal1';
+    NumElement=3;
+    % sample='Filter';
+    % NumElement=6;
 end
 angleScale=1; %1: half angle; 2: full angle
 if(synthetic)
@@ -42,6 +44,8 @@ else
         setup_seed;
     elseif(strcmp(sample,'Filter'))
         setup_filter_sim;
+    elseif(strcmp(sample,'Xtal1'))
+        setup_Xtal1;
     elseif(strcmp(sample,'Rod'))
         setup_rod;
     end
@@ -53,7 +57,7 @@ bounds = 1;  % no bound constraints
 Joint=1; % 0: XRF; -1: XTM; 1: Joint inversion
 ReconAttenu = 1*(Joint==-1); % 0: Recover W; 1: Recover miu
 Alternate=1*(Joint~=-1);
-frame='EM';
+frame='LS';
 linear_S=0*Alternate;
 LogScale=1; %% determine if the XTM is solved taking log first or not
 Weighted=0; %% 1 if use weighted least-square form

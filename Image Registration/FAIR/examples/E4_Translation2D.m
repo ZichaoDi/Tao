@@ -9,7 +9,6 @@
 % - interpolate                (linearInter) 
 % - and visualize              (viewImage2D)
 %==============================================================================
-
 setupUSData;  
 fprintf('trafo=%s\n',translation2D([]));
 wc = [-50;0]; 
@@ -19,4 +18,9 @@ Tc = linearInter(dataT,omega,yc);
 figure(1); viewImage2D(dataT,[0 1000 0 1000],[513 386],'colormap','gray(256)'); 
 
 figure(2); viewImage2D(Tc,[0 1000 0 1000],m,'colormap','gray(256)'); 
+
+
+
+
+
 

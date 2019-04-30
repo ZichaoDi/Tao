@@ -15,7 +15,6 @@ function [y,dy] = translation2D(w,x,varargin)
 % the persistent variable Q stores the matrix 
 % Q(x) = kron( I_2 , [x(:,1),x(:,2),1] );
 persistent Q
-
 if nargin == 0, 
   runMinimalExample;
   return;
@@ -31,6 +30,7 @@ if isempty(w) || (size(Q,1) ~= numel(x)),
   Q = sparse(kron(speye(2),ones(n,1)));
   if nargout == 0, return; end;
 end;
+figure, imagesc(Q)
 y  = x + Q*w;
 dy = Q;
 

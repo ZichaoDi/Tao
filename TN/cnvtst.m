@@ -32,13 +32,20 @@ else
    stop2 = abs(dif) < rtleps*ftest;
    stop3 = gnorm < accrcy^(1/3)*ftest;
    stop4 = gnorm < .01*sqrt(accrcy)*ftest;
+   stop5 = gnorm <1e-5;
    conv = ( stop1 ...
            & stop2        ...
            & stop3) ...
           | stop4;
+   conv = ( stop1 ...
+           & stop2        ...
+           & stop3);
+   conv=stop5;
    if(conv)
        if(stop1 & stop2 & stop3)
            disp('tighter stoppting')
+       elseif(stop5)
+           disp('absolute gnorm')
        else
            disp('gnorm < eps * |f|')
        end

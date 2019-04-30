@@ -140,7 +140,7 @@ while (~conv);
         & gnorm < accrcy^(1/3)*ftest)    ...
         | gnorm < .01*sqrt(accrcy)*ftest;
     %+++++++++++++++++++++++++++++++++++++++++++++++++++
-    % conv = (gnorm < 1d-6*ftest);
+    conv = (gnorm < 1e-5);
     %+++++++++++++++++++++++++++++++++++++++++++++++++++
     if (conv | nit>=maxiter);
         ierror = 0;

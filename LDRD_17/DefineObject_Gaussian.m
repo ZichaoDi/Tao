@@ -20,7 +20,7 @@ y=linspace(omega(3),omega(4),m(2)+1);
 if(synthetic)
     if(strcmp(sample,'Golosio') | strcmp(sample, 'checkboard'))
         Z = 19;%[6 8 14 20 26];% Golosio's Sample
-    elseif(strcmp(sample,'Phantom')|strcmp(sample,'mri'))
+    elseif(strcmp(sample,'Phantom')|strcmp(sample,'MRI'))
         Z = [19];
     elseif(strcmp(sample,'circle'))
         Z = [14];
@@ -59,7 +59,7 @@ iR_num=zeros(N,N,NumElement);
     if(synthetic)
         if(strcmp(sample,'Golosio'))
             CreateCircle; 
-        elseif(strcmp(sample,'Phantom')|strcmp(sample,'mri'))
+        elseif(strcmp(sample,'Phantom')|strcmp(sample,'MRI'))
             CreateElement; 
         elseif(strcmp(sample,'circle'))
             [X,Y]=meshgrid(1:m(1),1:m(2));
@@ -91,7 +91,7 @@ iR_num=zeros(N,N,NumElement);
     clear Line ElementDensity LineEnergy CS_FluoLine CS_Total CS_TotalBeam
 %%%%% =================== Attenuation Matrix at beam energy
 MUe=reshape(MU_e(:,1,1),1,1,NumElement);
-MU_XTM=sum(W.*repmat(MUe,[m(1),m(2),1]),3);
+MU_XTM=sum(1e0*W.*repmat(MUe,[m(1),m(2),1]),3);
 %%%%% ====================================================================
 
 %%=================== Picture the object based on atomic number and attenuation

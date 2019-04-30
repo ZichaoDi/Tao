@@ -8,7 +8,6 @@
 
 function [Tc,dT] = linearInter(T,omega,x,varargin)
 
-global testpad
 
 Tc = mfilename('fullpath'); dT = []; 
 
@@ -53,8 +52,7 @@ if isempty(valid),
   if doDerivative, dT = sparse(n,dim*n); end; % allocate memory incolumn format
   return; 
 end;
-
-pad = 1; TP = testpad*ones(m+2*pad);                 % pad data to reduce cases
+pad = 1; TP = pad*ones(m+2*pad);                 % pad data to reduce cases
 
 P = floor(x); x = x-P;                        % split x into integer/remainder
 p = @(j) P(valid,j); xi = @(j) x(valid,j);

@@ -79,5 +79,6 @@ if(iproj==0)
     end;
     itcnt=itcnt+trialLength;
 end
+
 if (ierror == 3); alpha1 = 0; end;
 nf1 = itcnt;

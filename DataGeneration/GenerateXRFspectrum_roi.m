@@ -16,6 +16,7 @@ NoSelfAbsorption=0;
 more off;
 current_n=256; %% sample resolution
 numThetan=1; %% number of angles
+thetan=linspace(1,360,numThetan);
 Define_Detector_Beam_Gaussian; %% provide geometry of the beam source and Detectorlet
 XRF_roi=zeros(nTau+1,256,4);
 for whichElement=1:4
@@ -28,7 +29,7 @@ for whichElement=1:4
         end
         %%%=========Start Simulation
         
-        XRF=cell(length(thetan),nTau+1);
+        XRF=cell(numThetan,nTau+1);
         if(NoSelfAbsorption)
             fprintf(1,'====== No Self Absorption, Transmission Detector Resolution is %d\n',nTau);
         else

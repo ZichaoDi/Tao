@@ -43,6 +43,11 @@ else
         Z=Z(slice-4);
     elseif(strcmp(sample,'Filter'))
         Z=[14 15 16 20 30 58];
+    elseif(strcmp(sample,'Xtal1'))
+        Z=[13 14 29];
+    elseif(strcmp(sample,'20173'))
+        Z=[15 16 17 19 20 25 26 29 30];
+        Z=Z(slice_tot);
     end
 end
 %---------------------------

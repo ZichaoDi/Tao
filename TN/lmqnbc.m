@@ -7,9 +7,9 @@ function [xstar, f, g, ierror] = ...
 % this routine) with a diagonal scaling (routine ndia3).
 % For further details, see routine tnbc.
 %---------------------------------------------------------
-global shift
+global dimActive shift
 global sk yk sr yr yksk yrsr
-global NF N current_n  fiter itertest ErrIter
+global NF N current_n x_iter fiter itertest ErrIter
 global ptest gv ipivot nit
 global n_delta N_delta i_cauchy W0  m NumElement
 global maxiter err0 Joint 
@@ -145,10 +145,6 @@ while (~conv);
     PieceLinear=1;
     newcon = 0;
     if(PieceLinear)
-        % if(spe<=eps)
-        %     disp('update active set due to zero step length');
-        %     [ipivot, flast] = modz (x, p, ipivot, low, up, flast, f);
-        % end
         if(Joint==1)
         [x_new, f_new, g_new, nf1, ierror, alpha,ipivot,newcon,flast,f_xrf,f_xtm] = lin_proj (p, x, f, g, alpha0, sfun, low, up,ipivot,newcon,flast);
         else
@@ -158,22 +154,6 @@ while (~conv);
         [x_new, f_new, g_new, nf1, ierror, alpha] = lin1 (p, x, f, alpha0, g, sfun);
     end
 
-    % if(length(x_new)==N^2)
-    %     subplot(1,2,1);plot(p,'r.-');
-    %     subplot(1,2,2);imagesc(reshape(x_new,N,N));
-    % elseif(length(x_new)==n_delta+N^2)
-    %     subplot(3,2,1);plot(g_new(n_delta+1:end),'r.-');subplot(3,2,2);plot(g_new(1:n_delta),'g.-')
-    %     subplot(3,2,3);plot(p(n_delta+1:end),'r.-');subplot(3,2,4);plot(p(1:n_delta),'g.-')
-    %     subplot(3,2,5);plot(shift,'r.-');
-    %     subplot(3,2,6);imagesc(reshape(x_new(n_delta+1:end),N,N));
-    % else
-    %     subplot(3,2,1);plot(g_new(N_delta+1:end),'r.-');subplot(3,2,2);plot(g_new(1:N_delta),'g.-')
-    %     subplot(3,2,3);plot(p(N_delta+1:end),'r.-');subplot(3,2,4);plot(p(1:N_delta),'g.-')
-    %     subplot(3,2,5);plot(shift,'r.-');
-    %     subplot(3,2,6);imagesc(reshape(x_new(N_delta+1:end),N,N));
-    % end
-    % drawnow;
-    % pause(1);
     if (alpha <= 0 & alpha0 ~= 0 | ierror == 3);
         fprintf('Error in Line Search\n');
         fprintf('    ierror = %3i\n',    ierror);
@@ -197,7 +177,7 @@ while (~conv);
 %---------------------------------------------------------
     newcon = 0;
     if (abs(alpha-spe) <= 10*eps);% | alpha==1
-        disp('update ipivot due to tiny step length')
+        % disp('update ipivot due to tiny step length')
         newcon = 1;
         ierror = 0;
         [ipivot, flast] = modz (x, p, ipivot, low, up, flast, f);
@@ -308,6 +288,7 @@ while (~conv);
     end
     %------------------------------------------------------
     if (conv);
+        dimActive=length(find(ipivot==-1));
         disp('LMQNBC: termination 5')
         xstar = x;
         NF(1,nind) = NF(1,nind) + nit;

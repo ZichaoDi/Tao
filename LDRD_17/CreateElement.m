@@ -1,17 +1,15 @@
 global cross_ind NumElement
-% A=double(imread('MRIhead-R.jpg'));
-A=phantom3d(N(1));
-% if(~exist('cross_ind','var'))
-cross_ind=floor(N(1)/2);
-% end
-A=squeeze(A(:,:,cross_ind));% sum(imread('phantom.png'),3);%
-A=map1D(double(A),[0,1]);
+if(strcmp(sample,'MRI'))
+    A=double(imread('MRIhead-R.jpg'));
+elseif(strcmp(sample,'Phantom'))
+    A=phantom3d(N(1));
+    cross_ind=floor(N(1)/2);
+    A=squeeze(A(:,:,cross_ind));% sum(imread('phantom.png'),3);%
+    A=map1D(double(A),[0,1]);
+end
 if(NumElement==1)
     W=sum(A,3);% abs(peaks(m(1)));%
-    % W(W<0.1)=0;
-    % W(40:100,40:100)=W(40:100,40:100)+1e-2;
 else
-    % A=ones(m);
     A(A(:)<0)=0;
     tol=eps^(1/2);
     W=zeros(m(1),m(2),NumElement);
@@ -40,3 +38,4 @@ else
         end
     end
 end;
+

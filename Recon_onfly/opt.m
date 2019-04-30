@@ -7,15 +7,16 @@ global err0 fiter nit maxiter
 global ConstSub MU_XTM I0 DisR
 global itertest ErrIter icycle maxOut
 global COR initialize mtol xbox ybox L in_after
-global LogScale Tol Itemp
+global LogScale Tol 
 COR=0;
+% slice=66;
 do_setup;
 more off;
 icycle=0;
 Define_Detector_Beam_Gaussian; %% provide the beam source and Detectorlet
 DefineObject_Gaussian; % Produce W, MU_XTM
 %%%----------------------------Initialize dependent variables
-DecomposedElement=0;
+DecomposedElement=1;
 if(strcmp(sample,'Seed'))
     beta_d=1e0;
 elseif(strcmp(sample,'Rod'))
@@ -26,7 +27,7 @@ end
 if(~synthetic & ~ReconAttenu)
     truncChannel=1*(DecomposedElement==0);
     if(DecomposedElement)
-        XRF=XRF_decom;
+        XRF=XRF_decom;%./max(XRF_decom(:));
         DetChannel=DetChannel_decom;
         numChannel=numChannel_decom;
         M=M_decom;
@@ -49,18 +50,15 @@ W0=W(:);
 %%%================= First-order derivative regularization
 penalty=0;
 cmap=[min(W0),max(W0)];
-TempBeta=1; Beta=48;
-Mt=-log(DisR'./I0);
-return;
+Mt=-log(data_abs./max(data_abs(:)));
 windowSize=2;
 xrt1=zeros(size(Mt));
 for i=1:numThetan, 
     xrt1(i,:)=medfilt1(Mt(i,:),windowSize);
 end
-xrt1(:,1)=xrt1(:,2);
-Mt=xrt1*beta_d;
+Mt=xrt1(:);
+Mt=Mt*beta_d;
 clear y xrt1;
-Mt=Mt(:)-min(Mt(:));
 
 xrfData=XRF(:);
 fctn_f=@(W)Forward_onfly(W,xrfData,Mt,M);
@@ -72,9 +70,8 @@ tic;
 x=x0;
 Wold=reshape(x,prod(m),NumElement);%zeros(prod(m),NumElement);
 err=[];
-outCycle=2;
 if(~ReconAttenu && Alternate)
-    initialize=1;
+    % initialize=1;
     %%%%%%%==============================================================
     if(initialize)
         mtol=prod(m);
@@ -96,7 +93,6 @@ up=inf*ones(size(x0));
 x_admm=[];
 x_admm(:,1)=x0;
 err_obj=[];
-Itemp=ones(size(L,1),size(L,2),5);
 if(Alternate && linear_S==0)
     if(TempBeta==0)
         maxOut=1;
@@ -143,7 +139,7 @@ if(Alternate && linear_S==0)
         end
         icycle=icycle+1;
     end
-    save(['xstar_',sample,'_',num2str(N(1)),'_',num2str(numThetan),'_',num2str(TempBeta),'_',num2str(Beta),'_',num2str(beta_d),'_',num2str(numChannel),'-',num2str(nit),frame,num2str(slice),'.mat'],'x_admm','W0');%,'_linear_',num2str(lambda),'.mat'
+     save(['xstar_',sample,'_',num2str(N(1)),'_',num2str(numThetan),'_',num2str(TempBeta),'_',num2str(Beta),'_',num2str(beta_d),'_',num2str(numChannel),'-',num2str(nit),frame,num2str(slice),'_',num2str(icycle),'.mat'],'x_admm');
 end
 %%%%%%%%%%%%%%%%%%%%======================================================
 if(~ReconAttenu)

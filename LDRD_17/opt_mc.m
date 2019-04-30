@@ -5,6 +5,8 @@ global reg_str
 
 ReconAttenu = 0; % 0: Recover W; 1: Recover miu
 slice=1;
+ind_cr=1;
+ele_ind=[1:3];
 synthetic=0;
 do_setup;
 N_delta=numThetan;
@@ -19,16 +21,21 @@ W0=[deltaStar;W(:)];
 maxiter=300;
 aligned3D=zeros(numThetan*(nTau+1),NumElement,nslice);
 recon=sparse(N^2*NumElement+N_delta,nslice);
-for slice= 86;%1:nslice
+for slice= 1;%1:nslice
     NF = [0*N; 0*N; 0*N];
     Mt=XRF_raw(:,:,:,slice);
     Mt(Mt<0)=0;
+    prj=0*Mt;
+    rng('default')
     for ele=1:NumElement
-        a=Mt(:,:,ele);alpha(ele)=max(a(:));
+        Mt(:,:,ele)=poissrnd(map1D(Mt(:,:,ele),[min(min(Mt(:,:,ele))),100*max(max(Mt(:,:,ele)))]));
+        Mt(:,:,ele)=Mt(:,:,ele)+randn(size(Mt(:,:,ele)))*0.02*max(max(Mt(:,:,ele)));
+        prj(:,:,ele)=Mt(:,:,ele);
         Mt(:,:,ele)=Mt(:,:,ele)./max(max(Mt(:,:,ele)));
+        a=Mt(:,:,ele);alpha(ele)=std(a(:));
     end
+    % save('pydata.mat','prj','thetan');
     alpha=(alpha./sum(alpha));
-    % Mt=Mt./max(Mt(:))+abs(min(Mt(:)));%%==normalize data;
     sinoS=reshape(Mt,numThetan*(nTau+1),NumElement);
     Lmap=sparse(L);
     for res_step=1:initial_direction
@@ -51,18 +58,6 @@ for slice= 86;%1:nslice
                 errW(res_step)=norm(W0(n_delta+1:end)-xCOR(n_delta+1:end));
                 f_global(res_step)=f;
                 [~,~,alignedSignal]=feval(fctn_COR,xCOR);
-                %% ============================================
-                % for ele=4;%1:NumElement
-                %     % for t=1:numThetan
-                %     %     alignedSignal(t:numThetan:end,ele)=medfilt1(alignedSignal(t:numThetan:end,ele),6);
-                %     % end
-
-                %     % fctn=@(x)sfun_radon(x,full(alignedSignal(:,ele)),sparse(Lmap));% on attenuation coefficients miu;
-                %     % W0=zeros(N^2,1);
-                %     % [x,f,g,ierror] = tnbc (W0,fctn,zeros(N^2,1),inf*ones(N^2,1)); % algo='TNbc';
-                %     xLasso=lasso(Lmap,alignedSignal(:,ele),1e-4);
-                % end
-                %% ============================================
             else
                 [xCOR,f,g,ierror] = tn (x0,fctn_COR);
             end
@@ -72,14 +67,14 @@ for slice= 86;%1:nslice
     aligned3D(:,:,slice)=alignedSignal;
 end
 prj=reshape(alignedSignal,numThetan,nTau+1,NumElement);
-save(['result/',sample,'/Recon_shift_mc_weighted',num2str(numThetan),'.mat'],'xCOR','prj');
+% save(['result/',sample,'/Recon_shift_mc_',num2str(numThetan),'_',num2str(NumElement),'_',num2str(nTau+1),'noise.mat'],'xCOR','prj');
 
 nrow=3;
 figure,
 xc=reshape(xCOR(N_delta+1:end,:),[N,N,NumElement,initial_direction]);
 for ele=1:NumElement
     subplot(nrow,NumElement,ele);
-    imagesc(XRF_raw(:,:,ele,slice));
+    imagesc(Mt(:,:,ele));
     title(Element{Z(ele)});
 set(gca,'xtick',[],'ytick',[]);
     if(ele==1);xlabel('\tau');ylabel('original: \theta');end

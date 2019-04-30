@@ -37,6 +37,8 @@ Y_test=np.reshape(Y_test,(len(Y_test),pxh,pyh))
 model = []
 model = Sequential()
 model.add(Dense(pxh*pyh, input_dim=pxH*pyH))
+model.add(Dense(pxh*pyh, input_dim=pxH*pyH))
+model.add(Dense(pxh*pyh, input_dim=pxH*pyH))
 model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
 b_size=1
 model.fit(X_train, Y_train, nb_epoch=1, batch_size=b_size)

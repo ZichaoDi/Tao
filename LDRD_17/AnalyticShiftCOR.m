@@ -63,7 +63,8 @@ nrow=3;
 subplot(nrow,2,1);imagesc(Mt(:,:,2)); title('Observed Sinogram')
 xlabel('\theta');ylabel('\tau','FontWeight','bold','FontSize',14);
 % set(gca,'xtick',[],'ytick',[]);
-subplot(nrow,2,2);imagesc(reshape(W,N,N));%,'linear','shepp-logan',N)'); 
+% subplot(nrow,2,2);imagesc(reshape(W,N,N));%,'linear','shepp-logan',N)'); 
+subplot(nrow,2,2);imagesc(iradon(Mt(:,:,2),thetan));%,'linear','shepp-logan',N)'); 
 axis xy image;
 set(gca,'xtick',[],'ytick',[]);
 title('Reconstruction w/o correction')

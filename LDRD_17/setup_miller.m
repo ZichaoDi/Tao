@@ -39,6 +39,6 @@ data_xrf_decom(ele,:,:)=data_h(slice_tot(ele),:,:);
 end
 % save('tomopy_test.mat','data_xrf_decom','data_xrt','ang');
 % return;
-XRF_decom=permute(data_xrf_decom(:,:,:),[2 3 1]);
+XRF_raw=permute(data_xrf_decom(:,:,:),[2 3 1]);
 %%================================================
 iR_num=zeros(N(1),N(1),NumElement);
