@@ -6,9 +6,9 @@ global reg_str
 ReconAttenu = 0; % 0: Recover W; 1: Recover miu
 slice=1;
 ind_cr=1;
-ele_ind=[1:3];
 synthetic=0;
 do_setup;
+N_delta=numThetan;
 rng('default');
 res=3;
 d0=[0 -res -res 0     res res res 0   -res;...
@@ -24,7 +24,7 @@ recon=sparse(N^2*NumElement+N_delta,nslice);
     rng('default')
     Mt= permute(data_h,[3 2 1]);
     prj=0*Mt;
-    for ele=1:length(slice_sub)
+    for ele=1:nslice
         prj(:,:,ele)=Mt(:,:,ele);
         Mt(:,:,ele)=Mt(:,:,ele)./max(max(Mt(:,:,ele)));
         a=Mt(:,:,ele);alpha(ele)=std(a(:));

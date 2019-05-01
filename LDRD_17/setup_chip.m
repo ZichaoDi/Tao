@@ -1,11 +1,11 @@
-ang_rate=10;
+ang_rate=2;
 tau_rate=2;
-nslice = 870;
 load('data/projs_small_fov.mat','projs_align_y');
 load('data/projs_small_fov.mat','angles');
 [~,ang_ind]=sort(angles);
-ang=angles(ang_ind);
+ang=angles(ang_ind)';
 slice_sub=[100];
+nslice = length(slice_sub);
 data=projs_align_y(slice_sub,:,ang_ind);
 NumElement=1;
 %%%================================
