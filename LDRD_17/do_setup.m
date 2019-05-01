@@ -30,7 +30,8 @@ if(synthetic)
 else
     % sample='Run02';%'olga';%'miller';%'Rod';%'Filter';%
     % sample='Paunesku';%'miller';%'Zn_modified_6';
-    sample = 'synthetic';
+    sample='chip';
+    % sample = 'synthetic';
 end
 if(~exist('slice','var'))
     slice=1;
@@ -41,10 +42,6 @@ end
 initialize=1;
 
 coarsen_type='smooth';
-% N=128;
-% if(strcmp(sample,'checkboard'))
-%     N=100;
-% end
 angleScale=2; %1: half angle; 2: full angle
 if(synthetic)
     % numThetan=30; % number of scanning angles/projections
@@ -109,6 +106,8 @@ else
         N=nTau+1;
         thetan_real=importdata('angle.txt');
         thetan_real=thetan_real';
+    else
+        run(['setup_',sample,'.m']);
     end
     clear data_xrf_raw data_xrf_decom data_xrt x_ir y_ir x_num y_num iR data spectra 
     n_delta=2*numThetan;

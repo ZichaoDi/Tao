@@ -18,7 +18,7 @@ d0=d0(:,1);
 initial_direction=size(d0,2);
 deltaStar=zeros(N_delta,1);
 W0=[deltaStar;W(:)];
-maxiter=300;
+maxiter=100;
 aligned3D=zeros(numThetan*(nTau+1),NumElement,nslice);
 recon=sparse(N^2*NumElement+N_delta,nslice);
 for slice= 1;%1:nslice
@@ -28,13 +28,14 @@ for slice= 1;%1:nslice
     prj=0*Mt;
     rng('default')
     for ele=1:NumElement
-        Mt(:,:,ele)=poissrnd(map1D(Mt(:,:,ele),[min(min(Mt(:,:,ele))),100*max(max(Mt(:,:,ele)))]));
-        Mt(:,:,ele)=Mt(:,:,ele)+randn(size(Mt(:,:,ele)))*0.02*max(max(Mt(:,:,ele)));
+        % Mt(:,:,ele)=poissrnd(map1D(Mt(:,:,ele),[min(min(Mt(:,:,ele))),100*max(max(Mt(:,:,ele)))]));
+        % Mt(:,:,ele)=Mt(:,:,ele)+randn(size(Mt(:,:,ele)))*0.05*max(max(Mt(:,:,ele)));
         prj(:,:,ele)=Mt(:,:,ele);
         Mt(:,:,ele)=Mt(:,:,ele)./max(max(Mt(:,:,ele)));
         a=Mt(:,:,ele);alpha(ele)=std(a(:));
     end
     % save('pydata.mat','prj','thetan');
+    % return;
     alpha=(alpha./sum(alpha));
     sinoS=reshape(Mt,numThetan*(nTau+1),NumElement);
     Lmap=sparse(L);

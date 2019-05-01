@@ -1,4 +1,4 @@
-function [f,g,XTM]=sfun_shift_mc(x,XTM,Ltol) 
+function [f,g,XTM,f_sub]=sfun_shift_mc(x,XTM,Ltol) 
 global frame N_delta  
 global thetan numThetan dTau nTau 
 global lambda sinoS N NumElement alpha
@@ -47,6 +47,7 @@ for ele=1:NumElement
             x = reshape(xc(:,ele),N,N);
             f2_v=sqrt((Tik*x).^2 + (Tik*x').^2+ epsilon);
             f2=sum(sum(f2_v));
+            f_sub(ele)=sum(-log(Rdis).*Mt+Rdis);
             f=f+alpha(ele)*sum(-log(Rdis).*Mt+Rdis)+lambda*f2;
             g_reg= Tik'*Tik*x./f2_v;
             g= [g; alpha(ele)*Ltol'*(-Mt./Rdis+1)+lambda*g_reg(:)];

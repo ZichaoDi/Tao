@@ -50,6 +50,8 @@ else
         Z=Z(slice_tot);
     elseif(strcmp(sample,'Zn_modified_6'))
         Z=30;
+    else
+        Z=13;
     end
 end
 %---------------------------
@@ -83,6 +85,8 @@ iR_num=zeros(N,N,NumElement);
                 W(:,:,tsub)=abs((rot90(iR_num(:,:,tsub),3)));
     elseif(strcmp(sample,'Paunesku'))
                 W(:,:,tsub)=abs(fliplr(rot90(permute(iR_num(:,:,tsub),[2 1 3]))));%tsub*2e-1;
+            else
+                W(:,:,tsub)=iR_num;
             end
         end
         clear iR
