@@ -42,3 +42,4 @@ end
 XRF_raw=permute(data_xrf_decom(:,:,:),[2 3 1]);
 %%================================================
 iR_num=zeros(N(1),N(1),NumElement);
+Z=[20 30 68];

@@ -1,0 +1,10 @@
+data=readNPY('XRF data/olga-dat.npy');
+ang=readNPY('XRF data/olga-ang.npy');
+ang_range=[1:ang_rate:length(ang)];
+[thetan_real,ind_ang]=sort(double(ang(1:ang_rate:end)'));
+numThetan=length(thetan_real);
+nslice=size(data,3);
+XRF_decom3D=double(permute(squeeze(data([30 37],ang_range(ind_ang),:,1:tau_rate:end)),[2 3 4 1]));
+nTau=size(XRF_decom3D,3)-1;
+N=nTau+1;
+Z=[26 34];

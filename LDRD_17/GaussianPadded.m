@@ -1,23 +1,23 @@
-function output=GaussianPadded(x)
-global numThetan nTau nslice NumElement
+function output=GaussianPadded(x,padwidthx,padwidthy)
+global numThetan nTau nchannel NumElement
 global realIndSlice realInd extNtau extNslice
 sigma=1.5/2.355;
 scale=1/(sqrt(2*pi)*sigma);
-padwidth=0;%1*max(nTau+1,nslice);
-nstart=1*floor(padwidth/2);
-extNslice=nslice+padwidth;
-realIndSlice=nstart+1:nslice+nstart;
+nstart=1*floor(padwidthx/2);
+extNslice=nchannel+padwidthy;
+realIndSlice=1:nchannel;
+% realIndSlice=nstart+1:nchannel+nstart;
 padIndSlice=setdiff([1:extNslice],realIndSlice);
-extNtau=nTau+1+padwidth;
+extNtau=nTau+1+padwidthx;
 realInd=nstart+1:nTau+1+nstart;
 padInd=setdiff([1:extNtau],realInd);
 N=extNtau;
 M=extNslice;
 for n=1:numThetan
-    for ele=1:NumElement
-        temp=zeros(extNtau,extNslice);temp(realInd,realIndSlice)=x(n,:,:,ele);
-        temp1=gaussfilt2D(temp,5.*[sigma,sigma]);
-        temp(padInd,padIndSlice)=temp1(padInd,padIndSlice); 
-        output(n,:,:,ele)=temp;
-    end
+    temp=mean(mean(x(n,:,:)))*ones(extNtau,extNslice);
+    temp(realInd,realIndSlice)=x(n,:,:);
+    temp1=gaussfilt2D(temp,50*[sigma,sigma]);
+    temp1(realInd,realIndSlice)=x(n,:,:);
+    output(n,:,:)=temp1;
 end
+

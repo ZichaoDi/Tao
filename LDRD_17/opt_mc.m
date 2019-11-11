@@ -3,13 +3,14 @@ global xiter fiter ErrIter
 global alpha lambda
 global reg_str
 
-ReconAttenu = 0; % 0: Recover W; 1: Recover miu
-slice=1;
-ind_cr=1;
-ele_ind=[1:3];
-synthetic=0;
-do_setup;
-N_delta=numThetan;
+% ReconAttenu = 0; % 0: Recover W; 1: Recover miu
+% slice=1;
+% ind_cr=1;
+% synthetic=0;
+% sample='paunesku';
+% do_setup;
+% N_delta=numThetan;
+% return;
 rng('default');
 res=3;
 d0=[0 -res -res 0     res res res 0   -res;...
@@ -18,25 +19,31 @@ d0=d0(:,1);
 initial_direction=size(d0,2);
 deltaStar=zeros(N_delta,1);
 W0=[deltaStar;W(:)];
-maxiter=100;
+maxiter=3;
 aligned3D=zeros(numThetan*(nTau+1),NumElement,nslice);
 recon=sparse(N^2*NumElement+N_delta,nslice);
-for slice= 1;%1:nslice
+for slice= 86;%1:nslice
     NF = [0*N; 0*N; 0*N];
     Mt=XRF_raw(:,:,:,slice);
+    Mt=GaussianPadded(Mt,0,0);
     Mt(Mt<0)=0;
     prj=0*Mt;
     rng('default')
+    snr=zeros(NumElement,1);
     for ele=1:NumElement
-        % Mt(:,:,ele)=poissrnd(map1D(Mt(:,:,ele),[min(min(Mt(:,:,ele))),100*max(max(Mt(:,:,ele)))]));
-        % Mt(:,:,ele)=Mt(:,:,ele)+randn(size(Mt(:,:,ele)))*0.05*max(max(Mt(:,:,ele)));
+        poiss_ratio=2^alp;
+        Mt(:,:,ele)=poissrnd(Mt(:,:,ele)*1/poiss_ratio);
+        % gauss_ratio=7;
+        % snr(ele)=sqrt(mean(mean(Mt(:,:,ele))));
+        % Mt(:,:,ele)=Mt(:,:,ele)+randn(size(Mt(:,:,ele)))*gauss_ratio*1e-2*mean(mean(Mt(:,:,ele)));
+        Mt(:,:,ele)=Mt(:,:,ele)+abs(min(min(Mt(:,:,ele))));
         prj(:,:,ele)=Mt(:,:,ele);
+        a=Mt(:,:,ele);alpha(ele)=max(a(:));
         Mt(:,:,ele)=Mt(:,:,ele)./max(max(Mt(:,:,ele)));
-        a=Mt(:,:,ele);alpha(ele)=std(a(:));
     end
-    % save('pydata.mat','prj','thetan');
-    % return;
-    alpha=(alpha./sum(alpha));
+    % save(['pydataPoiss',num2str(poiss_ratio),'.mat'],'prj','thetan');
+    alpha=alpha./sum(alpha);
+    % alpha=ones(size(alpha));
     sinoS=reshape(Mt,numThetan*(nTau+1),NumElement);
     Lmap=sparse(L);
     for res_step=1:initial_direction
@@ -44,8 +51,11 @@ for slice= 1;%1:nslice
         x0 = [(cos(theta)-1)*delta(1)+sin(theta)*delta(2);0*10^(0)*rand(m(1)*m(2)*NumElement,1)];
         err0=norm(W0-x0);
         fctn_COR=@(x)sfun_shift_mc(x,Mt,Lmap);% on attenuation coefficients miu;
-        low=[-nTau/2*ones(N_delta,1);zeros(prod(m)*NumElement,1)];
-        up=[nTau/2*ones(N_delta,1);inf*ones(prod(m)*NumElement,1)];
+        % low=[-nTau/2*ones(N_delta,1);zeros(prod(m)*NumElement,1)];
+        % up=[nTau/2*ones(N_delta,1);inf*ones(prod(m)*NumElement,1)];
+        low=[-inf*ones(N_delta,1);zeros(prod(m)*NumElement,1)];
+        up=[inf*ones(N_delta,1);inf*ones(prod(m)*NumElement,1)];
+
         bounds=1;
         % load aligned86_5_paunesku;
         % x0(1:numThetan)=shift;
@@ -68,7 +78,7 @@ for slice= 1;%1:nslice
     aligned3D(:,:,slice)=alignedSignal;
 end
 prj=reshape(alignedSignal,numThetan,nTau+1,NumElement);
-% save(['result/',sample,'/Recon_shift_mc_',num2str(numThetan),'_',num2str(NumElement),'_',num2str(nTau+1),'noise.mat'],'xCOR','prj');
+% save(['result/',sample,'/Recon_shift_mc_',num2str(numThetan),'_',num2str(NumElement),'_',num2str(nTau+1),'poiss',num2str(poiss_ratio),'.mat'],'xCOR','prj');
 
 nrow=3;
 figure,

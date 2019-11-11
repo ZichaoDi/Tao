@@ -28,7 +28,7 @@ for itcnt = 1:maxit;
     % Armijo =ft<f+1e-4*alpha1*q0;
     % Wolfe = abs(p'*gt)<0.25*abs(q0);
     if (ft < f);
-%     if(Armijo & Wolfe)
+    % if(Armijo);% & Wolfe)
         ierror = 0;
         xnew   = xt;
         fnew   = ft;

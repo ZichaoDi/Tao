@@ -25,14 +25,6 @@ for n=1:numThetan
         y(n,:,:,ele)=ytemp(realInd,realIndSlice);
         Daligned(2*n-1,n,:,:,ele) = scale^2*real(ifft2(X.*fft2(dG_x*G_y)));
         Daligned(2*n,n,:,:,ele) = scale^2*real(ifft2(X.*fft2(G_x*dG_y)));
-        % if(ele==4 & n==2)
-        %     subplot(2,2,1);imagesc(x(realInd,realIndSlice,ele,n));colorbar;
-        %     subplot(2,2,2);imagesc(x(:,:,ele,n));colorbar;%plot(range_x,G_x,'r.-')
-        %     subplot(2,2,3);imagesc(squeeze(y(n,:,:,ele)));colorbar;
-        %     subplot(2,2,4);plot(range_y,G_y,'r.-')
-        %     title(num2str([n,delta(1,n),delta(2,n)]))
-        %     pause;
-        % end
     end
 end
 Daligned=Daligned(:,:,realInd,realIndSlice,:);

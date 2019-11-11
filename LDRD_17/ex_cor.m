@@ -1,11 +1,11 @@
 global reg lambda n_delta initialize
 global f1 f2
 ReconAttenu=1;
-N=128;
-numThetan=40;
+N=5;
+numThetan=10;
 synthetic=1;
 n_delta=2*numThetan;
-samSet={'MRI','Phantom','Golosio'};
+samSet={'Phantom'};%,'MRI','Golosio'};
 prj=zeros(numThetan,N,length(samSet));
 wtrue=zeros(N,N,length(samSet));
 for isample=1:length(samSet)
@@ -20,9 +20,13 @@ for isample=1:length(samSet)
             L_cr(:,:,ind_cr)=L;
             DisR(:,:,ind_cr)=DisR_Simulated;
     end
-    return;
+    delta_d=0; % off center for the initial reference projection;
+    Det=norm(DetKnot0(1,:)-SourceKnot0(1,:));
+    Num=(DetKnot0(1,1)-SourceKnot0(1,1))*((cos(theta')-1).*delta0(:,2)'+delta0(:,1)'.*sin(theta'))+ (DetKnot0(1,2)-SourceKnot0(1,2))*((1-cos(theta')).*delta0(:,1)'+sin(theta').*delta0(:,2)');
+    shift=Num./Det/dTau+1/2*delta_d0/dTau;
     prj(:,:,isample)=-log(DisR(:,:,2)./I0);
     wtrue(:,:,isample)=W;
+    ptrue(:,isample)=shift';
 end
 % save('syntheticMultiSino.mat','prj','thetan','wtrue');
 return;

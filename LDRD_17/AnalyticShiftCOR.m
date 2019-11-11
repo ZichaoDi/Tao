@@ -12,7 +12,6 @@ Mt1=Mt(:,:,1);%Mth(1:4/factor:end,:,1);
 tt=Mt(:,:,2);
 sig=linspace(0.0125,1.0616,50);
 err=[];
-shift=15*ones(numThetan,1);
 for ti=1:length(sig)
     sigma=sig(ti);
 for i = 1:numThetan

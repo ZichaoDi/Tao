@@ -29,10 +29,6 @@ for i = 1:numThetan
     ubar=exp(-j*2*pi.*(u*(delay)));
     alignedSignal(i,:)=real(ifft(H.*ubar));
     DalignedSignal(i,:)=real(ifft(H.*ubar.*(-2*pi*j*u)));
-    plot(1:nTau+1,alignedSignal(i,:),'r.-',1:nTau+1,XTM(i,:),'b.-')
-    title(num2str([i,delay]));
-    pause;
-
 end
 
 %%------------------------------------------------------

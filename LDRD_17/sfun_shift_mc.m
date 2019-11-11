@@ -1,42 +1,26 @@
 function [f,g,XTM,f_sub]=sfun_shift_mc(x,XTM,Ltol) 
 global frame N_delta  
 global thetan numThetan dTau nTau 
-global lambda sinoS N NumElement alpha
-global reg_str
+global lambda sinoS N alpha
+global nslice reg_str
 %%===== Reconstruction discrete objective
 %%===== Ltol: intersection length matrix
 %%===== f: sum_i ||e^T(Ltol_i.*I)e-M_i||^2, i=1..theta
 %%===== x(1:N_delta): off center for the initial reference projection;
 %%===== XTM: multichannel sigogram
-
 shift=x(1:N_delta);
-xc=reshape(x(N_delta+1:end),N^2,NumElement);
-alignedSignal=zeros(numThetan,nTau+1,NumElement);
-DalignedSignal=zeros(numThetan,nTau+1,NumElement);
-sigma=1.5/2.355;
-scale=1/sqrt(2*pi)/sigma;
-for ele=1:NumElement
-for i = 1:numThetan
-    delay=shift(i);
-    range=[0:floor((nTau+1)/2)-1 floor(-(nTau+1)/2):-1];%
-    G=exp(-(range-delay).^2./(2*sigma^2));
-    dG=((range-delay)./(sigma^2)).*exp(-(range-delay).^2./(2*sigma^2));
-    alignedSignal(i,:,ele)=scale*real(ifft(fft(G).*(fft(XTM(i,:,ele)))));
-    DalignedSignal(i,:,ele)=scale*real(ifft(fft(dG).*(fft(XTM(i,:,ele)))));
-end
-end
-%%------------------------------------------------------
-Daligned=zeros(N_delta,numThetan*(nTau+1),NumElement);
-for i=1:N_delta
-    Daligned(i,i:numThetan:end,:)=DalignedSignal(i,:,:);
-end
-XTM=reshape(alignedSignal,numThetan*(nTau+1),NumElement);
+nchannel=length(x(N_delta+1:end))/N^2;
+xc=reshape(x(N_delta+1:end),N^2,nchannel);
+%%===========================================
+[alignedSignal,Daligned]=GaussianShift1D(XTM,shift);
+%%===========================================
+XTM=reshape(alignedSignal,numThetan*(nTau+1),nchannel);
 
 f=0;
 g_pert=zeros(1,N_delta);
 g=[];
 Tik=delsq(numgrid('S',N+2)); 
-for ele=1:NumElement
+for ele=1:nchannel
     if(strcmp(frame,'EM'))
         thres=1;
         Mt=XTM(:,ele)+thres;

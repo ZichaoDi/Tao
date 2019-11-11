@@ -18,7 +18,7 @@ elseif(strcmp(frame,'LS'))
 end
 penalty=1;
 if(penalty)
-    lambda=1e-5;
+    lambda=1e-4;
     if(strcmp(reg,'L2'))
         Tik=delsq(numgrid('S',N(1)+2)); 
         Reg=Tik*MU;

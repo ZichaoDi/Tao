@@ -1,0 +1,13 @@
+load syntheticMultiSino.mat; 
+thetan_real=thetan;
+XRF_raw_tot=prj;
+XRF_raw=prj;
+N=size(wtrue,1);
+numThetan=size(prj,1);
+nTau=size(prj,2)-1;
+nslice=1;
+Ztot=[20 25 36];
+ele_ind=1:3;
+Z=Ztot(ele_ind);
+NumElement=length(Z);
+nchannel=NumElement;

@@ -32,11 +32,10 @@ slice_tot = [3 4 7 8 11 14];
 XRF_raw_tot(:,:,:,slice)=permute(data(slice_tot,1:ang_rate:end,2:tau_rate:end),[2 3 1]);
 end;
 Ztot=[15 16 20 22 26 30];
-ele_ind=[1:6];%
+ele_ind=[3:6];%
 slice_tot=slice_tot(ele_ind);
 XRF_raw=XRF_raw_tot(:,:,ele_ind,:);
-% ele_ind=1;%:6;
-Z=Ztot(ele_ind);%[15 16 20 26 30];
+Z=Ztot(ele_ind);
 NumElement=length(Z);
 %%%================================
 data_h=[];
@@ -85,3 +84,4 @@ iR_num=zeros(N(1),N(1),size(iR,3));
 for ele=1:size(iR,3)
     iR_num(:,:,ele)=interp2(x_ir,y_ir,iR(:,:,ele),x_num,y_num);
 end
+nchannel=NumElement;

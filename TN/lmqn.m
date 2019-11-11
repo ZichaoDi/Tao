@@ -140,9 +140,12 @@ while (~conv);
         & gnorm < accrcy^(1/3)*ftest)    ...
         | gnorm < .01*sqrt(accrcy)*ftest;
     %+++++++++++++++++++++++++++++++++++++++++++++++++++
-    conv = (gnorm < 1e-5);
+    % conv = (gnorm < 1e-5);
     %+++++++++++++++++++++++++++++++++++++++++++++++++++
     if (conv | nit>=maxiter);
+        if(conv)
+            disp('converge')
+        end
         ierror = 0;
         xstar = x;
         NF(1,nind) = NF(1,nind) + nit;

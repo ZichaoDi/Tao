@@ -1,22 +1,32 @@
-% load spectra_30
-% spectra_30_aligned=spectra_30;
-load slice30
-data(isnan(data))=0;
-data(isinf(data))=0;
-data=permute(data,[3 2 1]);
-load per_shift.mat
+function data_aligned=align_simple(data,shift)
+%%=============data: nTau x numThetan x nchannel
+% load slice30
+% data(isnan(data))=0;
+% data(isinf(data))=0;
+% data=permute(data,[3 2 1]);
+% load per_shift.mat
 data_aligned=data;
+nTau=size(data,1)-1;
+sigma=1.5/2.355;
+scale=1/(sqrt(2*pi)*sigma);
+range=[0:floor((nTau+1)/2)-1 floor(-(nTau+1)/2):-1]';% / (nTau+1);
+discrete=0;
 for ch=1:size(data,3)
     currentSlice=squeeze(data(:,:,ch));
-    for i=1:size(currentSlice,2)-1
-        delay=-per_shift(i); 
-        alignedSignal=currentSlice(:,i+1);
-        if(delay>=0)
-            alignedSignal(delay+1:end)=alignedSignal(1:end-delay);
+    for i=1:size(currentSlice,2)
+        delay=shift(i); 
+        alignedSignal=currentSlice(:,i);
+        if(discrete)
+            if(delay>=0)
+                alignedSignal(delay+1:end)=alignedSignal(1:end-delay);
+            else
+                alignedSignal(1:end+(delay))=alignedSignal(abs(delay)+1:end);
+            end
         else
-            alignedSignal(1:end+(delay))=alignedSignal(abs(delay)+1:end);
+            G=exp(-(range-shift(i)).^2./(2*sigma^2));
+            alignedSignal=scale*real(ifft((fft(G)).*(fft(alignedSignal))));
         end
-        currentSlice(:,i+1)=alignedSignal;
+        currentSlice(:,i)=alignedSignal;
     end
     data_aligned(:,:,ch)=currentSlice;
 end

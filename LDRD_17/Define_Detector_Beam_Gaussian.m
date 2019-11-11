@@ -26,7 +26,8 @@ DetKnot0=DetKnot0(end:-1:1,:);
 SourceKnot0=SourceKnot0(end:-1:1,:);
 SSD0=[detE0-[0,Tol]; SourceE0-[0,Tol]];
 %%%=========== Assign Projection Angles;
-thetan=linspace(1,360,numThetan);%linspace(363,abs(183*(angleScale)-363),numThetan);% must be positive.
-if(~synthetic)
-    thetan=mod(thetan_real,360);%linspace(-180,180,numThetan)+360;% must be positive.
+if(synthetic)
+    thetan=linspace(1,360,numThetan);%linspace(363,abs(183*(angleScale)-363),numThetan);% must be positive.
+else
+    thetan = mod(thetan,360);
 end

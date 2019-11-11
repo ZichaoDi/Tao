@@ -85,3 +85,4 @@ iR_num=zeros(N(1),N(1),size(iR,3));
 for ele=1:size(iR,3)
     iR_num(:,:,ele)=interp2(x_ir,y_ir,iR(:,:,ele),x_num,y_num);
 end
+Z=[79 14 74];% Glass Rod

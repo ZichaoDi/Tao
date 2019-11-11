@@ -34,4 +34,6 @@ iR_num=zeros(N(1),N(1),length(slice));
 for ele=1:size(iR_num,3)
     iR_num(:,:,ele)=interp2(x_ir,y_ir,iR(:,:,slice(ele)),x_num,y_num);
 end
-save('tomopytest.mat','data_xrf_decom');
+Z=[14 16 17 19 20 22 23 24 25 26 28 29 30 31 80 33 34 35 92 37 38 39 40];% Complete Seed
+Z=Z(slice-4);
+% save('tomopytest.mat','data_xrf_decom');
