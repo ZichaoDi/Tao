@@ -12,9 +12,12 @@ data=projs_align_y(slice_sub,sub_tau,sub_theta(ang_ind));
 for i=1:nslice
     d=squeeze(data(i,:,:));
     d=d(:);
-    num=[901,161];
-    save(['test_chip_full',num2str(i),'.dat'],'num','-ascii');
-    save(['test_chip_full',num2str(i),'.dat'],'d','-ascii','-append');
+    fid=fopen(['~/Documents/projects/PIRT/test_chip_full',num2str(i),'.dat'],'w');
+    fprintf(fid,'%d %d\n',901,161);
+    fprintf(fid,'%f\n',d);
+    fclose(fid);
+    % save(['test_chip_full',num2str(i),'.dat'],'num','-ascii');
+    % save(['test_chip_full',num2str(i),'.dat'],'d','-ascii','-append');
 end
 return;
 

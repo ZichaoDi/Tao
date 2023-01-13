@@ -16,7 +16,7 @@ elseif(strcmp(frame,'LS'))
     g=Ltol'*r;
     f=1/2*sum(r.^2,1);
 end
-penalty=1;
+penalty=0; %%regularizer options
 if(penalty)
     lambda=1e-4;
     if(strcmp(reg,'L2'))
